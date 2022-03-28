@@ -33,8 +33,8 @@ public class FileController {
         return new FileInfo(String.valueOf(timeStamp), file.getOriginalFilename(), targetFile.getAbsolutePath());
     }
 
-    @GetMapping("/download/{id}")
-    public void download(@PathVariable String id, String type, HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/download/{type}/{id}")
+    public void download(@PathVariable String id, @PathVariable String type, HttpServletRequest request, HttpServletResponse response) {
         try (InputStream inputStream = new FileInputStream(new File(uploadTestFolder + "/" + type + "/" + id + ".txt"));
              OutputStream outputStream = response.getOutputStream();
         ) {
