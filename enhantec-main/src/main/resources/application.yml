@@ -11,5 +11,12 @@ spring:
       name: admin
       password: admin
       roles: manager
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  mvc:
+    format:
+      date-time: iso
+
 server:
   port: 80
