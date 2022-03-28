@@ -1,16 +1,10 @@
 package com.enhantec;
 
+import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.example.dto.User;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.bind.BindResult;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,15 +35,29 @@ public class Application {
         return "echo";
     }
 
+    @JsonView(User.UserSubView1.class)
     @PostMapping("/user")
-    public User addUser(@Valid @RequestBody User user, BindingResult result) throws Exception{
+    public User addUser(@Valid @RequestBody User user
+          //  , BindingResult result
+    ){
 
-        if(result.hasErrors()){
-            System.out.println(result);
-            throw new Exception(result.toString());
-        }
+//        if(result.hasErrors()){
+//            System.out.println(result);
+//         //   throw new Exception(result.toString());
+//        }
         user.setUserId(1);
         return user;
     }
+
+    @GetMapping("/testRuntimeError")
+    public void testRuntimeError(){
+        throw new RuntimeException("run time exception test msg.");
+    }
+
+    @GetMapping("/testEHApplicationError")
+    public void testEHApplicationError(){
+        throw new EHApplicationException("run time exception test msg.");
+    }
+
 
 }
