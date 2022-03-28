@@ -19,4 +19,6 @@ spring:
       date-time: iso
 
 server:
+  error:
+    include-binding-errors: always
   port: 80
