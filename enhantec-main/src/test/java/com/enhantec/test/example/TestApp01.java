@@ -1,4 +1,4 @@
-package com.enhantec.example;
+package com.enhantec.test.example;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

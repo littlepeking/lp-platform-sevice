@@ -1,4 +1,4 @@
-package com.enhantec.example.dto;
+package com.enhantec.example.test.dto;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;

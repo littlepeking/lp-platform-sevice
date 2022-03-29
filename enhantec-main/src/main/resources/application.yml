@@ -17,7 +17,8 @@ spring:
   mvc:
     format:
       date-time: iso
-
+    pathmatch:
+      matching-strategy: ant_path_matcher #add this config to resolve the starting issue caused by Swagger
 server:
   error:
     include-binding-errors: always

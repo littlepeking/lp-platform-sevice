@@ -23,7 +23,7 @@
 	<properties>
 		<java.version>8</java.version>
 		<spring.cloud-version>2021.0.1</spring.cloud-version>
-
+		<swagger.version>3.0.0</swagger.version>
 		<com.enhantec.application.version>0.0.1-SNAPSHOT</com.enhantec.application.version>
 	</properties>
 	<dependencyManagement>
@@ -35,6 +35,14 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- https://mvnrepository.com/artifact/com.guicedee/swagger-bom -->
+			<dependency>
+				<groupId>com.guicedee</groupId>
+				<artifactId>swagger-bom</artifactId>
+				<version>1.2.2.1</version>
+				<type>pom</type>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -63,6 +71,11 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock-jre8</artifactId>
+			<scope>test</scope>
 		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>commons-lang</groupId>-->
