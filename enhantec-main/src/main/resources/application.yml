@@ -4,8 +4,8 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/testdb?useUnicode=yes&characterEncoding=utf-8
     username: root
     password: Passw0rd
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+#  autoconfigure:
+#    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
   security:
     user:
       name: admin
@@ -21,5 +21,11 @@ spring:
       matching-strategy: ant_path_matcher #add this config to resolve the starting issue caused by Swagger
 server:
   error:
-    include-binding-errors: always
+    include-binding-errors: always #return detail error for rest service
   port: 80
+
+enhantec:
+  security:
+    webProperties:
+      loginPage: /web-login.html
+
