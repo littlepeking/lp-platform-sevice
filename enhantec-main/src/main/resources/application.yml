@@ -28,4 +28,5 @@ enhantec:
   security:
     webProperties:
       loginPage: /web-login.html
+      loginType: REDIRECT
 

@@ -7,4 +7,6 @@ public class WebProperties {
 
    private String loginPage = "/web-common-login.html";
 
+   LoginType loginType = LoginType.JSON;
+
 }
