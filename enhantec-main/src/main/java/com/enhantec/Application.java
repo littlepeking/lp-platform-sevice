@@ -22,33 +22,9 @@ public class Application {
         SpringApplication.run(Application.class,args);
     }
 
-
-//    @Bean
-//    @Primary
-//    public ObjectMapper objectMapper() {
-//        return    new ObjectMapper()
-//                .registerModule(new ParameterNamesModule())
-//                .registerModule(new Jdk8Module())
-//                .registerModule(new JavaTimeModule());
-//    }
-
     @GetMapping("/echo")
     public String echo(){
         return "echo";
-    }
-
-    @JsonView(User.UserSubView1.class)
-    @PostMapping("/user")
-    public User addUser(@Valid @RequestBody User user
-          //  , BindingResult result
-    ){
-
-//        if(result.hasErrors()){
-//            System.out.println(result);
-//         //   throw new Exception(result.toString());
-//        }
-        user.setUserId(1);
-        return user;
     }
 
     @GetMapping("/testRuntimeError")

@@ -31,7 +31,7 @@ public class WebAuthSuccessHandler  extends SavedRequestAwareAuthenticationSucce
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
             logger.info("login success!");
 
-            if(LoginType.JSON.equals(securityProperties.getWebProperties().getLoginType())) {
+            if(LoginType.JSON.equals(securityProperties.getWeb().getLoginType())) {
 
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write(objectMapper.writeValueAsString(authentication));

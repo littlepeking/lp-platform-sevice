@@ -25,6 +25,7 @@
 		<spring.cloud-version>2021.0.1</spring.cloud-version>
 		<swagger.version>3.0.0</swagger.version>
 		<com.enhantec.application.version>0.0.1-SNAPSHOT</com.enhantec.application.version>
+		<spring-social.version>1.1.4.RELEASE</spring-social.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -81,10 +82,10 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>commons-lang</groupId>-->
-<!--			<artifactId>commons-lang</artifactId>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>commons-collections</groupId>-->
 <!--			<artifactId>commons-collections</artifactId>-->

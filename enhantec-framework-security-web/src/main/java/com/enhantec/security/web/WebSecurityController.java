@@ -44,7 +44,7 @@ public class WebSecurityController {
             String targetUrl = savedRequest.getRedirectUrl();
             logger.info("original url:"+ targetUrl);
             if(StringUtils.endsWithIgnoreCase(targetUrl,".html")){
-                redirectStrategy.sendRedirect(request,response,securityProperties.getWebProperties().getLoginPage());
+                redirectStrategy.sendRedirect(request,response,securityProperties.getWeb().getLoginPage());
             }
         }
         return new SimpleResponse("访问的服务需要身份验证");

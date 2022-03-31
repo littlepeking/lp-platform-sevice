@@ -3,6 +3,7 @@ package com.enhantec.security.web.authentication;
 import com.enhantec.security.core.properties.LoginType;
 import com.enhantec.security.core.properties.SecurityProperties;
 import com.enhantec.security.web.WebSecurityConfig;
+import com.enhantec.security.web.support.SimpleResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,11 @@ public class WebAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         logger.info("login failed!");
-        if (LoginType.JSON.equals(securityProperties.getWebProperties().getLoginType())) {
+        if (LoginType.JSON.equals(securityProperties.getWeb().getLoginType())) {
 
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write(objectMapper.writeValueAsString(exception));
+            response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponse(exception.getMessage())));
 
         }else {
             super.onAuthenticationFailure(request,response,exception);

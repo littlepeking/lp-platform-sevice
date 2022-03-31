@@ -26,7 +26,12 @@ server:
 
 enhantec:
   security:
-    webProperties:
+    web:
       loginPage: /web-login.html
-      loginType: REDIRECT
+      loginType: JSON
+    validationCode:
+      image:
+        length: 6
+        width: 100
+#        url: /user/*  #test validationCode filter by urls
 
