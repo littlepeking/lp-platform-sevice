@@ -4,10 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
 	<modules>
-		<module>enhantec-framework-security-app</module>
-		<module>enhantec-framework-security-web</module>
-		<module>enhantec-main</module>
-		<module>enhantec-framework-security-core</module>
+		<module>enhantec-framework-service</module>
+		<module>enhantec-wms-service</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
