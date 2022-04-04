@@ -22,10 +22,15 @@ spring:
 server:
   error:
     include-binding-errors: always #return detail error for rest service
-  port: 80
+  port: 8060
 
 enhantec:
-  security:
+  common:
+    security:
+      jwt:
+        base64Secret: 'YmJlMWVmMjYxODM1ZGVkMWI2MzA5M2UxOGJmMmEzMTYzYTg4ZDk3MTJkYjA1Mzc3YTI3YThlYjBhN2I3YTdlZjk1MThiMmMzYjE5NjYzMWFjYjdlMDZmODlhMDdhNDg3NGRjODg5ZWJlODg5NjYzNzljNDQ0MzllYjYwN2U5ODE='
+        tokenValidityInSeconds: 600
+
 #    web:
 #    validationCode:
 #      image:

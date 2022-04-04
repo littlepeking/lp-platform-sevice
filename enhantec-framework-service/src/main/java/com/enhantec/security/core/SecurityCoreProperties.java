@@ -1,10 +1,10 @@
 package com.enhantec.security.core;
 
-import com.enhantec.security.core.properties.SecurityProperties;
+import com.enhantec.config.properties.ApplicationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(SecurityProperties.class)
+@EnableConfigurationProperties(ApplicationProperties.class)
 public class SecurityCoreProperties {
 }

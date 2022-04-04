@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class WebAuthSuccessHandler  extends SavedRequestAwareAuthenticationSuccessHandler {
+public class JwtAuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 

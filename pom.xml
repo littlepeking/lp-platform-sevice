@@ -24,6 +24,7 @@
 		<swagger.version>3.0.0</swagger.version>
 		<com.enhantec.application.version>0.0.1-SNAPSHOT</com.enhantec.application.version>
 		<spring-social.version>1.1.4.RELEASE</spring-social.version>
+		<jjwt.version>0.11.1</jjwt.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -92,7 +93,24 @@
 <!--			<groupId>commons-beanutils</groupId>-->
 <!--			<artifactId>commons-beanutils</artifactId>-->
 <!--		</dependency>-->
-
+		<!-- jwt -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 

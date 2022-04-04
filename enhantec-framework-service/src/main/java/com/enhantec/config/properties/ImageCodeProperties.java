@@ -1,4 +1,4 @@
-package com.enhantec.security.core.properties;
+package com.enhantec.config.properties;
 
 import lombok.Data;
 

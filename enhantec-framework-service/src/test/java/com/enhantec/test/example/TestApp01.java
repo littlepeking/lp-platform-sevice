@@ -12,8 +12,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,6 +22,16 @@ public class TestApp01 {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Test
+    public void testAuthentication() throws Exception {
+        String result = mockMvc.perform(post("/testAuth").header("Bearer","wcdwdwdwdwd").
+                contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).
+              andReturn().getResponse().getContentAsString();
+        System.out.println(result);
+    }
+
+
 
     @Test
     public void addUser() throws Exception {

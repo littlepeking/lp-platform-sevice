@@ -1,6 +1,6 @@
 package com.enhantec.security.core.validate.code;
 
-import com.enhantec.security.core.properties.SecurityProperties;
+import com.enhantec.config.properties.ApplicationProperties;
 import lombok.Data;
 import org.springframework.web.bind.ServletRequestUtils;
 
@@ -12,7 +12,7 @@ import java.util.Random;
 @Data
 public class ImageValidateCodeGenerator implements ValidateCodeGenerator{
 
-    private SecurityProperties securityProperties;
+    private ApplicationProperties applicationProperties;
 
     private char mapTable[]={
             'a','b','c','d','e','f',
@@ -23,8 +23,8 @@ public class ImageValidateCodeGenerator implements ValidateCodeGenerator{
             '4','5','6','7','8','9'};
 
     public ImageCode generateImageCode(HttpServletRequest request) {
-        int width = ServletRequestUtils.getIntParameter(request,"width",securityProperties.getValidationCode().getImage().getWidth());
-        int height = ServletRequestUtils.getIntParameter(request,"height",securityProperties.getValidationCode().getImage().getHeight());
+        int width = ServletRequestUtils.getIntParameter(request,"width",applicationProperties.getValidationCode().getImage().getWidth());
+        int height = ServletRequestUtils.getIntParameter(request,"height",applicationProperties.getValidationCode().getImage().getHeight());
 
 
         if(width<=0)width=60;
@@ -42,7 +42,7 @@ public class ImageValidateCodeGenerator implements ValidateCodeGenerator{
         //Take the randomly generated authentication code
         String strEnsure = "";
         //4 represents a 4-bit verification code. If you want to generate more bits, increase the value
-        for(int i=0; i<securityProperties.getValidationCode().getImage().getLength(); ++i) {
+        for(int i=0; i<applicationProperties.getValidationCode().getImage().getLength(); ++i) {
             strEnsure+=mapTable[(int)(mapTable.length*Math.random())];
         }
         //Displays the authentication code in the image, and adds a drawString statement if you want to generate more bits of authentication code
@@ -59,7 +59,7 @@ public class ImageValidateCodeGenerator implements ValidateCodeGenerator{
         //Freeing the graph context
         g.dispose();
 
-        ImageCode imageCode = new ImageCode(image,strEnsure,securityProperties.getValidationCode().getImage().getExpireIn());
+        ImageCode imageCode = new ImageCode(image,strEnsure,applicationProperties.getValidationCode().getImage().getExpireIn());
 
         return imageCode;
 

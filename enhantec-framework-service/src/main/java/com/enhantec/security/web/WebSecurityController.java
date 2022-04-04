@@ -1,7 +1,7 @@
 package com.enhantec.security.web;
 
+import com.enhantec.config.properties.ApplicationProperties;
 import com.enhantec.security.web.support.SimpleResponse;
-import com.enhantec.security.core.properties.SecurityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -9,7 +9,6 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,10 +29,10 @@ public class WebSecurityController {
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-    private final SecurityProperties securityProperties;
+    private final ApplicationProperties applicationProperties;
 
-    public WebSecurityController(SecurityProperties securityProperties) {
-        this.securityProperties = securityProperties;
+    public WebSecurityController(ApplicationProperties applicationProperties) {
+        this.applicationProperties = applicationProperties;
     }
 
     @RequestMapping(loginUrl)

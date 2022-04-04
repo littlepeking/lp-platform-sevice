@@ -1,6 +1,6 @@
 package com.enhantec.security.core.validate.code;
 
-import com.enhantec.security.core.properties.SecurityProperties;
+import com.enhantec.config.properties.ApplicationProperties;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -26,7 +26,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter implements Initiali
 
     private Set<String> urls = new HashSet<>();
 
-    private SecurityProperties securityProperties;
+    private ApplicationProperties securityProperties;
 
     private AntPathMatcher antPathMatcher = new AntPathMatcher();
 

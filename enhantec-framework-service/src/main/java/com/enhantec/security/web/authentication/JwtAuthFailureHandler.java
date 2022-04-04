@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class WebAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+public class JwtAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -26,9 +26,9 @@ public class WebAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         logger.info("login failed!");
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponse(exception.getMessage())));
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponse(exception.getMessage())));
 
     }
 }
