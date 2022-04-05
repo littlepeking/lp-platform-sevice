@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -30,6 +31,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -95,17 +98,32 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin(form -> form.loginProcessingUrl("/login")
                         .successHandler(jsonAuthSuccessHandler())
                         .failureHandler(jsonAuthFailureHandler()))    //   .userDetailsService(userDetailsService)
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+//                .sessionManagement()
+//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                .and()
                 .authorizeHttpRequests()
                 .antMatchers(loginUrl, swaggerUrl, "/swagger-resources/**", "/v3/api-docs", "/code/image")
                 .permitAll().anyRequest().authenticated().and()
-                .exceptionHandling(exHandler -> exHandler.accessDeniedHandler(CustomAccessDeniedHandler()))
+                .exceptionHandling(exHandler -> exHandler.accessDeniedHandler(customAccessDeniedHandler()))
                 //.authenticationEntryPoint(new RestAuthenticationEntryPoint())
-                .csrf(csrf -> csrf.disable());
+                .csrf(csrf -> csrf.disable())
+                .logout(logout->logout.logoutUrl("/doLogout").logoutSuccessHandler(logOutHandler()));
               //  .apply(jwtConfigurer);
         ;
+    }
+
+    private org.springframework.security.web.authentication.logout.LogoutSuccessHandler logOutHandler() {
+        return  ( req,  res,  auth)-> {
+            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            res.setCharacterEncoding("UTF-8");
+            res.setStatus(HttpStatus.OK.value());
+
+            val returnData = Maps.of("title","登出成功").build();
+
+            res.getWriter().println(objectMapper.writeValueAsString(returnData));
+
+            logger.info("登出成功");
+        };
     }
 
     private AuthenticationSuccessHandler jsonAuthSuccessHandler() {
@@ -124,7 +142,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             res.setCharacterEncoding("UTF-8");
             res.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-            val errorData = Maps.of("title","登录失败").and("error", ex.getLocalizedMessage()).build();
+            val errorData = Maps.of("title","登录失败").and("details", ex.getLocalizedMessage()).build();
 
             res.getWriter().println(objectMapper.writeValueAsString(errorData));
             logger.info("登录失败");
@@ -132,7 +150,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-    private AccessDeniedHandler CustomAccessDeniedHandler() {
+    private AccessDeniedHandler customAccessDeniedHandler() {
 
         return (HttpServletRequest req, HttpServletResponse res,
                 AccessDeniedException ex) -> {
