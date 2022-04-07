@@ -25,6 +25,7 @@
 		<com.enhantec.application.version>0.0.1-SNAPSHOT</com.enhantec.application.version>
 		<spring-social.version>1.1.4.RELEASE</spring-social.version>
 		<jjwt.version>0.11.1</jjwt.version>
+		<problem.version>0.26.1</problem.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -52,11 +53,24 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.h2database</groupId>-->
+<!--			<artifactId>h2</artifactId>-->
+<!--			<scope>runtime</scope>-->
+<!--		</dependency>-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-ldap</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -110,6 +124,11 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.zalando</groupId>
+			<artifactId>problem-spring-web-starter</artifactId>
+			<version>${problem.version}</version>
 		</dependency>
 	</dependencies>
 

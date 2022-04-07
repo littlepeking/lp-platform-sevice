@@ -1,17 +1,15 @@
 package com.enhantec.security.web;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.core.validate.code.ValidateCodeFilter;
 import com.enhantec.security.jwt.JWTConfigurer;
+import com.enhantec.security.web.filter.RestAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.javafx.collections.MappingChange;
 import io.jsonwebtoken.lang.Maps;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,70 +17,70 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import java.io.IOException;
-import java.util.HashMap;
 
-import static com.enhantec.security.Constants.loginUrl;
-import static com.enhantec.security.Constants.swaggerUrl;
+import static com.enhantec.security.Constants.*;
 
-@Configuration
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@RequiredArgsConstructor
+@Slf4j
+@EnableWebSecurity()
+@Order(99)
+public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    //private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    private ApplicationProperties applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
-    @Autowired
-    private AuthenticationSuccessHandler authenticationSuccessHandler;
-
-    @Autowired
-    private AuthenticationFailureHandler authenticationFailureHandler;
-
-    @Autowired
-    DataSource dataSource;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
     JWTConfigurer jwtConfigurer;
 
-    @Autowired ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    private final SecurityProblemSupport securityProblemSupport;
+
+    private final DataSource dataSource;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
 
-        web.ignoring().mvcMatchers("/static/**")
+        web.ignoring().mvcMatchers("/error/**")
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
 
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-       auth.inMemoryAuthentication().withUser("admin").password(passwordEncoder.encode("12345678")).roles("USER","ADMIN");
+//        auth.inMemoryAuthentication().withUser("admin").password(passwordEncoder.encode("12345678")).roles("USER", "ADMIN");
+//        auth.inMemoryAuthentication().withUser("john").password(passwordEncoder.encode("12345678")).roles("USER");
+
+        auth.jdbcAuthentication()
+                //.withDefaultSchema()
+                .dataSource(dataSource);
+//                .withUser("john")
+//                .password(passwordEncoder.encode("12345678"))
+//                .roles("USER");
+
+
+
     }
 
     @Override
@@ -93,37 +91,38 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //        validateCodeFilter.setApplicationProperties(applicationProperties);
 //        validateCodeFilter.afterPropertiesSet();
 
-        http
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form.loginProcessingUrl("/login")
-                        .successHandler(jsonAuthSuccessHandler())
-                        .failureHandler(jsonAuthFailureHandler()))    //   .userDetailsService(userDetailsService)
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-                .authorizeHttpRequests()
-                .antMatchers(loginUrl, swaggerUrl, "/swagger-resources/**", "/v3/api-docs", "/code/image")
-                .permitAll().anyRequest().authenticated().and()
-                .exceptionHandling(exHandler -> exHandler.accessDeniedHandler(customAccessDeniedHandler()))
-                //.authenticationEntryPoint(new RestAuthenticationEntryPoint())
+
+        http.
+                httpBasic(Customizer.withDefaults()).
+                requestMatchers(rm-> rm.antMatchers(
+
+                        authUrl,swaggerUrl,
+                        "/api/**",
+                        "/swagger-resources/**",
+                        "/v3/api-docs",
+                        "/code/image"
+                        ))
+                .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(req->req.antMatchers(authUrl,swaggerUrl,
+                        "/swagger-resources/**", "/v3/api-docs", "/code/image").permitAll().anyRequest().authenticated())
+                //REPLACE UsernamePasswordAuthenticationFilter WITH RestAuthenticationFilter
+                .addFilterAt(getRestAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class)
+                //.exceptionHandling(exHandler -> exHandler.accessDeniedHandler(customAccessDeniedHandler()))
+                // .authenticationEntryPoint(new RestAuthenticationEntryPoint())
+                .exceptionHandling(exHandler -> exHandler.authenticationEntryPoint(securityProblemSupport).
+                        accessDeniedHandler(securityProblemSupport))
                 .csrf(csrf -> csrf.disable())
-                .logout(logout->logout.logoutUrl("/doLogout").logoutSuccessHandler(logOutHandler()));
-              //  .apply(jwtConfigurer);
+        //  .apply(jwtConfigurer);
         ;
     }
 
-    private org.springframework.security.web.authentication.logout.LogoutSuccessHandler logOutHandler() {
-        return  ( req,  res,  auth)-> {
-            res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            res.setCharacterEncoding("UTF-8");
-            res.setStatus(HttpStatus.OK.value());
-
-            val returnData = Maps.of("title","登出成功").build();
-
-            res.getWriter().println(objectMapper.writeValueAsString(returnData));
-
-            logger.info("登出成功");
-        };
+    private RestAuthenticationFilter getRestAuthenticationFilter() throws Exception {
+        RestAuthenticationFilter restAuthenticationFilter = new RestAuthenticationFilter(objectMapper);
+        restAuthenticationFilter.setAuthenticationSuccessHandler(jsonAuthSuccessHandler());
+        restAuthenticationFilter.setAuthenticationFailureHandler(jsonAuthFailureHandler());
+        restAuthenticationFilter.setAuthenticationManager(authenticationManager());
+        restAuthenticationFilter.setFilterProcessesUrl(authUrl);
+        return restAuthenticationFilter;
     }
 
     private AuthenticationSuccessHandler jsonAuthSuccessHandler() {
@@ -132,7 +131,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             res.setCharacterEncoding("UTF-8");
             res.setStatus(HttpStatus.OK.value());
             res.getWriter().println(objectMapper.writeValueAsString(auth));
-            logger.info("登录成功");
+            log.info("登录成功");
         };
     }
 
@@ -142,10 +141,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             res.setCharacterEncoding("UTF-8");
             res.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-            val errorData = Maps.of("title","登录失败").and("details", ex.getLocalizedMessage()).build();
+            val errorData = Maps.of("title", "登录失败").and("details", ex.getLocalizedMessage()).build();
 
             res.getWriter().println(objectMapper.writeValueAsString(errorData));
-            logger.info("登录失败");
+            log.info("登录失败");
         };
     }
 
@@ -156,7 +155,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 AccessDeniedException ex) -> {
             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null) {
-                logger.warn(String.format("User [%s] attempted to access the protected URL [%s]!", authentication.getName(), req.getRequestURI()));
+                log.warn(String.format("User [%s] attempted to access the protected URL [%s]!", authentication.getName(), req.getRequestURI()));
             }
 
             //response.sendRedirect(request.getContextPath() + "/site/403");

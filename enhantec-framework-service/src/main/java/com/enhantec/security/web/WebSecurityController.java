@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.enhantec.security.Constants.loginUrl;
+import static com.enhantec.security.Constants.authUrl;
 
 @RestController
 public class WebSecurityController {
@@ -35,7 +35,7 @@ public class WebSecurityController {
         this.applicationProperties = applicationProperties;
     }
 
-    @RequestMapping(loginUrl)
+    @RequestMapping(authUrl)
     @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
     public SimpleResponse forward2LoginPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
