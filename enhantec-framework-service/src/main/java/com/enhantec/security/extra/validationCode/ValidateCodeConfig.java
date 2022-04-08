@@ -1,8 +1,7 @@
-package com.enhantec.security.core.validate.code;
+package com.enhantec.security.extra.validationCode;
 
 import com.enhantec.config.properties.ApplicationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

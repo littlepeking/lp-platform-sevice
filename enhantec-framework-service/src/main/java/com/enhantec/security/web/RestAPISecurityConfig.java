@@ -59,6 +59,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final DataSource dataSource;
 
+    private final EHUserDetailsService ehUserDetailsService;
+
     @Override
     public void configure(WebSecurity web) throws Exception {
 
@@ -72,14 +74,17 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 //        auth.inMemoryAuthentication().withUser("admin").password(passwordEncoder.encode("12345678")).roles("USER", "ADMIN");
 //        auth.inMemoryAuthentication().withUser("john").password(passwordEncoder.encode("12345678")).roles("USER");
 
-        auth.jdbcAuthentication()
-                //.withDefaultSchema()
-                .dataSource(dataSource);
-//                .withUser("john")
-//                .password(passwordEncoder.encode("12345678"))
-//                .roles("USER");
+        //Replace jdbcAuthentication with customized EHUserDetailsService
+        auth.userDetailsService(ehUserDetailsService).passwordEncoder(passwordEncoder);
 
-
+//        auth.jdbcAuthentication()
+//                //.withDefaultSchema()
+//                .dataSource(dataSource)
+//                .usersByUsernameQuery("select username,password,enabled,login_name from users where username = ?")
+//                .authoritiesByUsernameQuery("select username,authority from authorities where username = ?");
+//                .withUser("admin")
+//                .password(passwordEncoder.encode("1234"))
+//                .roles("ADMIN");
 
     }
 
@@ -93,7 +98,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
 
         http.
-                httpBasic(Customizer.withDefaults()).
+                //httpBasic(Customizer.withDefaults()).  //allow auth from http header
                 requestMatchers(rm-> rm.antMatchers(
 
                         authUrl,swaggerUrl,

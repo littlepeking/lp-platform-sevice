@@ -40,15 +40,15 @@ public class JWTFilter extends GenericFilterBean {
             throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String jwt = resolveToken(httpServletRequest);
-        if (StringUtils.hasText(jwt)) {
-            if(this.tokenProvider.validateToken(jwt)) {
-                Authentication authentication = this.tokenProvider.getAuthentication(jwt);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }else {
-                jwtAuthFailureHandler.onAuthenticationFailure((HttpServletRequest) servletRequest,(HttpServletResponse) servletResponse,new JwtAuthException("jwt token is invalid."));
-                return;
-            }
-        }
+//        if (StringUtils.hasText(jwt)) {
+//            if(this.tokenProvider.validateToken(jwt)) {
+//                Authentication authentication = this.tokenProvider.getAuthentication(jwt);
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
+//            }else {
+//                jwtAuthFailureHandler.onAuthenticationFailure((HttpServletRequest) servletRequest,(HttpServletResponse) servletResponse,new JwtAuthException("jwt token is invalid."));
+//                return;
+//            }
+//        }
 
         filterChain.doFilter(servletRequest, servletResponse);
 

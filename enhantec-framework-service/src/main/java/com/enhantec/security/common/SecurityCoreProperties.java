@@ -1,4 +1,4 @@
-package com.enhantec.security.core;
+package com.enhantec.security.common;
 
 import com.enhantec.config.properties.ApplicationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -1,4 +1,4 @@
-package com.enhantec.security.core;
+package com.enhantec.security.common;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

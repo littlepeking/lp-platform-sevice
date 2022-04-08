@@ -1,4 +1,4 @@
-package com.enhantec.security.core.validate.code;
+package com.enhantec.security.extra.validationCode;
 
 
 import org.springframework.beans.factory.annotation.Autowired;

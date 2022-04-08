@@ -101,26 +101,26 @@ public class JWTTokenProvider {
         }
     }
 
-    /**
-     * custom get user information form db and load extPayload
-     * @param token
-     * @return
-     */
-    public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(key)
-            .build()
-            .parseClaimsJws(token)
-            .getBody();
-
-
-        /*
-        User principal = new User(claims.getSubject(), "", authorities);
-        */
-        // custom load more user information form db
-        JWTUser principal = (JWTUser)userDetailsService.loadUserByUsername(claims.getSubject());
-        return new UsernamePasswordAuthenticationToken(principal, token, principal.getAuthorities());
-    }
+//    /**
+//     * custom get user information form db and load extPayload
+//     * @param token
+//     * @return
+//     */
+//    public Authentication getAuthentication(String token) {
+//        Claims claims = Jwts.parserBuilder()
+//            .setSigningKey(key)
+//            .build()
+//            .parseClaimsJws(token)
+//            .getBody();
+//
+//
+//        /*
+//        User principal = new User(claims.getSubject(), "", authorities);
+//        */
+//        // custom load more user information form db
+//        JWTUser principal = (JWTUser)userDetailsService.loadUserByUsername(claims.getSubject());
+//        return new UsernamePasswordAuthenticationToken(principal, token, principal.getAuthorities());
+//    }
 
 
     public boolean validateToken(String authToken) {

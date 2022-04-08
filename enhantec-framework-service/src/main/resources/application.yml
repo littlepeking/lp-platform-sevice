@@ -42,5 +42,8 @@ server:
   port: 8060
 logging:
   level:
-    sql: "debug"
+    org.springframework.security: DEBUG
+    org.springframework.jdbc.core: TRACE
+    com.enhantec: DEBUG
+    sql: DEBUG
     #org.springframework.web: "debug"

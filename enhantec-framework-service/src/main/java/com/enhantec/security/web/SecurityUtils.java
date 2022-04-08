@@ -1,6 +1,5 @@
 package com.enhantec.security.web;
 
-import com.enhantec.security.jwt.JWTUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -40,21 +39,21 @@ public final class SecurityUtils {
         return null;
     }
 
-    /**
-     * Get Custom JWTUser From Context.
-     *
-     * @return
-     */
-    public static JWTUser getJwtUser() {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        Authentication authentication = securityContext.getAuthentication();
-        if (authentication == null) {
-            return null;
-        } else if (authentication.getPrincipal() instanceof JWTUser) {
-            return (JWTUser) authentication.getPrincipal();
-        }
-        return null;
-    }
+//    /**
+//     * Get Custom JWTUser From Context.
+//     *
+//     * @return
+//     */
+//    public static JWTUser getJwtUser() {
+//        SecurityContext securityContext = SecurityContextHolder.getContext();
+//        Authentication authentication = securityContext.getAuthentication();
+//        if (authentication == null) {
+//            return null;
+//        } else if (authentication.getPrincipal() instanceof JWTUser) {
+//            return (JWTUser) authentication.getPrincipal();
+//        }
+//        return null;
+//    }
 
 
     /**

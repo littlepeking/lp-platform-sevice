@@ -1,35 +1,41 @@
 package com.enhantec.security.web;
 
 import com.enhantec.common.services.LdapService;
-import com.enhantec.security.jwt.JWTUser;
+import com.enhantec.security.base.EHAuthority;
+import com.enhantec.security.base.EHUser;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Locale;
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Authenticate a user from the database.
  */
-@Component("userDetailsService")
-public class EHUserDetailsService implements UserDetailsService {
+@Component
+public class EHUserDetailsService extends JdbcDaoSupport implements UserDetailsService {
 
     @Autowired
-    public LdapService ldapService;
-
+    public void setJdbcTemplate(DataSource dataSource) {
+        setDataSource(dataSource);
+    }
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -40,37 +46,34 @@ public class EHUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(final String userName) {
+    public EHUser loadUserByUsername(final String userName) {
+
         logger.debug("Authenticating {}", userName);
 
         String lowercaseLogin = userName.toLowerCase(Locale.ENGLISH);
 
-        boolean isDomainUser = true;
 
-        JWTUser user = null;
-        if(isDomainUser) {
-            user = ldapService.authenticate(lowercaseLogin);
-        }else{
-            //username/password load from db
+        EHUser user =  getJdbcTemplate().queryForObject("select username,password,enabled,login_name from users where username = ?", new Object[]{userName}, (rs, rowNum) ->
+                new EHUser(
+                        rs.getString("username"),
+                        rs.getString("login_name"),
+                        rs.getString("password"),
+                        rs.getBoolean("enabled"),
+                        true,
+                        true,
+                        true,
+                        null
+                ));
 
-            logger.info("login user:"+ user);
-            //password type and format see: https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-encoding
-            //return new User(userName,passwordEncoder.encode("123"), true,true,true,true, AuthorityUtils.commaSeparatedStringToAuthorityList("admin"));
+            List<EHAuthority> authorities = getJdbcTemplate().query(
+                    "select username,authority from authorities where username = ?",new Object[]{userName},(rs,rowNum)-> new EHAuthority(
+                            rs.getString("authority")
+                    )
+            );
 
-            user = null;
+            user.setAuthorities(authorities);
 
             return user;
-
-        }
-
-
-        if(user==null) {
-            throw new UsernameNotFoundException("User " + lowercaseLogin + " was not found in the database/AD");
-        }else {
-            getAuthorities(user.getUsername());
-        }
-
-        return user;
 
     }
 
