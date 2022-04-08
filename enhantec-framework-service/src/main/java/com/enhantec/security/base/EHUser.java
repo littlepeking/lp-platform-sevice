@@ -1,5 +1,6 @@
 package com.enhantec.security.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ public class EHUser implements UserDetails, Serializable {
 
     private String loginName; // username show in the
 
+    @JsonIgnore
     private String password;
 
     private boolean enabled;
