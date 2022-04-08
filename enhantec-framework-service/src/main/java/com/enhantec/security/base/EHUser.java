@@ -17,7 +17,7 @@ public class EHUser implements UserDetails, Serializable {
 
     private String username;
 
-    private String loginName; // username show in the
+    private String loginName; // username show in the UI
 
     @JsonIgnore
     private String password;
