@@ -1,4 +1,4 @@
-package com.enhantec.security.jwt;
+package com.enhantec.security.core.jwt;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

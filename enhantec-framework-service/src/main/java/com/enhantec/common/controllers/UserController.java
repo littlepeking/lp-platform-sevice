@@ -1,26 +1,17 @@
 package com.enhantec.common.controllers;
 
 import com.enhantec.example.test.dto.User;
-import com.enhantec.security.jwt.JWTFilter;
-import com.enhantec.security.jwt.JWTTokenDTO;
-import com.enhantec.security.jwt.JWTTokenProvider;
-import com.enhantec.security.web.EHUserDetailsService;
+import com.enhantec.security.core.jwt.JWTTokenProvider;
+import com.enhantec.security.core.EHUserDetailsService;
 import com.fasterxml.jackson.annotation.JsonView;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/user")

@@ -1,18 +1,15 @@
-package com.enhantec.security.web;
+package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.jwt.JWTConfigurer;
-import com.enhantec.security.ldap.LDAPAuthenticationProvider;
+import com.enhantec.security.core.jwt.JWTConfigurer;
+import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;

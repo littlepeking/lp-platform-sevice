@@ -1,4 +1,4 @@
-package com.enhantec.security.web.authentication;
+package com.enhantec.security.core.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

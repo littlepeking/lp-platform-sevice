@@ -1,4 +1,4 @@
-package com.enhantec.security.ldap;
+package com.enhantec.security.core.ldap;
 
 import org.springframework.data.ldap.repository.LdapRepository;
 import org.springframework.stereotype.Repository;

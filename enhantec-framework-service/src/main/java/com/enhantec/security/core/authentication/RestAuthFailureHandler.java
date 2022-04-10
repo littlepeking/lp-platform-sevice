@@ -1,6 +1,5 @@
-package com.enhantec.security.web.authentication;
+package com.enhantec.security.core.authentication;
 
-import com.enhantec.security.web.support.SimpleResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public class RestAuthFailureHandler extends SimpleUrlAuthenticationFailureHandle
         logger.info("login failed!");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(new SimpleResponse(exception.getMessage())));
+        response.getWriter().write(objectMapper.writeValueAsString(new RestAuthSimpleResponse(exception.getMessage())));
 
     }
 }

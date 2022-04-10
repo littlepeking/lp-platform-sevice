@@ -6,5 +6,5 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties(ApplicationProperties.class)
-public class SecurityCoreProperties {
+public class SecurityProperties {
 }

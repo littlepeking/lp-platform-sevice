@@ -1,4 +1,4 @@
-package com.enhantec.security.web.support;
+package com.enhantec.security.core.authentication;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Data
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class SimpleResponse {
+public class RestAuthSimpleResponse {
 
    private final Object content;
 

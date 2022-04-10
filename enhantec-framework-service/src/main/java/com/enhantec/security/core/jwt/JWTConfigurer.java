@@ -1,7 +1,7 @@
-package com.enhantec.security.jwt;
+package com.enhantec.security.core.jwt;
 
-import com.enhantec.security.web.authentication.RestAuthFailureHandler;
-import com.enhantec.security.web.authentication.RestAuthSuccessHandler;
+import com.enhantec.security.core.authentication.RestAuthFailureHandler;
+import com.enhantec.security.core.authentication.RestAuthSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

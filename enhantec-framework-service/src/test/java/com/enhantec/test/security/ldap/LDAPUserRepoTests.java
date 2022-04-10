@@ -1,6 +1,6 @@
 package com.enhantec.test.security.ldap;
 
-import com.enhantec.security.ldap.LdapUserRepository;
+import com.enhantec.security.core.ldap.LdapUserRepository;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class LDAPUserRepoTests {
         String password = "Passw0rd";
         val user = ldapUserRepository.findAll();
 
-       
+
     }
 
 

@@ -1,10 +1,10 @@
-package com.enhantec.security.web;
+package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.jwt.JWTConfigurer;
-import com.enhantec.security.ldap.LDAPAuthenticationProvider;
-import com.enhantec.security.ldap.LdapUserRepository;
-import com.enhantec.security.web.filter.RestAuthenticationFilter;
+import com.enhantec.security.core.jwt.JWTConfigurer;
+import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
+import com.enhantec.security.core.ldap.LdapUserRepository;
+import com.enhantec.security.core.filter.RestAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.lang.Maps;
 import lombok.RequiredArgsConstructor;

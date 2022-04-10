@@ -1,7 +1,7 @@
-package com.enhantec.security.ldap;
+package com.enhantec.security.core.ldap;
 
 import com.enhantec.security.common.models.EHUser;
-import com.enhantec.security.web.EHUserDetailsService;
+import com.enhantec.security.core.EHUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

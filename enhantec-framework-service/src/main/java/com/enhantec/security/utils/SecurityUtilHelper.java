@@ -1,4 +1,4 @@
-package com.enhantec.security.web;
+package com.enhantec.security.utils;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,9 +12,9 @@ import java.util.stream.Stream;
 /**
  * Utility class for Spring Security.
  */
-public final class SecurityUtils {
+public final class SecurityUtilHelper {
 
-    private SecurityUtils() {
+    private SecurityUtilHelper() {
     }
 
     /**

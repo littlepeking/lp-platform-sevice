@@ -1,4 +1,4 @@
-package com.enhantec.security.web;
+package com.enhantec.security.core;
 
 import com.enhantec.security.common.models.EHAuthority;
 import com.enhantec.security.common.models.EHUser;
