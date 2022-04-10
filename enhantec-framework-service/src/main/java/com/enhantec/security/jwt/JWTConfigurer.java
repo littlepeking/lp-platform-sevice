@@ -1,7 +1,7 @@
 package com.enhantec.security.jwt;
 
-import com.enhantec.security.web.authentication.JwtAuthFailureHandler;
-import com.enhantec.security.web.authentication.JwtAuthSuccessHandler;
+import com.enhantec.security.web.authentication.RestAuthFailureHandler;
+import com.enhantec.security.web.authentication.RestAuthSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,11 +16,11 @@ public class  JWTConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFil
     private JWTTokenProvider tokenProvider;
 
     @Autowired
-    private JwtAuthFailureHandler webAuthFailureHandler;
+    private RestAuthFailureHandler webAuthFailureHandler;
 
 
     @Autowired
-    private JwtAuthSuccessHandler webAuthSuccessHandler;
+    private RestAuthSuccessHandler webAuthSuccessHandler;
 
     @Override
     public void configure(HttpSecurity http) {

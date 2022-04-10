@@ -1,0 +1,23 @@
+dn: dc=enhantec,dc=com
+objectClass: top
+objectClass: domain
+
+dn: uid=ldapuser,dc=enhantec,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: admin
+sn: admin
+uid: admin
+userPassword: Passw0rd
+
+dn: uid=john,dc=enhantec,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: john wang
+sn: john
+uid: john
+userPassword: Passw0rd

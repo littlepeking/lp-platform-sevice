@@ -2,6 +2,8 @@ package com.enhantec.security.web;
 
 import com.enhantec.config.properties.ApplicationProperties;
 import com.enhantec.security.jwt.JWTConfigurer;
+import com.enhantec.security.ldap.LDAPAuthenticationProvider;
+import com.enhantec.security.ldap.LdapUserRepository;
 import com.enhantec.security.web.filter.RestAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.lang.Maps;
@@ -9,11 +11,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -61,6 +64,10 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final EHUserDetailsService ehUserDetailsService;
 
+    private final LdapUserRepository ldapUserRepository;
+
+    private final LDAPAuthenticationProvider ldapAuthenticationProvider;
+
     @Override
     public void configure(WebSecurity web) throws Exception {
 
@@ -75,7 +82,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 //        auth.inMemoryAuthentication().withUser("john").password(passwordEncoder.encode("12345678")).roles("USER");
 
         //Replace jdbcAuthentication with customized EHUserDetailsService
-        auth.userDetailsService(ehUserDetailsService).passwordEncoder(passwordEncoder);
+        auth.authenticationProvider(daoAuthenticationProvider());
+        auth.authenticationProvider(ldapAuthenticationProvider);
 
 //        auth.jdbcAuthentication()
 //                //.withDefaultSchema()
@@ -120,6 +128,16 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
         //  .apply(jwtConfigurer);
         ;
     }
+
+    @Bean
+    DaoAuthenticationProvider daoAuthenticationProvider(){
+        val daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(ehUserDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        return  daoAuthenticationProvider;
+    }
+
+
 
     private RestAuthenticationFilter getRestAuthenticationFilter() throws Exception {
         RestAuthenticationFilter restAuthenticationFilter = new RestAuthenticationFilter(objectMapper);

@@ -1,0 +1,8 @@
+spring:
+  ldap:
+    base: dc=enhantec,dc=com
+    embedded:
+      base-dn: dc=enhantec,dc=com
+      ldif: classpath:test-ldap-server.ldif
+      port: 8389
+      urls: ldap://localhost:8389/

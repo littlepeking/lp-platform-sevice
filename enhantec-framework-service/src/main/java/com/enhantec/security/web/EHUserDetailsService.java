@@ -1,28 +1,19 @@
 package com.enhantec.security.web;
 
-import com.enhantec.common.services.LdapService;
-import com.enhantec.security.base.EHAuthority;
-import com.enhantec.security.base.EHUser;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import com.enhantec.security.common.models.EHAuthority;
+import com.enhantec.security.common.models.EHUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,25 +39,42 @@ public class EHUserDetailsService extends JdbcDaoSupport implements UserDetailsS
     @Override
     public EHUser loadUserByUsername(final String userName) {
 
+        EHUser user = getUserInfo(userName);
+
+        if(user==null) throw new UsernameNotFoundException("username is not exists");
+
+        return user;
+
+    }
+
+    public EHUser getUserInfo(final String userName) {
+
         logger.debug("Authenticating {}", userName);
 
         String lowercaseLogin = userName.toLowerCase(Locale.ENGLISH);
 
 
-        EHUser user =  getJdbcTemplate().queryForObject("select username,password,enabled,login_name from users where username = ?", new Object[]{userName}, (rs, rowNum) ->
+        List<EHUser> users =  getJdbcTemplate().query("select username,password,enabled,domain_username from users where username = ?", new Object[]{lowercaseLogin}, (rs, rowNum) ->
                 new EHUser(
                         rs.getString("username"),
-                        rs.getString("login_name"),
+                        rs.getString("domain_username"),
                         rs.getString("password"),
                         rs.getBoolean("enabled"),
                         true,
                         true,
                         true,
                         null
-                ));
+                )
+        );
+
+        EHUser user = users.isEmpty() ? null: users.get(0);
+
+        if(user==null) return null;
+
+        else {
 
             List<EHAuthority> authorities = getJdbcTemplate().query(
-                    "select username,authority from authorities where username = ?",new Object[]{userName},(rs,rowNum)-> new EHAuthority(
+                    "select username,authority from authorities where username = ?", new Object[]{userName}, (rs, rowNum) -> new EHAuthority(
                             rs.getString("authority")
                     )
             );
@@ -74,9 +82,14 @@ public class EHUserDetailsService extends JdbcDaoSupport implements UserDetailsS
             user.setAuthorities(authorities);
 
             return user;
+        }
 
     }
 
+     public EHUser createDomainUser(final String userName, final String domainUserName){
+
+        return new EHUser(userName,domainUserName,"",true,true,true,true,new ArrayList<>());
+    }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String subject) {
 

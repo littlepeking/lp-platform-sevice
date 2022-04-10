@@ -1,9 +1,7 @@
 package com.enhantec.security.jwt;
 
-import com.enhantec.security.web.authentication.JwtAuthFailureHandler;
-import com.enhantec.security.web.authentication.JwtAuthSuccessHandler;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.enhantec.security.web.authentication.RestAuthFailureHandler;
+import com.enhantec.security.web.authentication.RestAuthSuccessHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -12,7 +10,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -25,11 +22,11 @@ public class JWTFilter extends GenericFilterBean {
 
     private final JWTTokenProvider tokenProvider;
 
-    private final JwtAuthFailureHandler jwtAuthFailureHandler;
+    private final RestAuthFailureHandler jwtAuthFailureHandler;
 
-    private final JwtAuthSuccessHandler jwtAuthSuccessHandler;
+    private final RestAuthSuccessHandler jwtAuthSuccessHandler;
 
-    public JWTFilter(JWTTokenProvider tokenProvider, JwtAuthSuccessHandler jwtAuthSuccessHandler, JwtAuthFailureHandler jwtAuthFailureHandler) {
+    public JWTFilter(JWTTokenProvider tokenProvider, RestAuthSuccessHandler jwtAuthSuccessHandler, RestAuthFailureHandler jwtAuthFailureHandler) {
         this.tokenProvider = tokenProvider;
         this.jwtAuthFailureHandler = jwtAuthFailureHandler;
         this.jwtAuthSuccessHandler = jwtAuthSuccessHandler;

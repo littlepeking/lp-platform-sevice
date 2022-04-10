@@ -1,4 +1,4 @@
-package com.enhantec.security.base;
+package com.enhantec.security.common.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

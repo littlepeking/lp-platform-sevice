@@ -2,11 +2,13 @@ package com.enhantec.security.web;
 
 import com.enhantec.config.properties.ApplicationProperties;
 import com.enhantec.security.jwt.JWTConfigurer;
+import com.enhantec.security.ldap.LDAPAuthenticationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,19 +43,14 @@ public class SessionBasedSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final DataSource dataSource;
 
+    private final DaoAuthenticationProvider daoAuthenticationProvider;
+
+    private final LDAPAuthenticationProvider ldapAuthenticationProvider;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.inMemoryAuthentication().withUser("admin").password(passwordEncoder.encode("12345678")).roles("USER", "ADMIN");
-//        auth.inMemoryAuthentication().withUser("john").password(passwordEncoder.encode("12345678")).roles("USER");
-
-        auth.jdbcAuthentication()
-             //   .withDefaultSchema()
-                .dataSource(dataSource);
-//                .withUser("john")
-//                .password(passwordEncoder.encode("12345678"))
-//                .roles("USER");
-
-
+        auth.authenticationProvider(daoAuthenticationProvider);
+        auth.authenticationProvider(ldapAuthenticationProvider);
 
     }
 

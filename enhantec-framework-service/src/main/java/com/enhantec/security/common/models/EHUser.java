@@ -1,4 +1,4 @@
-package com.enhantec.security.base;
+package com.enhantec.security.common.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ public class EHUser implements UserDetails, Serializable {
 
     private String username;
 
-    private String loginName; // username show in the UI
+    private String domainUsername; //ONLY used in AD
 
     @JsonIgnore
     private String password;
