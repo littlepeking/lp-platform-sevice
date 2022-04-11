@@ -9,7 +9,7 @@ objectClass: organizationalPerson
 objectClass: inetOrgPerson
 cn: admin
 sn: admin
-uid: admin
+uid: ldapuser
 userPassword: Passw0rd
 
 dn: uid=john,dc=enhantec,dc=com

@@ -1,4 +1,4 @@
-package com.enhantec.security.core.authentication;
+package com.enhantec.security.core.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class RestAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+public class JwtAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -24,10 +24,10 @@ public class RestAuthFailureHandler extends SimpleUrlAuthenticationFailureHandle
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        logger.info("login failed!");
+        logger.info("JWT verification failed!");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(new RestAuthSimpleResponse(exception.getMessage())));
+        response.getWriter().write(objectMapper.writeValueAsString(new JwtAuthSimpleResponse(exception.getMessage())));
 
     }
 }

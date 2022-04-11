@@ -1,7 +1,6 @@
 package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.core.jwt.JWTConfigurer;
 import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +28,6 @@ public class SessionBasedSecurityConfig extends WebSecurityConfigurerAdapter {
     //private Logger logger = LoggerFactory.getLogger(getClass());
 
     private final ApplicationProperties applicationProperties;
-
-    JWTConfigurer jwtConfigurer;
 
     private final ObjectMapper objectMapper;
 

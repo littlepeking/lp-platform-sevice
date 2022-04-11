@@ -1,14 +1,10 @@
 package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.common.dtos.AuthDto;
 import com.enhantec.security.common.services.EHUserDetailsService;
-import com.enhantec.security.core.jwt.JWTConfigurer;
 import com.enhantec.security.core.jwt.JWTFilter;
-import com.enhantec.security.core.jwt.JWTTokenDTO;
 import com.enhantec.security.core.jwt.JWTTokenProvider;
 import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
-import com.enhantec.security.core.ldap.LdapUserRepository;
 import com.enhantec.security.core.filter.RestAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.lang.Maps;
@@ -18,7 +14,6 @@ import lombok.val;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -42,7 +37,6 @@ import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.sql.DataSource;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -59,23 +53,19 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final ApplicationProperties applicationProperties;
 
-    JWTConfigurer jwtConfigurer;
-
     private final ObjectMapper objectMapper;
 
     private final PasswordEncoder passwordEncoder;
 
     private final SecurityProblemSupport securityProblemSupport;
 
-    private final DataSource dataSource;
-
     private final EHUserDetailsService ehUserDetailsService;
-
-    private final LdapUserRepository ldapUserRepository;
 
     private final LDAPAuthenticationProvider ldapAuthenticationProvider;
 
     private final JWTTokenProvider jwtTokenProvider;
+
+    private final JWTFilter jwtFilter;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -128,6 +118,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeHttpRequests(req->req.antMatchers(authUrl,swaggerUrl,
                         "/swagger-resources/**", "/v3/api-docs", "/code/image").permitAll().anyRequest().authenticated())
                 //REPLACE UsernamePasswordAuthenticationFilter WITH RestAuthenticationFilter
+                .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(getRestAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class)
                 //.exceptionHandling(exHandler -> exHandler.accessDeniedHandler(customAccessDeniedHandler()))
                 // .authenticationEntryPoint(new RestAuthenticationEntryPoint())
@@ -157,7 +148,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
         return restAuthenticationFilter;
     }
 
-    private AuthenticationSuccessHandler jsonAuthSuccessHandler() {
+    AuthenticationSuccessHandler jsonAuthSuccessHandler() {
         return (req, res, auth) -> {
             // custom payload
             HashMap<String, Object> extPayLoad = new HashMap<>();
@@ -167,13 +158,13 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
             res.setCharacterEncoding("UTF-8");
             res.setStatus(HttpStatus.OK.value());
-            res.setHeader(JWTFilter.AUTHORIZATION_HEADER,"Bearer " + jwt);
+            res.setHeader(JWTTokenProvider.AUTHORIZATION_HEADER,"Bearer " + jwt);
             res.getWriter().println(objectMapper.writeValueAsString(auth));
             log.info("登录成功");
         };
     }
 
-    private AuthenticationFailureHandler jsonAuthFailureHandler() {
+    AuthenticationFailureHandler jsonAuthFailureHandler() {
         return (req, res, ex) -> {
             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
             res.setCharacterEncoding("UTF-8");
@@ -187,6 +178,11 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
+
+    /**
+     * Replaced by problem lib
+     */
+    @Deprecated
     private AccessDeniedHandler customAccessDeniedHandler() {
 
         return (HttpServletRequest req, HttpServletResponse res,
@@ -207,8 +203,10 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     /**
-     * 权限不通过的处理
+     * Replaced by problem lib
      */
+
+    @Deprecated
     public static class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         @Override
         public void commence(HttpServletRequest request,
