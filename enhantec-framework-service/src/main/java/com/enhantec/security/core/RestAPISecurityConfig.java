@@ -1,7 +1,12 @@
 package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
+import com.enhantec.security.common.dtos.AuthDto;
+import com.enhantec.security.common.services.EHUserDetailsService;
 import com.enhantec.security.core.jwt.JWTConfigurer;
+import com.enhantec.security.core.jwt.JWTFilter;
+import com.enhantec.security.core.jwt.JWTTokenDTO;
+import com.enhantec.security.core.jwt.JWTTokenProvider;
 import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
 import com.enhantec.security.core.ldap.LdapUserRepository;
 import com.enhantec.security.core.filter.RestAuthenticationFilter;
@@ -13,6 +18,7 @@ import lombok.val;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import static com.enhantec.security.Constants.*;
 
@@ -67,6 +74,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
     private final LdapUserRepository ldapUserRepository;
 
     private final LDAPAuthenticationProvider ldapAuthenticationProvider;
+
+    private final JWTTokenProvider jwtTokenProvider;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -150,9 +159,15 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
     private AuthenticationSuccessHandler jsonAuthSuccessHandler() {
         return (req, res, auth) -> {
+            // custom payload
+            HashMap<String, Object> extPayLoad = new HashMap<>();
+            // jwt token
+            String jwt = jwtTokenProvider.createToken(auth, extPayLoad);
+            //AuthDto authDto = new AuthDto(auth.getName(),jwt);
             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
             res.setCharacterEncoding("UTF-8");
             res.setStatus(HttpStatus.OK.value());
+            res.setHeader(JWTFilter.AUTHORIZATION_HEADER,"Bearer " + jwt);
             res.getWriter().println(objectMapper.writeValueAsString(auth));
             log.info("登录成功");
         };

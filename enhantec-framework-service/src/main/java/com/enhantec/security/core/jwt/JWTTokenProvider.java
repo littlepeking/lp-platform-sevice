@@ -1,10 +1,8 @@
 package com.enhantec.security.core.jwt;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.core.EHUserDetailsService;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.enhantec.security.common.services.EHUserDetailsService;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
@@ -18,6 +16,7 @@ import javax.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -73,9 +72,7 @@ public class JWTTokenProvider {
             .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-        Date validity;
-
-        validity = new Date(now + this.tokenValidityInMilliseconds);
+        Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
         if (null != extPayLoad) {
             // add custom payload
@@ -84,6 +81,7 @@ public class JWTTokenProvider {
                     .setSubject(authentication.getName())
                     .addClaims(extPayLoad)
                     .signWith(key, SignatureAlgorithm.HS512)
+                    .setIssuedAt(new Date(now))
                     //.setExpiration(validity)
                     .compact();
         } else {
@@ -91,6 +89,7 @@ public class JWTTokenProvider {
                     .setSubject(authentication.getName())
                    // .claim(AUTHORITIES_KEY, authorities)
                     .signWith(key, SignatureAlgorithm.HS512)
+                    .setIssuedAt(new Date(now))
                     //.setExpiration(validity)
                     .compact();
         }
@@ -118,14 +117,14 @@ public class JWTTokenProvider {
 //    }
 
 
-    public boolean validateToken(String authToken) {
+    public Optional<Claims> getTokenClaims(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
-            return true;
+            return Optional.of(Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken).getBody());
         } catch (JwtException | IllegalArgumentException e) {
             log.warn("Invalid JWT token.");
+            return  Optional.empty();
 
         }
-        return false;
     }
+
 }

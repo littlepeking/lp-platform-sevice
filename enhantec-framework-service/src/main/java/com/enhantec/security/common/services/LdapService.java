@@ -1,4 +1,4 @@
-package com.enhantec.common.services;
+package com.enhantec.security.common.services;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,17 +1,13 @@
-package com.enhantec.common.controllers;
+package com.enhantec.security.common.controllers;
 
-import com.enhantec.example.test.dto.User;
 import com.enhantec.security.core.jwt.JWTTokenProvider;
-import com.enhantec.security.core.EHUserDetailsService;
-import com.fasterxml.jackson.annotation.JsonView;
+import com.enhantec.security.common.services.EHUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/user")
@@ -67,19 +63,5 @@ public class UserController {
         return userDetails;
     }
 
-
-    @JsonView(User.UserSubView1.class)
-    @PostMapping("/add")
-    public User addUser(@Valid @RequestBody User user
-                        //  , BindingResult result
-    ) {
-
-//        if(result.hasErrors()){
-//            System.out.println(result);
-//         //   throw new Exception(result.toString());
-//        }
-        user.setUserId(1);
-        return user;
-    }
 
 }
