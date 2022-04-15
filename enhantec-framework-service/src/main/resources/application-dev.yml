@@ -5,13 +5,15 @@ spring:
 #      ldif: classpath:test-ldap-server.ldif
 #      port: 8389
 #      urls: ldap://localhost:8389/
-    #urls: ldap://192.168.2.37:389/,ldap://192.168.2.40:389/
-    urls: ldap://192.168.2.37:3268/
+    urls: ldap://192.168.2.37:389/
+    #urls: ldap://192.168.2.37:3268/
     username: CN=Administrator,CN=Users,DC=infor,DC=com
     password: Passw0rd3
     base: DC=infor,DC=com
-
-
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+enhantec:
+  common:
+    security:
+      authTypes: ldap,basic
