@@ -3,8 +3,10 @@ package com.enhantec.security.core;
 import com.enhantec.config.properties.ApplicationProperties;
 import com.enhantec.security.common.services.EHUserDetailsService;
 import com.enhantec.security.common.services.RoleHierarchyService;
+import com.enhantec.security.core.enums.AuthType;
 import com.enhantec.security.core.jwt.JWTFilter;
 import com.enhantec.security.core.jwt.JWTTokenProvider;
+import com.enhantec.security.core.ldap.BasicAuthenticationProvider;
 import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
 import com.enhantec.security.core.filter.RestAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,9 +22,6 @@ import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -48,7 +47,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -74,6 +72,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final LDAPAuthenticationProvider ldapAuthenticationProvider;
 
+    private final BasicAuthenticationProvider basicAuthenticationProvider;
+
     private final JWTTokenProvider jwtTokenProvider;
 
     private final JWTFilter jwtFilter;
@@ -96,8 +96,15 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 //        auth.inMemoryAuthentication().withUser("john").password(passwordEncoder.encode("12345678")).roles("USER");
 
         //Replace jdbcAuthentication with customized EHUserDetailsService
-        auth.authenticationProvider(daoAuthenticationProvider());
-        auth.authenticationProvider(ldapAuthenticationProvider);
+        if(applicationProperties.getSecurity().getAuthTypes().contains(AuthType.BASIC.toString())) {
+            auth.authenticationProvider(basicAuthenticationProvider);
+        }
+        if(applicationProperties.getSecurity().getAuthTypes().contains(AuthType.LDAP.toString())) {
+            auth.authenticationProvider(ldapAuthenticationProvider);
+        }
+
+
+
 
 //        auth.jdbcAuthentication()
 //                //.withDefaultSchema()
@@ -145,19 +152,19 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
         //  .apply(jwtConfigurer);
         ;
     }
-
-    @Bean
-    DaoAuthenticationProvider daoAuthenticationProvider(){
-        val daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(ehUserDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
-        return  daoAuthenticationProvider;
-    }
+//
+//    @Bean
+//    BasicAuthenticationProvider basicAuthenticationProvider(){
+//        val basicAuthenticationProvider = new BasicAuthenticationProvider();
+//        basicAuthenticationProvider.setUserDetailsService(ehUserDetailsService);
+//        basicAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+//        return  basicAuthenticationProvider;
+//    }
 
 
 
     private RestAuthenticationFilter getRestAuthenticationFilter() throws Exception {
-        RestAuthenticationFilter restAuthenticationFilter = new RestAuthenticationFilter(objectMapper);
+        RestAuthenticationFilter restAuthenticationFilter = new RestAuthenticationFilter(objectMapper,ehUserDetailsService);
         restAuthenticationFilter.setAuthenticationSuccessHandler(jsonAuthSuccessHandler());
         restAuthenticationFilter.setAuthenticationFailureHandler(jsonAuthFailureHandler());
         restAuthenticationFilter.setAuthenticationManager(authenticationManager());
@@ -176,7 +183,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
             res.setCharacterEncoding("UTF-8");
             res.setStatus(HttpStatus.OK.value());
             res.setHeader(JWTTokenProvider.AUTHORIZATION_HEADER,"Bearer " + jwt);
-            res.getWriter().println(objectMapper.writeValueAsString(auth));
+            res.getWriter().println(objectMapper.writeValueAsString(auth.getPrincipal()));
             log.info("登录成功");
         };
     }

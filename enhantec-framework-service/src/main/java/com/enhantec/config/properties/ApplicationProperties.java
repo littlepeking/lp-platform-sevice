@@ -1,8 +1,12 @@
 package com.enhantec.config.properties;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @ConfigurationProperties("enhantec.common")
@@ -15,6 +19,17 @@ public class ApplicationProperties {
     private final Security security = new Security();
 
     public static class Security {
+        //basic,ldap
+        private List<String> authTypes = Collections.singletonList("BASIC");
+
+        public List<String> getAuthTypes() {
+            return authTypes;
+        }
+
+        public void setAuthTypes(List<String> authTypes) {
+                this.authTypes = authTypes.stream().map(e-> StringUtils.upperCase(e.trim())).collect(Collectors.toList());
+
+        }
 
         private final Jwt jwt = new Jwt();
 

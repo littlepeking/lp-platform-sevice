@@ -1,5 +1,6 @@
 package com.enhantec.security.common.models;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -21,8 +22,9 @@ import java.util.Set;
 @TableName("EH_PERMISSION")
 public class EHPermission implements GrantedAuthority, Serializable {
 
-    private static  final long serialVersionUid =1L;
+    private static final long serialVersionUid =1L;
 
+    @TableId
     @NotNull
     private String authority;
 

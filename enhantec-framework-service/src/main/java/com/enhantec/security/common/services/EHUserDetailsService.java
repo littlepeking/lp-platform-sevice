@@ -5,6 +5,7 @@ import com.enhantec.security.common.mappers.EHRoleMapper;
 import com.enhantec.security.common.mappers.EHUserMapper;
 import com.enhantec.security.common.models.EHRole;
 import com.enhantec.security.common.models.EHUser;
+import com.enhantec.security.core.enums.AuthType;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ public class EHUserDetailsService implements UserDetailsService {
 
          userService.save(EHUser.builder().username(userName).domainUsername(domainUserName).build());
 
-        return new EHUser(userName,domainUserName,"",true,true,true,true,new ArrayList<>());
+        return new EHUser(userName, AuthType.LDAP,domainUserName,"",true,true,true,true,new ArrayList<>());
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String subject) {

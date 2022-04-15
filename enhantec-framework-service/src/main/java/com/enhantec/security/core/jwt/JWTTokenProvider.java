@@ -5,6 +5,7 @@ import com.enhantec.security.common.services.EHUserDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JWTTokenProvider {
 
     private final Logger log = LoggerFactory.getLogger(JWTTokenProvider.class);
@@ -34,15 +36,7 @@ public class JWTTokenProvider {
     private Key key;
 
     private long tokenValidityInMilliseconds;
-
-    private final EHUserDetailsService userDetailsService;
-
-    ApplicationProperties applicationProperties;
-
-    public JWTTokenProvider(ApplicationProperties applicationProperties, EHUserDetailsService userDetailsService) {
-        this.applicationProperties = applicationProperties;
-        this.userDetailsService = userDetailsService;
-    }
+    private final ApplicationProperties applicationProperties;
 
     @PostConstruct
     public void init() {
@@ -58,10 +52,6 @@ public class JWTTokenProvider {
         this.tokenValidityInMilliseconds =
             1000 * applicationProperties.getSecurity().getJwt().getTokenValidityInSeconds();
 
-    }
-
-    public String createToken(Authentication authentication) {
-        return createToken(authentication, null);
     }
 
     /**
@@ -106,27 +96,6 @@ public class JWTTokenProvider {
         }
         return null;
     }
-
-//    /**
-//     * custom get user information form db and load extPayload
-//     * @param token
-//     * @return
-//     */
-//    public Authentication getAuthentication(String token) {
-//        Claims claims = Jwts.parserBuilder()
-//            .setSigningKey(key)
-//            .build()
-//            .parseClaimsJws(token)
-//            .getBody();
-//
-//
-//        /*
-//        User principal = new User(claims.getSubject(), "", authorities);
-//        */
-//        // custom load more user information form db
-//        JWTUser principal = (JWTUser)userDetailsService.loadUserByUsername(claims.getSubject());
-//        return new UsernamePasswordAuthenticationToken(principal, token, principal.getAuthorities());
-//    }
 
 
     public Optional<Claims> getTokenClaims(String authToken) {

@@ -1,31 +1,25 @@
 package com.enhantec.security.core.ldap;
 
+import com.enhantec.config.properties.ApplicationProperties;
 import com.enhantec.security.common.models.EHUser;
 import com.enhantec.security.common.services.EHUserDetailsService;
+import com.enhantec.security.common.services.EHUserService;
+import com.enhantec.security.core.enums.AuthType;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.AuthenticationException;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.ldap.query.LdapQuery;
-import org.springframework.ldap.query.LdapQueryBuilder;
-import org.springframework.ldap.query.SearchScope;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
 @RequiredArgsConstructor
 @Component
@@ -40,7 +34,9 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
 
     private final EHUserDetailsService ehUserDetailsService;
 
-    private final LdapService ldapService;
+    private final EHUserService userService;
+
+    private final ApplicationProperties applicationProperties;
 
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
@@ -50,20 +46,41 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
     @Override
     protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
 
-        String lowercaseLogin = username.toLowerCase(Locale.ENGLISH);
+        String lowercaseLogin = authentication.getName();
 
-        ldapUserRepository.findAll().forEach(System.out::println);
-//        List<String> res = ldapTemplate.list("");
-//        res.stream().forEach(System.out::println);
+        //      if authentication type is usernamePassword, throw org.springframework.security.core.AuthenticationException();
+        //       ldapUserRepository.findAll().forEach(System.out::println);
+        //        List<String> res = ldapTemplate.list("");
+        //        res.stream().forEach(System.out::println);
+
+
+        userService.checkIfUserExists(lowercaseLogin);
+
+        EHUser user = ehUserDetailsService.getUserInfo(lowercaseLogin);
+
+        if(!user.getAuthType().equals(AuthType.LDAP)){
+            throw new BadCredentialsException("User auth type is not LDAP and skipped by LDAP auth provider, auth failed. Current user auth type:  " + user.getAuthType());
+        }
+
 
         boolean success = ldapTemplate.authenticate("", "(sAMAccountName="+lowercaseLogin+")", authentication.getCredentials().toString());
 
         if(!success){
-            throw new BadCredentialsException("uid and password does not match:\n ");
+            throw new BadCredentialsException("LDAP auth failed: username and password does not match.");
         }
 
         LDAPUser ldapUser = ldapUserRepository.findBysAMAccountName(lowercaseLogin).get();
 
+//        if(user==null){
+//            throw new BadCredentialsException("Current domain user is not registered in application.");
+//            // user =  ehUserDetailsService.createDomainUser(ldapUser.getSAMAccountName(),ldapUser.getFullName().toString());
+//        }
+
+        if(!StringUtils.equals(ldapUser.getFullName().toString(),user.getDomainUsername()))
+        {
+            userService.saveOrUpdate(user.withDomainUsername(ldapUser.getFullName().toString()));
+            user.setDomainUsername(ldapUser.getFullName().toString());
+        }
 
 //        System.out.println(success);
 //        ldapUserRepository.findAll().forEach(System.out::println);
@@ -75,12 +92,6 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
 //        System.out.println(person);
 //        Set<String> groups = ldapService.getAllGroupsForUserRecursively(username);
 
-
-        EHUser user = ehUserDetailsService.getUserInfo(lowercaseLogin);
-        if(user==null){
-            throw new BadCredentialsException("Current domain user is not registered in system.");
-          // user =  ehUserDetailsService.createDomainUser(ldapUser.getSAMAccountName(),ldapUser.getFullName().toString());
-        }
 
         return user;
     }

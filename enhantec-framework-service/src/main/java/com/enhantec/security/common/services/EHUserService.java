@@ -1,8 +1,10 @@
 package com.enhantec.security.common.services;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.security.common.mappers.EHUserMapper;
 import com.enhantec.security.common.models.EHUser;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,5 +26,13 @@ public class EHUserService extends ServiceImpl<EHUserMapper, EHUser> {
         this.save(user);
 
         return user;
+    }
+
+    public void checkIfUserExists(String username){
+
+        boolean userExists = getBaseMapper().exists(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
+
+        if(!userExists) throw new UsernameNotFoundException("username "+username+" is not exists.");
+
     }
 }

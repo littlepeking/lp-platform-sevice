@@ -1,5 +1,6 @@
 package com.enhantec.security.common.controllers;
 
+import com.enhantec.security.common.models.EHUser;
 import com.enhantec.security.core.jwt.JWTTokenProvider;
 import com.enhantec.security.common.services.EHUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/user")
@@ -54,7 +57,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('USER_READ')")
     public Object getCurrentUser(Authentication authentication) {
         //return SecurityContextHolder.getContext().getAuthentication(); or
-        return authentication;
+        return ehUserDetailsService.getUserInfo(authentication.getName());
     }
 
     @GetMapping("/detail")

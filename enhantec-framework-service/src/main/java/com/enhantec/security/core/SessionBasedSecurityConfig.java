@@ -1,6 +1,7 @@
 package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
+import com.enhantec.security.core.ldap.BasicAuthenticationProvider;
 import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -37,13 +38,13 @@ public class SessionBasedSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final DataSource dataSource;
 
-    private final DaoAuthenticationProvider daoAuthenticationProvider;
+    private final BasicAuthenticationProvider basicAuthenticationProvider;
 
     private final LDAPAuthenticationProvider ldapAuthenticationProvider;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(daoAuthenticationProvider);
+        auth.authenticationProvider(basicAuthenticationProvider);
         auth.authenticationProvider(ldapAuthenticationProvider);
 
     }
