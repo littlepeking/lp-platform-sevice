@@ -39,7 +39,7 @@ public class LDAPUser {
 
     @JsonIgnore
     @Attribute(name = "distinguishedname")
-    private Name dn;
+    private Name fullName;
 
     @Attribute(name = "department")
     private String deptName;

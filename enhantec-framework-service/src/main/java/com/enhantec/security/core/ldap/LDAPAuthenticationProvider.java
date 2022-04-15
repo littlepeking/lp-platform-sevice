@@ -62,7 +62,7 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
             throw new BadCredentialsException("uid and password does not match:\n ");
         }
 
-        Optional<LDAPUser> ldapUser = ldapUserRepository.findBysAMAccountName(lowercaseLogin);
+        LDAPUser ldapUser = ldapUserRepository.findBysAMAccountName(lowercaseLogin).get();
 
 
 //        System.out.println(success);
@@ -78,7 +78,8 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
 
         EHUser user = ehUserDetailsService.getUserInfo(lowercaseLogin);
         if(user==null){
-           user =  ehUserDetailsService.createDomainUser(ldapUser.get().getUid(),ldapUser.get().getId().toString());
+            throw new BadCredentialsException("Current domain user is not registered in system.");
+          // user =  ehUserDetailsService.createDomainUser(ldapUser.getSAMAccountName(),ldapUser.getFullName().toString());
         }
 
         return user;

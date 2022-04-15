@@ -71,6 +71,8 @@ public class EHUserDetailsService implements UserDetailsService {
 
      public EHUser createDomainUser(final String userName, final String domainUserName){
 
+         userService.save(EHUser.builder().username(userName).domainUsername(domainUserName).build());
+
         return new EHUser(userName,domainUserName,"",true,true,true,true,new ArrayList<>());
     }
 
