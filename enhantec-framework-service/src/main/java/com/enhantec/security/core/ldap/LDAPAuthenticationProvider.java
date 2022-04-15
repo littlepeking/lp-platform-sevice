@@ -52,7 +52,7 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
 
         String lowercaseLogin = username.toLowerCase(Locale.ENGLISH);
 
-//        ldapUserRepository.findAll().forEach(System.out::println);
+        ldapUserRepository.findAll().forEach(System.out::println);
 //        List<String> res = ldapTemplate.list("");
 //        res.stream().forEach(System.out::println);
 

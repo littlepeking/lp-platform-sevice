@@ -38,7 +38,7 @@ public class LDAPUser {
     private String password;
 
     @JsonIgnore
-    @Attribute(name = "dn")
+    @Attribute(name = "distinguishedname")
     private Name dn;
 
     @Attribute(name = "department")
