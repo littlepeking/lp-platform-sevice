@@ -1,18 +1,28 @@
 package com.enhantec.security.common.models;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.val;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@TableName("EH_USER")
 public class EHUser implements UserDetails, Serializable {
 
     private String username;
@@ -24,12 +34,14 @@ public class EHUser implements UserDetails, Serializable {
 
     private boolean enabled;
 
+    @TableField(exist = false)
     private boolean accountNonExpired  = true;
-
+    @TableField(exist = false)
     private boolean accountNonLocked = true;
-
+    @TableField(exist = false)
     private boolean credentialsNonExpired = true;
 
-    List<EHAuthority> authorities;
+    @TableField(exist = false)
+    private Collection<? extends GrantedAuthority> authorities;
 
 }

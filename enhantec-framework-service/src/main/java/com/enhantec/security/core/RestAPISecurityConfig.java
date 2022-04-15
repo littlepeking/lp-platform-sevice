@@ -2,6 +2,7 @@ package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
 import com.enhantec.security.common.services.EHUserDetailsService;
+import com.enhantec.security.common.services.RoleHierarchyService;
 import com.enhantec.security.core.jwt.JWTFilter;
 import com.enhantec.security.core.jwt.JWTTokenProvider;
 import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
@@ -14,9 +15,13 @@ import lombok.val;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,12 +38,18 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 import static com.enhantec.security.Constants.*;
@@ -66,6 +77,10 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
     private final JWTTokenProvider jwtTokenProvider;
 
     private final JWTFilter jwtFilter;
+
+    private final Environment environment;
+
+    private final RoleHierarchyService roleHierarchyService;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -124,7 +139,9 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
                 // .authenticationEntryPoint(new RestAuthenticationEntryPoint())
                 .exceptionHandling(exHandler -> exHandler.authenticationEntryPoint(securityProblemSupport).
                         accessDeniedHandler(securityProblemSupport))
+                .cors(cors-> cors.configurationSource(configurationSource()))
                 .csrf(csrf -> csrf.disable())
+
         //  .apply(jwtConfigurer);
         ;
     }
@@ -221,6 +238,26 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 //                    "Authentication Failed: " + authException.getMessage());
         }
     }
+
+    @Bean
+    CorsConfigurationSource configurationSource(){
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        if(environment.acceptsProfiles(Profiles.of("dev"))) {
+            corsConfiguration.addAllowedOrigin("http://localhost:4001"); // ui service -dev
+        }else {
+            corsConfiguration.addAllowedOrigin("http://localhost_prd:8080");// ui service -prd
+        }
+
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
+        corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
+        corsConfiguration.addExposedHeader("X-Authenticate");//RESPONSE ADD HEADER X-Authenticate TO ALLOW 2 FACTOR AUTH, NOT USE NOW.
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**",corsConfiguration);
+        return source;
+
+    }
+
+
 
 
 }

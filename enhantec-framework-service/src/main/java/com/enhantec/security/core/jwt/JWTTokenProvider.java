@@ -28,7 +28,7 @@ public class JWTTokenProvider {
 
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String AUTHORITIES_KEY = "auth";
+    public static final String AUTHORITIES_KEY = "authorities";
     private static final String SECRET = "YmJlMWVmMjYxODM1ZGVkMWI2MzA5M2UxOGJmMmEzMTYzYTg4ZDk3MTJkYjA1Mzc3YTI3YThlYjBhN2I3YTdlZjk1MThiMmMzYjE5NjYzMWFjYjdlMDZmODlhMDdhNDg3NGRjODg5ZWJlODg5NjYzNzljNDQ0MzllYjYwN2U5ODE=";
 
     private Key key;
@@ -80,7 +80,7 @@ public class JWTTokenProvider {
 
         if (null != extPayLoad) {
             // add custom payload
-            //extPayLoad.put(AUTHORITIES_KEY, authorities);
+            extPayLoad.put(AUTHORITIES_KEY, authorities);
             return Jwts.builder()
                     .setSubject(authentication.getName())
                     .addClaims(extPayLoad)

@@ -47,3 +47,6 @@ logging:
     com.enhantec: DEBUG
     sql: DEBUG
     #org.springframework.web: "debug"
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

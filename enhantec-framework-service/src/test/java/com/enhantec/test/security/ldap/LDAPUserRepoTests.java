@@ -22,7 +22,7 @@ public class LDAPUserRepoTests {
     public void givenUserNamePassword_Success(){
         String username = "admin";
         String password = "Passw0rd";
-       val user = ldapUserRepository.findByUsernameAndPassword(username,password);
+       val user = ldapUserRepository.findBysAMAccountNameAndPassword(username,password);
 
        assertTrue(user.isPresent());
     }

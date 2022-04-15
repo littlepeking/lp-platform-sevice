@@ -1,7 +1,11 @@
 package com.enhantec.security.common.services;
 
-import com.enhantec.security.common.models.EHAuthority;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.enhantec.security.common.mappers.EHRoleMapper;
+import com.enhantec.security.common.mappers.EHUserMapper;
+import com.enhantec.security.common.models.EHRole;
 import com.enhantec.security.common.models.EHUser;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +25,13 @@ import java.util.stream.Collectors;
  * Authenticate a user from the database.
  */
 @Component
-public class EHUserDetailsService extends JdbcDaoSupport implements UserDetailsService {
+public class EHUserDetailsService implements UserDetailsService {
 
     @Autowired
-    public void setJdbcTemplate(DataSource dataSource) {
-        setDataSource(dataSource);
-    }
+    EHUserService userService;
+
+    @Autowired
+    EHRoleService roleService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -53,37 +58,15 @@ public class EHUserDetailsService extends JdbcDaoSupport implements UserDetailsS
 
         String lowercaseLogin = userName.toLowerCase(Locale.ENGLISH);
 
+        EHUser user = userService.getOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,lowercaseLogin));
+        if(user==null){
+            return null;
+        }else {
 
-        List<EHUser> users =  getJdbcTemplate().query("select username,password,enabled,domain_username from users where username = ?", new Object[]{lowercaseLogin}, (rs, rowNum) ->
-                new EHUser(
-                        rs.getString("username"),
-                        rs.getString("domain_username"),
-                        rs.getString("password"),
-                        rs.getBoolean("enabled"),
-                        true,
-                        true,
-                        true,
-                        null
-                )
-        );
+            user.setAuthorities(roleService.findByUsername(user.getUsername()));
 
-        EHUser user = users.isEmpty() ? null: users.get(0);
-
-        if(user==null) return null;
-
-        else {
-
-            List<EHAuthority> authorities = getJdbcTemplate().query(
-                    "select username,authority from authorities where username = ?", new Object[]{userName}, (rs, rowNum) -> new EHAuthority(
-                            rs.getString("authority")
-                    )
-            );
-
-            user.setAuthorities(authorities);
-
-            return user;
         }
-
+            return user;
     }
 
      public EHUser createDomainUser(final String userName, final String domainUserName){

@@ -1,6 +1,7 @@
 package com.enhantec;
 
 import com.enhantec.common.exception.EHApplicationException;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 @RestController
+@MapperScan("com.enhantec.**.mappers")
 public class Application {
 
     public static void main(String[] args) {

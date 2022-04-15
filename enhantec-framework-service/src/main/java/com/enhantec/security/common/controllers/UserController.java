@@ -51,13 +51,14 @@ public class UserController {
 //    }
 
     @GetMapping("/info")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public Object getCurrentUser(Authentication authentication) {
         //return SecurityContextHolder.getContext().getAuthentication(); or
         return authentication;
     }
 
     @GetMapping("/detail")
+    @PreAuthorize("hasAuthority('USER_WRITE')")
     public Object getUserDetail(@AuthenticationPrincipal UserDetails userDetails) {
         //return SecurityContextHolder.getContext().getAuthentication(); or
         return userDetails;

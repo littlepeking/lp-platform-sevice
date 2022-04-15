@@ -26,6 +26,7 @@
 		<spring-social.version>1.1.4.RELEASE</spring-social.version>
 		<jjwt.version>0.11.1</jjwt.version>
 		<problem.version>0.26.1</problem.version>
+		<mybatisplus.version>3.5.1</mybatisplus.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -64,6 +65,10 @@
             <artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 		</dependency>
@@ -93,6 +98,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus-boot-starter</artifactId>
+			<version>${mybatisplus.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
