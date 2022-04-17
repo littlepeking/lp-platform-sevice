@@ -39,8 +39,7 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
 
-        HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        String jwt = tokenProvider.resolveToken(httpServletRequest);
+        String jwt = tokenProvider.resolveToken(servletRequest);
         if (StringUtils.hasText(jwt)) {
             Optional<Claims> claims = this.tokenProvider.getTokenClaims(jwt);
             if(claims.isPresent()) {

@@ -62,7 +62,6 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
             throw new BadCredentialsException("User auth type is not LDAP and skipped by LDAP auth provider, auth failed. Current user auth type:  " + user.getAuthType());
         }
 
-
         boolean success = ldapTemplate.authenticate("", "(sAMAccountName="+lowercaseLogin+")", authentication.getCredentials().toString());
 
         if(!success){
@@ -91,7 +90,6 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
 //        LDAPUser person = ldapTemplate.findOne(query, LDAPUser.class);
 //        System.out.println(person);
 //        Set<String> groups = ldapService.getAllGroupsForUserRecursively(username);
-
 
         return user;
     }

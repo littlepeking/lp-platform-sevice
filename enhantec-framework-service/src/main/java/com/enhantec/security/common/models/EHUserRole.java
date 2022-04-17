@@ -14,7 +14,7 @@ public class EHUserRole {
 
     @TableId
     String id;
-    String username;
+    String userId;
     String roleName;
 
 }

@@ -2,28 +2,62 @@ package com.enhantec.security.common.services;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.security.common.mappers.EHUserMapper;
 import com.enhantec.security.common.models.EHUser;
+import com.enhantec.security.core.enums.AuthType;
+import com.enhantec.security.core.ldap.LDAPUser;
+import com.enhantec.security.core.ldap.LdapUserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-
+@Transactional
 @Service
+@RequiredArgsConstructor
 public class EHUserService extends ServiceImpl<EHUserMapper, EHUser> {
 
-    public EHUser createUser(final String userName){
+    private final LdapUserRepository ldapUserRepository;
+    private final LdapTemplate ldapTemplate;
 
-        EHUser user = EHUser.builder().username(userName).domainUsername("").build();
-        this.save(user);
+    public EHUser createUser(String username, String password, AuthType authType) {
 
-        return user;
-    }
+        if(!username.equals(username.toLowerCase()))
+            throw new EHApplicationException("username must be lowercase");
 
-    public EHUser createDomainUser(final String userName, final String domainUserName){
+        EHUser user = getOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername, username));
 
-        EHUser user = EHUser.builder().username(userName).domainUsername(domainUserName).build();
-        this.save(user);
+        if (user != null) {
+            throw new EHApplicationException("user name is already exist");
+        }
+
+        String domainUserName ="";
+
+        if(AuthType.LDAP.equals(authType)){
+
+            boolean success = ldapTemplate.authenticate("", "(sAMAccountName="+ username+")",
+                    password);
+
+            if(!success){
+                throw new EHApplicationException("LDAP auth failed: username and password does not match.");
+            }
+
+            LDAPUser ldapUser = ldapUserRepository.findBysAMAccountName(username).get();
+
+            domainUserName = ldapUser.getFullName().toString();
+
+        }
+
+        user =EHUser.builder()
+                .username(username)
+                .domainUsername(domainUserName)
+                .password(password)
+                .authType(authType)
+                .enabled(true)
+                .build();
+
 
         return user;
     }

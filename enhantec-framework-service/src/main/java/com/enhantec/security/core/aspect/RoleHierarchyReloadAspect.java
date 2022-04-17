@@ -24,6 +24,7 @@ public class RoleHierarchyReloadAspect {
     @AfterReturning("applicationPackagePointCut() && @annotation(com.enhantec.security.core.annotation.ReloadRoleHierarchy)")
     public void reloadRoleHierarchy(){
 
+        //TODO: multiple servers roles reload, currently only work for single server
         val roleHierarchyExpression = roleHierarchyService.getRoleHierarchyExpression();
 
         roleHierarchy.setHierarchy(roleHierarchyExpression);

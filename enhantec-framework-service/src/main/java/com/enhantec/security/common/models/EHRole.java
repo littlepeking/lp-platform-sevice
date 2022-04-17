@@ -1,5 +1,6 @@
 package com.enhantec.security.common.models;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,7 +20,7 @@ import java.io.Serializable;
 @TableName("EH_ROLE")
 public class EHRole implements GrantedAuthority, Serializable {
 
-    @TableId
+    @TableId(type = IdType.INPUT)
     @NotNull
     private String roleName;
 

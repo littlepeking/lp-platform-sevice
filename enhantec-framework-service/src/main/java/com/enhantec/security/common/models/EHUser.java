@@ -1,5 +1,6 @@
 package com.enhantec.security.common.models;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,6 +24,8 @@ import java.util.Collection;
 public class EHUser implements UserDetails, Serializable {
 
     @TableId
+    private String id;
+
     private String username;
 
     private AuthType authType;
@@ -36,10 +39,14 @@ public class EHUser implements UserDetails, Serializable {
     private boolean enabled;
 
     @TableField(exist = false)
+
+    @Builder.Default
     private boolean accountNonExpired  = true;
     @TableField(exist = false)
+    @Builder.Default
     private boolean accountNonLocked = true;
     @TableField(exist = false)
+    @Builder.Default
     private boolean credentialsNonExpired = true;
 
     @TableField(exist = false)

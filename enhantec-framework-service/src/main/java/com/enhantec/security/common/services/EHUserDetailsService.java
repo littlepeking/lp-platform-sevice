@@ -70,18 +70,4 @@ public class EHUserDetailsService implements UserDetailsService {
             return user;
     }
 
-     public EHUser createDomainUser(final String userName, final String domainUserName){
-
-         userService.save(EHUser.builder().username(userName).domainUsername(domainUserName).build());
-
-        return new EHUser(userName, AuthType.LDAP,domainUserName,"",true,true,true,true,new ArrayList<>());
-    }
-
-    private Collection<? extends GrantedAuthority> getAuthorities(String subject) {
-
-        //  if(subject.equals("cn=john"))
-        return Arrays.stream(new String[]{"admin"}).map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-    }
-
 }

@@ -19,11 +19,9 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query;
 @RequiredArgsConstructor
 public class LdapService {
     private final LdapTemplate ldapTemplate;
-    private Set<String> groups= new HashSet<>();;
-
+    private Set<String> groups = new HashSet<>();
 
     public List<String> getAllGroupsForUser(String userCN){
-
 
         /*
          * Get user distinguised name, example: "user" -> "CN=User Name,OU=Groups,OU=Domain Users,DC=company,DC=something,DC=org"

@@ -3,9 +3,12 @@ package com.enhantec.security.common.services;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.security.common.mappers.EHUserMapper;
 import com.enhantec.security.common.mappers.EHUserRoleMapper;
 import com.enhantec.security.common.models.EHRole;
 import com.enhantec.security.common.mappers.EHRoleMapper;
+import com.enhantec.security.common.models.EHUser;
 import com.enhantec.security.common.models.EHUserRole;
 import com.enhantec.security.core.annotation.ReloadRoleHierarchy;
 import lombok.RequiredArgsConstructor;
@@ -14,33 +17,45 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.nio.file.Watchable;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
-public class EHRoleService extends ServiceImpl<EHRoleMapper,EHRole> {
+public class EHRoleService extends ServiceImpl<EHRoleMapper, EHRole> {
 
     private final EHRoleMapper roleMapper;
 
+    private final EHUserMapper userMapper;
+
     private final EHUserRoleMapper userRoleMapper;
 
-    @Transactional
-    @ReloadRoleHierarchy
-    public EHRole createRole(final String roleName) {
+    public EHRole createRole(String roleName, String displayName) {
 
-        EHRole role = EHRole.builder().roleName(roleName).build();
-        super.save(role);
+        if(!roleName.equals(roleName.toUpperCase()))
+            throw new EHApplicationException("role name must be upper case.");
 
-        return role;
+        EHRole role = getOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, roleName));
+
+        if (role != null) {
+            throw new EHApplicationException("role name '" + roleName + "' is already exist.");
+        } else {
+            EHRole roleToSave = EHRole.builder().roleName(roleName).displayName(displayName).build();
+            save(roleToSave);
+
+            return roleToSave;
+        }
+
     }
 
 
-    public  List<EHRole> findByUsername(String username) {
-        val userRoleLambdaQueryWrapper = Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getUsername, username);
+    public List<EHRole> findByUserId(String userId) {
+
+        val userRoleLambdaQueryWrapper = Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getUserId, userId);
 
         List<EHUserRole> userRoleList = userRoleMapper.selectList(userRoleLambdaQueryWrapper);
 
@@ -52,6 +67,60 @@ public class EHRoleService extends ServiceImpl<EHRoleMapper,EHRole> {
         } else {
             return Collections.EMPTY_LIST;
         }
+
+    }
+
+
+    public List<EHRole> findByUsername(String username) {
+
+       EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
+
+       if( user == null ) throw  new EHApplicationException("Username "+ username +" is not exists.");
+
+       return findByUserId(user.getId());
+    }
+
+    public EHUser assignRolesToUser(String userId, List<String> roleNames) {
+
+        boolean isUserExists = userMapper.exists(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
+
+        if(!isUserExists) throw new EHApplicationException("user id is not exist.");
+
+        if (roleNames!=null && roleNames.size() > 0) {
+
+            roleNames.forEach(roleName -> {
+
+                if(!roleName.equals(roleName.toUpperCase()))
+                    throw new EHApplicationException("role name must be upper case.");
+
+
+                val storedRoleName = roleName.trim();
+
+                EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, storedRoleName));
+
+                Optional.ofNullable(role).ifPresent(
+                        (r) -> {
+                            boolean isExist = userRoleMapper.exists(Wrappers.lambdaQuery(EHUserRole.class)
+                                    .eq(EHUserRole::getUserId, userId)
+                                    .eq(EHUserRole::getRoleName, storedRoleName));
+
+                            if (!isExist) {
+                                userRoleMapper.insert(EHUserRole.builder().userId(userId).roleName(storedRoleName).build()
+                                );
+                            }
+                        }
+                );
+            });
+
+        }
+
+        EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
+
+        val userRoleList = findByUsername(userId);
+
+        user.setAuthorities(userRoleList);
+
+        return user;
 
     }
 }
