@@ -14,7 +14,7 @@ import java.util.List;
 public class UserRolesDTO implements Serializable {
 
     @NotNull
-    private String username;
+    private String userId;
 
     private List<String> roles;
 }

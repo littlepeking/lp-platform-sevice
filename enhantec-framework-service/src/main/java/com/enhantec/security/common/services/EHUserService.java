@@ -11,6 +11,7 @@ import com.enhantec.security.core.ldap.LdapUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,8 @@ public class EHUserService extends ServiceImpl<EHUserMapper, EHUser> {
 
     private final LdapUserRepository ldapUserRepository;
     private final LdapTemplate ldapTemplate;
+    private final PasswordEncoder passwordEncoder;
+
 
     public EHUser createUser(String username, String password, AuthType authType) {
 
@@ -53,11 +56,12 @@ public class EHUserService extends ServiceImpl<EHUserMapper, EHUser> {
         user =EHUser.builder()
                 .username(username)
                 .domainUsername(domainUserName)
-                .password(password)
+                .password(passwordEncoder.encode(password))
                 .authType(authType)
                 .enabled(true)
                 .build();
 
+        save(user);
 
         return user;
     }

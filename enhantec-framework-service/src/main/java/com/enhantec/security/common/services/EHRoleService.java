@@ -98,7 +98,7 @@ public class EHRoleService extends ServiceImpl<EHRoleMapper, EHRole> {
 
                 EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, storedRoleName));
 
-                Optional.ofNullable(role).ifPresent(
+                Optional.ofNullable(role).ifPresentOrElse(
                         (r) -> {
                             boolean isExist = userRoleMapper.exists(Wrappers.lambdaQuery(EHUserRole.class)
                                     .eq(EHUserRole::getUserId, userId)
@@ -108,7 +108,8 @@ public class EHRoleService extends ServiceImpl<EHRoleMapper, EHRole> {
                                 userRoleMapper.insert(EHUserRole.builder().userId(userId).roleName(storedRoleName).build()
                                 );
                             }
-                        }
+                        },
+                        ()-> {throw new EHApplicationException("role name '" + roleName + "' is not exist");}
                 );
             });
 
@@ -116,9 +117,9 @@ public class EHRoleService extends ServiceImpl<EHRoleMapper, EHRole> {
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
 
-        val userRoleList = findByUsername(userId);
+        val roleList = findByUserId(userId);
 
-        user.setAuthorities(userRoleList);
+        user.setAuthorities(roleList);
 
         return user;
 

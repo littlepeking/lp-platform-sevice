@@ -66,15 +66,15 @@ public class EHPermissionService extends ServiceImpl<EHPermissionMapper, EHPermi
     }
 
     @ReloadRoleHierarchy
-    public void assignPermToRole(String roleName, List<String> Permissions) {
+    public EHRole assignPermToRole(String roleName, List<String> permissions) {
 
         boolean isRoleExists = roleMapper.exists(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, roleName));
 
         if(!isRoleExists) throw new EHApplicationException("role name "+ roleName +" is not exist.");
 
-        if (Permissions!=null && Permissions.size() > 0) {
+        if (permissions!=null && permissions.size() > 0) {
 
-            Permissions.forEach(perm -> {
+            permissions.forEach(perm -> {
 
                 if(!perm.equals(perm.toUpperCase()))
                     throw new EHApplicationException("Permission name must be upper case.");
@@ -91,7 +91,7 @@ public class EHPermissionService extends ServiceImpl<EHPermissionMapper, EHPermi
                                     .eq(EHRolePermission::getAuthority, storedPermName));
 
                             if (!isExist) {
-                                rolePermissionMapper.insert(EHRolePermission.builder().roleName(roleName).roleName(storedPermName).build()
+                                rolePermissionMapper.insert(EHRolePermission.builder().roleName(roleName).authority(storedPermName).build()
                                 );
                             }
                         }
@@ -99,6 +99,15 @@ public class EHPermissionService extends ServiceImpl<EHPermissionMapper, EHPermi
             });
 
         }
+
+        EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, roleName));
+
+        val permissionList = findByRole(roleName);
+
+        role.setPermissions(permissionList);
+
+        return role;
+
 
     }
 }

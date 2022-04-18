@@ -48,20 +48,20 @@ public class SecurityController {
 
     @PostMapping("/assignRolesToUser")
     public EHUser assignRolesToUser(@Valid @RequestBody UserRolesDTO userRolesDTO){
-        return roleService.assignRolesToUser(userRolesDTO.getUsername(),userRolesDTO.getRoles());
+        return roleService.assignRolesToUser(userRolesDTO.getUserId(),userRolesDTO.getRoles());
     }
 
     @PostMapping("/assignPermissionsToRole")
-    public void assignPermissionsToRole(@Valid @RequestBody RolePermissionDTO rolePermissionDTO){
-        permissionService.assignPermToRole(rolePermissionDTO.getRoleName(),rolePermissionDTO.getPermissions());
+    public EHRole assignPermissionsToRole(@Valid @RequestBody RolePermissionDTO rolePermissionDTO){
+       return permissionService.assignPermToRole(rolePermissionDTO.getRoleName(),rolePermissionDTO.getPermissions());
     }
 
-    @PostMapping("/getRolesByUsername")
+    @GetMapping("/getRolesByUsername")
     public List<EHRole> getRolesByUsername(@Valid @NotNull String username){
         return roleService.findByUsername(username);
     }
 
-    @PostMapping("/getPermissionsByRole")
+    @GetMapping("/getPermissionsByRole")
     public List<EHPermission> getPermissionsByRole(@Valid @NotNull String roleName){
         return permissionService.findByRole(roleName);
     }
