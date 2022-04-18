@@ -27,6 +27,7 @@
 		<jjwt.version>0.11.1</jjwt.version>
 		<problem.version>0.26.1</problem.version>
 		<mybatisplus.version>3.5.1</mybatisplus.version>
+		<mybatisplus.generator.ver>3.5.2</mybatisplus.generator.ver>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -158,7 +159,20 @@
 			<artifactId>problem-spring-web-starter</artifactId>
 			<version>${problem.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus-generator</artifactId>
+			<version>${mybatisplus.generator.ver}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+		</dependency>
 	</dependencies>
-
 
 </project>

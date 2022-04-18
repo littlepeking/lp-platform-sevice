@@ -1,11 +1,9 @@
-package com.enhantec.security.common.services;
+package com.enhantec.security.common.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.enhantec.security.common.mappers.EHRoleMapper;
-import com.enhantec.security.common.models.EHRole;
+import com.enhantec.security.common.mapper.EHRoleMapper;
+import com.enhantec.security.common.model.EHRole;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

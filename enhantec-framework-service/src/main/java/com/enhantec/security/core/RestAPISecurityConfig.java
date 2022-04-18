@@ -1,8 +1,8 @@
 package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.common.services.EHUserDetailsService;
-import com.enhantec.security.common.services.RoleHierarchyService;
+import com.enhantec.security.common.service.EHUserDetailsService;
+import com.enhantec.security.common.service.RoleHierarchyService;
 import com.enhantec.security.core.enums.AuthType;
 import com.enhantec.security.core.jwt.JWTFilter;
 import com.enhantec.security.core.jwt.JWTTokenProvider;

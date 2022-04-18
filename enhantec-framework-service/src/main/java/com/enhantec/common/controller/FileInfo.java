@@ -1,4 +1,4 @@
-package com.enhantec.common.controllers;
+package com.enhantec.common.controller;
 
 import lombok.Data;
 

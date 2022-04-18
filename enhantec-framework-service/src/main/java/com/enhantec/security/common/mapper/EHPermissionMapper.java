@@ -1,8 +1,7 @@
-package com.enhantec.security.common.mappers;
+package com.enhantec.security.common.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.enhantec.security.common.models.EHPermission;
-import com.enhantec.security.common.models.EHRole;
+import com.enhantec.security.common.model.EHPermission;
 import org.springframework.stereotype.Repository;
 
 @Repository

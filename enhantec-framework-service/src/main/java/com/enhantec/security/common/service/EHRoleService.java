@@ -1,25 +1,19 @@
-package com.enhantec.security.common.services;
+package com.enhantec.security.common.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
-import com.enhantec.security.common.mappers.EHUserMapper;
-import com.enhantec.security.common.mappers.EHUserRoleMapper;
-import com.enhantec.security.common.models.EHRole;
-import com.enhantec.security.common.mappers.EHRoleMapper;
-import com.enhantec.security.common.models.EHUser;
-import com.enhantec.security.common.models.EHUserRole;
-import com.enhantec.security.core.annotation.ReloadRoleHierarchy;
+import com.enhantec.security.common.mapper.EHUserMapper;
+import com.enhantec.security.common.mapper.EHUserRoleMapper;
+import com.enhantec.security.common.model.EHRole;
+import com.enhantec.security.common.mapper.EHRoleMapper;
+import com.enhantec.security.common.model.EHUser;
+import com.enhantec.security.common.model.EHUserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.nio.file.Watchable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,9 +76,9 @@ public class EHRoleService extends ServiceImpl<EHRoleMapper, EHRole> {
 
     public EHUser assignRolesToUser(String userId, List<String> roleNames) {
 
-        boolean isUserExists = userMapper.exists(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
+        EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
 
-        if(!isUserExists) throw new EHApplicationException("user id is not exist.");
+        if(user==null) throw new EHApplicationException("user id is not exist.");
 
         if (roleNames!=null && roleNames.size() > 0) {
 
@@ -100,11 +94,11 @@ public class EHRoleService extends ServiceImpl<EHRoleMapper, EHRole> {
 
                 Optional.ofNullable(role).ifPresentOrElse(
                         (r) -> {
-                            boolean isExist = userRoleMapper.exists(Wrappers.lambdaQuery(EHUserRole.class)
+                            EHUserRole userRole = userRoleMapper.selectOne(Wrappers.lambdaQuery(EHUserRole.class)
                                     .eq(EHUserRole::getUserId, userId)
                                     .eq(EHUserRole::getRoleName, storedRoleName));
 
-                            if (!isExist) {
+                            if (userRole == null) {
                                 userRoleMapper.insert(EHUserRole.builder().userId(userId).roleName(storedRoleName).build()
                                 );
                             }
@@ -114,8 +108,6 @@ public class EHRoleService extends ServiceImpl<EHRoleMapper, EHRole> {
             });
 
         }
-
-        EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
 
         val roleList = findByUserId(userId);
 

@@ -1,4 +1,4 @@
-package com.enhantec.security.common.models;
+package com.enhantec.security.common.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.ldap.odm.annotations.Id;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.validation.constraints.NotNull;

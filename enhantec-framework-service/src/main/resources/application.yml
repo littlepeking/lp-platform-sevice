@@ -40,7 +40,7 @@ enhantec:
 #        width: 100
 #        url: /user/*  #test validationCode filter by urls
 server:
-  port: ${SERVER_PORT:8060}
+  port: ${SERVER_PORT:8061}
 logging:
   level:
     org.springframework.security: DEBUG
@@ -52,5 +52,7 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: assign_id
+#  mapper-locations: classpath*:com/enhantec/**/mapper/xml/*Mapper.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.enhantec.security.common.model,com.enhantec.security.common.testCodeGenerate.model

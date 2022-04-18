@@ -1,18 +1,16 @@
-package com.enhantec.security.common.services;
+package com.enhantec.security.common.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
-import com.enhantec.security.common.mappers.*;
-import com.enhantec.security.common.models.*;
+import com.enhantec.security.common.mapper.*;
+import com.enhantec.security.common.model.*;
 import com.enhantec.security.core.annotation.ReloadRoleHierarchy;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -68,9 +66,9 @@ public class EHPermissionService extends ServiceImpl<EHPermissionMapper, EHPermi
     @ReloadRoleHierarchy
     public EHRole assignPermToRole(String roleName, List<String> permissions) {
 
-        boolean isRoleExists = roleMapper.exists(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, roleName));
+        EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, roleName));
 
-        if(!isRoleExists) throw new EHApplicationException("role name "+ roleName +" is not exist.");
+        if(role==null) throw new EHApplicationException("role name "+ roleName +" is not exist.");
 
         if (permissions!=null && permissions.size() > 0) {
 
@@ -86,11 +84,11 @@ public class EHPermissionService extends ServiceImpl<EHPermissionMapper, EHPermi
 
                 Optional.ofNullable(permission).ifPresent(
                         (p) -> {
-                            boolean isExist = rolePermissionMapper.exists(Wrappers.lambdaQuery(EHRolePermission.class)
+                            EHRolePermission rolePermission = rolePermissionMapper.selectOne(Wrappers.lambdaQuery(EHRolePermission.class)
                                     .eq(EHRolePermission::getRoleName, roleName)
                                     .eq(EHRolePermission::getAuthority, storedPermName));
 
-                            if (!isExist) {
+                            if (rolePermission == null) {
                                 rolePermissionMapper.insert(EHRolePermission.builder().roleName(roleName).authority(storedPermName).build()
                                 );
                             }
@@ -99,8 +97,6 @@ public class EHPermissionService extends ServiceImpl<EHPermissionMapper, EHPermi
             });
 
         }
-
-        EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, roleName));
 
         val permissionList = findByRole(roleName);
 

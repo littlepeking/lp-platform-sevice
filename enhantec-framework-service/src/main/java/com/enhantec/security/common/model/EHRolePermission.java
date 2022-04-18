@@ -1,4 +1,4 @@
-package com.enhantec.security.common.models;
+package com.enhantec.security.common.model;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;

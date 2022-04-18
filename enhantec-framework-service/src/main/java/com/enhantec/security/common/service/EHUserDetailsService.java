@@ -1,26 +1,16 @@
-package com.enhantec.security.common.services;
+package com.enhantec.security.common.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.enhantec.security.common.mappers.EHRoleMapper;
-import com.enhantec.security.common.mappers.EHUserMapper;
-import com.enhantec.security.common.models.EHRole;
-import com.enhantec.security.common.models.EHUser;
-import com.enhantec.security.core.enums.AuthType;
-import lombok.RequiredArgsConstructor;
+import com.enhantec.security.common.model.EHUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Authenticate a user from the database.

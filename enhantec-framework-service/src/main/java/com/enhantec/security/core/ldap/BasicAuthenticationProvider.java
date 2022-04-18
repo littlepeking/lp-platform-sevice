@@ -1,6 +1,6 @@
 package com.enhantec.security.core.ldap;
-import com.enhantec.security.common.models.EHUser;
-import com.enhantec.security.common.services.EHUserService;
+import com.enhantec.security.common.model.EHUser;
+import com.enhantec.security.common.service.EHUserService;
 import com.enhantec.security.core.enums.AuthType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;

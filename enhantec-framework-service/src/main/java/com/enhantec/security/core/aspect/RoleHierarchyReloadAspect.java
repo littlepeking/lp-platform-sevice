@@ -1,6 +1,6 @@
 package com.enhantec.security.core.aspect;
 
-import com.enhantec.security.common.services.RoleHierarchyService;
+import com.enhantec.security.common.service.RoleHierarchyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

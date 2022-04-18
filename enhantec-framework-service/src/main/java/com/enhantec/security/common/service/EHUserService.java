@@ -1,10 +1,10 @@
-package com.enhantec.security.common.services;
+package com.enhantec.security.common.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
-import com.enhantec.security.common.mappers.EHUserMapper;
-import com.enhantec.security.common.models.EHUser;
+import com.enhantec.security.common.mapper.EHUserMapper;
+import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.core.enums.AuthType;
 import com.enhantec.security.core.ldap.LDAPUser;
 import com.enhantec.security.core.ldap.LdapUserRepository;
@@ -68,9 +68,9 @@ public class EHUserService extends ServiceImpl<EHUserMapper, EHUser> {
 
     public void checkIfUserExists(String username){
 
-        boolean userExists = getBaseMapper().exists(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
+        EHUser user = getBaseMapper().selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
 
-        if(!userExists) throw new UsernameNotFoundException("username "+username+" is not exists.");
+        if(user == null) throw new UsernameNotFoundException("username "+username+" is not exists.");
 
     }
 }

@@ -1,12 +1,10 @@
 package com.enhantec.security.common;
 
-import com.enhantec.security.common.services.RoleHierarchyService;
+import com.enhantec.security.common.service.RoleHierarchyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.context.annotation.Bean;
-import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;

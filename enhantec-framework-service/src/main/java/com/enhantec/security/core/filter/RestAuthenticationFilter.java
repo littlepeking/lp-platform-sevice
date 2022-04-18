@@ -1,10 +1,6 @@
 package com.enhantec.security.core.filter;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.enhantec.security.common.models.EHUser;
-import com.enhantec.security.common.services.EHUserDetailsService;
-import com.enhantec.security.common.services.EHUserService;
-import com.enhantec.security.core.enums.AuthType;
+import com.enhantec.security.common.service.EHUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.val;

@@ -1,9 +1,9 @@
 package com.enhantec.security.core.ldap;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.common.models.EHUser;
-import com.enhantec.security.common.services.EHUserDetailsService;
-import com.enhantec.security.common.services.EHUserService;
+import com.enhantec.security.common.model.EHUser;
+import com.enhantec.security.common.service.EHUserDetailsService;
+import com.enhantec.security.common.service.EHUserService;
 import com.enhantec.security.core.enums.AuthType;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Locale;
 
 @RequiredArgsConstructor
 @Component

@@ -1,16 +1,12 @@
-package com.enhantec.security.common.models;
+package com.enhantec.security.common.model;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
-import javax.management.relation.Role;
 import javax.validation.constraints.NotNull;
-import java.io.PrintStream;
 import java.io.Serializable;
-import java.util.Set;
 
 @With
 @Builder

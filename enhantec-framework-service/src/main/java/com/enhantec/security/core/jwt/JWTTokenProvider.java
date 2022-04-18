@@ -1,7 +1,6 @@
 package com.enhantec.security.core.jwt;
 
 import com.enhantec.config.properties.ApplicationProperties;
-import com.enhantec.security.common.services.EHUserDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

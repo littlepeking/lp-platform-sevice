@@ -1,17 +1,13 @@
 package com.enhantec.security.core;
 
-import com.enhantec.security.common.services.RoleHierarchyService;
+import com.enhantec.security.common.service.RoleHierarchyService;
 import com.enhantec.security.core.aspect.RoleHierarchyReloadAspect;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
-
-import javax.annotation.PostConstruct;
 
 @RequiredArgsConstructor
 @EnableAspectJAutoProxy
