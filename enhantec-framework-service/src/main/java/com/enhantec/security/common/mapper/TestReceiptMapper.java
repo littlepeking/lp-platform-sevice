@@ -1,9 +1,15 @@
 package com.enhantec.security.common.mapper;
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
 import com.enhantec.security.common.model.TestReceipt;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.Map;
 
 /**
 * @author johnw
@@ -15,6 +21,9 @@ public interface TestReceiptMapper extends BaseMapper<TestReceipt> {
 
 
     List<TestReceipt> selectAllById(@Param("id") String id);
+
+    @MapKey("id")
+    Page<Map<String,Object>> selectByReceiptKey(Page<Map<String,Object>> page, QueryWrapper ew);
 
 }
 

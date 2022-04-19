@@ -1,9 +1,12 @@
 package com.enhantec.security.common.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.security.common.model.TestReceipt;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author johnw
@@ -12,6 +15,8 @@ import java.util.List;
 */
 public interface TestReceiptService extends IService<TestReceipt> {
 
-    public List<TestReceipt> getReceiptById(String id);
+    public List<TestReceipt> getReceiptByReceiptId(String id);
+
+    public Page<Map<String,Object>> getReceiptPageData(Page<Map<String,Object>> page, QueryWrapper qw);
 
 }

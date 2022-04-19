@@ -1,5 +1,7 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.security.common.model.TestReceipt;
 import com.enhantec.security.common.service.TestReceiptService;
@@ -7,6 +9,7 @@ import com.enhantec.security.common.mapper.TestReceiptMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author johnw
@@ -18,10 +21,16 @@ public class TestReceiptServiceImpl extends ServiceImpl<TestReceiptMapper, TestR
     implements TestReceiptService{
 
 
-    public List<TestReceipt> getReceiptById(String id){
+    public List<TestReceipt> getReceiptByReceiptId(String id){
 
        return getBaseMapper().selectAllById(id);
     }
+
+    public Page<Map<String,Object>> getReceiptPageData(Page<Map<String,Object>> page, QueryWrapper qw){
+
+        return getBaseMapper().selectByReceiptKey(page, qw);
+    }
+
 
 }
 

@@ -1,25 +1,23 @@
 package com.enhantec.security.common.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.enhantec.common.model.PageParams;
+import com.enhantec.common.utils.EHPaginationHelper;
 import com.enhantec.security.common.model.TestReceipt;
 import com.enhantec.security.common.service.TestReceiptService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.val;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * <p>
- *  前端控制器
- * </p>
- *
  * @author John Wang
  * @since 2022-04-18
  */
 @RestController
-@RequestMapping("/system/test-receipt")
+@RequestMapping("/api/test-receipt")
 @RequiredArgsConstructor
 public class TestReceiptController {
 
@@ -28,9 +26,25 @@ public class TestReceiptController {
     @GetMapping("/search/{id}")
     public List<TestReceipt> getTestReceipt(@PathVariable String id){
 
-        List<TestReceipt>  res = testReceiptService.getReceiptById(id);
+        List<TestReceipt>  res = testReceiptService.getReceiptByReceiptId(id);
         return res;
 
     }
+
+    @PostMapping("/queryByPage")
+    public Page<Map<String,Object>> getTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
+
+        Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
+
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+
+        Page<Map<String,Object>> res = testReceiptService.getReceiptPageData(pageInfo,queryWrapper);
+
+        //DataFormatHelper.formatPageData(res);
+
+        return res;
+
+    }
+
 
 }

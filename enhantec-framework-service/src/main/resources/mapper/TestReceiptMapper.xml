@@ -22,4 +22,10 @@
         where
         id = #{id,jdbcType=VARCHAR}
     </select>
+    <select id="selectByReceiptKey" resultType="java.util.Map">
+        select
+        <include refid="Base_Column_List"/>
+        from test_receipt
+        ${ew.customSqlSegment}
+    </select>
 </mapper>

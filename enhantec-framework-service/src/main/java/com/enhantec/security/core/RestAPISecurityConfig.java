@@ -129,7 +129,6 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
         http.
                 //httpBasic(Customizer.withDefaults()).  //allow auth from http header
                 requestMatchers(rm-> rm.antMatchers(
-
                         authUrl,swaggerUrl,
                         "/api/**",
                         "/swagger-resources/**",
@@ -138,7 +137,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
                         ))
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req->req.antMatchers(authUrl,swaggerUrl,
-                        "/swagger-resources/**", "/v3/api-docs", "/code/image").permitAll().anyRequest().authenticated())
+                        "/swagger-resources/**", "/v3/api-docs", "/code/image","/api/test-receipt/**").permitAll().anyRequest().authenticated())
                 //REPLACE UsernamePasswordAuthenticationFilter WITH RestAuthenticationFilter
                 .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(getRestAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class)
@@ -250,7 +249,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
     CorsConfigurationSource configurationSource(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         if(environment.acceptsProfiles(Profiles.of("dev"))) {
-            corsConfiguration.addAllowedOrigin("http://localhost:4001"); // ui service -dev
+            //corsConfiguration.addAllowedOrigin("http://localhost:*"); // ui service -dev
+            corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
         }else {
             corsConfiguration.addAllowedOrigin("http://localhost_prd:8080");// ui service -prd
         }
