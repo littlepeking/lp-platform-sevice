@@ -7,9 +7,7 @@ import com.enhantec.common.model.PageParams;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -23,14 +21,44 @@ public class EHPaginationHelper {
 
     public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams){
 
-        val queryWrapper  =  Wrappers.query();
+        val queryWrapper = Wrappers.query();
 
         if( pageParams.getFilters()!=null) {
-            pageParams.getFilters().entrySet().stream().forEach(e ->
+            pageParams.getFilters().entrySet().stream().forEach(f ->
             {
-                if(e.getValue()!=null && !StringUtils.isBlank(e.getValue().toString())) {
+                if(f.getValue()!=null && !StringUtils.isBlank(f.getValue().toString())) {
                     //removes all whitespaces and non-visible characters (e.g., tab, \n) in key
-                    queryWrapper.eq(e.getKey().replaceAll("\\s+", ""), e.getValue());
+
+                    HashSet<String>  singleColumnValues = new HashSet<>();
+                    String columnName = formatKey(f.getKey());
+
+                    if(f.getValue() instanceof String) {
+                        //deal with scenario => multiSelect filter allow empty value
+                        boolean searchEmptyValue = ((String) f.getValue()).contains("[__EMPTY__]");
+
+                        queryWrapper.and(wq -> {
+
+                                    singleColumnValues.addAll(Arrays.stream(f.getValue().toString().split(",")).
+                                            map(e -> e.replace("[__EMPTY__]", ""))
+                                            .collect(Collectors.toList()));
+
+                                    if (singleColumnValues.size() == 1) {
+                                        wq.eq(columnName, singleColumnValues.iterator().next());
+                                    } else {
+                                        wq.in(columnName, singleColumnValues);
+                                    }
+
+                                    if (searchEmptyValue)
+                                        wq.or().isNull(columnName);
+                                }
+                        );
+                    } else {
+                         queryWrapper.eq(columnName, f.getValue());
+                    }
+
+                    val subQw = Wrappers.query();
+
+
                 }
             });
         }
@@ -39,7 +67,7 @@ public class EHPaginationHelper {
             {
                 if(e.getValue()!=null && !StringUtils.isBlank(e.getValue().toString())) {
                     //removes all whitespaces and non-visible characters (e.g., tab, \n) in key
-                    queryWrapper.eq(e.getKey().replaceAll("\\s+", ""), e.getValue());
+                    queryWrapper.eq(formatKey(e.getKey()), e.getValue());
                 }
             });
         }
@@ -47,14 +75,20 @@ public class EHPaginationHelper {
         if( pageParams.getOrderBy()!=null) {
             pageParams.getOrderBy().entrySet().stream().forEach(e ->
             {
-                //removes all whitespaces and non-visible characters (e.g., tab, \n) in key
                 queryWrapper.orderBy(true,
                         "asc".equalsIgnoreCase(e.getValue()),
-                        e.getKey().replaceAll("\\s+", ""));
+                        formatKey(e.getKey()));
             });
         }
 
         return queryWrapper;
+    }
+
+    private static String formatKey(String key){
+
+        String trimmedKey = key.replaceAll("\\s+","");
+
+        return  camelToSnake(trimmedKey);
     }
 
     public static void formatPageData(Page<Map<String,Object>> page){
@@ -79,13 +113,13 @@ public class EHPaginationHelper {
         while (it.hasNext()) {
             Map.Entry<String, Object> entry = it.next();
             String key = entry.getKey();
-            String newKey = toFormatCol(key);
+            String newKey = SnakeToCamel(key);
             newMap.put(newKey, entry.getValue());
         }
         return newMap;
     }
 
-    private static String toFormatCol(String colName) {
+    private static String SnakeToCamel(String colName) {
         StringBuilder sb = new StringBuilder();
         String[] str = colName.toLowerCase().split("_");
         int i = 0;
@@ -104,6 +138,44 @@ public class EHPaginationHelper {
             }
         }
         return sb.toString();
+    }
+
+    public static String camelToSnake(String str)
+    {
+
+        // Empty String
+        String result = "";
+
+        // Append first character(in lower case)
+        // to result string
+        char c = str.charAt(0);
+        result = result + Character.toLowerCase(c);
+
+        // Traverse the string from
+        // ist index to last index
+        for (int i = 1; i < str.length(); i++) {
+
+            char ch = str.charAt(i);
+
+            // Check if the character is upper case
+            // then append '_' and such character
+            // (in lower case) to result string
+            if (Character.isUpperCase(ch)) {
+                result = result + '_';
+                result
+                        = result
+                        + Character.toLowerCase(ch);
+            }
+
+            // If the character is lower case then
+            // add such character into result string
+            else {
+                result = result + ch;
+            }
+        }
+
+        // return the result
+        return result;
     }
 
 }

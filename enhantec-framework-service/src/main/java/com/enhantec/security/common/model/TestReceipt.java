@@ -36,6 +36,11 @@ public class TestReceipt implements Serializable {
      */
     private BigDecimal quantity;
 
+    /**
+     * 
+     */
+    private String city;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }
