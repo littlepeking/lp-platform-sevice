@@ -10,11 +10,12 @@
             <result property="whseId" column="whse_id" jdbcType="VARCHAR"/>
             <result property="quantity" column="quantity" jdbcType="DECIMAL"/>
             <result property="city" column="city" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,receipt_key,whse_id,
-        quantity,city
+        quantity,city,create_time
     </sql>
     <select id="selectAllById" resultMap="BaseResultMap">
         select
