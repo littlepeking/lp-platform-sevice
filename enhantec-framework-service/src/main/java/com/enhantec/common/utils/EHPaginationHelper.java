@@ -35,7 +35,7 @@ public class EHPaginationHelper {
                     HashSet<String> singleColumnValues = new HashSet<>();
                     String columnName = formatKey(f.getColumnName());
 
-                    if ("String".equals(f.getType())) {
+                    if ("string".equals(f.getType())) {
                         //deal with scenario => multiSelect filter allow empty value
                         boolean searchEmptyValue = ((String) f.getValue()).contains("[__EMPTY__]");
 
