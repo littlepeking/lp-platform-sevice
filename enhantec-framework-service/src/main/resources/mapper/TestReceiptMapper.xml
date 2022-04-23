@@ -11,12 +11,15 @@
             <result property="quantity" column="quantity" jdbcType="DECIMAL"/>
             <result property="city" column="city" jdbcType="VARCHAR"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="enabled" column="enabled" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,receipt_key,whse_id,
-        quantity,city,create_time
+        quantity,city,create_time,
+        enabled
     </sql>
+
     <select id="selectAllById" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
