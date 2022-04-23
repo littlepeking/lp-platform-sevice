@@ -7,6 +7,9 @@ import com.enhantec.common.model.PageParams;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,24 +18,24 @@ public class EHPaginationHelper {
 
 
     public static Page<Map<String, Object>> buildPageInfo(PageParams pageParams) {
-        Page<Map<String,Object>> mapPage = new Page<>(pageParams.getPageNum(), pageParams.getPageSize());
+        Page<Map<String, Object>> mapPage = new Page<>(pageParams.getPageNum(), pageParams.getPageSize());
         return mapPage;
     }
 
-    public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams){
+    public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams) {
 
         val queryWrapper = Wrappers.query();
 
-        if( pageParams.getFilters()!=null) {
-            pageParams.getFilters().entrySet().stream().forEach(f ->
+        if (pageParams.getFilters() != null) {
+            pageParams.getFilters().stream().forEach(f ->
             {
-                if(f.getValue()!=null && !StringUtils.isBlank(f.getValue().toString())) {
+                if (f.getValue() != null && !StringUtils.isBlank(f.getValue().toString())) {
                     //removes all whitespaces and non-visible characters (e.g., tab, \n) in key
 
-                    HashSet<String>  singleColumnValues = new HashSet<>();
-                    String columnName = formatKey(f.getKey());
+                    HashSet<String> singleColumnValues = new HashSet<>();
+                    String columnName = formatKey(f.getColumnName());
 
-                    if(f.getValue() instanceof String) {
+                    if ("String".equals(f.getType())) {
                         //deal with scenario => multiSelect filter allow empty value
                         boolean searchEmptyValue = ((String) f.getValue()).contains("[__EMPTY__]");
 
@@ -43,7 +46,8 @@ public class EHPaginationHelper {
                                             .collect(Collectors.toList()));
 
                                     if (singleColumnValues.size() == 1) {
-                                        wq.eq(columnName, singleColumnValues.iterator().next());
+                                        //wq.likeRight(columnName, singleColumnValues.iterator().next());
+                                        wq.apply(columnName + " like {0}", singleColumnValues.iterator().next());
                                     } else {
                                         wq.in(columnName, singleColumnValues);
                                     }
@@ -52,8 +56,15 @@ public class EHPaginationHelper {
                                         wq.or().isNull(columnName);
                                 }
                         );
+                    } else if ("date".equals(f.getType())) {
+                        LocalDateTime dateTime = EHDateTimeHelper.timeStamp2LocalDateTime(f.getValue());
+                        queryWrapper.ge(columnName, dateTime);
+                        Duration duration = Duration.ofHours(23);
+                        duration = duration.plusMinutes(59).plusSeconds(59);
+                        //end of the day converted from the given timezone to the GMT timezone
+                        queryWrapper.lt(columnName, dateTime.plus(duration));
                     } else {
-                         queryWrapper.eq(columnName, f.getValue());
+                        queryWrapper.eq(columnName, f.getValue());
                     }
 
                     val subQw = Wrappers.query();
@@ -62,17 +73,17 @@ public class EHPaginationHelper {
                 }
             });
         }
-        if( pageParams.getExtraParams()!=null) {
+        if (pageParams.getExtraParams() != null) {
             pageParams.getExtraParams().entrySet().stream().forEach(e ->
             {
-                if(e.getValue()!=null && !StringUtils.isBlank(e.getValue().toString())) {
+                if (e.getValue() != null && !StringUtils.isBlank(e.getValue().toString())) {
                     //removes all whitespaces and non-visible characters (e.g., tab, \n) in key
                     queryWrapper.eq(formatKey(e.getKey()), e.getValue());
                 }
             });
         }
 
-        if( pageParams.getOrderBy()!=null) {
+        if (pageParams.getOrderBy() != null) {
             pageParams.getOrderBy().entrySet().stream().forEach(e ->
             {
                 queryWrapper.orderBy(true,
@@ -84,21 +95,20 @@ public class EHPaginationHelper {
         return queryWrapper;
     }
 
-    private static String formatKey(String key){
+    private static String formatKey(String key) {
 
-        String trimmedKey = key.replaceAll("\\s+","");
+        String trimmedKey = key.replaceAll("\\s+", "");
 
-        return  camelToSnake(trimmedKey);
+        return camelToSnake(trimmedKey);
     }
 
-    public static void formatPageData(Page<Map<String,Object>> page){
+    public static void formatPageData(Page<Map<String, Object>> page) {
 
-      var formattedRecords = page.getRecords().stream().map(r->camelCaseMap(r)).collect(Collectors.toList());
+        var formattedRecords = page.getRecords().stream().map(r -> camelCaseMap(r)).collect(Collectors.toList());
 
-      page.setRecords(formattedRecords);
+        page.setRecords(formattedRecords);
 
     }
-
 
 
     /**
@@ -123,7 +133,7 @@ public class EHPaginationHelper {
         StringBuilder sb = new StringBuilder();
         String[] str = colName.toLowerCase().split("_");
         int i = 0;
-        for (String s: str) {
+        for (String s : str) {
             if (s.length() == 1) {
                 s = s.toUpperCase();
             }
@@ -132,7 +142,7 @@ public class EHPaginationHelper {
                 sb.append(s);
                 continue;
             }
-            if (s.length()> 0) {
+            if (s.length() > 0) {
                 sb.append(s.substring(0, 1).toUpperCase());
                 sb.append(s.substring(1));
             }
@@ -140,8 +150,7 @@ public class EHPaginationHelper {
         return sb.toString();
     }
 
-    public static String camelToSnake(String str)
-    {
+    public static String camelToSnake(String str) {
 
         // Empty String
         String result = "";

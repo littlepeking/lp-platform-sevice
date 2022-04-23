@@ -1,5 +1,6 @@
 package com.enhantec.config;
 
+import com.enhantec.common.utils.EHDateTimeHelper;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -51,12 +52,7 @@ public class LocalDateTimeSerializerConfig {
         public LocalDateTime deserialize(JsonParser p, DeserializationContext deserializationContext)
                 throws IOException {
             long timestamp = p.getValueAsLong();
-            if (timestamp > 0) {
-                return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
-                //return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
-            } else {
-                return null;
-            }
+            return EHDateTimeHelper.timeStamp2LocalDateTime(timestamp);
         }
     }
 
@@ -83,8 +79,8 @@ public class LocalDateTimeSerializerConfig {
                 throws IOException {
             long timestamp = p.getValueAsLong();
             if (timestamp > 0) {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
-                //return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
+                //return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
             } else {
                 return null;
             }
@@ -115,8 +111,8 @@ public class LocalDateTimeSerializerConfig {
                 throws IOException {
             long timestamp = p.getValueAsLong();
             if (timestamp > 0) {
-                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
-                //return OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
+                //return OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
             } else {
                 return null;
             }
