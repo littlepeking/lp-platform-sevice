@@ -7,8 +7,14 @@ import java.util.List;
 
 @Data
 public class PageParams {
-    int pageNum = 1;
+
+    public int getPageNum(){
+        return pageIndex+1;
+    }
+
     int pageSize = 25;
+    int pageIndex;
+
     List<EHDataGridFilterInfo> filters;
     HashMap<String,Object> extraParams;
     HashMap<String,String> orderBy;
