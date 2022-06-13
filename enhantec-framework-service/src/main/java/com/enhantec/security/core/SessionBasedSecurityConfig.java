@@ -59,7 +59,7 @@ public class SessionBasedSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 //表单登录
-                .requestMatchers().antMatchers("/login","/web/**")
+                .requestMatchers().antMatchers(loginUrl,"/web/**")
                 .and()
                 .authorizeHttpRequests(req->req.antMatchers(loginUrl, "/code/image")
                         .permitAll().anyRequest().authenticated())

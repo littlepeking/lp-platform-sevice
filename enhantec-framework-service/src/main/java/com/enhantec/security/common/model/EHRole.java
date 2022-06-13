@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.validation.constraints.NotNull;
@@ -18,12 +15,20 @@ import java.util.Collection;
 
 @Data
 @Builder
+@With
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("EH_ROLE")
 public class EHRole implements GrantedAuthority, Serializable {
 
-    @TableId(type = IdType.INPUT)
+
+    @TableId
+    @NotNull
+    private String id;
+
+    @NotNull
+    private String orgId;// ONLY system tables has orgId as all biz transaction table rely on schema name to difference org.
+
     @NotNull
     private String roleName;
 
@@ -33,7 +38,7 @@ public class EHRole implements GrantedAuthority, Serializable {
     @JsonIgnore
     @Override
     public String getAuthority() {
-        return roleName;
+        return id;
     }
 
 

@@ -137,7 +137,9 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
                         ))
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req->req.antMatchers(authUrl,swaggerUrl,
-                        "/swagger-resources/**", "/v3/api-docs", "/code/image","/api/test-receipt/**").permitAll().anyRequest().authenticated())
+                        "/swagger-resources/**", "/v3/api-docs", "/code/image"
+                        // ,"/api/test-receipt/**"
+                ).permitAll().anyRequest().authenticated())
                 //REPLACE UsernamePasswordAuthenticationFilter WITH RestAuthenticationFilter
                 .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(getRestAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class)
@@ -258,6 +260,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
         corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","OPTIONS"));
         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
         corsConfiguration.addExposedHeader("X-Authenticate");//RESPONSE ADD HEADER X-Authenticate TO ALLOW 2 FACTOR AUTH, NOT USE NOW.
+        corsConfiguration.addExposedHeader("authorization");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",corsConfiguration);
         return source;

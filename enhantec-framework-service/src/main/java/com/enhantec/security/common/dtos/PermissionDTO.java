@@ -8,8 +8,12 @@ import javax.validation.constraints.NotNull;
 public class PermissionDTO {
 
     @NotNull
-    String permissionName;
+    String orgId;
+
     @NotNull
-    String displayName;
+    String authority;
+
+    @NotNull
+    String description;
 
 }

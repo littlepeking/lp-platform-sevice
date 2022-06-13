@@ -16,5 +16,5 @@ public class UserRolesDTO implements Serializable {
     @NotNull
     private String userId;
 
-    private List<String> roles;
+    private List<String> roleIds;
 }

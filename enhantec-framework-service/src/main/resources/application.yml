@@ -56,4 +56,5 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
+    #Mybatis自动扫描到自定义的POJO，以用于MAPPER XML文件中的resultType
   type-aliases-package: com.enhantec.security.common.model,com.enhantec.security.common.testCodeGenerate.model

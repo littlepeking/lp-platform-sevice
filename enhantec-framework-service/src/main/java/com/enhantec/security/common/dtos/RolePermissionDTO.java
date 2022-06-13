@@ -14,7 +14,7 @@ import java.util.List;
 public class RolePermissionDTO implements Serializable {
 
     @NotNull
-    private String roleName;
+    private String roleId;
 
-    private List<String> permissions;
+    private List<String> permissionIds;
 }

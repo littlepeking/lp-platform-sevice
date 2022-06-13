@@ -21,8 +21,8 @@ public class RoleHierarchyService {
 
             List<EHRole> roles = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class));
 
-        return roles.stream().flatMap(role -> permissionService.findByRole(role.getRoleName()).stream().map(
-                ehPermission -> role.getRoleName() + " > " + ehPermission.getAuthority() )).collect(Collectors.joining(
+        return roles.stream().flatMap(role -> permissionService.findByRoleId(role.getId()).stream().map(
+                ehPermission -> role.getAuthority() + " > " + ehPermission.getAuthority() )).collect(Collectors.joining(
                 "\n")
         );
 

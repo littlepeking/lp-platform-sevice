@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Data
@@ -30,24 +31,41 @@ public class EHUser implements UserDetails, Serializable {
 
     private String domainUsername; //ONLY used in AD
 
+    private String firstName;
+
+    private String lastName;
 
     @JsonIgnore
     private String password;
 
     private boolean enabled;
 
-    @TableField(exist = false)
-
-    @Builder.Default
-    private boolean accountNonExpired  = true;
-    @TableField(exist = false)
-    @Builder.Default
-    private boolean accountNonLocked = true;
-    @TableField(exist = false)
-    @Builder.Default
-    private boolean credentialsNonExpired = true;
+    private boolean accountLocked;
+    private boolean credentialsExpired;
 
     @TableField(exist = false)
     private Collection<? extends GrantedAuthority> authorities;
 
+    private LocalDateTime addDate;
+
+    private String addWho;
+
+    private LocalDateTime editDate;
+
+    private String editWho;
+
+    @JsonIgnore
+    public boolean isAccountNonLocked(){
+        return !accountLocked;
+    }
+
+    @JsonIgnore
+    public boolean isAccountNonExpired(){
+        return true;
+    }
+
+    @JsonIgnore
+    public boolean isCredentialsNonExpired(){
+        return !credentialsExpired;
+    }
 }

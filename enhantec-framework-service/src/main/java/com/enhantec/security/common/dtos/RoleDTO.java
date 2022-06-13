@@ -8,7 +8,11 @@ import javax.validation.constraints.NotNull;
 public class RoleDTO {
 
     @NotNull
-    String roleName;
+    String orgId;
+
+    @NotNull
+    String name;
+
     @NotNull
     String displayName;
 

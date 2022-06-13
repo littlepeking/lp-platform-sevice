@@ -3,6 +3,7 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.enhantec.security.common.model.EHUser;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,7 +19,6 @@ import java.util.Map;
 * @Entity com.enhantec.security.common.model.TestReceipt
 */
 public interface TestReceiptMapper extends BaseMapper<TestReceipt> {
-
 
     List<TestReceipt> selectAllById(@Param("id") String id);
 

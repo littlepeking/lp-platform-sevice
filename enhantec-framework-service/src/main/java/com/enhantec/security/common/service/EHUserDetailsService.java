@@ -2,6 +2,7 @@ package com.enhantec.security.common.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.security.common.model.EHUser;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,28 +10,23 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 /**
  * Authenticate a user from the database.
  */
-@Component
+@Service
+@RequiredArgsConstructor
 public class EHUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    EHUserService userService;
+    private final EHUserService userService;
 
-    @Autowired
-    EHRoleService roleService;
+    private final EHRoleService roleService;
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    final PasswordEncoder passwordEncoder;
-
-    public EHUserDetailsService(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public EHUser loadUserByUsername(final String userName) {

@@ -13,7 +13,7 @@ import lombok.Data;
 public class EHRolePermission {
     @TableId
     String id;
-    String roleName;
-    String authority;
+    String roleId;
+    String permissionId;
 
 }
