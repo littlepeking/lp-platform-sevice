@@ -1,6 +1,8 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.security.common.dtos.PermissionDTO;
@@ -16,10 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,6 +114,50 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
 
 
     }
+
+
+
+    @ReloadRoleHierarchy
+    public EHRole revokePermFromRole(String roleId, List<String> permissionIds) {
+
+        EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getId, roleId));
+
+        if(role==null) throw new EHApplicationException("role id "+ roleId +" is not exist.");
+
+        if (permissionIds!=null && permissionIds.size() > 0) {
+
+            permissionIds.forEach(permId -> {
+
+                rolePermissionMapper.delete((Wrappers.lambdaQuery(EHRolePermission.class)
+                        .eq(EHRolePermission::getRoleId, roleId)
+                        .eq(EHRolePermission::getPermissionId,permId)));
+
+            });
+
+        }
+
+        val permissionList = findByRoleId(roleId);
+
+        role.setPermissions(permissionList);
+
+        return role;
+
+
+    }
+
+
+    public Page<Map<String, Object>> getPageData(Page<Map<String, Object>> page, QueryWrapper qw) {
+
+        return getBaseMapper().selectMapsPage(page, qw);
+
+    }
+
+    public Page<Map<String, Object>> getRolePermissionPageData(Page<Map<String, Object>> page, QueryWrapper qw) {
+
+        return getBaseMapper().queryRolePermissionPageData(page, qw);
+
+    }
+
 
 
 }

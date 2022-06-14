@@ -72,7 +72,7 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
         Set<String> roleSet = userRoleList.stream().map(EHUserRole::getRoleId).collect(Collectors.toSet());
 
         if (userRoleList.size() > 0 && roleSet.size() > 0) {
-            List<EHRole> roleList = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class).in(EHRole::getRoleName, roleSet));
+            List<EHRole> roleList = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class).in(EHRole::getId, roleSet));
             return roleList;
         } else {
             return Collections.EMPTY_LIST;
@@ -171,7 +171,13 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
 
     public Page<Map<String, Object>> getPageData(Page<Map<String, Object>> page, QueryWrapper qw) {
 
-        return getBaseMapper().queryPageData(page, qw);
+        return getBaseMapper().selectMapsPage(page, qw);
+
+    }
+
+    public Page<Map<String, Object>> getUserRolePageData(Page<Map<String, Object>> page, QueryWrapper qw) {
+
+        return getBaseMapper().queryUserRolePageData(page, qw);
 
     }
 

@@ -93,5 +93,23 @@ public class RoleController {
 
     }
 
+    @PostMapping("/queryUserRoleByPage")
+    public Page<Map<String, Object>> queryUserRoleByPage(@RequestBody PageParams pageParams) {
+
+        //todo: check if userId is current user, if not, set userId to current UserId if request user is not admin user.
+
+        Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
+
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+
+        Page<Map<String, Object>> res = ehRoleService.getUserRolePageData(pageInfo, queryWrapper);
+
+        //DataFormatHelper.formatPageData(res);
+
+        return res;
+
+    }
+
+
 
 }

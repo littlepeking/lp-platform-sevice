@@ -39,8 +39,10 @@ public interface EHRoleService extends IService<EHRole> {
 
     EHUser assignRolesToUser(String userId, List<String> roleNames);
 
-    public EHUser revokeRolesFromUser( String userId, List<String> roleIds);
+    EHUser revokeRolesFromUser( String userId, List<String> roleIds);
 
-    public Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+    Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+
+    Page<Map<String, Object>> getUserRolePageData(Page<Map<String, Object>> page, QueryWrapper qw);
 
 }

@@ -9,9 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
+@Data
 @With
 @Builder
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"roles"})

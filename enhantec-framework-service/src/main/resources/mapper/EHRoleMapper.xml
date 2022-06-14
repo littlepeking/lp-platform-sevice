@@ -6,7 +6,7 @@
 
 
     <resultMap id="BaseResultMap" type="com.enhantec.security.common.model.EHRole">
-        <id property="id" column="id" jdbcType="VARCHAR"/>
+        <id property="id" column="r.id" jdbcType="VARCHAR"/>
         <id property="roleName" column="role_name" jdbcType="VARCHAR"/>
         <result property="displayName" column="display_name" jdbcType="VARCHAR"/>
     </resultMap>
@@ -14,7 +14,8 @@
     <sql id="Base_Column_List">
         r.id, role_name,display_name
     </sql>
-    <select id="queryPageData" resultType="java.util.Map">
+
+    <select id="queryUserRolePageData" resultType="java.util.Map">
         select
         <include refid="Base_Column_List"/>
         from eh_role r

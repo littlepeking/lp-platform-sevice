@@ -15,6 +15,6 @@ import java.util.Map;
 public interface EHRoleMapper extends BaseMapper<EHRole> {
 
     @MapKey("id")
-    Page<Map<String, Object>> queryPageData(@Param("page") Page<Map<String, Object>> page, @Param("ew") QueryWrapper<EHRole> qw);
+    Page<Map<String, Object>> queryUserRolePageData(@Param("page") Page<Map<String, Object>> page, @Param("ew") QueryWrapper<EHRole> qw);
 
 }

@@ -27,12 +27,4 @@
         add_date,editDate,addWho,editWho
     </sql>
 
-
-    <select id="selectAllById" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from EH_USER
-        where
-        = #{id,jdbcType=VARCHAR}
-    </select>
 </mapper>

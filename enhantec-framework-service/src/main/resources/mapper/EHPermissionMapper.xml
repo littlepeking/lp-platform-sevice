@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.enhantec.security.common.mapper.EHPermissionMapper">
+
+    <resultMap id="BaseResultMap" type="com.enhantec.security.common.model.EHPermission">
+        <id property="id" column="id" jdbcType="VARCHAR"/>
+        <id property="orgId" column="org_id" jdbcType="VARCHAR"/>
+        <id property="authority" column="authority" jdbcType="VARCHAR"/>
+        <result property="displayName" column="display_name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        p.id,p.org_id, p.authority, p.display_name
+    </sql>
+
+    <select id="queryRolePermissionPageData" resultType="java.util.Map">
+        select
+        <include refid="Base_Column_List"/>
+        from eh_permission p
+        JOIN eh_role_permission rp ON p.id = rp.permission_id
+        ${ew.customSqlSegment}
+    </select>
+</mapper>
+
