@@ -14,6 +14,6 @@ public class PermissionDTO {
     String authority;
 
     @NotNull
-    String description;
+    String displayName;
 
 }

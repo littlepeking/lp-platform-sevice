@@ -35,7 +35,7 @@ public class UserController {
     private final EHUserDetailsService ehUserDetailsService;
 
     @GetMapping("/userInfo")
-    @PreAuthorize("hasAuthority('USER_READ')")
+    //@PreAuthorize("hasAuthority('USER_READ')")
     public Object getCurrentUser(Authentication authentication) {
         //return SecurityContextHolder.getContext().getAuthentication();
         return ehUserDetailsService.getUserInfo(authentication.getName());

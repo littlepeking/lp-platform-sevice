@@ -1,7 +1,5 @@
 package com.enhantec.security.common.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
@@ -61,7 +59,7 @@ public class RoleController {
 
     @PostMapping("/createRole")
     public EHRole createRole(@Valid @RequestBody RoleDTO roleDTO) {
-        return ehRoleService.createRole(roleDTO.getOrgId(), roleDTO.getName(), roleDTO.getDisplayName());
+        return ehRoleService.createRole(roleDTO.getOrgId(), roleDTO.getRoleName(), roleDTO.getDisplayName());
     }
 
     @PostMapping("/assignRolesToUser")
@@ -70,7 +68,7 @@ public class RoleController {
     }
 
 
-    @PostMapping("/RevokeRolesFromUser")
+    @PostMapping("/revokeRolesFromUser")
     public EHUser revokeRolesToUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
         return ehRoleService.revokeRolesFromUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
     }

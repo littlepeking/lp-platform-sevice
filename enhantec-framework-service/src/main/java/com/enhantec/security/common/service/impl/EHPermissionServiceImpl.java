@@ -41,12 +41,12 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
                 .eq(EHPermission::getOrgId, permissionDTO.getOrgId()));
 
         if (permission != null) {
-            throw new EHApplicationException("permission '" + permission.getDisplayName() + "' is already exist in organization +"+permissionDTO.getOrgId()+"+.");
+            throw new EHApplicationException("permission '" + permission.getDisplayName() + "' is already exist in organization "+permissionDTO.getOrgId()+".");
         } else {
             EHPermission permToSave = EHPermission.builder()
                     .orgId(permissionDTO.getOrgId())
                     .authority(permissionDTO.getAuthority())
-                    .displayName(permissionDTO.getDescription()).build();
+                    .displayName(permissionDTO.getDisplayName()).build();
 
             save(permToSave);
 
@@ -97,7 +97,7 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
                                     .eq(EHRolePermission::getPermissionId, permId));
 
                             if (rolePermission == null) {
-                                rolePermissionMapper.insert(EHRolePermission.builder().id(roleId).permissionId(permId).build()
+                                rolePermissionMapper.insert(EHRolePermission.builder().roleId(roleId).permissionId(permId).build()
                                 );
                             }
                         }

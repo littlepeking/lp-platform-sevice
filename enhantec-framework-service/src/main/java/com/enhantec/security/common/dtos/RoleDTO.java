@@ -11,7 +11,7 @@ public class RoleDTO {
     String orgId;
 
     @NotNull
-    String name;
+    String roleName;
 
     @NotNull
     String displayName;

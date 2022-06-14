@@ -126,7 +126,7 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
                                     .eq(EHUserRole::getId, roleId));
 
                             if (userRole == null) {
-                                userRoleMapper.insert(EHUserRole.builder().userId(userId).id(roleId).build());
+                                userRoleMapper.insert(EHUserRole.builder().userId(userId).roleId(roleId).build());
                             }
                         }
                 );
