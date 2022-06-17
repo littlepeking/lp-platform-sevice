@@ -31,21 +31,34 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
 
     private final EHUserRoleMapper userRoleMapper;
 
-    public EHRole createRole(String orgId, String roleName, String description) {
+    public EHRole createOrUpdate(EHRole role) {
 
-        if (!roleName.equals(roleName.toUpperCase()))
+        if (!role.getRoleName().equals(role.getRoleName().toUpperCase()))
             throw new EHApplicationException("role name must be upper case.");
 
-        EHRole role = getOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, roleName).eq(EHRole::getOrgId, orgId));
+            save(role);
 
-        if (role != null) {
-            throw new EHApplicationException("role name '" + roleName + "' is already exist.");
-        } else {
-            EHRole roleToSave = EHRole.builder().orgId(orgId).roleName(roleName).displayName(description).build();
-            save(roleToSave);
+            return role;
 
-            return roleToSave;
-        }
+    }
+
+    public void delete(String roleId) {
+
+        EHRole role = roleMapper.selectById(roleId);
+
+        if (role == null) throw new EHApplicationException("roleId " + roleId + " does not exist.");
+
+        List<EHUserRole> userRoleList = userRoleMapper.selectList(Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getRoleId, roleId));
+
+        Optional.ofNullable(userRoleList).ifPresentOrElse((list) -> {
+                    List<String> userIds = list.stream().map(ur -> ur.getUserId()).collect(Collectors.toList());
+                    List<EHUser> users = userMapper.selectList(Wrappers.lambdaQuery(EHUser.class).in(EHUser::getId, userIds));
+
+                    throw new EHApplicationException("Role" + role.getRoleName() + " still used by user " + users.stream().map(u -> u.getUsername()).collect(Collectors.joining(","))+".");
+                }
+                , () ->  roleMapper.deleteById(roleId)
+
+        );
 
     }
 

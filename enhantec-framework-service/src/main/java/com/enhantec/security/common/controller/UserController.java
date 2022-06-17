@@ -3,15 +3,12 @@ package com.enhantec.security.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
-import com.enhantec.security.common.dtos.UserRegisterDTO;
+import com.enhantec.security.common.dto.UserRegisterDTO;
 import com.enhantec.security.common.model.EHUser;
-import com.enhantec.security.common.model.TestReceipt;
 import com.enhantec.security.common.service.EHUserDetailsService;
 import com.enhantec.security.common.service.EHUserService;
-import com.enhantec.security.common.service.TestReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 

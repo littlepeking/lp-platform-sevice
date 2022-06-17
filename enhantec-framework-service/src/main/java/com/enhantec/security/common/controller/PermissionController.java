@@ -3,7 +3,7 @@ package com.enhantec.security.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
-import com.enhantec.security.common.dtos.*;
+import com.enhantec.security.common.dto.*;
 import com.enhantec.security.common.model.EHPermission;
 import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.service.EHPermissionService;
@@ -25,31 +25,68 @@ public class PermissionController {
 
     @GetMapping("/getAllPermissions")
     public List<EHPermission> getAllPermissions(){
-        return permissionService.findAll();
-    }
-
-    @PostMapping("/createPermission")
-    public EHPermission createPermission(@Valid @RequestBody PermissionDTO permissionDTO){
-        return permissionService.createPermission(permissionDTO);
+        return permissionService.findAll(false);
     }
 
 
-    @PostMapping("/assignPermissionsToRole")
-    public EHRole assignPermissionsToRole(@Valid @RequestBody RolePermissionDTO rolePermissionDTO){
-       return permissionService.assignPermToRole(rolePermissionDTO.getRoleId(),rolePermissionDTO.getPermissionIds());
+    @GetMapping("/getOrgPermissions/{orgId}")
+    public List<EHPermission> getOrgPermissions(@PathVariable @NotNull String orgId){
+        return permissionService.findByOrgId(orgId);
     }
 
-    @PostMapping("/revokePermissionsFromRole")
-    public EHRole revokePermissionsFromRole(@Valid @RequestBody RolePermissionDTO rolePermissionDTO){
-        return permissionService.revokePermFromRole(rolePermissionDTO.getRoleId(),rolePermissionDTO.getPermissionIds());
+    @GetMapping("/getPermissionTree")
+    public EHPermission getPermissionTree(){
+        return permissionService.rebuildPermissionTree();
     }
 
-    @GetMapping("/getPermissionsByRole/{roleId}")
-    public List<EHPermission> getPermissionsByRole(@PathVariable @NotNull String roleId){
+    @GetMapping("/getOrgPermissionTree/{orgId}")
+    public EHPermission getOrgPermissionTree(@PathVariable @NotNull String orgId){
+        return permissionService.rebuildOrgPermissionTree(orgId);
+    }
+
+    @GetMapping("/getRolePermissionTree/{roleId}")
+    public EHPermission getRolePermissionTree(@PathVariable @NotNull String roleId){
+        return permissionService.rebuildRolePermissionTree(roleId);
+    }
+
+    @PostMapping("/createOrUpdate")
+    public EHPermission createOrUpdate(@Valid @RequestBody PermissionDTO permissionDTO){
+
+        EHPermission permission = EHPermission.builder()
+                .id(permissionDTO.getId())
+                .type(permissionDTO.getType())
+                .parentId(permissionDTO.getParentId())
+                .displayName(permissionDTO.getDisplayName())
+                .build();
+
+        return permissionService.createOrUpdate(permission);
+    }
+
+    @PostMapping("/deletePermissions/")
+    public void deletePermission(@RequestBody @NotNull List<String> permissionIds){
+        permissionService.deleteByIds(permissionIds);
+    }
+
+    @PostMapping("/updateOrgPermissions")
+    public EHPermission updateOrgPermissions(@Valid @RequestBody OrgPermissionsDTO orgPermissionsDTO){
+        return permissionService.updateOrgPermissions(orgPermissionsDTO.getOrgId(),orgPermissionsDTO.getPermissionIds());
+    }
+
+    @PostMapping("/updateRolePermissions")
+    public EHRole updateRolePermissions(@Valid @RequestBody RolePermissionsDTO rolePermissionDTO){
+       return permissionService.updateRolePermissions(rolePermissionDTO.getRoleId(),rolePermissionDTO.getPermissionIds());
+    }
+
+    @GetMapping("/getPermissionsByRoleId/{roleId}")
+    public List<EHPermission> getPermissionsByRoleId(@PathVariable @NotNull String roleId){
         return permissionService.findByRoleId(roleId);
     }
+    @GetMapping("/getPermissionsByOrgId/{orgId}")
+    public List<EHPermission> getPermissionsByOrgId(@PathVariable @NotNull String orgId){
+        return permissionService.findByOrgId(orgId);
+    }
 
-
+    @Deprecated
     @PostMapping("/queryByPage")
     public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
 
@@ -67,6 +104,7 @@ public class PermissionController {
 
     }
 
+    @Deprecated
     @PostMapping("/queryRolePermissionsByPage")
     public Page<Map<String, Object>> queryRolePermissionsByPage(@RequestBody PageParams pageParams) {
 

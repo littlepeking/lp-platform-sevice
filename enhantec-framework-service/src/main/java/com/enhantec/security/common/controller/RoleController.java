@@ -3,8 +3,8 @@ package com.enhantec.security.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
-import com.enhantec.security.common.dtos.RoleDTO;
-import com.enhantec.security.common.dtos.UserRolesDTO;
+import com.enhantec.security.common.dto.RoleDTO;
+import com.enhantec.security.common.dto.UserRolesDTO;
 import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.service.EHRoleService;
@@ -28,39 +28,54 @@ public class RoleController {
 
     private final EHRoleService ehRoleService;
 
-    @GetMapping("/getAllRoles")
-    public List<EHRole> getAllRoles() {
+    @GetMapping("/getAll")
+    public List<EHRole> getAll() {
         return ehRoleService.findAll();
     }
 
 
-    @GetMapping("/getRolesByOrgId/{orgId}")
-    public List<EHRole> getAllRolesByOrgId(@PathVariable @NotNull String orgId) {
+    @GetMapping("/getByOrgId/{orgId}")
+    public List<EHRole> getByOrgId(@PathVariable @NotNull String orgId) {
         return ehRoleService.findByOrgId(orgId);
     }
 
-    @GetMapping("/getRolesByUsername/{username}")
-    public List<EHRole> getRolesByUsername(@PathVariable @NotNull String username) {
+    @GetMapping("/getByUsername/{username}")
+    public List<EHRole> getByUsername(@PathVariable @NotNull String username) {
         return ehRoleService.findByUsername(username);
     }
 
 
-    @GetMapping("/getRolesByOrgIdAndUsername/{orgId}/{username}")
-    public List<EHRole> getRolesByOrgIdAndUsername(@PathVariable @NotNull String orgId, @PathVariable @NotNull String username) {
+    @GetMapping("/getByOrgIdAndUsername/{orgId}/{username}")
+    public List<EHRole> getByOrgIdAndUsername(@PathVariable @NotNull String orgId, @PathVariable @NotNull String username) {
         return ehRoleService.findByOrgIdAndUsername(orgId, username);
     }
 
 
-    @GetMapping("/getRolesByOrgIdAndUsername/{orgId}/{userId}")
-    public List<EHRole> getRolesByOrgIdAndUserId(@PathVariable @NotNull String orgId, @PathVariable @NotNull String userId) {
+    @GetMapping("/getByOrgIdAndUsername/{orgId}/{userId}")
+    public List<EHRole> getByOrgIdAndUserId(@PathVariable @NotNull String orgId, @PathVariable @NotNull String userId) {
         return ehRoleService.findByOrgIdAndUserId(orgId, userId);
     }
 
 
-    @PostMapping("/createRole")
-    public EHRole createRole(@Valid @RequestBody RoleDTO roleDTO) {
-        return ehRoleService.createRole(roleDTO.getOrgId(), roleDTO.getRoleName(), roleDTO.getDisplayName());
+    @PostMapping("/createOrUpdate")
+    public EHRole createOrUpdate(@Valid @RequestBody RoleDTO roleDTO) {
+
+        EHRole role = EHRole.builder()
+                .id(roleDTO.getOrgId())
+                .orgId(roleDTO.getOrgId())
+                .roleName(roleDTO.getRoleName())
+                .displayName(roleDTO.getDisplayName()).build();
+
+        ehRoleService.save(role);
+
+        return role;
     }
+
+    @PostMapping("/deleteRole/{roleId}")
+    public void deleteRole(@PathVariable @NotNull String roleId) {
+        ehRoleService.delete(roleId);
+    }
+
 
     @PostMapping("/assignRolesToUser")
     public EHUser assignRolesToUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
@@ -69,7 +84,7 @@ public class RoleController {
 
 
     @PostMapping("/revokeRolesFromUser")
-    public EHUser revokeRolesToUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
+    public EHUser revokeRolesFromUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
         return ehRoleService.revokeRolesFromUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
     }
 

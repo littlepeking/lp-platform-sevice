@@ -1,17 +1,17 @@
-package com.enhantec.security.common.dtos;
+package com.enhantec.security.common.dto;
 
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
 @Data
-public class PermissionDTO {
+public class RoleDTO {
 
     @NotNull
     String orgId;
 
     @NotNull
-    String authority;
+    String roleName;
 
     @NotNull
     String displayName;

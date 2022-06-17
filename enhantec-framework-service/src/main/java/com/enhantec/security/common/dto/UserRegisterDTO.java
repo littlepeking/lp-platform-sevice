@@ -1,15 +1,12 @@
-package com.enhantec.security.common.dtos;
+package com.enhantec.security.common.dto;
 
 import com.enhantec.security.core.enums.AuthType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.LowerCase;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor

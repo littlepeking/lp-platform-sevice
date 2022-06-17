@@ -9,6 +9,7 @@ import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.security.common.mapper.EHRoleMapper;
 import com.enhantec.security.common.mapper.EHUserMapper;
 import com.enhantec.security.common.mapper.EHUserRoleMapper;
+import com.enhantec.security.common.model.EHOrganization;
 import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.model.EHUserRole;
@@ -35,7 +36,9 @@ public interface EHRoleService extends IService<EHRole> {
 
     List<EHRole> findByOrgIdAndUserId(String orgId, String userId);
 
-    EHRole createRole(String orgId, String roleName, String description) ;
+    EHRole createOrUpdate(EHRole role);
+
+    void delete(String roleId);
 
     EHUser assignRolesToUser(String userId, List<String> roleNames);
 

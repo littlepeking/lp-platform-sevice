@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enhantec.security.common.mapper.EHRolePermissionMapper">
+
+    <resultMap id="BaseResultMap" type="com.enhantec.security.common.model.EHRolePermission">
+            <id property="id" column="id" jdbcType="VARCHAR"/>
+            <result property="roleId" column="role_id" jdbcType="VARCHAR"/>
+            <result property="permissionId" column="permission_id" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,role_id,permission_id
+    </sql>
+    <select id="findByOrgId" resultType="com.enhantec.security.common.model.EHRolePermission">
+        select
+            <include refid="Base_Column_List"/>
+        from eh_role_permission rp
+        JOIN eh_role r
+        ON rp.role_id = r.id
+        ON r.orgId = ${orgId}
+    </select>
+</mapper>

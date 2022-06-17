@@ -1,4 +1,4 @@
-package com.enhantec.security.common.dtos;
+package com.enhantec.security.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,10 +11,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRolesDTO implements Serializable {
+public class RolePermissionsDTO implements Serializable {
 
     @NotNull
-    private String userId;
+    private String roleId;
 
-    private List<String> roleIds;
+    private List<String> permissionIds;
 }

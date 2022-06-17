@@ -10,15 +10,15 @@ import lombok.*;
 
 /**
  * 
- * @TableName eh_role_permission
+ * @TableName eh_org_permission
  */
-@TableName(value ="eh_role_permission")
+@TableName(value ="eh_org_permission")
 @Data
-@Builder
 @With
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
-public class EHRolePermission implements Serializable {
+@AllArgsConstructor
+public class EHOrgPermission implements Serializable {
     /**
      * 
      */
@@ -28,7 +28,7 @@ public class EHRolePermission implements Serializable {
     /**
      * 
      */
-    private String roleId;
+    private String orgId;
 
     /**
      * 
