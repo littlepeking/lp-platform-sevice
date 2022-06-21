@@ -28,31 +28,31 @@ public class RoleController {
 
     private final EHRoleService ehRoleService;
 
-    @GetMapping("/getAll")
-    public List<EHRole> getAll() {
+    @GetMapping("/findAll")
+    public List<EHRole> findAll() {
         return ehRoleService.findAll();
     }
 
 
-    @GetMapping("/getByOrgId/{orgId}")
-    public List<EHRole> getByOrgId(@PathVariable @NotNull String orgId) {
+    @GetMapping("/findByOrgId/{orgId}")
+    public List<EHRole> findByOrgId(@PathVariable @NotNull String orgId) {
         return ehRoleService.findByOrgId(orgId);
     }
 
-    @GetMapping("/getByUsername/{username}")
-    public List<EHRole> getByUsername(@PathVariable @NotNull String username) {
+    @GetMapping("/findByUsername/{username}")
+    public List<EHRole> findByUsername(@PathVariable @NotNull String username) {
         return ehRoleService.findByUsername(username);
     }
 
 
-    @GetMapping("/getByOrgIdAndUsername/{orgId}/{username}")
-    public List<EHRole> getByOrgIdAndUsername(@PathVariable @NotNull String orgId, @PathVariable @NotNull String username) {
+    @GetMapping("/findByOrgIdAndUsername/{orgId}/{username}")
+    public List<EHRole> findByOrgIdAndUsername(@PathVariable @NotNull String orgId, @PathVariable @NotNull String username) {
         return ehRoleService.findByOrgIdAndUsername(orgId, username);
     }
 
 
-    @GetMapping("/getByOrgIdAndUsername/{orgId}/{userId}")
-    public List<EHRole> getByOrgIdAndUserId(@PathVariable @NotNull String orgId, @PathVariable @NotNull String userId) {
+    @GetMapping("/findByOrgIdAndUserId/{orgId}/{userId}")
+    public List<EHRole> findByOrgIdAndUserId(@PathVariable @NotNull String orgId, @PathVariable @NotNull String userId) {
         return ehRoleService.findByOrgIdAndUserId(orgId, userId);
     }
 
@@ -61,31 +61,30 @@ public class RoleController {
     public EHRole createOrUpdate(@Valid @RequestBody RoleDTO roleDTO) {
 
         EHRole role = EHRole.builder()
-                .id(roleDTO.getOrgId())
+                .id(roleDTO.getId())
                 .orgId(roleDTO.getOrgId())
                 .roleName(roleDTO.getRoleName())
                 .displayName(roleDTO.getDisplayName()).build();
 
-        ehRoleService.save(role);
+        return ehRoleService.createOrUpdate(role);
 
-        return role;
     }
 
-    @PostMapping("/deleteRole/{roleId}")
-    public void deleteRole(@PathVariable @NotNull String roleId) {
+    @DeleteMapping("/{roleId}")
+    public void delete(@PathVariable @NotNull String roleId) {
         ehRoleService.delete(roleId);
     }
 
 
-    @PostMapping("/assignRolesToUser")
-    public EHUser assignRolesToUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
-        return ehRoleService.assignRolesToUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
+    @PostMapping("/assignToUser")
+    public EHUser assignToUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
+        return ehRoleService.assignToUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
     }
 
 
-    @PostMapping("/revokeRolesFromUser")
-    public EHUser revokeRolesFromUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
-        return ehRoleService.revokeRolesFromUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
+    @PostMapping("/revokeFromUser")
+    public EHUser revokeFromUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
+        return ehRoleService.revokeFromUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
     }
 
 

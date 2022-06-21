@@ -7,6 +7,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class RoleDTO {
 
+    String id;
+
     @NotNull
     String orgId;
 

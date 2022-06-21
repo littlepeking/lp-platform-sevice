@@ -1,6 +1,7 @@
 package com.enhantec.security.common.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,10 +16,12 @@ import com.enhantec.security.core.enums.AuthType;
 import com.enhantec.security.core.ldap.LDAPUser;
 import com.enhantec.security.core.ldap.LdapUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -38,52 +41,124 @@ public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
     private final PasswordEncoder passwordEncoder;
 
 
-    public EHUser createUser(String username, String password, AuthType authType) {
+    public EHUser createOrUpdate(EHUser user) {
 
-        if(!username.equals(username.toLowerCase()))
-            throw new EHApplicationException("username must be lowercase");
+        if(!StringUtils.hasLength(user.getId())) {
 
-        EHUser user = getOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername, username));
+            //Register user
 
-        if (user != null) {
-            throw new EHApplicationException("user name is already exist");
-        }
+            validUsername(user);
 
-        String domainUserName ="";
+            if (AuthType.LDAP.equals(user.getAuthType())) {
 
-        if(AuthType.LDAP.equals(authType)){
+                boolean success = ldapTemplate.authenticate("", "(sAMAccountName=" + user.getUsername() + ")",
+                        user.getPassword());
 
-            boolean success = ldapTemplate.authenticate("", "(sAMAccountName="+ username+")",
-                    password);
+                if (!success) {
+                    throw new EHApplicationException("LDAP auth failed: username and password does not match.");
+                }
 
-            if(!success){
-                throw new EHApplicationException("LDAP auth failed: username and password does not match.");
+                LDAPUser ldapUser = ldapUserRepository.findBysAMAccountName(user.getUsername()).get();
+
+                user.setDomainUsername(ldapUser.getFullName().toString());
+
+            }else {
+                //only basic auth type record password hash.
+                  user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+            //Set default access properties to new user.
+            user.setAccountLocked(false);
+            user.setEnabled(true);
+            user.setCredentialsExpired(false);
+
+            save(user);
+
+        }else {
+
+            //Update user
+
+            EHUser originUserInfo = baseMapper.selectById(user.getId());
+
+            user.setAuthType(originUserInfo.getAuthType()); //authType cannot be updated
+
+            if(!originUserInfo.getUsername().equals(user.getUsername())) {
+                //update to a new username (All tables must reference userId instead of username as username can be updated!!!)
+                validUsername(user);
+
             }
 
-            LDAPUser ldapUser = ldapUserRepository.findBysAMAccountName(username).get();
+            if(user.getAuthType().equals(AuthType.BASIC)){
+                //Check if user want change to new password.
+                if(StringUtils.hasLength(user.getPassword())){
 
-            domainUserName = ldapUser.getFullName().toString();
+                    if(!StringUtils.hasLength(user.getOriginalPassword()))
+                        throw new EHApplicationException("Please provide original password before changing to new password.");
+
+                    if( passwordEncoder.matches(user.getOriginalPassword(),originUserInfo.getPassword())){
+
+                        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+                    }else {
+                        throw new EHApplicationException("Original password is not match.");
+                    }
+                }
+
+            }
+
+            //enable attribute can only be changed from enable method.
+            user.setEnabled(originUserInfo.isEnabled());
+
+            baseMapper.updateById(user);
 
         }
-
-        user =EHUser.builder()
-                .username(username)
-                .domainUsername(domainUserName)
-                .password(passwordEncoder.encode(password))
-                .authType(authType)
-                .enabled(true)
-                .build();
-
-        save(user);
 
         return user;
     }
 
-    public void checkIfUserExists(String username){
+    public void enable(String userId){
+
+        checkIfUserIdExists(userId);
+
+        val updateWrapper = Wrappers.lambdaUpdate(EHUser.class).set(EHUser::isEnabled,true)
+                .eq(EHUser::getId,userId);
+        baseMapper.update(null, updateWrapper);
+    }
+
+    public void disable(String userId){
+
+        checkIfUserIdExists(userId);
+
+        val updateWrapper = Wrappers.lambdaUpdate(EHUser.class).set(EHUser::isEnabled,false)
+                .eq(EHUser::getId,userId);
+
+        baseMapper.update(null, updateWrapper);
+    }
+
+    private void validUsername(EHUser user) {
+        if (!user.getUsername().equals(user.getUsername().toLowerCase()))
+            throw new EHApplicationException("User name must be lowercase");
+
+        long count = count(Wrappers.lambdaQuery(EHUser.class)
+                .eq(EHUser::getUsername, user.getUsername())
+                .eq(EHUser::isEnabled,true)
+        );
+
+        if (count > 0) throw new EHApplicationException("User name is already in use.");
+    }
+
+    public void checkIfUsernameExists(String username){
 
         EHUser user = getBaseMapper().selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
 
-        if(user == null) throw new UsernameNotFoundException("username "+username+" is not exists.");
+        if(user == null) throw new UsernameNotFoundException("username "+username+" does not exist.");
+
+    }
+
+    public void checkIfUserIdExists(String userId){
+
+        EHUser user = getBaseMapper().selectById(userId);
+
+        if(user == null) throw new UsernameNotFoundException("userId "+userId+" does not exist.");
 
     }
 

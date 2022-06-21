@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.enhantec.common.model.EHBaseModel;
 import lombok.Data;
 
 /**
@@ -14,13 +16,7 @@ import lombok.Data;
  * @TableName test_receipt
  */
 @TableName(value ="test_receipt")
-@Data
-public class TestReceipt implements Serializable {
-    /**
-     * 
-     */
-    @TableId
-    private String id;
+public class TestReceipt extends EHBaseModel implements Serializable {
 
     /**
      * 

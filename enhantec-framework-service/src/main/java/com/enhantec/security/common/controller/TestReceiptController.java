@@ -24,15 +24,15 @@ public class TestReceiptController {
     private final TestReceiptService testReceiptService;
 
     @GetMapping("/search/{id}")
-    public List<TestReceipt> getTestReceipt(@PathVariable String id){
+    public List<TestReceipt> findTestReceipt(@PathVariable String id){
 
-        List<TestReceipt>  res = testReceiptService.getReceiptByReceiptId(id);
+        List<TestReceipt>  res = testReceiptService.findReceiptByReceiptId(id);
         return res;
 
     }
 
     @PostMapping("/queryByPage")
-    public Page<Map<String,Object>> getTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
+    public Page<Map<String,Object>> findTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 

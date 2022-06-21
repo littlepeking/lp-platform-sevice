@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.common.service.EHBaseService;
 import com.enhantec.security.common.mapper.EHRoleMapper;
 import com.enhantec.security.common.mapper.EHUserMapper;
 import com.enhantec.security.common.mapper.EHUserRoleMapper;
@@ -22,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
-public interface EHRoleService extends IService<EHRole> {
+public interface EHRoleService extends EHBaseService<EHRole> {
 
     List<EHRole> findAll();
 
@@ -40,9 +41,9 @@ public interface EHRoleService extends IService<EHRole> {
 
     void delete(String roleId);
 
-    EHUser assignRolesToUser(String userId, List<String> roleNames);
+    EHUser assignToUser(String userId, List<String> roleNames);
 
-    EHUser revokeRolesFromUser( String userId, List<String> roleIds);
+    EHUser revokeFromUser(String userId, List<String> roleIds);
 
     Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
 

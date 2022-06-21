@@ -77,7 +77,7 @@ public class BasicAuthenticationProvider extends AbstractUserDetailsAuthenticati
         protected final UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication)
                 throws AuthenticationException {
 
-            userService.checkIfUserExists(username);
+            userService.checkIfUsernameExists(username);
 
             prepareTimingAttackProtection();
             try {

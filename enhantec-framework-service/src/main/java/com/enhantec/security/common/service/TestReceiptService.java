@@ -15,7 +15,7 @@ import java.util.Map;
 */
 public interface TestReceiptService extends IService<TestReceipt> {
 
-    public List<TestReceipt> getReceiptByReceiptId(String id);
+    public List<TestReceipt> findReceiptByReceiptId(String id);
 
     public Page<Map<String,Object>> getReceiptPageData(Page<Map<String,Object>> page, QueryWrapper qw);
 

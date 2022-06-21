@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 
+import com.enhantec.common.model.EHBaseModel;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 
@@ -15,24 +17,13 @@ import lombok.*;
 @TableName(value ="eh_org_permission")
 @Data
 @With
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EHOrgPermission implements Serializable {
-    /**
-     * 
-     */
-    @TableId
-    private String id;
+public class EHOrgPermission extends EHBaseModel implements Serializable {
 
-    /**
-     * 
-     */
     private String orgId;
 
-    /**
-     * 
-     */
     private String permissionId;
 
     @TableField(exist = false)

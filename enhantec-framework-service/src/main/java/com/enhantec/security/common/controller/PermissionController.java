@@ -23,29 +23,34 @@ public class PermissionController {
 
     private final EHPermissionService permissionService;
 
-    @GetMapping("/getAllPermissions")
-    public List<EHPermission> getAllPermissions(){
+    @GetMapping("/findAll")
+    public List<EHPermission> findAll(){
         return permissionService.findAll(false);
     }
 
 
-    @GetMapping("/getOrgPermissions/{orgId}")
-    public List<EHPermission> getOrgPermissions(@PathVariable @NotNull String orgId){
+    @GetMapping("/findByOrgId/{orgId}")
+    public List<EHPermission> findByOrgId(@PathVariable @NotNull String orgId){
         return permissionService.findByOrgId(orgId);
     }
 
-    @GetMapping("/getPermissionTree")
-    public EHPermission getPermissionTree(){
+    @GetMapping("/findByRoleId/{roleId}")
+    public List<EHPermission> findByRoleId(@PathVariable @NotNull String roleId){
+        return permissionService.findByRoleId(roleId);
+    }
+
+    @GetMapping("/buildTree")
+    public EHPermission buildTree(){
         return permissionService.rebuildPermissionTree();
     }
 
-    @GetMapping("/getOrgPermissionTree/{orgId}")
-    public EHPermission getOrgPermissionTree(@PathVariable @NotNull String orgId){
+    @GetMapping("/buildTreeByOrgId/{orgId}")
+    public EHPermission buildTreeByOrgId(@PathVariable @NotNull String orgId){
         return permissionService.rebuildOrgPermissionTree(orgId);
     }
 
-    @GetMapping("/getRolePermissionTree/{roleId}")
-    public EHPermission getRolePermissionTree(@PathVariable @NotNull String roleId){
+    @GetMapping("/buildTreeByRoleId/{roleId}")
+    public EHPermission buildTreeByRoleId(@PathVariable @NotNull String roleId){
         return permissionService.rebuildRolePermissionTree(roleId);
     }
 
@@ -57,13 +62,14 @@ public class PermissionController {
                 .type(permissionDTO.getType())
                 .parentId(permissionDTO.getParentId())
                 .displayName(permissionDTO.getDisplayName())
+                .authority(permissionDTO.getAuthority())
                 .build();
 
         return permissionService.createOrUpdate(permission);
     }
 
-    @PostMapping("/deletePermissions/")
-    public void deletePermission(@RequestBody @NotNull List<String> permissionIds){
+    @DeleteMapping("")
+    public void delete(@RequestBody @NotNull List<String> permissionIds){
         permissionService.deleteByIds(permissionIds);
     }
 
@@ -77,14 +83,6 @@ public class PermissionController {
        return permissionService.updateRolePermissions(rolePermissionDTO.getRoleId(),rolePermissionDTO.getPermissionIds());
     }
 
-    @GetMapping("/getPermissionsByRoleId/{roleId}")
-    public List<EHPermission> getPermissionsByRoleId(@PathVariable @NotNull String roleId){
-        return permissionService.findByRoleId(roleId);
-    }
-    @GetMapping("/getPermissionsByOrgId/{orgId}")
-    public List<EHPermission> getPermissionsByOrgId(@PathVariable @NotNull String orgId){
-        return permissionService.findByOrgId(orgId);
-    }
 
     @Deprecated
     @PostMapping("/queryByPage")

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.security.common.dto.PermissionDTO;
 import com.enhantec.security.common.enums.PermissionType;
 import com.enhantec.security.common.mapper.*;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHPermission> implements EHPermissionService {
+public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMapper, EHPermission> implements EHPermissionService {
 
     private final EHRoleMapper roleMapper;
 
@@ -40,19 +41,25 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
         if (!permission.getAuthority().equals(permission.getAuthority().toUpperCase()))
             throw new EHApplicationException("Permission must be upper case.");
 
-            if (PermissionType.Permission.toString().equals(permission.getType()) &&
-                    StringUtils.isEmpty(permission.getAuthority())
-            ) {
+        if (PermissionType.Permission.toString().equals(permission.getType())) {
+            if (StringUtils.isNotEmpty(permission.getAuthority())) {
+
+                val ehPermission = baseMapper.selectOne(Wrappers.lambdaQuery(EHPermission.class)
+                        .eq(EHPermission::getAuthority, permission.getAuthority()));
+                if (ehPermission != null)
+                    throw new EHApplicationException("authority name " + permission.getAuthority() + " already been used.");
+
+            } else {
                 throw new EHApplicationException("Permission must provide authority.");
-            } else if (PermissionType.Directory.toString().equals(permission.getType()) &&
-                    StringUtils.isNotEmpty(permission.getAuthority())
-            ) {
-                throw new EHApplicationException("Directory should not provide authority.");
             }
+        } else if (PermissionType.Directory.toString().equals(permission.getType())
+                && StringUtils.isNotEmpty(permission.getAuthority())
+        ) {
+            throw new EHApplicationException("Directory should not provide authority.");
+        }
 
-            save(permission);
 
-            return permission;
+        return saveOrUpdateAndRetE(permission);
     }
 
 
@@ -64,37 +71,36 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
 
         List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class).eq(EHOrgPermission::getPermissionId, permissionId));
 
-        Optional.ofNullable(orgPermissionList).ifPresentOrElse((list) -> {
-                    List<String> orgIds = list.stream().map(op -> op.getOrgId()).collect(Collectors.toList());
-                    List<EHOrganization> orgs = organizationMapper.selectList(Wrappers.lambdaQuery(EHOrganization.class).in(EHOrganization::getId, orgIds));
+        if (!CollectionUtils.isEmpty(orgPermissionList)) {
+            List<String> orgIds = orgPermissionList.stream().map(op -> op.getOrgId()).collect(Collectors.toList());
+            List<EHOrganization> orgs = organizationMapper.selectList(Wrappers.lambdaQuery(EHOrganization.class).in(EHOrganization::getId, orgIds));
 
-                    throw new EHApplicationException("Permission " + permission.getDisplayName() + " still used by organization " + orgs.stream().map(org -> org.getName()).collect(Collectors.joining(","))+".");
-                }
-                , () ->  permissionMapper.deleteById(permissionId)
-
-        );
+            throw new EHApplicationException("Permission " + permission.getDisplayName() + " still used by organization " + orgs.stream().map(org -> org.getName()).collect(Collectors.joining(",")) + ".");
+        } else {
+            permissionMapper.deleteById(permissionId);
+        }
 
 
     }
 
     public void deleteByIds(List<String> permissionIds) {
-        permissionIds.stream().forEach(p-> deleteById(p));
+        permissionIds.stream().forEach(p -> deleteById(p));
     }
 
 
     public List<EHPermission> findAll(boolean withDirectories) {
-        if(withDirectories) {
+        if (withDirectories) {
             return permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class));
-        }else {
+        } else {
             return permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class)
-                    .eq(EHPermission::getType,PermissionType.Permission));
+                    .eq(EHPermission::getType, PermissionType.Permission.toString()));
         }
     }
 
 
     public EHPermission rebuildPermissionTree() {
         List<EHPermission> permissionList = findAll(true);
-        return buildFullPermissionTree(permissionList,true);
+        return buildFullPermissionTree(permissionList, true);
 
     }
 
@@ -107,11 +113,11 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
 
         permissionList.stream().forEach(p -> {
 
-            p.setCheckStatus(orgPermissionList.stream().anyMatch(op->op.getPermissionId().equals(p.getId())) ? 1 : 0);
+            p.setCheckStatus(orgPermissionList.stream().anyMatch(op -> op.getPermissionId().equals(p.getId())) ? 1 : 0);
 
         });
 
-        EHPermission RootDirectory = buildFullPermissionTree(permissionList,false);
+        EHPermission RootDirectory = buildFullPermissionTree(permissionList, false);
 
         recursivelyCalculateCheckStatus(RootDirectory);
 
@@ -128,20 +134,20 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
         List<EHPermission> orgPermissionsList = findByOrgId(role.getOrgId());
 
         List<EHPermission> fullDirectoryList = permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class)
-                .eq(EHPermission::getType,PermissionType.Directory.toString()));
+                .eq(EHPermission::getType, PermissionType.Directory.toString()));
 
-        List<EHPermission>  orgPermsAndFullDirsList = Stream.concat(orgPermissionsList.stream(), fullDirectoryList.stream())
+        List<EHPermission> orgPermsAndFullDirsList = Stream.concat(orgPermissionsList.stream(), fullDirectoryList.stream())
                 .collect(Collectors.toList());
 
         List<EHPermission> rolePermissionsList = findByRoleId(role.getId());
 
         orgPermsAndFullDirsList.stream().forEach(op -> {
 
-            op.setCheckStatus(rolePermissionsList.stream().anyMatch(rp->op.getId().equals(rp.getId())) ? 1 : 0);
+            op.setCheckStatus(rolePermissionsList.stream().anyMatch(rp -> op.getId().equals(rp.getId())) ? 1 : 0);
 
         });
 
-        EHPermission rootDirectory = buildFullPermissionTree(orgPermsAndFullDirsList,false);
+        EHPermission rootDirectory = buildFullPermissionTree(orgPermsAndFullDirsList, false);
 
         recursivelyCalculateCheckStatus(rootDirectory);
 
@@ -158,9 +164,8 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
             if (permission.getChildren() == null || permission.getChildren().size() == 0) {
                 permission.setCheckStatus(1); //if empty folder then mark status as Selected
             } else {
-                int status = 0;
                 permission.getChildren().forEach(p -> {
-                    if (p.getType().equals(PermissionType.Directory)) {
+                    if (p.getType().equals(PermissionType.Directory.toString())) {
                         recursivelyCalculateCheckStatus(p);
                     }
                 });
@@ -196,7 +201,7 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
     }
 
 
-    private EHPermission buildFullPermissionTree(List<EHPermission> permissionList,boolean withEmptyDir) {
+    private EHPermission buildFullPermissionTree(List<EHPermission> permissionList, boolean withEmptyDir) {
 
         EHPermission rootDirectory = permissionList.stream().filter(p -> p.getId().equals("0")).findFirst().get();
 
@@ -210,20 +215,20 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
 
         val childPerms = allPerms.stream().filter(p -> p.getParentId().equals(currentPerm.getId())).collect(Collectors.toList());
 
-        if (currentPerm.getType().equals(PermissionType.Directory) && !CollectionUtils.isEmpty(childPerms)) {
+        if (currentPerm.getType().equals(PermissionType.Directory.toString()) && !CollectionUtils.isEmpty(childPerms)) {
 
             childPerms.stream().
-                    filter(p -> p.getType().equals(PermissionType.Directory))
-                    .forEach(p -> buildSubPermissionTree(p, allPerms,withEmptyDir));
+                    filter(p -> p.getType().equals(PermissionType.Directory.toString()))
+                    .forEach(p -> buildSubPermissionTree(p, allPerms, withEmptyDir));
 
-            if(!withEmptyDir) {
+            if (!withEmptyDir) {
                 //remove empty sub dir
-                childPerms.removeIf(childPerm -> childPerm.getType().equals(PermissionType.Directory) && CollectionUtils.isEmpty(childPerm.getChildren()));
+                childPerms.removeIf(childPerm -> childPerm.getType().equals(PermissionType.Directory.toString()) && CollectionUtils.isEmpty(childPerm.getChildren()));
             }
-            currentPerm.setChildren(childPerms);
-
 
         }
+
+        currentPerm.setChildren(childPerms);
 
     }
 
@@ -290,14 +295,16 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
 
             String permId = PermId2RolePermsMap.keySet().iterator().next(); //Only show one permId error information one time.
             EHPermission permission = permissionMapper.selectById(permId);
-            List<String> roleIds = PermId2RolePermsMap.get(permId).stream().map(rp->rp.getRoleId()).collect(Collectors.toList());
-            List<String> roleNamesInUse = roleMapper.selectBatchIds(roleIds).stream().map(r->r.getRoleName()).collect(Collectors.toList());
+            List<String> roleIds = PermId2RolePermsMap.get(permId).stream().map(rp -> rp.getRoleId()).collect(Collectors.toList());
+            List<String> roleNamesInUse = roleMapper.selectBatchIds(roleIds).stream().map(r -> r.getRoleName()).collect(Collectors.toList());
             throw new EHApplicationException("permission " + permission.getAuthority() + " is used by roles " + roleNamesInUse.stream().collect(Collectors.joining(",")) + ", organization permission update failed.");
         }
 
-        orgPermissionMapper.delete(Wrappers.lambdaQuery(EHOrgPermission.class)
-                .eq(EHOrgPermission::getOrgId, orgId)
-                .in(EHOrgPermission::getPermissionId, toBeDeletedPermissionIds));
+        if(toBeDeletedPermissionIds.size()>0) {
+            orgPermissionMapper.delete(Wrappers.lambdaQuery(EHOrgPermission.class)
+                    .eq(EHOrgPermission::getOrgId, orgId)
+                    .in(EHOrgPermission::getPermissionId, toBeDeletedPermissionIds));
+        }
 
 
         toBeInsertedPermissionIds.stream().forEach(permissionId ->
@@ -316,7 +323,7 @@ public class EHPermissionServiceImpl extends ServiceImpl<EHPermissionMapper, EHP
 
         if (role == null) throw new EHApplicationException("role id " + roleId + " is not exist.");
 
-        rolePermissionMapper.delete(Wrappers.lambdaQuery(EHRolePermission.class).eq(EHRolePermission::getRoleId,roleId));
+        rolePermissionMapper.delete(Wrappers.lambdaQuery(EHRolePermission.class).eq(EHRolePermission::getRoleId, roleId));
 
         if (updatedPermissionIds != null && updatedPermissionIds.size() > 0) {
 

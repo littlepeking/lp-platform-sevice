@@ -26,19 +26,19 @@ import java.util.Map;
  * @since 2022-04-18
  */
 @RestController
-@RequestMapping("/api/security/role")
+@RequestMapping("/api/security/org")
 @RequiredArgsConstructor
 public class OrganizationController {
 
     private final EHOrganizationService ehOrganizationService;
 
-    @GetMapping("/getAll")
-    public List<EHOrganization> getAll() {
+    @GetMapping("/findAll")
+    public List<EHOrganization> findAll() {
         return ehOrganizationService.list();
     }
 
-    @GetMapping("/getOrgTree")
-    public EHOrganization getOrgTree(){
+    @GetMapping("/buildTree")
+    public EHOrganization buildTree(){
         return ehOrganizationService.buildOrgTree();
     }
 
@@ -47,6 +47,7 @@ public class OrganizationController {
 
         EHOrganization organization = EHOrganization.builder()
                 .id(organizationDTO.getId())
+                .parentId(organizationDTO.getParentId())
                 .name(organizationDTO.getName())
                 .code(organizationDTO.getCode())
                 .address1(organizationDTO.getAddress1())
@@ -54,13 +55,12 @@ public class OrganizationController {
                 .contact1(organizationDTO.getContact1())
                 .contact2(organizationDTO.getContact2()).build();
 
-        ehOrganizationService.save(organization);
+        return ehOrganizationService.createOrUpdate(organization);
 
-        return organization;
     }
 
-    @PostMapping("/delete/{orgId}")
-    public void deleteRole(@PathVariable @NotNull String orgId) {
+    @DeleteMapping("/{orgId}")
+    public void delete(@PathVariable @NotNull String orgId) {
         ehOrganizationService.deleteById(orgId);
     }
 

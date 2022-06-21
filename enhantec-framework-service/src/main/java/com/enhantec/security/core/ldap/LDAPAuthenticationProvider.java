@@ -53,7 +53,7 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
         //        res.stream().forEach(System.out::println);
 
 
-        userService.checkIfUserExists(lowercaseLogin);
+        userService.checkIfUsernameExists(lowercaseLogin);
 
         EHUser user = ehUserDetailsService.getUserInfo(lowercaseLogin);
 

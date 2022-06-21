@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.security.common.dto.UserDTO;
 import com.enhantec.security.common.mapper.EHUserMapper;
 import com.enhantec.security.common.model.EHPermission;
 import com.enhantec.security.common.model.EHUser;
@@ -29,13 +30,19 @@ import java.util.Map;
 @Transactional
 public interface EHUserService extends IService<EHUser> {
 
-    public List<EHUser> findAll();
+    List<EHUser> findAll();
 
-    public EHUser createUser(String username, String password, AuthType authType);
+    EHUser createOrUpdate(EHUser user);
 
-    public void checkIfUserExists(String username);
+    void enable(String userId);
 
-    public Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+    void disable(String userId);
+
+    void checkIfUsernameExists(String username);
+
+    Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+
+
 
 
 }

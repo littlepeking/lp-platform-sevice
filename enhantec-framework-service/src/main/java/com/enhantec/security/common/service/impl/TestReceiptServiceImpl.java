@@ -21,7 +21,7 @@ public class TestReceiptServiceImpl extends ServiceImpl<TestReceiptMapper, TestR
     implements TestReceiptService{
 
 
-    public List<TestReceipt> getReceiptByReceiptId(String id){
+    public List<TestReceipt> findReceiptByReceiptId(String id){
 
        return getBaseMapper().selectAllById(id);
     }

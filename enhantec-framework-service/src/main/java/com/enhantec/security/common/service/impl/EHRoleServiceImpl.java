@@ -6,24 +6,25 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.security.common.mapper.EHRoleMapper;
 import com.enhantec.security.common.mapper.EHUserMapper;
 import com.enhantec.security.common.mapper.EHUserRoleMapper;
-import com.enhantec.security.common.model.EHRole;
-import com.enhantec.security.common.model.EHUser;
-import com.enhantec.security.common.model.EHUserRole;
+import com.enhantec.security.common.model.*;
 import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> implements EHRoleService {
+public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> implements EHRoleService {
 
     private final EHRoleMapper roleMapper;
 
@@ -32,14 +33,13 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
     private final EHUserRoleMapper userRoleMapper;
 
     public EHRole createOrUpdate(EHRole role) {
+        if (!StringUtils.hasLength(role.getId())) {
+            val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHRole.class)
+                    .eq(EHRole::getRoleName, role.getRoleName()));
+            if (count > 0) throw new EHApplicationException("Role name " + role.getRoleName() + " is already exist.");
+        }
 
-        if (!role.getRoleName().equals(role.getRoleName().toUpperCase()))
-            throw new EHApplicationException("role name must be upper case.");
-
-            save(role);
-
-            return role;
-
+        return saveOrUpdateAndRetE(role);
     }
 
     public void delete(String roleId) {
@@ -50,15 +50,13 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
 
         List<EHUserRole> userRoleList = userRoleMapper.selectList(Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getRoleId, roleId));
 
-        Optional.ofNullable(userRoleList).ifPresentOrElse((list) -> {
-                    List<String> userIds = list.stream().map(ur -> ur.getUserId()).collect(Collectors.toList());
-                    List<EHUser> users = userMapper.selectList(Wrappers.lambdaQuery(EHUser.class).in(EHUser::getId, userIds));
+        if (!CollectionUtils.isEmpty(userRoleList)) {
+            List<String> userIds = userRoleList.stream().map(ur -> ur.getUserId()).collect(Collectors.toList());
+            List<EHUser> users = userMapper.selectList(Wrappers.lambdaQuery(EHUser.class).in(EHUser::getId, userIds));
 
-                    throw new EHApplicationException("Role" + role.getRoleName() + " still used by user " + users.stream().map(u -> u.getUsername()).collect(Collectors.joining(","))+".");
-                }
-                , () ->  roleMapper.deleteById(roleId)
-
-        );
+            throw new EHApplicationException("Role" + role.getRoleName() + " still used by user " + users.stream().map(u -> u.getUsername()).collect(Collectors.joining(",")) + ".");
+        }
+        roleMapper.deleteById(roleId);
 
     }
 
@@ -120,7 +118,7 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
         return findByOrgIdAndUserId(orgId, user.getId());
     }
 
-    public EHUser assignRolesToUser(String userId, List<String> roleIds) {
+    public EHUser assignToUser(String userId, List<String> roleIds) {
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
 
@@ -136,7 +134,7 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
                         (r) -> {
                             EHUserRole userRole = userRoleMapper.selectOne(Wrappers.lambdaQuery(EHUserRole.class)
                                     .eq(EHUserRole::getUserId, userId)
-                                    .eq(EHUserRole::getId, roleId));
+                                    .eq(EHUserRole::getRoleId, roleId));
 
                             if (userRole == null) {
                                 userRoleMapper.insert(EHUserRole.builder().userId(userId).roleId(roleId).build());
@@ -156,7 +154,7 @@ public class EHRoleServiceImpl extends ServiceImpl<EHRoleMapper, EHRole> impleme
     }
 
 
-    public EHUser revokeRolesFromUser(String userId, List<String> roleIds) {
+    public EHUser revokeFromUser(String userId, List<String> roleIds) {
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
 
