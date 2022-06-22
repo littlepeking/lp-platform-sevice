@@ -1,6 +1,7 @@
 package com.enhantec.security.core.jwt;
 
 import com.enhantec.config.properties.ApplicationProperties;
+import com.enhantec.security.common.model.EHUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -15,6 +16,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +27,6 @@ import java.util.stream.Collectors;
 public class JWTTokenProvider {
 
     private final Logger log = LoggerFactory.getLogger(JWTTokenProvider.class);
-
 
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -49,43 +50,41 @@ public class JWTTokenProvider {
         }
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.tokenValidityInMilliseconds =
-            1000 * applicationProperties.getSecurity().getJwt().getTokenValidityInSeconds();
+                1000 * applicationProperties.getSecurity().getJwt().getTokenValidityInSeconds();
 
     }
 
     /**
      * add params extPayload for trans more information
+     *
      * @param authentication
      * @param extPayLoad
      * @return
      */
-    public String createToken(Authentication authentication, Map<String,Object> extPayLoad) {
+    public String createToken(Authentication authentication, Map<String, Object> extPayLoad) {
         String authorities = authentication.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        EHUser user = (EHUser) authentication.getPrincipal();
 
         long now = (new Date()).getTime();
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
-        if (null != extPayLoad) {
-            // add custom payload
-            extPayLoad.put(AUTHORITIES_KEY, authorities);
-            return Jwts.builder()
-                    .setSubject(authentication.getName())
-                    .addClaims(extPayLoad)
-                    .signWith(key, SignatureAlgorithm.HS512)
-                    .setIssuedAt(new Date(now))
-                    //.setExpiration(validity)
-                    .compact();
-        } else {
-            return Jwts.builder()
-                    .setSubject(authentication.getName())
-                   // .claim(AUTHORITIES_KEY, authorities)
-                    .signWith(key, SignatureAlgorithm.HS512)
-                    .setIssuedAt(new Date(now))
-                    //.setExpiration(validity)
-                    .compact();
-        }
+        if (null == extPayLoad) extPayLoad = Collections.emptyMap();
+
+        extPayLoad.put(AUTHORITIES_KEY, authorities);
+        extPayLoad.put("userId", user.getId());
+
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .addClaims(extPayLoad)
+                // .claim(AUTHORITIES_KEY, authorities)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setIssuedAt(new Date(now))
+                //.setExpiration(validity)
+                .compact();
+
     }
 
     public String resolveToken(HttpServletRequest request) {
@@ -102,7 +101,7 @@ public class JWTTokenProvider {
             return Optional.of(Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken).getBody());
         } catch (JwtException | IllegalArgumentException e) {
             log.warn("Invalid JWT token.");
-            return  Optional.empty();
+            return Optional.empty();
 
         }
     }

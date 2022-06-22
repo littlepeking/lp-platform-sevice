@@ -1,12 +1,11 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
-import com.enhantec.security.common.dto.PermissionDTO;
 import com.enhantec.security.common.enums.PermissionType;
 import com.enhantec.security.common.mapper.*;
 import com.enhantec.security.common.model.*;
@@ -38,17 +37,41 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     public EHPermission createOrUpdate(EHPermission permission) {
 
+        validAuthority(permission);
+
+        EHPermission permission2save = permission;
+
+        if (!StringUtils.isEmpty(permission.getId())) {
+
+            permission2save = baseMapper.selectById(permission.getId());
+            //Existing permission can only allow update display name.
+            permission2save.setDisplayName(permission.getDisplayName());
+        }
+
+        return saveOrUpdateAndRetE(permission2save);
+    }
+
+    private void validAuthority(EHPermission permission) {
+
         if (!permission.getAuthority().equals(permission.getAuthority().toUpperCase()))
             throw new EHApplicationException("Permission must be upper case.");
 
         if (PermissionType.Permission.toString().equals(permission.getType())) {
+
             if (StringUtils.isNotEmpty(permission.getAuthority())) {
 
-                val ehPermission = baseMapper.selectOne(Wrappers.lambdaQuery(EHPermission.class)
-                        .eq(EHPermission::getAuthority, permission.getAuthority()));
-                if (ehPermission != null)
-                    throw new EHApplicationException("authority name " + permission.getAuthority() + " already been used.");
-
+                //If permissionId is not null means current operation is 'perm update' and we can only allow update 'display name' column.
+                //if user want change authority column, then need delete existing permission and recreate it. So we do not need check authority here.
+                if (StringUtils.isEmpty(permission.getId())) {
+                    val count = count(Wrappers.lambdaQuery(EHPermission.class).eq(EHPermission::getAuthority, permission.getAuthority()));
+                    if (count > 0)
+                        throw new EHApplicationException("Authority name " + permission.getAuthority() + " already been used.");
+                }else {
+                    EHPermission existPerm = baseMapper.selectById(permission.getId());
+                    if(!existPerm.getAuthority().equals(permission.getAuthority())){
+                        throw new EHApplicationException("Authority cannot be changed directly, please delete and recreate the permission.");
+                    }
+                }
             } else {
                 throw new EHApplicationException("Permission must provide authority.");
             }
@@ -57,9 +80,6 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
         ) {
             throw new EHApplicationException("Directory should not provide authority.");
         }
-
-
-        return saveOrUpdateAndRetE(permission);
     }
 
 
@@ -300,7 +320,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             throw new EHApplicationException("permission " + permission.getAuthority() + " is used by roles " + roleNamesInUse.stream().collect(Collectors.joining(",")) + ", organization permission update failed.");
         }
 
-        if(toBeDeletedPermissionIds.size()>0) {
+        if (toBeDeletedPermissionIds.size() > 0) {
             orgPermissionMapper.delete(Wrappers.lambdaQuery(EHOrgPermission.class)
                     .eq(EHOrgPermission::getOrgId, orgId)
                     .in(EHOrgPermission::getPermissionId, toBeDeletedPermissionIds));

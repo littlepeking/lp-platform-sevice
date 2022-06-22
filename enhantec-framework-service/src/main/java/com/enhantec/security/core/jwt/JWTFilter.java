@@ -1,6 +1,7 @@
 package com.enhantec.security.core.jwt;
 
 import com.enhantec.security.common.service.EHRoleService;
+import com.enhantec.security.common.service.EHUserService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -32,6 +33,9 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final EHRoleService roleService;
 
+
+    private final EHUserService userService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
 
@@ -42,7 +46,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 val roleList = roleService.findByUsername(claims.get().getSubject());
 
                 Authentication authentication =
-                        new UsernamePasswordAuthenticationToken(claims.get().getSubject(),"",roleList);
+                        new UsernamePasswordAuthenticationToken(userService.getById(claims.get().get("userId").toString()),"",roleList);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }else {
                 jwtAuthFailureHandler.onAuthenticationFailure((HttpServletRequest) servletRequest,(HttpServletResponse) servletResponse,new JwtAuthException("jwt token is invalid."));

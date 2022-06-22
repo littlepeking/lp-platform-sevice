@@ -1,10 +1,9 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.security.common.mapper.EHRoleMapper;
@@ -14,10 +13,10 @@ import com.enhantec.security.common.model.*;
 import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,10 +32,13 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
     private final EHUserRoleMapper userRoleMapper;
 
     public EHRole createOrUpdate(EHRole role) {
-        if (!StringUtils.hasLength(role.getId())) {
-            val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHRole.class)
-                    .eq(EHRole::getRoleName, role.getRoleName()));
-            if (count > 0) throw new EHApplicationException("Role name " + role.getRoleName() + " is already exist.");
+        if (StringUtils.isNotEmpty(role.getId())) {
+            EHRole existRole = baseMapper.selectById(role.getId());
+            if(!existRole.getRoleName().equals(role.getRoleName())){
+                val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, role.getRoleName()));
+                if (count > 0) throw new EHApplicationException("Role name " + role.getRoleName() + " is already exist.");
+
+            }
         }
 
         return saveOrUpdateAndRetE(role);
