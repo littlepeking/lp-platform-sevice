@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHBaseModel;
+import com.enhantec.common.model.EHVersionModel;
 import com.enhantec.security.core.enums.AuthType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -22,7 +23,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("EH_USER")
-public class EHUser extends EHBaseModel implements UserDetails, Serializable {
+public class EHUser extends EHVersionModel implements UserDetails, Serializable {
 
     private String username;
 

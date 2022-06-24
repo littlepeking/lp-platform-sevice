@@ -53,7 +53,8 @@ public class OrganizationController {
                 .address1(organizationDTO.getAddress1())
                 .address2(organizationDTO.getAddress2())
                 .contact1(organizationDTO.getContact1())
-                .contact2(organizationDTO.getContact2()).build();
+                .contact2(organizationDTO.getContact2())
+                .version(organizationDTO.getVersion()).build();
 
         return ehOrganizationService.createOrUpdate(organization);
 

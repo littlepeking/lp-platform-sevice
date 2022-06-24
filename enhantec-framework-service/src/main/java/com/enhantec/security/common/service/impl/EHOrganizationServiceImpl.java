@@ -25,15 +25,22 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     public EHOrganization createOrUpdate(EHOrganization organization){
         if(!StringUtils.hasLength(organization.getId())){
-           val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class)
-            .eq(EHOrganization::getCode,organization.getCode()));
-           if(count>0) throw new EHApplicationException("s-org-codeExist",organization.getCode());
+            validOrg(organization);
         }else {
-            val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getId,organization.getId()));
-            if(count==0) throw new EHApplicationException("s-org-idNotExist",organization.getId());
+            val existOrg = baseMapper.selectOne(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getId,organization.getId()));
+            if(existOrg==null) throw new EHApplicationException("s-org-idNotExist",organization.getId());
+            if(!organization.getCode().equals(existOrg.getCode())){
+                validOrg(organization);
+            }
         }
 
         return saveOrUpdateAndRetE(organization);
+    }
+
+    private void validOrg(EHOrganization organization){
+        val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class)
+                .eq(EHOrganization::getCode,organization.getCode()));
+        if(count>0) throw new EHApplicationException("s-org-codeExist",organization.getCode());
     }
 
     public void deleteById(String orgId) {

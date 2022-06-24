@@ -1,5 +1,6 @@
 package com.enhantec.security.common.dto;
 
+import com.enhantec.common.dto.VersionDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrganizationDTO implements Serializable {
+public class OrganizationDTO extends VersionDTO implements Serializable {
 
     private String id;
     @NotNull

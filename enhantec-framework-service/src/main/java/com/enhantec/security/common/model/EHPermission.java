@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHBaseModel;
+import com.enhantec.common.model.EHVersionModel;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("EH_PERMISSION")
-public class EHPermission extends EHBaseModel implements GrantedAuthority, Serializable {
+public class EHPermission extends EHVersionModel implements GrantedAuthority, Serializable {
 
     @NotNull
     private String parentId;

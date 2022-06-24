@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import com.enhantec.common.model.EHBaseModel;
+import com.enhantec.common.model.EHVersionModel;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -23,7 +24,7 @@ import javax.validation.constraints.NotNull;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EHOrganization extends EHBaseModel implements Serializable {
+public class EHOrganization extends EHVersionModel implements Serializable {
     /**
      * 
      */

@@ -42,6 +42,9 @@ public class AutoFillFieldsConfig implements MetaObjectHandler {
         this.strictInsertFill(metaObject, "addWho", () -> getUser().getId(), String.class);
         this.strictInsertFill(metaObject, "editDate", () -> date, LocalDateTime.class);
         this.strictInsertFill(metaObject, "editWho", () -> getUser().getId(), String.class);
+        //Init version column to 1.
+        this.setFieldValByName("version",1,metaObject);
+
     }
 
     @Override

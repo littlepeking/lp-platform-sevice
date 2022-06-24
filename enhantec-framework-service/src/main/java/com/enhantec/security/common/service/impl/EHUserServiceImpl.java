@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.security.common.mapper.EHUserMapper;
 import com.enhantec.security.common.mapper.TestReceiptMapper;
 import com.enhantec.security.common.model.EHUser;
@@ -32,7 +33,7 @@ import java.util.Map;
 */
 @Service
 @RequiredArgsConstructor
-public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
+public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
     implements EHUserService {
 
 
@@ -71,7 +72,6 @@ public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
             user.setEnabled(true);
             user.setCredentialsExpired(false);
 
-            save(user);
 
         }else {
 
@@ -108,11 +108,10 @@ public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
             //enable attribute can only be changed from enable method.
             user.setEnabled(originUserInfo.isEnabled());
 
-            baseMapper.updateById(user);
-
         }
 
-        return user;
+        return saveOrUpdateAndRetE(user);
+
     }
 
     public void enable(String userId){
