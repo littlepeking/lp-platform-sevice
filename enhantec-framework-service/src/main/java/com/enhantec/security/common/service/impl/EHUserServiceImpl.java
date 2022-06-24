@@ -55,7 +55,7 @@ public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
                         user.getPassword());
 
                 if (!success) {
-                    throw new EHApplicationException("LDAP auth failed: username and password does not match.");
+                    throw new EHApplicationException("s-usr-usernamePasswordNotMatch");
                 }
 
                 LDAPUser ldapUser = ldapUserRepository.findBysAMAccountName(user.getUsername()).get();
@@ -92,14 +92,14 @@ public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
                 if(StringUtils.hasLength(user.getPassword())){
 
                     if(!StringUtils.hasLength(user.getOriginalPassword()))
-                        throw new EHApplicationException("Please provide original password before changing to new password.");
+                        throw new EHApplicationException("s-usr-originPasswordNotProvided");
 
                     if( passwordEncoder.matches(user.getOriginalPassword(),originUserInfo.getPassword())){
 
                         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
                     }else {
-                        throw new EHApplicationException("Original password is not match.");
+                        throw new EHApplicationException("s-usr-passwordNotMatch");
                     }
                 }
 
@@ -136,21 +136,21 @@ public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
 
     private void validUsername(EHUser user) {
         if (!user.getUsername().equals(user.getUsername().toLowerCase()))
-            throw new EHApplicationException("User name must be lowercase");
+            throw new EHApplicationException("s-usr-usernameMustBeLowerCase");
 
         long count = count(Wrappers.lambdaQuery(EHUser.class)
                 .eq(EHUser::getUsername, user.getUsername())
                 .eq(EHUser::isEnabled,true)
         );
 
-        if (count > 0) throw new EHApplicationException("User name is already in use.");
+        if (count > 0) throw new EHApplicationException("s-usr-usernameInUse");
     }
 
     public void checkIfUsernameExists(String username){
 
         EHUser user = getBaseMapper().selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
 
-        if(user == null) throw new UsernameNotFoundException("username "+username+" does not exist.");
+        if(user == null) throw new EHApplicationException("s-usr-usernameNotExist",username);
 
     }
 
@@ -158,7 +158,7 @@ public class EHUserServiceImpl extends ServiceImpl<EHUserMapper, EHUser>
 
         EHUser user = getBaseMapper().selectById(userId);
 
-        if(user == null) throw new UsernameNotFoundException("userId "+userId+" does not exist.");
+        if(user == null) throw new EHApplicationException("s-usr-usernameNotFound",userId);
 
     }
 

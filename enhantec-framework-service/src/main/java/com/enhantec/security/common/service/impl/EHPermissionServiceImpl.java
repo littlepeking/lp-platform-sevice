@@ -54,7 +54,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
     private void validAuthority(EHPermission permission) {
 
         if (!permission.getAuthority().equals(permission.getAuthority().toUpperCase()))
-            throw new EHApplicationException("Permission must be upper case.");
+            throw new EHApplicationException("s-perm-PermMustBeUpperCase");
 
         if (PermissionType.Permission.toString().equals(permission.getType())) {
 
@@ -65,20 +65,20 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
                 if (StringUtils.isEmpty(permission.getId())) {
                     val count = count(Wrappers.lambdaQuery(EHPermission.class).eq(EHPermission::getAuthority, permission.getAuthority()));
                     if (count > 0)
-                        throw new EHApplicationException("Authority name " + permission.getAuthority() + " already been used.");
+                        throw new EHApplicationException("s-perm-AuthNameAlreadyUsed", permission.getAuthority());
                 }else {
                     EHPermission existPerm = baseMapper.selectById(permission.getId());
                     if(!existPerm.getAuthority().equals(permission.getAuthority())){
-                        throw new EHApplicationException("Authority cannot be changed directly, please delete and recreate the permission.");
+                        throw new EHApplicationException("s-perm-AuthCannotChange");
                     }
                 }
             } else {
-                throw new EHApplicationException("Permission must provide authority.");
+                throw new EHApplicationException("s-perm-PermMustProvideAuth");
             }
         } else if (PermissionType.Directory.toString().equals(permission.getType())
                 && StringUtils.isNotEmpty(permission.getAuthority())
         ) {
-            throw new EHApplicationException("Directory should not provide authority.");
+            throw new EHApplicationException("s-perm-DirShouldNotProvideAuth");
         }
     }
 
@@ -87,7 +87,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         EHPermission permission = permissionMapper.selectById(permissionId);
 
-        if (permission == null) throw new EHApplicationException("permissionId " + permissionId + " does not exist.");
+        if (permission == null) throw new EHApplicationException("s-perm-permIdNotExist", permissionId);
 
         List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class).eq(EHOrgPermission::getPermissionId, permissionId));
 
@@ -95,7 +95,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             List<String> orgIds = orgPermissionList.stream().map(op -> op.getOrgId()).collect(Collectors.toList());
             List<EHOrganization> orgs = organizationMapper.selectList(Wrappers.lambdaQuery(EHOrganization.class).in(EHOrganization::getId, orgIds));
 
-            throw new EHApplicationException("Permission " + permission.getDisplayName() + " still used by organization " + orgs.stream().map(org -> org.getName()).collect(Collectors.joining(",")) + ".");
+            throw new EHApplicationException("s-perm-permStillUsedByOrg", permission.getDisplayName(), orgs.stream().map(org -> org.getName()).collect(Collectors.joining(",")));
         } else {
             permissionMapper.deleteById(permissionId);
         }
@@ -149,7 +149,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         EHRole role = roleMapper.selectById(roleId);
 
-        if (role == null) throw new EHApplicationException("Role id " + roleId + " is not exist.");
+        if (role == null) throw new EHApplicationException("s-role-roleIdNotExist",roleId);
 
         List<EHPermission> orgPermissionsList = findByOrgId(role.getOrgId());
 
@@ -292,7 +292,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         EHOrganization org = organizationMapper.selectById(orgId);
 
-        if (org == null) throw new EHApplicationException("org id " + orgId + " is not exist.");
+        if (org == null) throw new EHApplicationException("s-org-idNotExist",orgId);
 
 
         List<String> existPermissionIds = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
@@ -317,7 +317,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             EHPermission permission = permissionMapper.selectById(permId);
             List<String> roleIds = PermId2RolePermsMap.get(permId).stream().map(rp -> rp.getRoleId()).collect(Collectors.toList());
             List<String> roleNamesInUse = roleMapper.selectBatchIds(roleIds).stream().map(r -> r.getRoleName()).collect(Collectors.toList());
-            throw new EHApplicationException("permission " + permission.getAuthority() + " is used by roles " + roleNamesInUse.stream().collect(Collectors.joining(",")) + ", organization permission update failed.");
+            throw new EHApplicationException("s-perm-permStillUsedByRole", permission.getAuthority() , roleNamesInUse.stream().collect(Collectors.joining(",")));
         }
 
         if (toBeDeletedPermissionIds.size() > 0) {
@@ -341,7 +341,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getId, roleId));
 
-        if (role == null) throw new EHApplicationException("role id " + roleId + " is not exist.");
+        if (role == null) throw new EHApplicationException("s-role-roleIdNotExist", roleId);
 
         rolePermissionMapper.delete(Wrappers.lambdaQuery(EHRolePermission.class).eq(EHRolePermission::getRoleId, roleId));
 
@@ -358,7 +358,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
                         ,
                         () -> {
                             EHOrganization org = organizationMapper.selectById(role.getId());
-                            throw new EHApplicationException("Permission id " + permId + " is not assigned to organization " + org.getName() + ".");
+                            throw new EHApplicationException("s-perm-permIdNotAssigned2Org", permId, org.getName());
                         }
                 );
             });

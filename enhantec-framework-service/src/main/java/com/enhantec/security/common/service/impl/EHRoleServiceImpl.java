@@ -32,23 +32,39 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
     private final EHUserRoleMapper userRoleMapper;
 
     public EHRole createOrUpdate(EHRole role) {
-        if (StringUtils.isNotEmpty(role.getId())) {
-            EHRole existRole = baseMapper.selectById(role.getId());
-            if(!existRole.getRoleName().equals(role.getRoleName())){
-                val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getRoleName, role.getRoleName()));
-                if (count > 0) throw new EHApplicationException("Role name " + role.getRoleName() + " is already exist.");
 
+        if (StringUtils.isNotEmpty(role.getId())) {
+
+            EHRole existRole = baseMapper.selectById(role.getId());
+
+            if (!existRole.getRoleName().equals(role.getRoleName())) {
+                validRoleName(role);
             }
+
+        } else {
+            validRoleName(role);
         }
 
         return saveOrUpdateAndRetE(role);
+    }
+
+
+    private void validRoleName(EHRole role) {
+
+        //check if new role name already used in the org.
+        val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHRole.class)
+                .eq(EHRole::getRoleName, role.getRoleName())
+                .eq(EHRole::getOrgId, role.getOrgId()));
+        if (count > 0)
+            throw new EHApplicationException("s-role-roleNameExist", role.getRoleName());
+
     }
 
     public void delete(String roleId) {
 
         EHRole role = roleMapper.selectById(roleId);
 
-        if (role == null) throw new EHApplicationException("roleId " + roleId + " does not exist.");
+        if (role == null) throw new EHApplicationException("s-role-roleIdNotExist",roleId);
 
         List<EHUserRole> userRoleList = userRoleMapper.selectList(Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getRoleId, roleId));
 
@@ -56,7 +72,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
             List<String> userIds = userRoleList.stream().map(ur -> ur.getUserId()).collect(Collectors.toList());
             List<EHUser> users = userMapper.selectList(Wrappers.lambdaQuery(EHUser.class).in(EHUser::getId, userIds));
 
-            throw new EHApplicationException("Role" + role.getRoleName() + " still used by user " + users.stream().map(u -> u.getUsername()).collect(Collectors.joining(",")) + ".");
+            throw new EHApplicationException("s-role-roleUsedByUser", role.getRoleName(), users.stream().map(u -> u.getUsername()).collect(Collectors.joining(",")));
         }
         roleMapper.deleteById(roleId);
 
@@ -106,7 +122,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername, username));
 
-        if (user == null) throw new EHApplicationException("Username " + username + " is not exists.");
+        if (user == null) throw new EHApplicationException("s-usr-usernameNotFound");
 
         return findByUserId(user.getId());
     }
@@ -115,7 +131,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername, username));
 
-        if (user == null) throw new EHApplicationException("Username " + username + " is not exists.");
+        if (user == null) throw new EHApplicationException("s-usr-usernameNotFound");
 
         return findByOrgIdAndUserId(orgId, user.getId());
     }
@@ -124,7 +140,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
 
-        if (user == null) throw new EHApplicationException("user id is not exist.");
+        if (user == null) throw new EHApplicationException("s-usr-userIdNotFound");
 
         if (roleIds != null && roleIds.size() > 0) {
 
@@ -160,7 +176,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getId, userId));
 
-        if (user == null) throw new EHApplicationException("user id is not exist.");
+        if (user == null) throw new EHApplicationException("s-usr-userIdNotFound");
 
         if (roleIds != null && roleIds.size() > 0) {
 

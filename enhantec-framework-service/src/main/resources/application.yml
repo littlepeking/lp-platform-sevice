@@ -22,9 +22,13 @@ spring:
             sql: trace
   error:
     include-binding-errors: always #return detail error for rest service
+  messages:
+    #Must provide file messages.properties, otherwise messages config will not take effect
+    basename: i18n/messages/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
   profiles:
     active: dev
-
 enhantec:
   common:
     security:

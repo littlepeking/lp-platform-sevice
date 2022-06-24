@@ -2,11 +2,14 @@ package com.enhantec.security.common.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
+import com.enhantec.common.utils.EHLocaleHelper;
 import com.enhantec.common.utils.EHPaginationHelper;
 import com.enhantec.security.common.model.TestReceipt;
 import com.enhantec.security.common.service.TestReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +26,8 @@ public class TestReceiptController {
 
     private final TestReceiptService testReceiptService;
 
+    private final MessageSource messageSource;
+
     @GetMapping("/search/{id}")
     public List<TestReceipt> findTestReceipt(@PathVariable String id){
 
@@ -30,6 +35,17 @@ public class TestReceiptController {
         return res;
 
     }
+
+    @GetMapping("translate/{msgKey}")
+    public String getI18nMsg(@PathVariable String msgKey){
+        return EHLocaleHelper.getMsg(msgKey);
+    }
+
+    @GetMapping("translate/test")
+    public String testI18nArgs(){
+        return EHLocaleHelper.getMsg("c-testArgs","arg1");
+    }
+
 
     @PostMapping("/queryByPage")
     public Page<Map<String,Object>> findTestReceiptByReceiptKey(@RequestBody PageParams pageParams){

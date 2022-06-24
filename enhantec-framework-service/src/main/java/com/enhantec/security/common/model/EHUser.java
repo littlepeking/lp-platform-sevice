@@ -50,14 +50,6 @@ public class EHUser extends EHBaseModel implements UserDetails, Serializable {
     @TableField(exist = false)
     private Collection<? extends GrantedAuthority> authorities;
 
-    private LocalDateTime addDate;
-
-    private String addWho;
-
-    private LocalDateTime editDate;
-
-    private String editWho;
-
     @JsonIgnore
     public boolean isAccountNonLocked(){
         return !accountLocked;

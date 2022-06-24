@@ -1,7 +1,9 @@
 package com.enhantec;
 
 import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.common.utils.EHLocaleHelper;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,5 +34,9 @@ public class Application {
         throw new EHApplicationException("run time exception test msg.");
     }
 
+    @GetMapping("/testEHApplicationError2")
+    public void testEHApplicationError2(){
+        throw new EHApplicationException("c-args","arg1","arg2","arg3");
+    }
 
 }

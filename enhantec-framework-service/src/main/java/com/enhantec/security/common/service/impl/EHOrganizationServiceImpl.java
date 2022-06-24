@@ -1,12 +1,9 @@
 package com.enhantec.security.common.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
-import com.enhantec.security.common.enums.PermissionType;
 import com.enhantec.security.common.model.EHOrganization;
-import com.enhantec.security.common.model.EHPermission;
 import com.enhantec.security.common.service.EHOrganizationService;
 import com.enhantec.security.common.mapper.EHOrganizationMapper;
 import lombok.val;
@@ -30,7 +27,10 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
         if(!StringUtils.hasLength(organization.getId())){
            val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class)
             .eq(EHOrganization::getCode,organization.getCode()));
-           if(count>0) throw new EHApplicationException("Code "+organization.getCode()+" is already exist.");
+           if(count>0) throw new EHApplicationException("s-org-codeExist",organization.getCode());
+        }else {
+            val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getId,organization.getId()));
+            if(count==0) throw new EHApplicationException("s-org-idNotExist",organization.getId());
         }
 
         return saveOrUpdateAndRetE(organization);
@@ -40,15 +40,15 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
         EHOrganization org = baseMapper.selectById(orgId);
 
-        if (org == null) throw new EHApplicationException("org id " + orgId + " is not exist.");
+        if (org == null) throw new EHApplicationException("s-org-idNotExist",orgId);
 
         if (orgId.equals("0"))
-            throw new EHApplicationException("Organization " + org.getName() + " is root organization, delete is not allowed.");
+            throw new EHApplicationException("s-org-rootOrgDeleteNotAllow", org.getName());
 
         long subOrgCount = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getParentId, orgId));
 
         if (subOrgCount > 0)
-            throw new EHApplicationException("Organization " + org.getName() + " still has child organizations, delete is not allowed.");
+            throw new EHApplicationException("s-org-childOrgExist",org.getName());
 
         baseMapper.deleteById(orgId);
 
