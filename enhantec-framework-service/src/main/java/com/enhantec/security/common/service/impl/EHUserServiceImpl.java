@@ -1,25 +1,20 @@
 package com.enhantec.security.common.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.security.common.mapper.EHUserMapper;
-import com.enhantec.security.common.mapper.TestReceiptMapper;
 import com.enhantec.security.common.model.EHUser;
-import com.enhantec.security.common.model.TestReceipt;
 import com.enhantec.security.common.service.EHUserService;
-import com.enhantec.security.common.service.TestReceiptService;
 import com.enhantec.security.core.enums.AuthType;
+import com.enhantec.security.core.jwt.JwtAuthException;
 import com.enhantec.security.core.ldap.LDAPUser;
 import com.enhantec.security.core.ldap.LdapUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -149,7 +144,7 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
 
         EHUser user = getBaseMapper().selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
 
-        if(user == null) throw new EHApplicationException("s-usr-usernameNotExist",username);
+        if(user == null) throw new JwtAuthException("s-usr-usernameNotExist");
 
     }
 

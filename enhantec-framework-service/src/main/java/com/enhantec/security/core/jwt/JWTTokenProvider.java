@@ -35,7 +35,6 @@ public class JWTTokenProvider {
 
     private Key key;
 
-    private long tokenValidityInMilliseconds;
     private final ApplicationProperties applicationProperties;
 
     @PostConstruct
@@ -49,8 +48,6 @@ public class JWTTokenProvider {
             keyBytes = Decoders.BASE64.decode(SECRET);
         }
         this.key = Keys.hmacShaKeyFor(keyBytes);
-        this.tokenValidityInMilliseconds =
-                1000 * applicationProperties.getSecurity().getJwt().getTokenValidityInSeconds();
 
     }
 
@@ -69,7 +66,6 @@ public class JWTTokenProvider {
         EHUser user = (EHUser) authentication.getPrincipal();
 
         long now = (new Date()).getTime();
-        Date validity = new Date(now + this.tokenValidityInMilliseconds);
 
         if (null == extPayLoad) extPayLoad = Collections.emptyMap();
 

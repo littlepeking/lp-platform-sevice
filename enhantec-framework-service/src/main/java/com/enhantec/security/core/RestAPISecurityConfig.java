@@ -1,7 +1,9 @@
 package com.enhantec.security.core;
 
 import com.enhantec.config.properties.ApplicationProperties;
+import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.service.EHUserDetailsService;
+import com.enhantec.security.common.service.JWTCacheService;
 import com.enhantec.security.common.service.RoleHierarchyService;
 import com.enhantec.security.core.enums.AuthType;
 import com.enhantec.security.core.jwt.JWTFilter;
@@ -81,6 +83,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
     private final Environment environment;
 
     private final RoleHierarchyService roleHierarchyService;
+
+    private final JWTCacheService jwtCacheService;
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -177,8 +181,13 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
         return (req, res, auth) -> {
             // custom payload
             HashMap<String, Object> extPayLoad = new HashMap<>();
+            EHUser user = (EHUser) auth.getPrincipal();
             // jwt token
             String jwt = jwtTokenProvider.createToken(auth, extPayLoad);
+
+            jwtCacheService.addOrRenewToken(jwt,req.getRemoteAddr());
+            jwtCacheService.addOrRenewUserToken(user.getId(),jwt);
+            log.info( req.getRemoteAddr());
             //AuthDto authDto = new AuthDto(auth.getName(),jwt);
             res.setContentType(MediaType.APPLICATION_JSON_VALUE);
             res.setCharacterEncoding("UTF-8");
