@@ -8,6 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class JwtAuthSimpleResponse {
 
-   private final Object content;
+   private final Object details;
 
 }

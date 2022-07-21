@@ -1,6 +1,5 @@
 package com.enhantec.security.common.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,12 +8,13 @@ import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.security.common.mapper.EHRoleMapper;
 import com.enhantec.security.common.mapper.EHUserMapper;
 import com.enhantec.security.common.mapper.EHUserRoleMapper;
-import com.enhantec.security.common.model.*;
+import com.enhantec.security.common.model.EHRole;
+import com.enhantec.security.common.model.EHUser;
+import com.enhantec.security.common.model.EHUserRole;
 import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -100,7 +100,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         Set<String> roleSet = userRoleList.stream().map(EHUserRole::getRoleId).collect(Collectors.toSet());
 
-        if (userRoleList.size() > 0 && roleSet.size() > 0) {
+        if (roleSet.size() > 0) {
             List<EHRole> roleList = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class).in(EHRole::getId, roleSet));
             return roleList;
         } else {
