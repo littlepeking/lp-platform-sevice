@@ -1,25 +1,14 @@
 package com.enhantec.security.common.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.enhantec.common.model.PageParams;
-import com.enhantec.common.utils.EHPaginationHelper;
 import com.enhantec.security.common.dto.OrganizationDTO;
-import com.enhantec.security.common.dto.RoleDTO;
-import com.enhantec.security.common.dto.UserRolesDTO;
 import com.enhantec.security.common.model.EHOrganization;
-import com.enhantec.security.common.model.EHPermission;
-import com.enhantec.security.common.model.EHRole;
-import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.service.EHOrganizationService;
-import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author John Wang
@@ -38,7 +27,7 @@ public class OrganizationController {
     }
 
     @GetMapping("/buildTree")
-    public EHOrganization buildTree(){
+    public List<EHOrganization> buildTree(){
         return ehOrganizationService.buildOrgTree();
     }
 
@@ -64,7 +53,6 @@ public class OrganizationController {
     public void delete(@PathVariable @NotNull String orgId) {
         ehOrganizationService.deleteById(orgId);
     }
-
 
 
 }

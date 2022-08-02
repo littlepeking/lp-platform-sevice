@@ -2,7 +2,6 @@ package com.enhantec.security.common.service;
 
 import com.enhantec.common.service.EHBaseService;
 import com.enhantec.security.common.model.EHOrganization;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ public interface EHOrganizationService extends EHBaseService<EHOrganization> {
 
     void deleteById(String orgId);
 
-    EHOrganization buildOrgTree();
+    List<EHOrganization> buildOrgTree();
 
     EHOrganization createOrUpdate(EHOrganization organization);
 

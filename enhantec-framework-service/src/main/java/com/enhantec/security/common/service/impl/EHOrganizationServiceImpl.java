@@ -49,7 +49,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
         if (org == null) throw new EHApplicationException("s-org-idNotExist",orgId);
 
-        if (orgId.equals("0"))
+        if (orgId.trim().equals(""))
             throw new EHApplicationException("s-org-rootOrgDeleteNotAllow", org.getName());
 
         long subOrgCount = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getParentId, orgId));
@@ -61,15 +61,15 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     }
 
-    public EHOrganization buildOrgTree() {
+    public List<EHOrganization> buildOrgTree() {
 
         List<EHOrganization> organizationList = list();
 
-        EHOrganization rootOrg = organizationList.stream().filter(p -> p.getId().equals("0")).findFirst().get();
+        List<EHOrganization> rootOrgs = organizationList.stream().filter(p -> p.getParentId().equals("")).collect(Collectors.toList());
 
-        buildSubOrgTree(rootOrg, organizationList);
+        rootOrgs.forEach(o-> buildSubOrgTree(o, organizationList));
 
-        return rootOrg;
+        return rootOrgs;
     }
 
 
