@@ -11,6 +11,7 @@ import com.enhantec.security.common.mapper.EHUserRoleMapper;
 import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.model.EHUserRole;
+import com.enhantec.security.common.service.EHPermissionService;
 import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -30,6 +31,8 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
     private final EHUserMapper userMapper;
 
     private final EHUserRoleMapper userRoleMapper;
+
+    private final EHPermissionService permissionService;
 
     public EHRole createOrUpdate(EHRole role) {
 
@@ -64,7 +67,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         EHRole role = roleMapper.selectById(roleId);
 
-        if (role == null) throw new EHApplicationException("s-role-roleIdNotExist",roleId);
+        if (role == null) throw new EHApplicationException("s-role-roleIdNotExist", roleId);
 
         List<EHUserRole> userRoleList = userRoleMapper.selectList(Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getRoleId, roleId));
 
@@ -93,6 +96,10 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
     }
 
     public List<EHRole> findByUserId(String userId) {
+        return findByUserId(userId, true);
+    }
+
+    public List<EHRole> findByUserId(String userId, boolean loadPermissions) {
 
         val userRoleLambdaQueryWrapper = Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getUserId, userId);
 
@@ -102,6 +109,11 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         if (roleSet.size() > 0) {
             List<EHRole> roleList = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class).in(EHRole::getId, roleSet));
+
+            if (loadPermissions) {
+                roleList.stream().forEach(r -> r.setPermissions(permissionService.findByRoleId(r.getId())));
+            }
+
             return roleList;
         } else {
             return Collections.EMPTY_LIST;
@@ -109,9 +121,9 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
     }
 
-    public List<EHRole> findByOrgIdAndUserId(String orgId, String userId) {
+    public List<EHRole> findByOrgIdAndUserId(String orgId, String userId,boolean loadPermissions) {
 
-        List<EHRole> roleList = findByUserId(userId);
+        List<EHRole> roleList = findByUserId(userId,loadPermissions);
 
         return roleList.stream().filter(r -> r.getOrgId().equals(orgId))
                 .collect(Collectors.toList());
@@ -127,13 +139,13 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
         return findByUserId(user.getId());
     }
 
-    public List<EHRole> findByOrgIdAndUsername(String orgId, String username) {
+    public List<EHRole> findByOrgIdAndUsername(String orgId, String username,boolean loadPermissions) {
 
         EHUser user = userMapper.selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername, username));
 
         if (user == null) throw new EHApplicationException("s-usr-usernameNotFound");
 
-        return findByOrgIdAndUserId(orgId, user.getId());
+        return findByOrgIdAndUserId(orgId, user.getId(), loadPermissions);
     }
 
     public EHUser assignToUser(String userId, List<String> roleIds) {
@@ -165,7 +177,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         val roleList = findByUserId(userId);
 
-        user.setAuthorities(roleList);
+        user.setRoles(roleList);
 
         return user;
 
@@ -192,7 +204,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
         val roleList = findByUserId(userId);
 
-        user.setAuthorities(roleList);
+        user.setRoles(roleList);
 
         return user;
 

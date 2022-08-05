@@ -1,6 +1,5 @@
 package com.enhantec.security.common.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -133,7 +132,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         permissionList.stream().forEach(p -> {
 
-            p.setCheckStatus(orgPermissionList.stream().anyMatch(op -> op.getPermissionId().equals(p.getId())) ? 1 : 0);
+            p.setCheckStatus(orgPermissionList.stream().anyMatch(op -> op.getPermissionId().equals(p.getId())) ? true : false);
 
         });
 
@@ -163,7 +162,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         orgPermsAndFullDirsList.stream().forEach(op -> {
 
-            op.setCheckStatus(rolePermissionsList.stream().anyMatch(rp -> op.getId().equals(rp.getId())) ? 1 : 0);
+            op.setCheckStatus(rolePermissionsList.stream().anyMatch(rp -> op.getId().equals(rp.getId())) ? true : false);
 
         });
 
@@ -182,7 +181,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
         } else {
             //PermissionType = D
             if (permission.getChildren() == null || permission.getChildren().size() == 0) {
-                permission.setCheckStatus(1); //if empty folder then mark status as Selected
+                permission.setCheckStatus(true); //if empty folder then mark status as Selected
             } else {
                 permission.getChildren().forEach(p -> {
                     if (p.getType().equals(PermissionType.Directory.toString())) {
@@ -198,24 +197,24 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
         }
     }
 
-    private int evaluatePermissionCheckStatus(List<EHPermission> permissionList) {
+    private Boolean evaluatePermissionCheckStatus(List<EHPermission> permissionList) {
 
-        boolean dirContainsUnSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() == 0);
-        boolean dirContainsSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() == 1);
-        boolean dirContainsSemiSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() == 2);
+        boolean dirContainsUnSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() ==false);
+        boolean dirContainsSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() == true);
+        boolean dirContainsSemiSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() == null);
 
         if (dirContainsSemiSelected) {
-            return 2;
+            return null;
         } else if (dirContainsUnSelected) {
             if (dirContainsSelected) {
-                return 2;
+                return null;
             } else {
-                return 0;
+                return false;
             }
 
         } else {
             //!dirContainsUnSelected
-            return 1;
+            return true;
         }
 
     }

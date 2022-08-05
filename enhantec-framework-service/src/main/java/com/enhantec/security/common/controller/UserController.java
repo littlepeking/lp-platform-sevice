@@ -39,6 +39,12 @@ public class UserController {
         return ehUserDetailsService.getUserInfo(authentication.getName());
     }
 
+    @GetMapping("/findById/{id}")
+    public EHUser findById(@NotNull @PathVariable String id){
+        return ehUserService.getById(id);
+    }
+
+
     @GetMapping("/findAll")
     public List<EHUser> findAll(){
         return ehUserService.findAll();
@@ -56,7 +62,9 @@ public class UserController {
                 .firstName(userDTO.getFirstName())
                 .lastName(userDTO.getLastName())
                 .originalPassword(userDTO.getOriginalPassword())
-                .password(userDTO.getPassword()).build();
+                .password(userDTO.getPassword())
+                .version(userDTO.getVersion())
+                .build();
 
         return ehUserService.createOrUpdate(user);
     }

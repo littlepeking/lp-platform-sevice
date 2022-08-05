@@ -42,21 +42,23 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
         if(!StringUtils.hasLength(user.getId())) {
 
             //Register user
-
             validUsername(user);
 
             if (AuthType.LDAP.equals(user.getAuthType())) {
 
-                boolean success = ldapTemplate.authenticate("", "(sAMAccountName=" + user.getUsername() + ")",
-                        user.getPassword());
-
-                if (!success) {
-                    throw new EHApplicationException("s-usr-usernamePasswordNotMatch");
-                }
+//                boolean success = ldapTemplate.authenticate("", "(sAMAccountName=" + user.getUsername() + ")",
+//                        user.getPassword());
+//                if (!success) {
+//                    throw new EHApplicationException("s-usr-usernamePasswordNotMatch");
+//                }
 
                 LDAPUser ldapUser = ldapUserRepository.findBysAMAccountName(user.getUsername()).get();
 
-                user.setDomainUsername(ldapUser.getFullName().toString());
+                if(ldapUser!=null) {
+                    user.setDomainUsername(ldapUser.getFullName().toString());
+                }else {
+                    throw new EHApplicationException("s-usr-ADUserNotFound",user.getUsername());
+                }
 
             }else {
                 //only basic auth type record password hash.
@@ -86,17 +88,23 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
                 //Check if user want change to new password.
                 if(StringUtils.hasLength(user.getPassword())){
 
-                    if(!StringUtils.hasLength(user.getOriginalPassword()))
-                        throw new EHApplicationException("s-usr-originPasswordNotProvided");
+                    user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-                    if( passwordEncoder.matches(user.getOriginalPassword(),originUserInfo.getPassword())){
-
-                        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-                    }else {
-                        throw new EHApplicationException("s-usr-passwordNotMatch");
-                    }
+                        //no need original password at all here..
+//                    if(!StringUtils.hasLength(user.getOriginalPassword()))
+//                        throw new EHApplicationException("s-usr-originPasswordNotProvided");
+//
+//                    if( passwordEncoder.matches(user.getOriginalPassword(),originUserInfo.getPassword())){
+//
+//                        user.setPassword(passwordEncoder.encode(user.getPassword()));
+//
+//                    }else {
+//                        throw new EHApplicationException("s-usr-passwordNotMatch");
+//                    }
                 }
+//                else{
+//                    user.setPassword(originUserInfo.getPassword());
+//                }
 
             }
 

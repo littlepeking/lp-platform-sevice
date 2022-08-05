@@ -47,13 +47,13 @@ public class RoleController {
 
     @GetMapping("/findByOrgIdAndUsername/{orgId}/{username}")
     public List<EHRole> findByOrgIdAndUsername(@PathVariable @NotNull String orgId, @PathVariable @NotNull String username) {
-        return ehRoleService.findByOrgIdAndUsername(orgId, username);
+        return ehRoleService.findByOrgIdAndUsername(orgId, username,false);
     }
 
 
     @GetMapping("/findByOrgIdAndUserId/{orgId}/{userId}")
     public List<EHRole> findByOrgIdAndUserId(@PathVariable @NotNull String orgId, @PathVariable @NotNull String userId) {
-        return ehRoleService.findByOrgIdAndUserId(orgId, userId);
+        return ehRoleService.findByOrgIdAndUserId(orgId, userId,false);
     }
 
 

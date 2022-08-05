@@ -1,20 +1,19 @@
 package com.enhantec.security.common.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.enhantec.common.model.EHBaseModel;
 import com.enhantec.common.model.EHVersionModel;
 import com.enhantec.security.core.enums.AuthType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
-
-import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Data
@@ -49,7 +48,10 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
     private boolean credentialsExpired;
 
     @TableField(exist = false)
-    private Collection<? extends GrantedAuthority> authorities;
+    private Collection<? extends GrantedAuthority> roles;
+
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() { return roles;}
 
     @JsonIgnore
     public boolean isAccountNonLocked(){

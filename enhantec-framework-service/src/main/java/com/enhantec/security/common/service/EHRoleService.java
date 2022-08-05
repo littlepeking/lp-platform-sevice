@@ -1,26 +1,14 @@
 package com.enhantec.security.common.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.EHBaseService;
-import com.enhantec.security.common.mapper.EHRoleMapper;
-import com.enhantec.security.common.mapper.EHUserMapper;
-import com.enhantec.security.common.mapper.EHUserRoleMapper;
-import com.enhantec.security.common.model.EHOrganization;
 import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.model.EHUser;
-import com.enhantec.security.common.model.EHUserRole;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
 
 @Transactional
 public interface EHRoleService extends EHBaseService<EHRole> {
@@ -29,13 +17,15 @@ public interface EHRoleService extends EHBaseService<EHRole> {
 
     List<EHRole> findByUserId(String userId);
 
+    List<EHRole> findByUserId(String userId, boolean loadPermissions);
+
     List<EHRole> findByOrgId(String orgId);
 
     List<EHRole> findByUsername(String username);
 
-    List<EHRole> findByOrgIdAndUsername(String orgId, String username);
+    List<EHRole> findByOrgIdAndUsername(String orgId, String username,boolean loadPermissions);
 
-    List<EHRole> findByOrgIdAndUserId(String orgId, String userId);
+    List<EHRole> findByOrgIdAndUserId(String orgId, String userId,boolean loadPermissions);
 
     EHRole createOrUpdate(EHRole role);
 

@@ -47,7 +47,7 @@ public class EHUserDetailsService implements UserDetailsService {
             return null;
         }else {
 
-            user.setAuthorities(roleService.findByUsername(user.getUsername()));
+            user.setRoles(roleService.findByUsername(user.getUsername()));
 
         }
             return user;
