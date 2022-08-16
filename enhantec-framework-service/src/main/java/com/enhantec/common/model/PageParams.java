@@ -16,6 +16,6 @@ public class PageParams {
     int pageIndex;
 
     List<EHDataGridFilterInfo> filters;
-    HashMap<String,Object> extraParams;
+    HashMap<String,Object> params;
     HashMap<String,String> orderBy;
 }

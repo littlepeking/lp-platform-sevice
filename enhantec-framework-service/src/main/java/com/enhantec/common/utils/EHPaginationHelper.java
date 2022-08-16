@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,8 +74,8 @@ public class EHPaginationHelper {
                 }
             });
         }
-        if (pageParams.getExtraParams() != null) {
-            pageParams.getExtraParams().entrySet().stream().forEach(e ->
+        if (pageParams.getParams() != null) {
+            pageParams.getParams().entrySet().stream().forEach(e ->
             {
                 if (e.getValue() != null && !StringUtils.isBlank(e.getValue().toString())) {
                     //removes all whitespaces and non-visible characters (e.g., tab, \n) in key

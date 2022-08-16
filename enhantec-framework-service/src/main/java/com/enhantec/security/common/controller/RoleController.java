@@ -1,6 +1,7 @@
 package com.enhantec.security.common.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
 import com.enhantec.security.common.dto.RoleDTO;
@@ -34,9 +35,13 @@ public class RoleController {
     }
 
 
-    @GetMapping("/findByOrgId/{orgId}")
-    public List<EHRole> findByOrgId(@PathVariable @NotNull String orgId) {
-        return ehRoleService.findByOrgId(orgId);
+    @PostMapping(value="/findByOrgId")
+    public List<EHRole> findByOrgId(@RequestBody Map<String,String> map){
+        if (map.get("orgId")!=null) {
+            return ehRoleService.findByOrgId(map.get("orgId"));
+        } else {
+            throw new EHApplicationException("s-org-idCannotBeNull");
+        }
     }
 
     @GetMapping("/findByUsername/{username}")
@@ -47,13 +52,13 @@ public class RoleController {
 
     @GetMapping("/findByOrgIdAndUsername/{orgId}/{username}")
     public List<EHRole> findByOrgIdAndUsername(@PathVariable @NotNull String orgId, @PathVariable @NotNull String username) {
-        return ehRoleService.findByOrgIdAndUsername(orgId, username,false);
+        return ehRoleService.findByOrgIdAndUsername(orgId, username, false);
     }
 
 
     @GetMapping("/findByOrgIdAndUserId/{orgId}/{userId}")
     public List<EHRole> findByOrgIdAndUserId(@PathVariable @NotNull String orgId, @PathVariable @NotNull String userId) {
-        return ehRoleService.findByOrgIdAndUserId(orgId, userId,false);
+        return ehRoleService.findByOrgIdAndUserId(orgId, userId, false);
     }
 
 
@@ -121,7 +126,6 @@ public class RoleController {
         return res;
 
     }
-
 
 
 }

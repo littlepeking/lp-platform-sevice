@@ -12,14 +12,25 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        r.id, role_name,display_name
+        r.id, r.role_name,r.display_name
     </sql>
+
+
+    <select id="queryRolePageData" resultType="java.util.Map">
+        select
+        <include refid="Base_Column_List"/>,
+        from eh_role r
+        ${ew.customSqlSegment}
+        AND orgId = ${orgId}
+    </select>
 
     <select id="queryUserRolePageData" resultType="java.util.Map">
         select
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List"/>,
+        org.name
         from eh_role r
         JOIN eh_user_role ur ON r.id = ur.role_id
+        JOIN eh_organization org ON r.org_id = org.id
         ${ew.customSqlSegment}
     </select>
 </mapper>

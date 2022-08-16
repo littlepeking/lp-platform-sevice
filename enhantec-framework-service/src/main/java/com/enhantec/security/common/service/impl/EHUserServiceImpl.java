@@ -102,9 +102,9 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
 //                        throw new EHApplicationException("s-usr-passwordNotMatch");
 //                    }
                 }
-//                else{
-//                    user.setPassword(originUserInfo.getPassword());
-//                }
+                else{
+                    user.setPassword(null);
+                }
 
             }
 
