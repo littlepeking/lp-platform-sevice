@@ -3,7 +3,6 @@ package com.enhantec.security.common.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.enhantec.security.common.dto.PermissionDTO;
 import com.enhantec.security.common.model.*;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +17,9 @@ public interface EHPermissionService extends IService<EHPermission> {
 
     List<EHPermission> findByRoleId(String roleId);
 
-    EHPermission rebuildPermissionTree();
+    List<EHPermission> rebuildPermissionTree();
 
-    EHPermission rebuildOrgPermissionTree(String orgId);
+    List<EHPermission> rebuildOrgPermissionTree(String orgId);
 
     EHPermission rebuildRolePermissionTree(String orgId);
 
@@ -30,7 +29,7 @@ public interface EHPermissionService extends IService<EHPermission> {
 
     void deleteByIds(List<String> permissionIds);
 
-    EHPermission updateOrgPermissions(String orgId, List<String> updatedPermissionIds);
+    List<EHPermission> updateOrgPermissions(String orgId, List<String> updatedPermissionIds);
 
     EHRole updateRolePermissions(String roleId, List<String> updatedPermissionIds);
     @Deprecated

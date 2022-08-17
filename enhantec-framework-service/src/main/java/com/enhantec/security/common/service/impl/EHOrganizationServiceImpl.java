@@ -65,7 +65,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
         List<EHOrganization> organizationList = list();
 
-        List<EHOrganization> rootOrgs = organizationList.stream().filter(p -> p.getParentId().equals("")).collect(Collectors.toList());
+        List<EHOrganization> rootOrgs = organizationList.stream().filter(p -> p.getParentId().equals("0")).collect(Collectors.toList());
 
         rootOrgs.forEach(o-> buildSubOrgTree(o, organizationList));
 

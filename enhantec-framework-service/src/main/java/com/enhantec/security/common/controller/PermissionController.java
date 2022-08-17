@@ -40,12 +40,12 @@ public class PermissionController {
     }
 
     @GetMapping("/buildTree")
-    public EHPermission buildTree(){
+    public List<EHPermission> buildTree(){
         return permissionService.rebuildPermissionTree();
     }
 
-    @GetMapping("/buildTreeByOrgId/{orgId}")
-    public EHPermission buildTreeByOrgId(@PathVariable @NotNull String orgId){
+    @GetMapping("/buildTreeByOrgId")
+    public List<EHPermission> buildTreeByOrgId(@RequestParam String orgId){
         return permissionService.rebuildOrgPermissionTree(orgId);
     }
 
@@ -74,7 +74,7 @@ public class PermissionController {
     }
 
     @PostMapping("/updateOrgPermissions")
-    public EHPermission updateOrgPermissions(@Valid @RequestBody OrgPermissionsDTO orgPermissionsDTO){
+    public List<EHPermission> updateOrgPermissions(@Valid @RequestBody OrgPermissionsDTO orgPermissionsDTO){
         return permissionService.updateOrgPermissions(orgPermissionsDTO.getOrgId(),orgPermissionsDTO.getPermissionIds());
     }
 

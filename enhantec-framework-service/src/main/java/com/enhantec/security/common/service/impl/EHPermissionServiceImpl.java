@@ -117,13 +117,14 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
     }
 
 
-    public EHPermission rebuildPermissionTree() {
+    public List<EHPermission> rebuildPermissionTree() {
         List<EHPermission> permissionList = findAll(true);
-        return buildFullPermissionTree(permissionList, true);
+        EHPermission rootPerm = buildFullPermissionTree(permissionList, true);
+        return   Arrays.asList(new EHPermission[]{rootPerm});
 
     }
 
-    public EHPermission rebuildOrgPermissionTree(String orgId) {
+    public List<EHPermission> rebuildOrgPermissionTree(String orgId) {
 
         List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
                 .eq(EHOrgPermission::getOrgId, orgId));
@@ -136,11 +137,11 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         });
 
-        EHPermission RootDirectory = buildFullPermissionTree(permissionList, false);
+        EHPermission rootDirectory = buildFullPermissionTree(permissionList, false);
 
-        recursivelyCalculateCheckStatus(RootDirectory);
+        recursivelyCalculateCheckStatus(rootDirectory);
 
-        return RootDirectory;
+        return Arrays.asList(new EHPermission[]{rootDirectory}) ;
 
     }
 
@@ -199,9 +200,9 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     private Boolean evaluatePermissionCheckStatus(List<EHPermission> permissionList) {
 
-        boolean dirContainsUnSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() ==false);
-        boolean dirContainsSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() == true);
-        boolean dirContainsSemiSelected = permissionList.stream().anyMatch(p -> p.getCheckStatus() == null);
+        boolean dirContainsUnSelected = permissionList.stream().anyMatch(p -> compareBoolValue( p.getCheckStatus() ,false));
+        boolean dirContainsSelected = permissionList.stream().anyMatch(p -> compareBoolValue(p.getCheckStatus() , true));
+        boolean dirContainsSemiSelected = permissionList.stream().anyMatch(p -> compareBoolValue( p.getCheckStatus() , null));
 
         if (dirContainsSemiSelected) {
             return null;
@@ -217,6 +218,15 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             return true;
         }
 
+    }
+
+    boolean compareBoolValue(Boolean b1,Boolean b2){
+
+        if(b1==null && b2==null){
+            return true;
+        }else if(b1==null || b2==null){
+            return false;
+        }else return b1==b2;
     }
 
 
@@ -287,7 +297,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     }
 
-    public EHPermission updateOrgPermissions(String orgId, List<String> updatedPermissionIds) {
+    public List<EHPermission> updateOrgPermissions(String orgId, List<String> updatedPermissionIds) {
 
         EHOrganization org = organizationMapper.selectById(orgId);
 
