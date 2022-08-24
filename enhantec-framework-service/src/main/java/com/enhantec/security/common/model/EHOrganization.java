@@ -1,18 +1,16 @@
 package com.enhantec.security.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.util.*;
-
-import com.enhantec.common.model.EHBaseModel;
-import com.enhantec.common.model.EHVersionModel;
-import lombok.*;
+import com.enhantec.common.model.EHTreeModel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 /**
  * 
@@ -24,21 +22,9 @@ import javax.validation.constraints.NotNull;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EHOrganization extends EHVersionModel implements Serializable {
-    /**
-     * 
-     */
-    @TableId
-    private String id;
+public class EHOrganization extends EHTreeModel<EHOrganization> implements Serializable {
 
     private String code;
-
-    /**
-     * 
-     */
-    @NotNull
-    private String parentId;
-
     /**
      * 
      */
@@ -68,7 +54,4 @@ public class EHOrganization extends EHVersionModel implements Serializable {
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
-
-    @TableField(exist = false)
-    private List<EHOrganization> children;
 }

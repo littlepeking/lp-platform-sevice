@@ -1,8 +1,7 @@
 package com.enhantec.security.common.model;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.enhantec.common.model.EHVersionModel;
+import com.enhantec.common.model.EHTreeModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,6 @@ import org.springframework.security.core.GrantedAuthority;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @With
@@ -20,11 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("EH_PERMISSION")
-public class EHPermission extends EHVersionModel implements GrantedAuthority, Serializable {
-
-    @NotNull
-    private String parentId;
-
+public class EHPermission extends EHTreeModel<EHPermission> implements GrantedAuthority, Serializable {
     /**
      * D: Directory
      * P: Permission
@@ -36,17 +30,5 @@ public class EHPermission extends EHVersionModel implements GrantedAuthority, Se
     private String authority;
 
     private String displayName;
-
-    /**
-     * Used for org perm selection display
-     * 0: Not select
-     * 1: Selected
-     * 2: Semi-selected
-     */
-    @TableField(exist = false)
-    private Boolean checkStatus;
-
-    @TableField(exist = false)
-    private List<EHPermission> children; //only use when type is P
 
 }

@@ -145,6 +145,9 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     }
 
+
+
+
     public EHPermission rebuildRolePermissionTree(String roleId) {
 
         EHRole role = roleMapper.selectById(roleId);
@@ -297,7 +300,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     }
 
-    public List<EHPermission> updateOrgPermissions(String orgId, List<String> updatedPermissionIds) {
+    public void updateOrgPermissions(String orgId, List<String> updatedPermissionIds) {
 
         EHOrganization org = organizationMapper.selectById(orgId);
 
@@ -342,7 +345,54 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             orgPermissionMapper.insert(orgPermission);
         });
 
-        return rebuildOrgPermissionTree(orgId);
+    }
+
+    public void updatePermissionOrgs(String permId, List<String> updatedOrgIds) {
+
+        EHPermission perm = permissionMapper.selectById(permId);
+
+        if (perm == null) throw new EHApplicationException("s-perm-permIdNotExist",permId);
+
+        List<String> existsOrgIdsInUse = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
+                .eq(EHOrgPermission::getPermissionId, permId)).stream().map(op -> op.getOrgId()).collect(Collectors.toList());
+
+        List<String> toBeDeletedOrgIds = existsOrgIdsInUse.stream().filter(eo -> !updatedOrgIds.contains(eo)).collect(Collectors.toList());
+
+        List<String> toBeInsertedOrgIds = updatedOrgIds.stream().filter(np -> !existsOrgIdsInUse.contains(np)).collect(Collectors.toList());
+
+
+        if(toBeDeletedOrgIds!=null && toBeDeletedOrgIds.size()>0) {
+
+            toBeDeletedOrgIds.forEach(orgId -> {
+
+                List<EHRolePermission> existRolePermissionList = rolePermissionMapper.findByPermIdAndOrgId(permId, orgId);
+
+                if (existRolePermissionList.size() > 0) {
+                    List<String> roleIds = existRolePermissionList.stream().map(rp -> rp.getRoleId()).collect(Collectors.toList());
+                    List<String> roleNames = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class)
+                            .in(EHRole::getId, roleIds)).stream().map(r -> r.getRoleName()).collect(Collectors.toList());
+                    EHOrganization organization = organizationMapper.selectById(orgId);
+                    throw new EHApplicationException("s-perm-permStillUsedByOrgAndRole", perm.getAuthority(), organization.getName() , roleNames.stream().collect(Collectors.joining(",")));
+
+                }
+
+
+                orgPermissionMapper.delete(Wrappers.lambdaQuery(EHOrgPermission.class)
+                        .eq(EHOrgPermission::getOrgId, orgId)
+                        .eq(EHOrgPermission::getPermissionId, permId));
+
+
+            });
+
+        }
+
+        toBeInsertedOrgIds.stream().forEach(orgId ->
+            {
+                EHOrgPermission orgPermission = EHOrgPermission.builder().permissionId(permId).orgId(orgId).build();
+                orgPermissionMapper.insert(orgPermission);
+            });
+
+
     }
 
     @ReloadRoleHierarchy

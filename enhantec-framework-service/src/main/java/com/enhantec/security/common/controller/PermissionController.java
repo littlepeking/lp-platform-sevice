@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
 import com.enhantec.security.common.dto.*;
+import com.enhantec.security.common.model.EHOrganization;
 import com.enhantec.security.common.model.EHPermission;
 import com.enhantec.security.common.model.EHRole;
+import com.enhantec.security.common.service.EHOrganizationService;
 import com.enhantec.security.common.service.EHPermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -22,6 +24,8 @@ import java.util.Map;
 public class PermissionController {
 
     private final EHPermissionService permissionService;
+
+    private final EHOrganizationService organizationService;
 
     @GetMapping("/findAll")
     public List<EHPermission> findAll(){
@@ -75,7 +79,14 @@ public class PermissionController {
 
     @PostMapping("/updateOrgPermissions")
     public List<EHPermission> updateOrgPermissions(@Valid @RequestBody OrgPermissionsDTO orgPermissionsDTO){
-        return permissionService.updateOrgPermissions(orgPermissionsDTO.getOrgId(),orgPermissionsDTO.getPermissionIds());
+        permissionService.updateOrgPermissions(orgPermissionsDTO.getOrgId(),orgPermissionsDTO.getPermissionIds());
+        return permissionService.rebuildOrgPermissionTree(orgPermissionsDTO.getOrgId());
+    }
+
+    @PostMapping("/updatePermissionOrgs")
+    public List<EHOrganization> updatePermissionOrgs(@Valid @RequestBody PermissionOrgsDTO permissionOrgsDTO){
+        permissionService.updatePermissionOrgs(permissionOrgsDTO.getPermissionId(),permissionOrgsDTO.getOrgIds());
+        return organizationService.buildPermissionOrgTree(permissionOrgsDTO.getPermissionId());
     }
 
     @PostMapping("/updateRolePermissions")

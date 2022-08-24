@@ -29,7 +29,9 @@ public interface EHPermissionService extends IService<EHPermission> {
 
     void deleteByIds(List<String> permissionIds);
 
-    List<EHPermission> updateOrgPermissions(String orgId, List<String> updatedPermissionIds);
+    void updateOrgPermissions(String orgId, List<String> updatedPermissionIds);
+
+    void updatePermissionOrgs(String permissionId, List<String> updatedOrgIds);
 
     EHRole updateRolePermissions(String roleId, List<String> updatedPermissionIds);
     @Deprecated

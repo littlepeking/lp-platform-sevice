@@ -2,7 +2,6 @@ package com.enhantec.security.common.mapper;
 
 import com.enhantec.common.mapper.EHBaseMapper;
 import com.enhantec.security.common.model.EHRolePermission;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -15,8 +14,9 @@ import java.util.List;
 */
 public interface EHRolePermissionMapper extends EHBaseMapper<EHRolePermission> {
 
-
     List<EHRolePermission> findByOrgId(@Param("orgId") String orgId);
+
+    List<EHRolePermission> findByPermIdAndOrgId(@Param("permId") String permId,@Param("orgId") String orgId);
 }
 
 

@@ -3,9 +3,12 @@ package com.enhantec.security.common.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
+import com.enhantec.security.common.mapper.EHOrgPermissionMapper;
+import com.enhantec.security.common.mapper.EHOrganizationMapper;
+import com.enhantec.security.common.model.EHOrgPermission;
 import com.enhantec.security.common.model.EHOrganization;
 import com.enhantec.security.common.service.EHOrganizationService;
-import com.enhantec.security.common.mapper.EHOrganizationMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -20,8 +23,10 @@ import java.util.stream.Collectors;
  * @createDate 2022-06-14 23:40:27
  */
 @Service
+@RequiredArgsConstructor
 public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationMapper, EHOrganization>
         implements EHOrganizationService {
+    private final EHOrgPermissionMapper orgPermissionMapper;
 
     public EHOrganization createOrUpdate(EHOrganization organization){
         if(!StringUtils.hasLength(organization.getId())){
@@ -61,9 +66,15 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     }
 
+
     public List<EHOrganization> buildOrgTree() {
 
         List<EHOrganization> organizationList = list();
+        return  buildOrgTree(organizationList);
+    }
+
+
+    public List<EHOrganization> buildOrgTree(List<EHOrganization> organizationList) {
 
         List<EHOrganization> rootOrgs = organizationList.stream().filter(p -> p.getParentId().equals("0")).collect(Collectors.toList());
 
@@ -86,6 +97,29 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
         }
 
     }
+
+    public List<EHOrganization> buildPermissionOrgTree(String permissionId) {
+
+        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
+                .eq(EHOrgPermission::getPermissionId, permissionId));
+
+        List<EHOrganization> organizationList = list();
+
+        organizationList.stream().forEach(o -> {
+
+            o.setCheckStatus(orgPermissionList.stream().anyMatch(op -> op.getOrgId().equals(o.getId())) ? true : false);
+
+        });
+
+        List<EHOrganization> rootOrgs = buildOrgTree(organizationList);
+        //No need check sub orgs automatically as permission is checked by org independently
+        //rootOrgs.stream().forEach(org->EHTreeHelper.recursivelyCalculateCheckStatus(org));
+
+        return rootOrgs;
+
+    }
+
+
 
 }
 
