@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,17 +77,17 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     public List<EHOrganization> buildOrgTree(List<EHOrganization> organizationList) {
 
-        List<EHOrganization> rootOrgs = organizationList.stream().filter(p -> p.getParentId().equals("0")).collect(Collectors.toList());
+        EHOrganization rootOrg = organizationList.stream().filter(p -> p.getId().equals("0")).collect(Collectors.toList()).stream().findFirst().get();
 
-        rootOrgs.forEach(o-> buildSubOrgTree(o, organizationList));
+         buildSubOrgTree(rootOrg, organizationList);
 
-        return rootOrgs;
+        return Arrays.asList(new EHOrganization[]{rootOrg});
     }
 
 
     private void buildSubOrgTree(EHOrganization currentOrg, List<EHOrganization> allOrganizations) {
 
-        val childOrgs = allOrganizations.stream().filter(p -> p.getParentId().equals(currentOrg.getId())).collect(Collectors.toList());
+        val childOrgs = allOrganizations.stream().filter(p -> p.getParentId()!=null && p.getParentId().equals(currentOrg.getId())).collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(childOrgs)) {
 

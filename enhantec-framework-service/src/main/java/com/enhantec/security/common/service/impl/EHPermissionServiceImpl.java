@@ -88,11 +88,15 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         if (permission == null) throw new EHApplicationException("s-perm-permIdNotExist", permissionId);
 
+        List<EHPermission> childPerms = permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class).eq(EHPermission::getParentId, permissionId));
+
+        if(childPerms.size()>0) throw new EHApplicationException("s-perm-permCannotDeleteWithChildren", permission.getDisplayName());
+
         List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class).eq(EHOrgPermission::getPermissionId, permissionId));
 
         if (!CollectionUtils.isEmpty(orgPermissionList)) {
             List<String> orgIds = orgPermissionList.stream().map(op -> op.getOrgId()).collect(Collectors.toList());
-            List<EHOrganization> orgs = organizationMapper.selectList(Wrappers.lambdaQuery(EHOrganization.class).in(EHOrganization::getId, orgIds));
+            List<EHOrganization> orgs = organizationMapper.selectBatchIds( orgIds);
 
             throw new EHApplicationException("s-perm-permStillUsedByOrg", permission.getDisplayName(), orgs.stream().map(org -> org.getName()).collect(Collectors.joining(",")));
         } else {
@@ -103,7 +107,11 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
     }
 
     public void deleteByIds(List<String> permissionIds) {
-        permissionIds.stream().forEach(p -> deleteById(p));
+
+        if(permissionIds!=null && permissionIds.size()>0) {
+
+            permissionIds.stream().forEach(p -> deleteById(p));
+        }
     }
 
 
@@ -148,7 +156,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
 
 
-    public EHPermission rebuildRolePermissionTree(String roleId) {
+    public List<EHPermission> rebuildRolePermissionTree(String roleId) {
 
         EHRole role = roleMapper.selectById(roleId);
 
@@ -174,7 +182,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         recursivelyCalculateCheckStatus(rootDirectory);
 
-        return rootDirectory;
+        return Arrays.asList(new EHPermission[]{rootDirectory}) ;
 
     }
 
@@ -396,7 +404,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
     }
 
     @ReloadRoleHierarchy
-    public EHRole updateRolePermissions(String roleId, List<String> updatedPermissionIds) {
+    public void updateRolePermissions(String roleId, List<String> updatedPermissionIds) {
 
         EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getId, roleId));
 
@@ -423,13 +431,6 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             });
 
         }
-
-        val permissionList = findByRoleId(roleId);
-
-        role.setPermissions(permissionList);
-
-        return role;
-
 
     }
 

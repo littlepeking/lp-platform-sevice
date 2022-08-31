@@ -35,6 +35,11 @@ public class RoleController {
     }
 
 
+    @GetMapping("/findById/{id}")
+    public EHRole findById(@NotNull @PathVariable String id){
+        return ehRoleService.getById(id);
+    }
+
     @PostMapping(value="/findByOrgId")
     public List<EHRole> findByOrgId(@RequestBody Map<String,String> map){
         if (map.get("orgId")!=null) {
@@ -69,14 +74,15 @@ public class RoleController {
                 .id(roleDTO.getId())
                 .orgId(roleDTO.getOrgId())
                 .roleName(roleDTO.getRoleName())
-                .displayName(roleDTO.getDisplayName()).build();
+                .displayName(roleDTO.getDisplayName())
+                .version(roleDTO.getVersion()).build();
 
         return ehRoleService.createOrUpdate(role);
 
     }
 
-    @DeleteMapping("/{roleId}")
-    public void delete(@PathVariable @NotNull String roleId) {
+    @DeleteMapping("")
+    public void delete(@RequestParam @NotNull String roleId) {
         ehRoleService.delete(roleId);
     }
 

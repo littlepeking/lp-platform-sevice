@@ -21,7 +21,7 @@ public interface EHPermissionService extends IService<EHPermission> {
 
     List<EHPermission> rebuildOrgPermissionTree(String orgId);
 
-    EHPermission rebuildRolePermissionTree(String orgId);
+    List<EHPermission> rebuildRolePermissionTree(String orgId);
 
     EHPermission createOrUpdate(EHPermission permission);
 
@@ -33,7 +33,7 @@ public interface EHPermissionService extends IService<EHPermission> {
 
     void updatePermissionOrgs(String permissionId, List<String> updatedOrgIds);
 
-    EHRole updateRolePermissions(String roleId, List<String> updatedPermissionIds);
+    void updateRolePermissions(String roleId, List<String> updatedPermissionIds);
     @Deprecated
     Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
     @Deprecated

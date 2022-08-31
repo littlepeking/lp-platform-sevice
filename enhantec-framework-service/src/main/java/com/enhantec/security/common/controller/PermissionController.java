@@ -3,10 +3,12 @@ package com.enhantec.security.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
-import com.enhantec.security.common.dto.*;
+import com.enhantec.security.common.dto.OrgPermissionsDTO;
+import com.enhantec.security.common.dto.PermissionDTO;
+import com.enhantec.security.common.dto.PermissionOrgsDTO;
+import com.enhantec.security.common.dto.RolePermissionsDTO;
 import com.enhantec.security.common.model.EHOrganization;
 import com.enhantec.security.common.model.EHPermission;
-import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.service.EHOrganizationService;
 import com.enhantec.security.common.service.EHPermissionService;
 import lombok.RequiredArgsConstructor;
@@ -49,12 +51,12 @@ public class PermissionController {
     }
 
     @GetMapping("/buildTreeByOrgId")
-    public List<EHPermission> buildTreeByOrgId(@RequestParam String orgId){
+    public List<EHPermission> buildTreeByOrgId(@RequestParam @NotNull String orgId){
         return permissionService.rebuildOrgPermissionTree(orgId);
     }
 
-    @GetMapping("/buildTreeByRoleId/{roleId}")
-    public EHPermission buildTreeByRoleId(@PathVariable @NotNull String roleId){
+    @GetMapping("/buildTreeByRoleId")
+    public List<EHPermission> buildTreeByRoleId(@RequestParam @NotNull String roleId){
         return permissionService.rebuildRolePermissionTree(roleId);
     }
 
@@ -90,8 +92,9 @@ public class PermissionController {
     }
 
     @PostMapping("/updateRolePermissions")
-    public EHRole updateRolePermissions(@Valid @RequestBody RolePermissionsDTO rolePermissionDTO){
-       return permissionService.updateRolePermissions(rolePermissionDTO.getRoleId(),rolePermissionDTO.getPermissionIds());
+    public List<EHPermission> updateRolePermissions(@Valid @RequestBody RolePermissionsDTO rolePermissionDTO){
+        permissionService.updateRolePermissions(rolePermissionDTO.getRoleId(),rolePermissionDTO.getPermissionIds());
+        return permissionService.rebuildRolePermissionTree(rolePermissionDTO.getRoleId());
     }
 
 

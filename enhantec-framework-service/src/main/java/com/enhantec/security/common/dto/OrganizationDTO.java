@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +16,7 @@ public class OrganizationDTO extends VersionDTO implements Serializable {
     private String id;
     @NotNull
     private String code;
-    @NotNull
+
     private String parentId;
     @NotNull
     private String name;

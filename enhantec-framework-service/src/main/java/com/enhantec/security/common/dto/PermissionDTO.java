@@ -10,7 +10,6 @@ public class PermissionDTO extends VersionDTO {
 
     String id;
 
-    @NotNull
     String parentId;
 
     @NotNull
