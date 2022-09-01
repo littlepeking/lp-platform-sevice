@@ -69,6 +69,15 @@ public class UserController {
         return ehUserService.createOrUpdate(user);
     }
 
+
+    @DeleteMapping("")
+    public void delete(@RequestParam @NotNull List<String> userIds) {
+
+        userIds.forEach(id-> ehUserService.delete(id));
+       ;
+    }
+
+
     @PostMapping("/disable/{userId}")
     public void disable(@NotNull @PathVariable String userId) {
         ehUserService.disable(userId);

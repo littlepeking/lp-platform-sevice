@@ -1,12 +1,16 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.security.common.mapper.EHUserMapper;
+import com.enhantec.security.common.mapper.EHUserRoleMapper;
 import com.enhantec.security.common.model.EHUser;
+import com.enhantec.security.common.model.EHUserRole;
+import com.enhantec.security.common.service.EHRoleService;
 import com.enhantec.security.common.service.EHUserService;
 import com.enhantec.security.core.enums.AuthType;
 import com.enhantec.security.core.jwt.JwtAuthException;
@@ -35,6 +39,10 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
     private final LdapUserRepository ldapUserRepository;
     private final LdapTemplate ldapTemplate;
     private final PasswordEncoder passwordEncoder;
+
+    private final EHRoleService roleService;
+
+    private final EHUserRoleMapper userRoleMapper;
 
 
     public EHUser createOrUpdate(EHUser user) {
@@ -134,6 +142,17 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
                 .eq(EHUser::getId,userId);
 
         baseMapper.update(null, updateWrapper);
+    }
+
+    @Deprecated
+    //only used in system data init phase.
+    public void delete(String userId){
+
+        LambdaQueryWrapper<EHUserRole> wrapper = Wrappers.lambdaQuery(EHUserRole.class).eq(EHUserRole::getUserId,userId);
+
+        userRoleMapper.delete(wrapper);
+
+        baseMapper.deleteById(userId);
     }
 
     private void validUsername(EHUser user) {

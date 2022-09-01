@@ -7,7 +7,10 @@ import com.enhantec.security.common.mapper.EHOrgPermissionMapper;
 import com.enhantec.security.common.mapper.EHOrganizationMapper;
 import com.enhantec.security.common.model.EHOrgPermission;
 import com.enhantec.security.common.model.EHOrganization;
+import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.service.EHOrganizationService;
+import com.enhantec.security.common.service.EHPermissionService;
+import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +32,10 @@ import java.util.stream.Collectors;
 public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationMapper, EHOrganization>
         implements EHOrganizationService {
     private final EHOrgPermissionMapper orgPermissionMapper;
+
+    private final EHPermissionService permissionService;
+
+    private final EHRoleService roleService;
 
     public EHOrganization createOrUpdate(EHOrganization organization){
         if(!StringUtils.hasLength(organization.getId())){
@@ -49,20 +57,27 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
         if(count>0) throw new EHApplicationException("s-org-codeExist",organization.getCode());
     }
 
+    @Deprecated
+    //org should can only be delete in dev env. In production, org can only be disable as related biz data will be inconsistent after the org record delete.
     public void deleteById(String orgId) {
 
         EHOrganization org = baseMapper.selectById(orgId);
 
         if (org == null) throw new EHApplicationException("s-org-idNotExist",orgId);
 
-        if (orgId.trim().equals(""))
+        if (orgId.trim().equals("0"))
             throw new EHApplicationException("s-org-rootOrgDeleteNotAllow", org.getName());
 
         long subOrgCount = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getParentId, orgId));
 
         if (subOrgCount > 0)
             throw new EHApplicationException("s-org-childOrgExist",org.getName());
-
+        //remove related org permissions
+        permissionService.updateOrgPermissions(orgId, Collections.EMPTY_LIST);
+        //remove related org roles
+        List<EHRole> roles = roleService.findByOrgId(orgId);
+        roles.forEach(r->  roleService.delete(r.getId()));
+        //remove org
         baseMapper.deleteById(orgId);
 
     }

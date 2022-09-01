@@ -63,6 +63,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
     }
 
+
     public void delete(String roleId) {
 
         EHRole role = roleMapper.selectById(roleId);
@@ -77,6 +78,11 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
             throw new EHApplicationException("s-role-roleUsedByUser", role.getRoleName(), users.stream().map(u -> u.getUsername()).collect(Collectors.joining(",")));
         }
+
+
+
+        permissionService.updateRolePermissions(roleId, Collections.EMPTY_LIST);
+
         roleMapper.deleteById(roleId);
 
     }
