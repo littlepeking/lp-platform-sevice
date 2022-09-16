@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -37,13 +38,13 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     private final EHRoleService roleService;
 
-    public EHOrganization createOrUpdate(EHOrganization organization){
-        if(!StringUtils.hasLength(organization.getId())){
+    public EHOrganization createOrUpdate(EHOrganization organization) {
+        if (!StringUtils.hasLength(organization.getId())) {
             validOrg(organization);
-        }else {
-            val existOrg = baseMapper.selectOne(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getId,organization.getId()));
-            if(existOrg==null) throw new EHApplicationException("s-org-idNotExist",organization.getId());
-            if(!organization.getCode().equals(existOrg.getCode())){
+        } else {
+            val existOrg = baseMapper.selectOne(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getId, organization.getId()));
+            if (existOrg == null) throw new EHApplicationException("s-org-idNotExist", organization.getId());
+            if (!organization.getCode().equals(existOrg.getCode())) {
                 validOrg(organization);
             }
         }
@@ -51,10 +52,10 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
         return saveOrUpdateAndRetE(organization);
     }
 
-    private void validOrg(EHOrganization organization){
+    private void validOrg(EHOrganization organization) {
         val count = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class)
-                .eq(EHOrganization::getCode,organization.getCode()));
-        if(count>0) throw new EHApplicationException("s-org-codeExist",organization.getCode());
+                .eq(EHOrganization::getCode, organization.getCode()));
+        if (count > 0) throw new EHApplicationException("s-org-codeExist", organization.getCode());
     }
 
     @Deprecated
@@ -63,7 +64,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
         EHOrganization org = baseMapper.selectById(orgId);
 
-        if (org == null) throw new EHApplicationException("s-org-idNotExist",orgId);
+        if (org == null) throw new EHApplicationException("s-org-idNotExist", orgId);
 
         if (orgId.trim().equals("0"))
             throw new EHApplicationException("s-org-rootOrgDeleteNotAllow", org.getName());
@@ -71,12 +72,12 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
         long subOrgCount = baseMapper.selectCount(Wrappers.lambdaQuery(EHOrganization.class).eq(EHOrganization::getParentId, orgId));
 
         if (subOrgCount > 0)
-            throw new EHApplicationException("s-org-childOrgExist",org.getName());
+            throw new EHApplicationException("s-org-childOrgExist", org.getName());
         //remove related org permissions
         permissionService.updateOrgPermissions(orgId, Collections.EMPTY_LIST);
         //remove related org roles
         List<EHRole> roles = roleService.findByOrgId(orgId);
-        roles.forEach(r->  roleService.delete(r.getId()));
+        roles.forEach(r -> roleService.delete(r.getId()));
         //remove org
         baseMapper.deleteById(orgId);
 
@@ -86,7 +87,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
     public List<EHOrganization> buildOrgTree() {
 
         List<EHOrganization> organizationList = list();
-        return  buildOrgTree(organizationList);
+        return buildOrgTree(organizationList);
     }
 
 
@@ -94,7 +95,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
         EHOrganization rootOrg = organizationList.stream().filter(p -> p.getId().equals("0")).collect(Collectors.toList()).stream().findFirst().get();
 
-         buildSubOrgTree(rootOrg, organizationList);
+        buildSubOrgTree(rootOrg, organizationList);
 
         return Arrays.asList(new EHOrganization[]{rootOrg});
     }
@@ -102,7 +103,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     private void buildSubOrgTree(EHOrganization currentOrg, List<EHOrganization> allOrganizations) {
 
-        val childOrgs = allOrganizations.stream().filter(p -> p.getParentId()!=null && p.getParentId().equals(currentOrg.getId())).collect(Collectors.toList());
+        val childOrgs = allOrganizations.stream().filter(p -> p.getParentId() != null && p.getParentId().equals(currentOrg.getId())).collect(Collectors.toList());
 
         if (!CollectionUtils.isEmpty(childOrgs)) {
 
@@ -114,7 +115,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     }
 
-    public List<EHOrganization> buildPermissionOrgTree(String permissionId) {
+    public List<EHOrganization> buildOrgTreeByPermId(String permissionId) {
 
         List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
                 .eq(EHOrgPermission::getPermissionId, permissionId));
@@ -136,9 +137,58 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
     }
 
 
+    public List<EHOrganization> buildOrgTreeByUserId(String userId) {
 
-}
+        List<EHRole> roleList = roleService.findByUserId(userId);
+
+        if(roleList.size()>0) {
+
+            List<EHOrganization> organizationList = list();
+
+            organizationList.stream().forEach(o -> {
+
+                o.setCheckStatus(roleList.stream().anyMatch(r -> r.getOrgId().equals(o.getId())) ? true : false);
+
+            });
+
+            return buildMinOrgTreeByCheckStatus(organizationList);
+        }
+        else return Collections.EMPTY_LIST;
+
+    }
 
 
+    /**
+     * build a minimum org tree only contains selected orgs and all their parent orgs.
+     *
+     * @return
+     */
+    private List<EHOrganization> buildMinOrgTreeByCheckStatus(List<EHOrganization> organizationList) {
 
+        EHOrganization rootOrg = organizationList.stream().filter(p -> p.getId().equals("0")).collect(Collectors.toList()).stream().findFirst().get();
+
+        if (keepOrgSubTree(rootOrg,organizationList))
+            return Arrays.asList(new EHOrganization[]{rootOrg});
+        else return Collections.EMPTY_LIST;
+
+
+    }
+
+
+    private boolean keepOrgSubTree(EHOrganization currentOrg, List<EHOrganization> organizationList) {
+
+        currentOrg.setChildren(new ArrayList<>());
+
+        var childOrganizations =  organizationList.stream().filter(o-> currentOrg.getId().equals(o.getParentId())).collect(Collectors.toList());
+
+        if(childOrganizations.size()>0) {
+            for (EHOrganization childOrg : childOrganizations) {
+                if (keepOrgSubTree(childOrg,organizationList)) {
+                    currentOrg.getChildren().add(childOrg);
+                }
+            }
+        }
+            return currentOrg.getChildren()!=null  && currentOrg.getChildren().size()>0 || currentOrg.getCheckStatus() == true;
+        }
+    }
 

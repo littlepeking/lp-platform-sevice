@@ -45,6 +45,9 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             permission2save = baseMapper.selectById(permission.getId());
             //Existing permission can only allow update display name.
             permission2save.setDisplayName(permission.getDisplayName());
+        }else {
+            EHPermission parentPerm = permissionMapper.selectById(permission.getParentId());
+            permission2save.setModuleId(parentPerm.getModuleId());
         }
 
         return saveOrUpdateAndRetE(permission2save);

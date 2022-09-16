@@ -29,6 +29,9 @@ public class EHPermission extends EHTreeModel<EHPermission> implements GrantedAu
     @NotNull
     private String authority;
 
+    private String moduleId;
+
     private String displayName;
+
 
 }

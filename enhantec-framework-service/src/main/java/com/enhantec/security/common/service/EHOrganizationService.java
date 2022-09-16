@@ -16,7 +16,9 @@ public interface EHOrganizationService extends EHBaseService<EHOrganization> {
 
     List<EHOrganization> buildOrgTree();
 
-    List<EHOrganization> buildPermissionOrgTree(String permissionId);
+    List<EHOrganization> buildOrgTreeByUserId(String userId);
+
+    List<EHOrganization> buildOrgTreeByPermId(String permissionId);
 
     EHOrganization createOrUpdate(EHOrganization organization);
 

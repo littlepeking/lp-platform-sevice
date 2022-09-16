@@ -31,9 +31,14 @@ public class OrganizationController {
         return ehOrganizationService.buildOrgTree();
     }
 
+    @GetMapping("/buildTreeByUserId")
+    public List<EHOrganization> buildTreeByUserId(@RequestHeader String userId){
+        return ehOrganizationService.buildOrgTreeByUserId(userId);
+    }
+
     @GetMapping("/buildTreeByPermId")
     public List<EHOrganization> buildTreeByPermId(@RequestParam String permId){
-        return ehOrganizationService.buildPermissionOrgTree(permId);
+        return ehOrganizationService.buildOrgTreeByPermId(permId);
     }
 
     @PostMapping("/createOrUpdate")

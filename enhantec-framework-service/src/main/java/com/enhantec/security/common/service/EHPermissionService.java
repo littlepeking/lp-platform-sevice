@@ -21,7 +21,7 @@ public interface EHPermissionService extends IService<EHPermission> {
 
     List<EHPermission> rebuildOrgPermissionTree(String orgId);
 
-    List<EHPermission> rebuildRolePermissionTree(String orgId);
+    List<EHPermission> rebuildRolePermissionTree(String roleId);
 
     EHPermission createOrUpdate(EHPermission permission);
 

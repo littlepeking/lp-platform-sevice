@@ -88,7 +88,7 @@ public class PermissionController {
     @PostMapping("/updatePermissionOrgs")
     public List<EHOrganization> updatePermissionOrgs(@Valid @RequestBody PermissionOrgsDTO permissionOrgsDTO){
         permissionService.updatePermissionOrgs(permissionOrgsDTO.getPermissionId(),permissionOrgsDTO.getOrgIds());
-        return organizationService.buildPermissionOrgTree(permissionOrgsDTO.getPermissionId());
+        return organizationService.buildOrgTreeByPermId(permissionOrgsDTO.getPermissionId());
     }
 
     @PostMapping("/updateRolePermissions")
