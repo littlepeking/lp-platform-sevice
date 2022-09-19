@@ -1,11 +1,11 @@
 package com.enhantec.security.core.jwt;
 
+import com.enhantec.security.common.model.EHRole;
 import com.enhantec.security.common.service.EHRoleService;
 import com.enhantec.security.common.service.EHUserService;
 import com.enhantec.security.common.service.JWTCacheService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +18,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static com.enhantec.security.Constants.authUrl;
@@ -64,9 +66,18 @@ public class JWTFilter extends OncePerRequestFilter {
                             jwtCacheService.addOrRenewUserToken(claims.get().get("userId").toString(), jwt);
                         }
 
-                        //loading authentication
-                        val roleList = roleService.findByUsername(claims.get().getSubject());
+                        //Loading roles by organization
+                        List<EHRole> roleList;
+                        String orgId = servletRequest.getHeader("orgId");
 
+                        if(StringUtils.hasText(orgId)){
+                            roleList = roleService.findByOrgIdAndUserId(orgId, (claims.get().get("userId").toString()),true);
+
+                        }else {
+                            roleList = Collections.emptyList();
+                        }
+
+                        //loading authentication
                         Authentication authentication =
                                 new UsernamePasswordAuthenticationToken(userService.getById(claims.get().get("userId").toString()), "", roleList);
                         SecurityContextHolder.getContext().setAuthentication(authentication);

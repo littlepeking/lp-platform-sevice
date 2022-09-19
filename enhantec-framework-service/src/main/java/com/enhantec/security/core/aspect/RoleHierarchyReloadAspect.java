@@ -18,7 +18,7 @@ public class RoleHierarchyReloadAspect {
 
     private final RoleHierarchyService roleHierarchyService;
 
-    @Pointcut("execution(* com.enhantec.*.*(..))")
+    @Pointcut("execution(* com.enhantec..*(..))")
     public void applicationPackagePointCut(){}
 
     @AfterReturning("applicationPackagePointCut() && @annotation(com.enhantec.security.core.annotation.ReloadRoleHierarchy)")

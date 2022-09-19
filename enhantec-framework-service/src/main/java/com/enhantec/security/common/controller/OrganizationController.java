@@ -1,9 +1,11 @@
 package com.enhantec.security.common.controller;
 
+import com.enhantec.common.utils.EHContextHelper;
 import com.enhantec.security.common.dto.OrganizationDTO;
 import com.enhantec.security.common.model.EHOrganization;
 import com.enhantec.security.common.service.EHOrganizationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -27,13 +29,15 @@ public class OrganizationController {
     }
 
     @GetMapping("/buildTree")
+    @PreAuthorize("hasAuthority('SECURITY_ORG')")
     public List<EHOrganization> buildTree(){
         return ehOrganizationService.buildOrgTree();
     }
 
     @GetMapping("/buildTreeByUserId")
-    public List<EHOrganization> buildTreeByUserId(@RequestHeader String userId){
-        return ehOrganizationService.buildOrgTreeByUserId(userId);
+    public List<EHOrganization> buildTreeByUserId(){
+        //System.out.println(EHContextHelper.getUser().toString());
+        return ehOrganizationService.buildOrgTreeByUserId(EHContextHelper.getUser().getId());
     }
 
     @GetMapping("/buildTreeByPermId")

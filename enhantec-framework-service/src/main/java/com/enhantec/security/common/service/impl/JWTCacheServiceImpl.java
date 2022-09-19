@@ -28,7 +28,7 @@ public class JWTCacheServiceImpl implements JWTCacheService {
     }
 
     @Cacheable(value = USER_TOKEN_CACHE_NAME, unless = "#result == null")
-    public String getUserToken(String jwt) {
+    public String getUserToken(String userId) {
         return null;
     }
 

@@ -9,7 +9,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
 /**
  * Authenticate a user from the database.
@@ -24,6 +25,7 @@ public class EHUserDetailsService implements UserDetailsService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final HttpServletRequest request;
 
     @Override
     public EHUser loadUserByUsername(final String userName) {
@@ -46,8 +48,14 @@ public class EHUserDetailsService implements UserDetailsService {
         if(user==null){
             return null;
         }else {
-
+            //Set all roles to user in login url Only, all other url should based on orgId to differentiate and load roles. It already implemented in JWTFilter.
             user.setRoles(roleService.findByUsername(user.getUsername()));
+//            String orgId = request.getHeader("orgId");
+//            if(StringUtils.hasText(orgId)) {
+//                user.setRoles(roleService.findByOrgIdAndUsername(orgId, user.getUsername(), true));
+//            }else {
+//                user.setRoles(Collections.emptyList());
+//            }
 
         }
             return user;

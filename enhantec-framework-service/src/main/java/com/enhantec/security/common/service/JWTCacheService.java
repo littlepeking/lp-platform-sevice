@@ -11,7 +11,7 @@ public interface JWTCacheService {
 
     String getToken(String jwt);
 
-    String getUserToken(String jwt);
+    String getUserToken(String userId);
 
     void removeToken(String cacheKey);
 
