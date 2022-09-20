@@ -26,7 +26,7 @@
 		<spring-social.version>1.1.4.RELEASE</spring-social.version>
 		<jjwt.version>0.11.1</jjwt.version>
 		<problem.version>0.26.1</problem.version>
-		<mybatisplus.version>3.5.1</mybatisplus.version>
+		<mybatisplus.version>3.5.2</mybatisplus.version>
 		<mybatisplus.generator.ver>3.5.2</mybatisplus.generator.ver>
 		<spring.data.redis.version>2.6.5</spring.data.redis.version>
 	</properties>
@@ -117,6 +117,11 @@
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus-boot-starter</artifactId>
+			<version>${mybatisplus.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>dynamic-datasource-spring-boot-starter</artifactId>
 			<version>${mybatisplus.version}</version>
 		</dependency>
 		<dependency>

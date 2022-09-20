@@ -29,7 +29,6 @@ public class OrganizationController {
     }
 
     @GetMapping("/buildTree")
-    @PreAuthorize("hasAuthority('SECURITY_ORG')")
     public List<EHOrganization> buildTree(){
         return ehOrganizationService.buildOrgTree();
     }
@@ -46,6 +45,8 @@ public class OrganizationController {
     }
 
     @PostMapping("/createOrUpdate")
+    //@PreAuthorize("hasAnyAuthority('SECURITY_ORG','SECURITY_USER')")
+    @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
     public EHOrganization createOrUpdate(@Valid @RequestBody OrganizationDTO organizationDTO) {
 
         EHOrganization organization = EHOrganization.builder()

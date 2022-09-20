@@ -1,5 +1,6 @@
 package com.enhantec.security.common.controller;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHLocaleHelper;
@@ -9,7 +10,6 @@ import com.enhantec.security.common.service.TestReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,6 +48,7 @@ public class TestReceiptController {
 
 
     @PostMapping("/queryByPage")
+    @DS("#header.orgId")
     public Page<Map<String,Object>> findTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);

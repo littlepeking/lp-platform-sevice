@@ -1,5 +1,6 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
@@ -84,6 +85,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
     }
 
 
+    @DS("#header.orgId")
     public List<EHOrganization> buildOrgTree() {
 
         List<EHOrganization> organizationList = list();
