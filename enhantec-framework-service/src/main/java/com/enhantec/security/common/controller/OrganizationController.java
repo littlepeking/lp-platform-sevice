@@ -1,5 +1,6 @@
 package com.enhantec.security.common.controller;
 
+import com.enhantec.common.utils.DBHelper;
 import com.enhantec.common.utils.EHContextHelper;
 import com.enhantec.security.common.dto.OrganizationDTO;
 import com.enhantec.security.common.model.EHOrganization;
@@ -30,6 +31,7 @@ public class OrganizationController {
 
     @GetMapping("/buildTree")
     public List<EHOrganization> buildTree(){
+        DBHelper.getOrgDBName("0");
         return ehOrganizationService.buildOrgTree();
     }
 

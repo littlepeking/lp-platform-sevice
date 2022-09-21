@@ -1,6 +1,5 @@
 package com.enhantec.security.common.controller;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHLocaleHelper;
@@ -48,7 +47,6 @@ public class TestReceiptController {
 
 
     @PostMapping("/queryByPage")
-    @DS("#header.orgId")
     public Page<Map<String,Object>> findTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);

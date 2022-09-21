@@ -29,6 +29,8 @@
 		<mybatisplus.version>3.5.2</mybatisplus.version>
 		<mybatisplus.generator.ver>3.5.2</mybatisplus.generator.ver>
 		<spring.data.redis.version>2.6.5</spring.data.redis.version>
+		<druid.version>1.2.5</druid.version>
+		<aspectjweaver.version>1.9.7</aspectjweaver.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -77,10 +79,14 @@
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
-			<version>1.9.7</version>
+			<version>${aspectjweaver.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid-spring-boot-starter</artifactId>
+			<version>${druid.version}</version>
 		</dependency>
 		<!-- ldap start -->
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-ldap</artifactId>

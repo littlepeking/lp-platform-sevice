@@ -1,5 +1,6 @@
 package com.enhantec;
 
+import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
 import com.enhantec.common.exception.EHApplicationException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication
+
+//https://blog.csdn.net/superyu1992/article/details/80336928
+@SpringBootApplication(exclude = DruidDataSourceAutoConfigure.class)
 @EnableSwagger2
 @RestController
 @EnableCaching

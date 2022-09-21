@@ -1,8 +1,10 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.enhantec.common.utils.DBConst;
 import com.enhantec.security.common.model.TestReceipt;
 import com.enhantec.security.common.service.TestReceiptService;
 import com.enhantec.security.common.mapper.TestReceiptMapper;
@@ -26,6 +28,7 @@ public class TestReceiptServiceImpl extends ServiceImpl<TestReceiptMapper, TestR
        return getBaseMapper().selectAllById(id);
     }
 
+    @DS(DBConst.DS_CONTEXT_ORG)
     public Page<Map<String,Object>> getReceiptPageData(Page<Map<String,Object>> page, QueryWrapper qw){
 
         return getBaseMapper().selectByReceiptKey(page, qw);

@@ -4,22 +4,22 @@ spring:
 #    url: jdbc:mysql://127.0.0.1:3306/testdb?useUnicode=yes&characterEncoding=utf-8
 #    username: root
 #    password: Passw0rd
+    primary: master #设置默认的数据源或者数据源组,默认值即为master
+    strict: true #严格匹配数据源,默认false. true未匹配到指定数据源时抛异常,false使用默认数据源
     dynamic:
-      primary: 0 #设置默认的数据源或者数据源组,默认值即为master
-      strict: true #严格匹配数据源,默认false. true未匹配到指定数据源时抛异常,false使用默认数据源
+      druid:
+        stat-view-servlet:
+        loginUsername: root
+        loginPassword: enhantec@passw0rd
+        initial-size: 1
+        max-active: 20
+        min-idle: 3
+        max-wait: 1000
+        validation-query: SELECT 1
       datasource:
-        1565464895783219202:
-          url: jdbc:mysql://127.0.0.1:3306/testdb?useUnicode=yes&characterEncoding=utf-8
-          username: root
-          password: Passw0rd
-          driver-class-name: com.mysql.cj.jdbc.Driver
-        0:
-          url: jdbc:mysql://127.0.0.1:3306/testdb?useUnicode=yes&characterEncoding=utf-8
-          username: root
-          password: Passw0rd
-          driver-class-name: com.mysql.cj.jdbc.Driver
-        1565535068007477249:
-          url: jdbc:mysql://127.0.0.1:3306/org_wh01?useUnicode=yes&characterEncoding=utf-8
+        master:
+          url: jdbc:mysql://127.0.0.1:3306/master?useUnicode=yes&characterEncoding=utf-8
+          orgUrlTemplate: jdbc:mysql://127.0.0.1:3306/%s?useUnicode=yes&characterEncoding=utf-8
           username: root
           password: Passw0rd
           driver-class-name: com.mysql.cj.jdbc.Driver
