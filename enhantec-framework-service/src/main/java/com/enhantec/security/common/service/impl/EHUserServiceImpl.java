@@ -1,11 +1,13 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
+import com.enhantec.common.utils.DBConst;
 import com.enhantec.security.common.mapper.EHUserMapper;
 import com.enhantec.security.common.mapper.EHUserRoleMapper;
 import com.enhantec.security.common.model.EHUser;
@@ -32,6 +34,7 @@ import java.util.Map;
 */
 @Service
 @RequiredArgsConstructor
+@DS(DBConst.DS_MASTER)
 public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
     implements EHUserService {
 

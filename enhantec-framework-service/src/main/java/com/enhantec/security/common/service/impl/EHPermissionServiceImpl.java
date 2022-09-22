@@ -1,10 +1,12 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
+import com.enhantec.common.utils.DBConst;
 import com.enhantec.security.common.enums.PermissionType;
 import com.enhantec.security.common.mapper.*;
 import com.enhantec.security.common.model.*;
@@ -22,6 +24,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@DS(DBConst.DS_MASTER)
 public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMapper, EHPermission> implements EHPermissionService {
 
     private final EHRoleMapper roleMapper;

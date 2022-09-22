@@ -1,8 +1,10 @@
 package com.enhantec.security.common.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
+import com.enhantec.common.utils.DBConst;
 import com.enhantec.security.common.mapper.EHOrgPermissionMapper;
 import com.enhantec.security.common.mapper.EHOrganizationMapper;
 import com.enhantec.security.common.model.EHOrgPermission;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@DS(DBConst.DS_MASTER)
 public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationMapper, EHOrganization>
         implements EHOrganizationService {
     private final EHOrgPermissionMapper orgPermissionMapper;
