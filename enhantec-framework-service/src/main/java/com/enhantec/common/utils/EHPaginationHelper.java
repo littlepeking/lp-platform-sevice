@@ -67,8 +67,8 @@ public class EHPaginationHelper {
                     } else {
                         queryWrapper.eq(columnName, f.getValue());
                     }
-
-                    val subQw = Wrappers.query();
+//
+//                    val subQw = Wrappers.query();
 
 
                 }

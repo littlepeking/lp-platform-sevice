@@ -16,6 +16,7 @@ import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @DS(DBConst.DS_MASTER)
+@Transactional(rollbackFor = Exception.class)
 public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationMapper, EHOrganization>
         implements EHOrganizationService {
     private final EHOrgPermissionMapper orgPermissionMapper;
@@ -52,7 +54,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
             }
         }
 
-        return saveOrUpdateAndRetE(organization);
+        return saveOrUpdateTr(organization);
     }
 
     private void validOrg(EHOrganization organization) {
@@ -82,7 +84,8 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
         List<EHRole> roles = roleService.findByOrgId(orgId);
         roles.forEach(r -> roleService.delete(r.getId()));
         //remove org
-        baseMapper.deleteById(orgId);
+        baseMapper.deleteByIdTr(orgId);
+        //baseMapper.deleteByIdTr(getById(orgId));
 
     }
 
@@ -119,7 +122,9 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     public List<EHOrganization> buildOrgTreeByPermId(String permissionId) {
 
-        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
+        orgPermissionMapper.insertTr(EHOrgPermission.builder().build());
+
+        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class)
                 .eq(EHOrgPermission::getPermissionId, permissionId));
 
         List<EHOrganization> organizationList = list();

@@ -27,10 +27,15 @@
     <select id="queryUserRolePageData" resultType="java.util.Map">
         select
         <include refid="Base_Column_List"/>,
-        org.name
+        tr_org.trans_text name
         from eh_role r
         JOIN eh_user_role ur ON r.id = ur.role_id
         JOIN eh_organization org ON r.org_id = org.id
+        JOIN eh_translation tr_org
+        ON tr_org.table_name = 'eh_organization'
+        AND tr_org.column_name = 'name'
+        AND tr_org.trans_id = org.id
+        AND tr_org.language_code = '${languageCode}'
         ${ew.customSqlSegment}
     </select>
 </mapper>

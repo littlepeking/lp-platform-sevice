@@ -41,15 +41,18 @@ public class MultiDataSourceConfig {
 
                 ResultSet rs = statement.executeQuery("select * from EH_ORGANIZATION");
                 while (rs.next()) {
-                    String orgId = rs.getString("ID");
-                    String dbName = rs.getString("DB_NAME");
-                    DataSourceProperty property = new DataSourceProperty();
-                    property.setUsername(username);
-                    property.setPassword(password);
-                    property.setUrl(String.format(orgUrlTemplate, dbName));
-                    property.setDriverClassName(driverClassName);
-                    map.put(orgId, property);
-                    log.info("load datasource {}", orgId);
+                    if(rs.getString("DB_NAME")!=null) {
+                        String orgId = rs.getString("ID");
+                        String dbName = rs.getString("DB_NAME");
+                        DataSourceProperty property = new DataSourceProperty();
+                        property.setUsername(username);
+                        property.setPassword(password);
+                        property.setUrl(String.format(orgUrlTemplate, dbName));
+                        property.setDriverClassName(driverClassName);
+                        map.put(orgId, property);
+                        log.info("===load datasource {}===", orgId);
+                    }
+
                 }
                 return map;
             }

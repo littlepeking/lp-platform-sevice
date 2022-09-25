@@ -3,6 +3,7 @@ package com.enhantec.security.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.exception.EHApplicationException;
 import com.enhantec.common.model.PageParams;
+import com.enhantec.common.utils.EHContextHelper;
 import com.enhantec.common.utils.EHPaginationHelper;
 import com.enhantec.security.common.dto.RoleDTO;
 import com.enhantec.security.common.dto.UserRolesDTO;
@@ -125,7 +126,7 @@ public class RoleController {
 
         val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
 
-        Page<Map<String, Object>> res = ehRoleService.getUserRolePageData(pageInfo, queryWrapper);
+        Page<Map<String, Object>> res = ehRoleService.getUserRolePageData(pageInfo, queryWrapper, EHContextHelper.getLanguageCode());
 
         //DataFormatHelper.formatPageData(res);
 

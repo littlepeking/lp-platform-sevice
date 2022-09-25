@@ -51,7 +51,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
             validRoleName(role);
         }
 
-        return saveOrUpdateAndRetE(role);
+        return saveOrUpdateTr(role);
     }
 
 
@@ -225,9 +225,9 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
     }
 
-    public Page<Map<String, Object>> getUserRolePageData(Page<Map<String, Object>> page, QueryWrapper qw) {
+    public Page<Map<String, Object>> getUserRolePageData(Page<Map<String, Object>> page, QueryWrapper qw, String languageCode) {
 
-        return getBaseMapper().queryUserRolePageData(page, qw);
+        return getBaseMapper().queryUserRolePageData(page, qw, languageCode);
 
     }
 

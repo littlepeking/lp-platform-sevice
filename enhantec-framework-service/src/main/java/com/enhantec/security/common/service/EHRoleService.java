@@ -37,6 +37,6 @@ public interface EHRoleService extends EHBaseService<EHRole> {
 
     Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
 
-    Page<Map<String, Object>> getUserRolePageData(Page<Map<String, Object>> page, QueryWrapper qw);
+    Page<Map<String, Object>> getUserRolePageData(Page<Map<String, Object>> page, QueryWrapper qw, String languageCode);
 
 }

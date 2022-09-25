@@ -124,7 +124,7 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
 
         }
 
-        return saveOrUpdateAndRetE(user);
+        return saveOrUpdateTr(user);
 
     }
 
