@@ -1,19 +1,19 @@
 package com.enhantec.security.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.enhantec.common.model.EHBaseModel;
 import com.enhantec.common.model.EHVersionModel;
+import com.enhantec.config.annotations.TransField;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.With;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Collection;
 
 
@@ -32,6 +32,7 @@ public class EHRole extends EHVersionModel implements GrantedAuthority, Serializ
     private String roleName;
 
     @NotNull
+    @TransField
     private String displayName;
 
     @JsonIgnore

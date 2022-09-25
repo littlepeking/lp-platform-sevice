@@ -31,11 +31,16 @@ public class EhTranslationServiceImpl extends ServiceImpl<EhTranslationMapper, E
 
       if(translation==null && allowUseFallbackLang){
           //try fall back to default language
-          String defLanguageCode = ((AcceptHeaderLocaleResolver)localResolver).getDefaultLocale().toString().replace('_','-');
-          translation = baseMapper.findByTranslationKeys( tableName, columnName, defLanguageCode, transId);
+        translation = findDefault( tableName, columnName, transId);
       }
 
       return translation;
+
+    }
+    public EhTranslation findDefault(String tableName, String columnName, String transId){
+
+            String defLanguageCode = ((AcceptHeaderLocaleResolver)localResolver).getDefaultLocale().toString().replace('_','-');
+            return baseMapper.findByTranslationKeys( tableName, columnName, defLanguageCode, transId);
 
     }
 

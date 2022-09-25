@@ -53,7 +53,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             permission2save.setModuleId(parentPerm.getModuleId());
         }
 
-        return saveOrUpdateTr(permission2save);
+        return saveOrUpdateRetE(permission2save);
     }
 
     private void validAuthority(EHPermission permission) {

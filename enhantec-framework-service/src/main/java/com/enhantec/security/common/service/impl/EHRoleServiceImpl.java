@@ -51,7 +51,7 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
             validRoleName(role);
         }
 
-        return saveOrUpdateTr(role);
+        return saveOrUpdateRetE(role);
     }
 
 

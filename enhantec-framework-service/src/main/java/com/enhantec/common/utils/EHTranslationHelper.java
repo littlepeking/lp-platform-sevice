@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +52,12 @@ public class EHTranslationHelper {
                                 .build();
                     }
                     translationService.saveOrUpdate(translation);
+                    //Set field to default language translation in base table after get translation value from entity.
+                    EhTranslation defTranslation = translationService.findDefault(tableName,columnName,translateId);
+                    if(defTranslation!=null){
+                        field.set(model,defTranslation.getTransText());
+                    }
+
                 }
 
             }
@@ -58,7 +65,7 @@ public class EHTranslationHelper {
         }
     }
 
-    public static <T extends EHBaseModel> void saveTranslation(List<T> models) {
+    public static <T extends EHBaseModel> void saveTranslation(Collection<T> models) {
         models.forEach(model-> saveTranslation(model));
     }
 
@@ -82,6 +89,13 @@ public class EHTranslationHelper {
 
         }
     }
+
+    public static  <E extends Serializable, T extends EHBaseModel> void deleteTranslationByIds(Collection<E> ids, Class<T> clazz) {
+        if(ids!=null || ids.size()>0){
+            ids.forEach(id-> deleteTranslationById(id, clazz));
+        }
+    }
+
 
 
     public static <T extends EHBaseModel> void deleteTranslation(T model) {
@@ -107,7 +121,7 @@ public class EHTranslationHelper {
     }
 
 
-    public static <T extends EHBaseModel> void deleteTranslation(List<T> models) {
+    public static <T extends EHBaseModel> void deleteTranslation(Collection<T> models) {
         models.forEach(model-> deleteTranslation(model));
     }
 
@@ -168,7 +182,7 @@ public class EHTranslationHelper {
         return dataList;
     }
 
-    public static <T extends EHBaseModel> List<T> translate(List<T> models) {
+    public static <T extends EHBaseModel> Collection<T> translate(Collection<T> models) {
 
         models.forEach(model->translate(model));
 

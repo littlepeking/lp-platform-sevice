@@ -54,7 +54,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
             }
         }
 
-        return saveOrUpdateTr(organization);
+        return saveOrUpdateRetE(organization);
     }
 
     private void validOrg(EHOrganization organization) {
@@ -121,8 +121,6 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
     }
 
     public List<EHOrganization> buildOrgTreeByPermId(String permissionId) {
-
-        orgPermissionMapper.insertTr(EHOrgPermission.builder().build());
 
         List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class)
                 .eq(EHOrgPermission::getPermissionId, permissionId));

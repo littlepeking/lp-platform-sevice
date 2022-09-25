@@ -30,6 +30,13 @@ public interface EHBaseMapper<T extends EHBaseModel> extends BaseMapper<T> {
     @Deprecated
     List<T> selectList(@Param("ew") Wrapper<T> queryWrapper);
 
+
+    /**
+     * Use deleteByIdTr to replace this method to handle translation logic.
+     */
+    @Deprecated
+    int deleteById(Serializable id);
+
     /**
      * Use deleteByIdTr to replace this method to handle translation logic.
      */
@@ -181,9 +188,9 @@ public interface EHBaseMapper<T extends EHBaseModel> extends BaseMapper<T> {
 
     }
 
-    default int deleteBatchIdsTr(@Param("coll") Collection<? extends Serializable> idList){
+    default int deleteBatchIdsTr(@Param("coll") Collection<?> idList){
 
-        List<T> rows2Delete = selectBatchIds(idList);
+        List<T> rows2Delete = selectBatchIds((Collection<? extends Serializable>)idList);
         EHTranslationHelper.deleteTranslation(rows2Delete);
         return deleteBatchIds(idList);
     }
@@ -205,10 +212,16 @@ public interface EHBaseMapper<T extends EHBaseModel> extends BaseMapper<T> {
 
         if(entity!=null) {
             EHTranslationHelper.saveTranslation(entity);
+            //update entity translation fields to default language.
+            updateById(entity);
         }
         if(updateWrapper!=null){
             List<T> rowsUpdated = selectList(updateWrapper);
-            EHTranslationHelper.saveTranslation(rowsUpdated);
+            if(rowsUpdated.size()>0) {
+                EHTranslationHelper.saveTranslation(rowsUpdated);
+                //update entity translation fields to default language.
+                rowsUpdated.forEach(row-> updateById(row));
+            }
         }
 
         return res;

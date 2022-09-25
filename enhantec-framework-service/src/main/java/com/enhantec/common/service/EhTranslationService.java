@@ -14,5 +14,7 @@ public interface EhTranslationService extends IService<EhTranslation> {
 
    EhTranslation find(String tableName, String columnName, String languageCode, String transId, boolean allowUseFallbackLang);
 
+   EhTranslation findDefault(String tableName, String columnName, String transId);
+
    void remove(String tableName, String columnName, Serializable transId);
 }
