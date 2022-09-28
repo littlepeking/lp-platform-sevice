@@ -45,6 +45,12 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
     @Override
     protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
 
+        if (authentication.getCredentials() == null) {
+            this.logger.debug("Failed to authenticate since no credentials provided");
+            throw new BadCredentialsException(this.messages
+                    .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
+        }
+
         String lowercaseLogin = authentication.getName();
 
         //      if authentication type is usernamePassword, throw org.springframework.security.core.AuthenticationException();
@@ -58,7 +64,7 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
         EHUser user = ehUserDetailsService.getUserInfo(lowercaseLogin);
 
         if(!user.getAuthType().equals(AuthType.LDAP)){
-            throw new BadCredentialsException("User auth type is not LDAP and skipped by LDAP auth provider, auth failed. Current user auth type:  " + user.getAuthType());
+            throw new BadCredentialsException("User auth type is not match and skipped by LDAP auth provider, auth failed. Current user auth type:  " + user.getAuthType());
         }
 
         boolean success = ldapTemplate.authenticate("", "(sAMAccountName="+lowercaseLogin+")", authentication.getCredentials().toString());

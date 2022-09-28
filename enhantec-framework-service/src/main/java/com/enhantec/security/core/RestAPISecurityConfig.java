@@ -9,6 +9,7 @@ import com.enhantec.security.core.enums.AuthType;
 import com.enhantec.security.core.jwt.JWTFilter;
 import com.enhantec.security.core.jwt.JWTTokenProvider;
 import com.enhantec.security.core.ldap.BasicAuthenticationProvider;
+import com.enhantec.security.core.ldap.FailedAuthenticationProvider;
 import com.enhantec.security.core.ldap.LDAPAuthenticationProvider;
 import com.enhantec.security.core.filter.RestAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,6 +77,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final BasicAuthenticationProvider basicAuthenticationProvider;
 
+    private final FailedAuthenticationProvider failedAuthenticationProvider;
+
     private final JWTTokenProvider jwtTokenProvider;
 
     private final JWTFilter jwtFilter;
@@ -106,6 +109,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
         if(applicationProperties.getSecurity().getAuthTypes().contains(AuthType.LDAP.toString())) {
             auth.authenticationProvider(ldapAuthenticationProvider);
         }
+        auth.authenticationProvider(failedAuthenticationProvider);
+
 
 
 
