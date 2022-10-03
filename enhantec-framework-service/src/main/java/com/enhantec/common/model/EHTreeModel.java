@@ -25,16 +25,16 @@ package com.enhantec.common.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
-@With
-@SuperBuilder(builderMethodName = "EHTreeModelBuilder")
+@SuperBuilder(builderMethodName = "EHTreeModelBuilder",toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class EHTreeModel<T extends EHTreeModel> extends EHVersionModel {

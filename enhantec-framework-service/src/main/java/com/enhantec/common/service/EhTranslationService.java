@@ -32,6 +32,8 @@ import java.io.Serializable;
 * @description 针对表【eh_translation】的数据库操作Service
 * @createDate 2022-09-22 16:07:04
 */
+
+
 public interface EhTranslationService extends IService<EhTranslation> {
 
    EhTranslation find(String tableName, String columnName, String languageCode, String transId, boolean allowUseFallbackLang);

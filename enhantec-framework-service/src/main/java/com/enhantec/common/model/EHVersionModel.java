@@ -28,12 +28,10 @@ import com.baomidou.mybatisplus.annotation.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import lombok.experimental.SuperBuilder;
 
 @Data
-@With
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class EHVersionModel extends EHBaseModel {

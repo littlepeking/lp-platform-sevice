@@ -104,8 +104,7 @@ public class LDAPAuthenticationProvider extends AbstractUserDetailsAuthenticatio
 
         if(!StringUtils.equals(ldapUser.getFullName().toString(),user.getDomainUsername()))
         {
-            userService.saveOrUpdate(user.withDomainUsername(ldapUser.getFullName().toString()));
-            user.setDomainUsername(ldapUser.getFullName().toString());
+            userService.saveOrUpdate(user.toBuilder().domainUsername(ldapUser.getFullName().toString()).build());
         }
 
 //        System.out.println(success);

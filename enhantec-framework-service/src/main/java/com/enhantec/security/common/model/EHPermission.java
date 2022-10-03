@@ -24,10 +24,10 @@ package com.enhantec.security.common.model;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHTreeModel;
+import com.enhantec.config.annotations.TransField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -35,8 +35,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Data
-@With
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("EH_PERMISSION")
@@ -52,7 +51,7 @@ public class EHPermission extends EHTreeModel<EHPermission> implements GrantedAu
     private String authority;
 
     private String moduleId;
-
+    @TransField
     private String displayName;
 
 

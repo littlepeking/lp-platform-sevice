@@ -25,12 +25,12 @@ package com.enhantec.security.common.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHVersionModel;
+import com.enhantec.config.annotations.TransField;
 import com.enhantec.security.core.enums.AuthType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,8 +39,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 @Data
-@SuperBuilder
-@With
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("EH_USER")
@@ -51,9 +50,9 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
     private AuthType authType;
 
     private String domainUsername; //ONLY used in AD
-
+    @TransField
     private String firstName;
-
+    @TransField
     private String lastName;
 
     @JsonIgnore

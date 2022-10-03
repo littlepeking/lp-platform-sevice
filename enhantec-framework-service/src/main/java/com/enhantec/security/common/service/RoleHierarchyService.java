@@ -43,7 +43,7 @@ public class RoleHierarchyService {
 
             List<EHRole> roles = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class));
 
-        return roles.stream().flatMap(role -> permissionService.findByRoleId(role.getId()).stream().map(
+        return roles.stream().flatMap(role -> permissionService.findByRoleIdWithoutTranslate(role.getId()).stream().map(
                 ehPermission -> role.getAuthority() + " > " + ehPermission.getAuthority() )).collect(Collectors.joining(
                 "\n")
         );

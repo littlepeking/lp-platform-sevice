@@ -29,7 +29,6 @@ import com.enhantec.config.annotations.TransField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
@@ -41,7 +40,6 @@ import java.io.Serializable;
  */
 @TableName(value ="eh_organization")
 @Data
-@With
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.exception.EHApplicationException;
+import com.enhantec.common.service.EhTranslationService;
 import com.enhantec.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.common.utils.DBConst;
 import com.enhantec.security.common.enums.PermissionType;
@@ -37,6 +38,7 @@ import com.enhantec.security.core.annotation.ReloadRoleHierarchy;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -59,6 +61,8 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     private final EHOrgPermissionMapper orgPermissionMapper;
 
+    private final EhTranslationService translationService;
+
     public EHPermission createOrUpdate(EHPermission permission) {
 
         validAuthority(permission);
@@ -66,12 +70,12 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
         EHPermission permission2save = permission;
 
         if (!StringUtils.isEmpty(permission.getId())) {
-
-            permission2save = baseMapper.selectById(permission.getId());
             //Existing permission can only allow update display name.
-            permission2save.setDisplayName(permission.getDisplayName());
+            //必须使用toBuilder方法加载原model对象并赋值，因为如果直接使用selectByIdTr加载对象再调用setDisplayName设置属性，则会导致数据无法正常保存，因为MybatisPlus会在保存之前重新从后台加载该对象，导致出现数据保存后没有发生变化的问题。
+            permission2save = baseMapper.selectByIdTr(permission.getId()).toBuilder().displayName(permission.getDisplayName()).build();
+
         }else {
-            EHPermission parentPerm = permissionMapper.selectById(permission.getParentId());
+            EHPermission parentPerm = permissionMapper.selectByIdTr(permission.getParentId());
             permission2save.setModuleId(parentPerm.getModuleId());
         }
 
@@ -94,7 +98,7 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
                     if (count > 0)
                         throw new EHApplicationException("s-perm-AuthNameAlreadyUsed", permission.getAuthority());
                 }else {
-                    EHPermission existPerm = baseMapper.selectById(permission.getId());
+                    EHPermission existPerm = baseMapper.selectByIdTr(permission.getId());
                     if(!existPerm.getAuthority().equals(permission.getAuthority())){
                         throw new EHApplicationException("s-perm-AuthCannotChange");
                     }
@@ -112,23 +116,23 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     public void deleteById(String permissionId) {
 
-        EHPermission permission = permissionMapper.selectById(permissionId);
+        EHPermission permission = permissionMapper.selectByIdTr(permissionId);
 
         if (permission == null) throw new EHApplicationException("s-perm-permIdNotExist", permissionId);
 
-        List<EHPermission> childPerms = permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class).eq(EHPermission::getParentId, permissionId));
+        List<EHPermission> childPerms = permissionMapper.selectListTr(Wrappers.lambdaQuery(EHPermission.class).eq(EHPermission::getParentId, permissionId));
 
         if(childPerms.size()>0) throw new EHApplicationException("s-perm-permCannotDeleteWithChildren", permission.getDisplayName());
 
-        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class).eq(EHOrgPermission::getPermissionId, permissionId));
+        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class).eq(EHOrgPermission::getPermissionId, permissionId));
 
         if (!CollectionUtils.isEmpty(orgPermissionList)) {
-            List<String> orgIds = orgPermissionList.stream().map(op -> op.getOrgId()).collect(Collectors.toList());
-            List<EHOrganization> orgs = organizationMapper.selectBatchIds( orgIds);
+            List<String> orgIds = orgPermissionList.stream().map(EHOrgPermission::getOrgId).collect(Collectors.toList());
+            List<EHOrganization> orgs = organizationMapper.selectBatchIdsTr( orgIds);
 
-            throw new EHApplicationException("s-perm-permStillUsedByOrg", permission.getDisplayName(), orgs.stream().map(org -> org.getName()).collect(Collectors.joining(",")));
+            throw new EHApplicationException("s-perm-permStillUsedByOrg", permission.getDisplayName(), orgs.stream().map(EHOrganization::getName).collect(Collectors.joining(",")));
         } else {
-            permissionMapper.deleteById(permissionId);
+            permissionMapper.deleteByIdTr(permissionId);
         }
 
 
@@ -138,16 +142,16 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         if(permissionIds!=null && permissionIds.size()>0) {
 
-            permissionIds.stream().forEach(p -> deleteById(p));
+            permissionIds.forEach(this::deleteById);
         }
     }
 
 
     public List<EHPermission> findAll(boolean withDirectories) {
         if (withDirectories) {
-            return permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class));
+            return permissionMapper.selectListTr(Wrappers.lambdaQuery(EHPermission.class));
         } else {
-            return permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class)
+            return permissionMapper.selectListTr(Wrappers.lambdaQuery(EHPermission.class)
                     .eq(EHPermission::getType, PermissionType.Permission.toString()));
         }
     }
@@ -156,28 +160,24 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
     public List<EHPermission> rebuildPermissionTree() {
         List<EHPermission> permissionList = findAll(true);
         EHPermission rootPerm = buildFullPermissionTree(permissionList, true);
-        return   Arrays.asList(new EHPermission[]{rootPerm});
+        return Collections.singletonList(rootPerm);
 
     }
 
     public List<EHPermission> rebuildOrgPermissionTree(String orgId) {
 
-        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
+        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class)
                 .eq(EHOrgPermission::getOrgId, orgId));
 
         List<EHPermission> permissionList = findAll(true);
 
-        permissionList.stream().forEach(p -> {
-
-            p.setCheckStatus(orgPermissionList.stream().anyMatch(op -> op.getPermissionId().equals(p.getId())) ? true : false);
-
-        });
+        permissionList.forEach(p -> p.setCheckStatus(orgPermissionList.stream().anyMatch(op -> op.getPermissionId().equals(p.getId()))));
 
         EHPermission rootDirectory = buildFullPermissionTree(permissionList, false);
 
         recursivelyCalculateCheckStatus(rootDirectory);
 
-        return Arrays.asList(new EHPermission[]{rootDirectory}) ;
+        return Collections.singletonList(rootDirectory);
 
     }
 
@@ -186,13 +186,13 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     public List<EHPermission> rebuildRolePermissionTree(String roleId) {
 
-        EHRole role = roleMapper.selectById(roleId);
+        EHRole role = roleMapper.selectByIdTr(roleId);
 
         if (role == null) throw new EHApplicationException("s-role-roleIdNotExist",roleId);
 
         List<EHPermission> orgPermissionsList = findByOrgId(role.getOrgId());
 
-        List<EHPermission> fullDirectoryList = permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class)
+        List<EHPermission> fullDirectoryList = permissionMapper.selectListTr(Wrappers.lambdaQuery(EHPermission.class)
                 .eq(EHPermission::getType, PermissionType.Directory.toString()));
 
         List<EHPermission> orgPermsAndFullDirsList = Stream.concat(orgPermissionsList.stream(), fullDirectoryList.stream())
@@ -200,17 +200,13 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         List<EHPermission> rolePermissionsList = findByRoleId(role.getId());
 
-        orgPermsAndFullDirsList.stream().forEach(op -> {
-
-            op.setCheckStatus(rolePermissionsList.stream().anyMatch(rp -> op.getId().equals(rp.getId())) ? true : false);
-
-        });
+        orgPermsAndFullDirsList.forEach(op -> op.setCheckStatus(rolePermissionsList.stream().anyMatch(rp -> op.getId().equals(rp.getId()))));
 
         EHPermission rootDirectory = buildFullPermissionTree(orgPermsAndFullDirsList, false);
 
         recursivelyCalculateCheckStatus(rootDirectory);
 
-        return Arrays.asList(new EHPermission[]{rootDirectory}) ;
+        return Collections.singletonList(rootDirectory);
 
     }
 
@@ -303,25 +299,39 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
     /**
      * All permissions which loaded from this method are ONLY the type P as all related associated directories can be inferred from parentId of table eh_permission.
      *
-     * @param orgId
-     * @return
      */
     public List<EHPermission> findByOrgId(String orgId) {
 
-        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
+        List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class)
                 .eq(EHOrgPermission::getOrgId, orgId));
 
         Set<String> permissionSet = orgPermissionList.stream().map(EHOrgPermission::getPermissionId).collect(Collectors.toSet());
 
         if (permissionSet.size() > 0) {
-            return permissionMapper.selectList(Wrappers.lambdaQuery(EHPermission.class).in(EHPermission::getId, permissionSet));
+            return permissionMapper.selectListTr(Wrappers.lambdaQuery(EHPermission.class).in(EHPermission::getId, permissionSet));
         } else {
             return Collections.EMPTY_LIST;
         }
     }
 
 
+    @DependsOn({"EhTranslationService"})
     public List<EHPermission> findByRoleId(String roleId) {
+        val rolePermissionLambdaQueryWrapper = Wrappers.lambdaQuery(EHRolePermission.class).eq(EHRolePermission::getRoleId, roleId);
+        
+        List<EHRolePermission> rolePermissionList = rolePermissionMapper.selectList(rolePermissionLambdaQueryWrapper);
+
+        Set<String> permissionIds = rolePermissionList.stream().map(EHRolePermission::getPermissionId).collect(Collectors.toSet());
+
+        if (permissionIds.size() > 0) {
+            return permissionMapper.selectListTr(Wrappers.lambdaQuery(EHPermission.class).in(EHPermission::getId, permissionIds));
+        } else {
+            return Collections.EMPTY_LIST;
+        }
+
+    }
+
+    public List<EHPermission> findByRoleIdWithoutTranslate(String roleId) {
         val rolePermissionLambdaQueryWrapper = Wrappers.lambdaQuery(EHRolePermission.class).eq(EHRolePermission::getRoleId, roleId);
 
         List<EHRolePermission> rolePermissionList = rolePermissionMapper.selectList(rolePermissionLambdaQueryWrapper);
@@ -338,13 +348,13 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
     public void updateOrgPermissions(String orgId, List<String> updatedPermissionIds) {
 
-        EHOrganization org = organizationMapper.selectById(orgId);
+        EHOrganization org = organizationMapper.selectByIdTr(orgId);
 
         if (org == null) throw new EHApplicationException("s-org-idNotExist",orgId);
 
 
-        List<String> existPermissionIds = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
-                .eq(EHOrgPermission::getOrgId, orgId)).stream().map(op -> op.getPermissionId()).collect(Collectors.toList());
+        List<String> existPermissionIds = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class)
+                .eq(EHOrgPermission::getOrgId, orgId)).stream().map(EHOrgPermission::getPermissionId).collect(Collectors.toList());
 
         List<String> toBeDeletedPermissionIds = existPermissionIds.stream().filter(ep -> !updatedPermissionIds.contains(ep)).collect(Collectors.toList());
 
@@ -362,58 +372,58 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
             );
 
             String permId = PermId2RolePermsMap.keySet().iterator().next(); //Only show one permId error information one time.
-            EHPermission permission = permissionMapper.selectById(permId);
-            List<String> roleIds = PermId2RolePermsMap.get(permId).stream().map(rp -> rp.getRoleId()).collect(Collectors.toList());
-            List<String> roleNamesInUse = roleMapper.selectBatchIds(roleIds).stream().map(r -> r.getRoleName()).collect(Collectors.toList());
-            throw new EHApplicationException("s-perm-permStillUsedByRole", permission.getAuthority() , roleNamesInUse.stream().collect(Collectors.joining(",")));
+            EHPermission permission = permissionMapper.selectByIdTr(permId);
+            List<String> roleIds = PermId2RolePermsMap.get(permId).stream().map(EHRolePermission::getRoleId).collect(Collectors.toList());
+            List<String> roleNamesInUse = roleMapper.selectBatchIdsTr(roleIds).stream().map(EHRole::getRoleName).collect(Collectors.toList());
+            throw new EHApplicationException("s-perm-permStillUsedByRole", permission.getAuthority() , String.join(",", roleNamesInUse));
         }
 
         if (toBeDeletedPermissionIds.size() > 0) {
-            orgPermissionMapper.delete(Wrappers.lambdaQuery(EHOrgPermission.class)
+            orgPermissionMapper.deleteTr(Wrappers.lambdaQuery(EHOrgPermission.class)
                     .eq(EHOrgPermission::getOrgId, orgId)
                     .in(EHOrgPermission::getPermissionId, toBeDeletedPermissionIds));
         }
 
 
-        toBeInsertedPermissionIds.stream().forEach(permissionId ->
+        toBeInsertedPermissionIds.forEach(permissionId ->
         {
             EHOrgPermission orgPermission = EHOrgPermission.builder().permissionId(permissionId).orgId(orgId).build();
-            orgPermissionMapper.insert(orgPermission);
+            orgPermissionMapper.insertTr(orgPermission);
         });
 
     }
 
     public void updatePermissionOrgs(String permId, List<String> updatedOrgIds) {
 
-        EHPermission perm = permissionMapper.selectById(permId);
+        EHPermission perm = permissionMapper.selectByIdTr(permId);
 
         if (perm == null) throw new EHApplicationException("s-perm-permIdNotExist",permId);
 
-        List<String> existsOrgIdsInUse = orgPermissionMapper.selectList(Wrappers.lambdaQuery(EHOrgPermission.class)
-                .eq(EHOrgPermission::getPermissionId, permId)).stream().map(op -> op.getOrgId()).collect(Collectors.toList());
+        List<String> existsOrgIdsInUse = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class)
+                .eq(EHOrgPermission::getPermissionId, permId)).stream().map(EHOrgPermission::getOrgId).collect(Collectors.toList());
 
         List<String> toBeDeletedOrgIds = existsOrgIdsInUse.stream().filter(eo -> !updatedOrgIds.contains(eo)).collect(Collectors.toList());
 
         List<String> toBeInsertedOrgIds = updatedOrgIds.stream().filter(np -> !existsOrgIdsInUse.contains(np)).collect(Collectors.toList());
 
 
-        if(toBeDeletedOrgIds!=null && toBeDeletedOrgIds.size()>0) {
+        if(toBeDeletedOrgIds.size()>0) {
 
             toBeDeletedOrgIds.forEach(orgId -> {
 
                 List<EHRolePermission> existRolePermissionList = rolePermissionMapper.findByPermIdAndOrgId(permId, orgId);
 
                 if (existRolePermissionList.size() > 0) {
-                    List<String> roleIds = existRolePermissionList.stream().map(rp -> rp.getRoleId()).collect(Collectors.toList());
-                    List<String> roleNames = roleMapper.selectList(Wrappers.lambdaQuery(EHRole.class)
-                            .in(EHRole::getId, roleIds)).stream().map(r -> r.getRoleName()).collect(Collectors.toList());
-                    EHOrganization organization = organizationMapper.selectById(orgId);
-                    throw new EHApplicationException("s-perm-permStillUsedByOrgAndRole", perm.getAuthority(), organization.getName() , roleNames.stream().collect(Collectors.joining(",")));
+                    List<String> roleIds = existRolePermissionList.stream().map(EHRolePermission::getRoleId).collect(Collectors.toList());
+                    List<String> roleNames = roleMapper.selectListTr(Wrappers.lambdaQuery(EHRole.class)
+                            .in(EHRole::getId, roleIds)).stream().map(EHRole::getRoleName).collect(Collectors.toList());
+                    EHOrganization organization = organizationMapper.selectByIdTr(orgId);
+                    throw new EHApplicationException("s-perm-permStillUsedByOrgAndRole", perm.getAuthority(), organization.getName() , String.join(",", roleNames));
 
                 }
 
 
-                orgPermissionMapper.delete(Wrappers.lambdaQuery(EHOrgPermission.class)
+                orgPermissionMapper.deleteTr(Wrappers.lambdaQuery(EHOrgPermission.class)
                         .eq(EHOrgPermission::getOrgId, orgId)
                         .eq(EHOrgPermission::getPermissionId, permId));
 
@@ -422,10 +432,10 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
 
         }
 
-        toBeInsertedOrgIds.stream().forEach(orgId ->
+        toBeInsertedOrgIds.forEach(orgId ->
             {
                 EHOrgPermission orgPermission = EHOrgPermission.builder().permissionId(permId).orgId(orgId).build();
-                orgPermissionMapper.insert(orgPermission);
+                orgPermissionMapper.insertTr(orgPermission);
             });
 
 
@@ -434,25 +444,25 @@ public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMappe
     @ReloadRoleHierarchy
     public void updateRolePermissions(String roleId, List<String> updatedPermissionIds) {
 
-        EHRole role = roleMapper.selectOne(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getId, roleId));
+        EHRole role = roleMapper.selectOneTr(Wrappers.lambdaQuery(EHRole.class).eq(EHRole::getId, roleId));
 
         if (role == null) throw new EHApplicationException("s-role-roleIdNotExist", roleId);
 
-        rolePermissionMapper.delete(Wrappers.lambdaQuery(EHRolePermission.class).eq(EHRolePermission::getRoleId, roleId));
+        rolePermissionMapper.deleteTr(Wrappers.lambdaQuery(EHRolePermission.class).eq(EHRolePermission::getRoleId, roleId));
 
         if (updatedPermissionIds != null && updatedPermissionIds.size() > 0) {
 
             updatedPermissionIds.forEach(permId -> {
                 //check if org has the permission before insert.
-                EHOrgPermission orgPermission = orgPermissionMapper.selectOne(Wrappers.lambdaQuery(EHOrgPermission.class)
+                EHOrgPermission orgPermission = orgPermissionMapper.selectOneTr(Wrappers.lambdaQuery(EHOrgPermission.class)
                         .eq(EHOrgPermission::getPermissionId, permId)
                         .eq(EHOrgPermission::getOrgId, role.getOrgId()));
 
                 Optional.ofNullable(orgPermission).ifPresentOrElse(
-                        (p) -> rolePermissionMapper.insert(EHRolePermission.builder().roleId(roleId).permissionId(permId).build())
+                        (p) -> rolePermissionMapper.insertTr(EHRolePermission.builder().roleId(roleId).permissionId(permId).build())
                         ,
                         () -> {
-                            EHOrganization org = organizationMapper.selectById(role.getId());
+                            EHOrganization org = organizationMapper.selectByIdTr(role.getId());
                             throw new EHApplicationException("s-perm-permIdNotAssigned2Org", permId, org.getName());
                         }
                 );

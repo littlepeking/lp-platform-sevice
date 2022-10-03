@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-@Transactional
+@Transactional(rollbackFor = Exception.class)
 public interface EHPermissionService extends IService<EHPermission> {
 
     List<EHPermission> findAll(boolean withDirectories);
@@ -38,6 +38,8 @@ public interface EHPermissionService extends IService<EHPermission> {
     List<EHPermission> findByOrgId(String orgId);
 
     List<EHPermission> findByRoleId(String roleId);
+
+    public List<EHPermission> findByRoleIdWithoutTranslate(String roleId);
 
     List<EHPermission> rebuildPermissionTree();
 

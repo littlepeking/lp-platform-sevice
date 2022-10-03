@@ -30,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -41,7 +40,6 @@ import java.util.Collection;
 
 @Data
 @SuperBuilder
-@With
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("EH_ROLE")
