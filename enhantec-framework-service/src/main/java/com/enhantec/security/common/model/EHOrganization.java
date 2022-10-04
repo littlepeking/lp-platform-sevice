@@ -25,7 +25,7 @@ package com.enhantec.security.common.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHTreeModel;
-import com.enhantec.config.annotations.TransField;
+import com.enhantec.config.annotations.EHTransField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -50,31 +50,31 @@ public class EHOrganization extends EHTreeModel<EHOrganization> implements Seria
      * 
      */
     @NotNull
-    @TransField
+    @EHTransField
     private String name;
 
     /**
      * 
      */
-    @TransField
+    @EHTransField
     private String address1;
 
     /**
      * 
      */
-    @TransField
+    @EHTransField
     private String address2;
 
     /**
      * 
      */
-    @TransField
+    @EHTransField
     private String contact1;
 
     /**
      * 
      */
-    @TransField
+    @EHTransField
     private String contact2;
 
     @TableField(exist = false)

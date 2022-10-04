@@ -35,6 +35,7 @@ import com.enhantec.security.common.service.EHOrganizationService;
 import com.enhantec.security.common.service.EHPermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -66,22 +67,25 @@ public class PermissionController {
     public List<EHPermission> findByRoleId(@PathVariable @NotNull String roleId){
         return permissionService.findByRoleId(roleId);
     }
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_PERMISSION')")
     @GetMapping("/buildTree")
     public List<EHPermission> buildTree(){
         return permissionService.rebuildPermissionTree();
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
     @GetMapping("/buildTreeByOrgId")
     public List<EHPermission> buildTreeByOrgId(@RequestParam @NotNull String orgId){
         return permissionService.rebuildOrgPermissionTree(orgId);
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ROLE')")
     @GetMapping("/buildTreeByRoleId")
     public List<EHPermission> buildTreeByRoleId(@RequestParam @NotNull String roleId){
         return permissionService.rebuildRolePermissionTree(roleId);
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ROLE')")
     @PostMapping("/createOrUpdate")
     public EHPermission createOrUpdate(@Valid @RequestBody PermissionDTO permissionDTO){
 
@@ -96,23 +100,27 @@ public class PermissionController {
         return permissionService.createOrUpdate(permission);
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_PERMISSION')")
     @DeleteMapping("")
     public void delete(@RequestBody @NotNull List<String> permissionIds){
         permissionService.deleteByIds(permissionIds);
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
     @PostMapping("/updateOrgPermissions")
     public List<EHPermission> updateOrgPermissions(@Valid @RequestBody OrgPermissionsDTO orgPermissionsDTO){
         permissionService.updateOrgPermissions(orgPermissionsDTO.getOrgId(),orgPermissionsDTO.getPermissionIds());
         return permissionService.rebuildOrgPermissionTree(orgPermissionsDTO.getOrgId());
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_PERMISSION')")
     @PostMapping("/updatePermissionOrgs")
     public List<EHOrganization> updatePermissionOrgs(@Valid @RequestBody PermissionOrgsDTO permissionOrgsDTO){
         permissionService.updatePermissionOrgs(permissionOrgsDTO.getPermissionId(),permissionOrgsDTO.getOrgIds());
         return organizationService.buildOrgTreeByPermId(permissionOrgsDTO.getPermissionId());
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ROLE')")
     @PostMapping("/updateRolePermissions")
     public List<EHPermission> updateRolePermissions(@Valid @RequestBody RolePermissionsDTO rolePermissionDTO){
         permissionService.updateRolePermissions(rolePermissionDTO.getRoleId(),rolePermissionDTO.getPermissionIds());

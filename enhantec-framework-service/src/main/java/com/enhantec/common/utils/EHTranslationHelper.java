@@ -27,7 +27,7 @@ import com.enhantec.common.model.EHBaseModel;
 import com.enhantec.common.model.EhTranslation;
 import com.enhantec.common.service.EhTranslationService;
 import com.enhantec.config.TransFieldConfig;
-import com.enhantec.config.annotations.TransField;
+import com.enhantec.config.annotations.EHTransField;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,7 +45,7 @@ public class EHTranslationHelper {
         for (Field field : model.getClass().getDeclaredFields()) {
             Class type = field.getType();
             String columnName = field.getName();
-            if (type == String.class && field.isAnnotationPresent(TransField.class)) {
+            if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
 
                 EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
@@ -61,10 +61,14 @@ public class EHTranslationHelper {
                 Object text = field.get(model);
 
                 if (text != null) {
-                    EhTranslation translation = translationService.find(tableName, columnName, languageCode, translateId,false);
-                    if (translation != null) {
-                        translation.setTransText(text.toString());
-                    } else {
+                    EhTranslation translation;
+                    if(translateId!=null) {
+                        translation = translationService.find(tableName, columnName, languageCode, translateId, false);
+                        if (translation != null) {
+                            translation.setTransText(text.toString());
+                        }
+                    }
+                    else {
                         translation = EhTranslation.builder().
                                 tableName(tableName).
                                 columnName(columnName).
@@ -96,7 +100,7 @@ public class EHTranslationHelper {
         for (Field field : clazz.getDeclaredFields()) {
             Class type = field.getType();
             String columnName = field.getName();
-            if (type == String.class && field.isAnnotationPresent(TransField.class)) {
+            if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
 
                 EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
@@ -125,7 +129,7 @@ public class EHTranslationHelper {
         for (Field field : model.getClass().getDeclaredFields()) {
             Class type = field.getType();
             String columnName = field.getName();
-            if (type == String.class && field.isAnnotationPresent(TransField.class)) {
+            if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
 
                 EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
@@ -150,33 +154,35 @@ public class EHTranslationHelper {
     @SneakyThrows
     public static <T extends EHBaseModel> T translate(T model) {
 
+        if(model!=null) {
 
-        for (Field field : model.getClass().getDeclaredFields()) {
-            Class type = field.getType();
-            String columnName = field.getName();
-            if (type == String.class && field.isAnnotationPresent(TransField.class)) {
+            for (Field field : model.getClass().getDeclaredFields()) {
+                Class type = field.getType();
+                String columnName = field.getName();
+                if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
 
-                EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
+                    EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
-                String languageCode = EHContextHelper.getLanguageCode();
+                    String languageCode = EHContextHelper.getLanguageCode();
 
-                String translateId = model.getId();
+                    String translateId = model.getId();
 
-                TableName tableNameAnnotation = model.getClass().getAnnotation(TableName.class);
+                    TableName tableNameAnnotation = model.getClass().getAnnotation(TableName.class);
 
-                String tableName = tableNameAnnotation.value();
+                    String tableName = tableNameAnnotation.value();
 
-                EhTranslation translation = translationService.find(tableName, columnName, languageCode, translateId,true);
+                    EhTranslation translation = translationService.find(tableName, columnName, languageCode, translateId, true);
 
-                if (translation != null) {
+                    if (translation != null) {
 
-                    field.setAccessible(true);
-                    field.set(model, translation.getTransText());
+                        field.setAccessible(true);
+                        field.set(model, translation.getTransText());
+
+                    }
 
                 }
 
             }
-
         }
 
         return model;

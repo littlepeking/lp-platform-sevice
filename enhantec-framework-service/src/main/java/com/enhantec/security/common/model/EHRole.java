@@ -25,7 +25,7 @@ package com.enhantec.security.common.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHVersionModel;
-import com.enhantec.config.annotations.TransField;
+import com.enhantec.config.annotations.EHTransField;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -52,7 +52,7 @@ public class EHRole extends EHVersionModel implements GrantedAuthority, Serializ
     private String roleName;
 
     @NotNull
-    @TransField
+    @EHTransField
     private String displayName;
 
     @JsonIgnore

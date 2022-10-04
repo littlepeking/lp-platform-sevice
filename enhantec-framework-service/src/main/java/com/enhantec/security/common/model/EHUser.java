@@ -25,7 +25,7 @@ package com.enhantec.security.common.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHVersionModel;
-import com.enhantec.config.annotations.TransField;
+import com.enhantec.config.annotations.EHTransField;
 import com.enhantec.security.core.enums.AuthType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -50,9 +50,9 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
     private AuthType authType;
 
     private String domainUsername; //ONLY used in AD
-    @TransField
+    @EHTransField
     private String firstName;
-    @TransField
+    @EHTransField
     private String lastName;
 
     @JsonIgnore

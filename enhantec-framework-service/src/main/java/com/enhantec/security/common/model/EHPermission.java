@@ -24,7 +24,7 @@ package com.enhantec.security.common.model;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHTreeModel;
-import com.enhantec.config.annotations.TransField;
+import com.enhantec.config.annotations.EHTransField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,7 +51,7 @@ public class EHPermission extends EHTreeModel<EHPermission> implements GrantedAu
     private String authority;
 
     private String moduleId;
-    @TransField
+    @EHTransField
     private String displayName;
 
 

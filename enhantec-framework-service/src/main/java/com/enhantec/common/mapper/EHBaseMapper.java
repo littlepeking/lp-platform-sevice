@@ -161,9 +161,12 @@ public interface EHBaseMapper<T extends EHBaseModel> extends BaseMapper<T> {
     @Transactional(rollbackFor = Exception.class)
     default int insertTr(T entity){
 
+        int result = insert(entity);
+
         EHTranslationHelper.saveTranslation(entity);
 
-        return insert(entity);
+        return result;
+
     }
     default int deleteByIdTr(Serializable id){
 

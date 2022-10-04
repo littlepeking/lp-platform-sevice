@@ -41,30 +41,34 @@ public class OrganizationController {
 
     private final EHOrganizationService ehOrganizationService;
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
     @GetMapping("/findAll")
     public List<EHOrganization> findAll() {
         return ehOrganizationService.list();
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
     @GetMapping("/buildTree")
     public List<EHOrganization> buildTree(){
         return ehOrganizationService.buildOrgTree();
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/buildTreeByUserId")
     public List<EHOrganization> buildTreeByUserId(){
         //System.out.println(EHContextHelper.getUser().toString());
         return ehOrganizationService.buildOrgTreeByUserId(EHContextHelper.getUser().getId());
     }
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_PERMISSION')")
     @GetMapping("/buildTreeByPermId")
     public List<EHOrganization> buildTreeByPermId(@RequestParam String permId){
         return ehOrganizationService.buildOrgTreeByPermId(permId);
     }
 
-    @PostMapping("/createOrUpdate")
+
     //@PreAuthorize("hasAnyAuthority('SECURITY_ORG','SECURITY_USER')")
     @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
+    @PostMapping("/createOrUpdate")
     public EHOrganization createOrUpdate(@Valid @RequestBody OrganizationDTO organizationDTO) {
 
         EHOrganization organization = EHOrganization.builder()
@@ -82,6 +86,7 @@ public class OrganizationController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
     @DeleteMapping("/{orgId}")
     public void delete(@PathVariable @NotNull String orgId) {
         ehOrganizationService.deleteById(orgId);

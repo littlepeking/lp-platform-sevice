@@ -31,6 +31,7 @@ import com.enhantec.security.common.service.EHUserDetailsService;
 import com.enhantec.security.common.service.EHUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +51,7 @@ public class UserController {
 
     private final EHUserDetailsService ehUserDetailsService;
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/userInfo")
     //@PreAuthorize("hasAuthority('USER_READ')")
     public Object getCurrentUser(Authentication authentication) {
@@ -57,17 +59,19 @@ public class UserController {
         return ehUserDetailsService.getUserInfo(authentication.getName());
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @GetMapping("/findById/{id}")
     public EHUser findById(@NotNull @PathVariable String id){
         return ehUserService.getById(id);
     }
 
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @GetMapping("/findAll")
     public List<EHUser> findAll(){
         return ehUserService.findAll();
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @PostMapping("/createOrUpdate")
     public EHUser createOrUpdate(@Valid @RequestBody UserDTO userDTO){
 
@@ -87,7 +91,7 @@ public class UserController {
         return ehUserService.createOrUpdate(user);
     }
 
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @DeleteMapping("")
     public void delete(@RequestParam @NotNull List<String> userIds) {
 
@@ -106,6 +110,7 @@ public class UserController {
         ehUserService.enable(userId);
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @PostMapping("/queryByPage")
     public Page<Map<String,Object>> queryByPage(@RequestBody PageParams pageParams){
 

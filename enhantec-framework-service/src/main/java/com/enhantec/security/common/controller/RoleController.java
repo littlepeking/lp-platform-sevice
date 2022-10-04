@@ -34,6 +34,7 @@ import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.service.EHRoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -54,6 +55,7 @@ public class RoleController {
     }
 
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_ROLE')")
     @GetMapping("/findById/{id}")
     public EHRole findById(@NotNull @PathVariable String id){
         return ehRoleService.getById(id);
@@ -85,7 +87,7 @@ public class RoleController {
         return ehRoleService.findByOrgIdAndUserId(orgId, userId, false);
     }
 
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_ROLE')")
     @PostMapping("/createOrUpdate")
     public EHRole createOrUpdate(@Valid @RequestBody RoleDTO roleDTO) {
 
@@ -99,25 +101,25 @@ public class RoleController {
         return ehRoleService.createOrUpdate(role);
 
     }
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_ROLE')")
     @DeleteMapping("")
     public void delete(@RequestParam @NotNull String roleId) {
         ehRoleService.delete(roleId);
     }
 
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @PostMapping("/assignToUser")
     public EHUser assignToUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
         return ehRoleService.assignToUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
     }
 
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @PostMapping("/revokeFromUser")
     public EHUser revokeFromUser(@Valid @RequestBody UserRolesDTO userRolesDTO) {
         return ehRoleService.revokeFromUser(userRolesDTO.getUserId(), userRolesDTO.getRoleIds());
     }
 
-
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @PostMapping("/queryByPage")
     public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
 
@@ -135,6 +137,7 @@ public class RoleController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @PostMapping("/queryUserRoleByPage")
     public Page<Map<String, Object>> queryUserRoleByPage(@RequestBody PageParams pageParams) {
 

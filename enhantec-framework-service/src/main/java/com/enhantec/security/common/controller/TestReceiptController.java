@@ -31,6 +31,7 @@ import com.enhantec.security.common.service.TestReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.context.MessageSource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -63,7 +64,7 @@ public class TestReceiptController {
         return EHLocaleHelper.getMsg("c-testArgs","arg1");
     }
 
-
+    @PreAuthorize("hasAnyAuthority('WM_ASN')")
     @PostMapping("/queryByPage")
     public Page<Map<String,Object>> findTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
 
