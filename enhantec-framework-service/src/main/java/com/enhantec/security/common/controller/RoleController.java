@@ -129,7 +129,7 @@ public class RoleController {
 
         val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
 
-        Page<Map<String, Object>> res = ehRoleService.getPageData(pageInfo, queryWrapper);
+        Page<Map<String, Object>> res = ehRoleService.getRolePageData(pageInfo, queryWrapper, EHContextHelper.getLanguageCode());
 
         //DataFormatHelper.formatPageData(res);
 

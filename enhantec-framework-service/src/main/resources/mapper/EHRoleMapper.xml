@@ -16,26 +16,44 @@
     </sql>
 
 
-    <select id="queryRolePageData" resultType="java.util.Map">
-        select
-        <include refid="Base_Column_List"/>,
-        from eh_role r
-        ${ew.customSqlSegment}
-        AND orgId = ${orgId}
-    </select>
-
     <select id="queryUserRolePageData" resultType="java.util.Map">
         select
-        <include refid="Base_Column_List"/>,
-        tr_org.trans_text name
-        from eh_role r
+        r.id, r.role_name,
+        CASE WHEN tr_role.trans_text IS NULL THEN r.display_name ELSE tr_role.trans_text END role_display_name,
+        CASE WHEN tr_org.trans_text IS NULL THEN org.name ELSE tr_org.trans_text END org_name
+        FROM eh_role r
         JOIN eh_user_role ur ON r.id = ur.role_id
         JOIN eh_organization org ON r.org_id = org.id
-        JOIN eh_translation tr_org
+        LEFT JOIN eh_translation tr_org
         ON tr_org.table_name = 'eh_organization'
         AND tr_org.column_name = 'name'
         AND tr_org.trans_id = org.id
         AND tr_org.language_code = '${languageCode}'
+        LEFT JOIN eh_translation tr_role
+        ON tr_role.table_name = 'eh_role'
+        AND tr_role.column_name = 'display_name'
+        AND tr_role.trans_id = r.id
+        AND tr_role.language_code = '${languageCode}'
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="queryRolePageData" resultType="java.util.Map">
+        SELECT
+            r.id, r.role_name,
+            CASE WHEN tr_role.trans_text IS NULL THEN r.display_name ELSE tr_role.trans_text END display_name,
+            CASE WHEN tr_org.trans_text IS NULL THEN org.name ELSE tr_org.trans_text END org_name
+        FROM eh_role r
+        JOIN eh_organization org ON r.org_id = org.id
+        LEFT JOIN eh_translation tr_org
+                  ON tr_org.table_name = 'eh_organization'
+                      AND tr_org.column_name = 'name'
+                      AND tr_org.trans_id = org.id
+                      AND tr_org.language_code = '${languageCode}'
+        LEFT JOIN eh_translation tr_role
+                  ON tr_role.table_name = 'eh_role'
+                      AND tr_role.column_name = 'display_name'
+                      AND tr_role.trans_id = r.id
+                      AND tr_role.language_code = '${languageCode}'
         ${ew.customSqlSegment}
     </select>
 </mapper>

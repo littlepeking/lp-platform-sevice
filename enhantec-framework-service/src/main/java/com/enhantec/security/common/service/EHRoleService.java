@@ -57,7 +57,7 @@ public interface EHRoleService extends EHBaseService<EHRole> {
 
     EHUser revokeFromUser(String userId, List<String> roleIds);
 
-    Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+    Page<Map<String,Object>> getRolePageData(Page<Map<String,Object>> page, QueryWrapper qw,String languageCode);
 
     Page<Map<String, Object>> getUserRolePageData(Page<Map<String, Object>> page, QueryWrapper qw, String languageCode);
 

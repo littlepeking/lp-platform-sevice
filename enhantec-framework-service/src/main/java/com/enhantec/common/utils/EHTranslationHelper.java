@@ -44,7 +44,8 @@ public class EHTranslationHelper {
 
         for (Field field : model.getClass().getDeclaredFields()) {
             Class type = field.getType();
-            String columnName = field.getName();
+            String columnName = DBHelper.formatCamelKey2Snake(field.getName());
+
             if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
 
                 EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
@@ -61,21 +62,20 @@ public class EHTranslationHelper {
                 Object text = field.get(model);
 
                 if (text != null) {
-                    EhTranslation translation;
+                    EhTranslation translation = null;
                     if(translateId!=null) {
                         translation = translationService.find(tableName, columnName, languageCode, translateId, false);
                         if (translation != null) {
                             translation.setTransText(text.toString());
+                        } else {
+                            translation = EhTranslation.builder().
+                                    tableName(tableName).
+                                    columnName(columnName).
+                                    transId(translateId).
+                                    languageCode(languageCode)
+                                    .transText(StringUtils.defaultString(text.toString(), ""))
+                                    .build();
                         }
-                    }
-                    else {
-                        translation = EhTranslation.builder().
-                                tableName(tableName).
-                                columnName(columnName).
-                                transId(translateId).
-                                languageCode(languageCode)
-                                .transText(StringUtils.defaultString(text.toString(), ""))
-                                .build();
                     }
                     translationService.saveOrUpdate(translation);
                     //Set field to default language translation in base table after get translation value from entity.
@@ -158,7 +158,7 @@ public class EHTranslationHelper {
 
             for (Field field : model.getClass().getDeclaredFields()) {
                 Class type = field.getType();
-                String columnName = field.getName();
+                String columnName = DBHelper.formatCamelKey2Snake(field.getName());
                 if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
 
                     EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);

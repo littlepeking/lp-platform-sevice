@@ -89,7 +89,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
     //org should can only be delete in dev env. In production, org can only be disable as related biz data will be inconsistent after the org record delete.
     public void deleteById(String orgId) {
 
-        EHOrganization org = baseMapper.selectById(orgId);
+        EHOrganization org = baseMapper.selectByIdTr(orgId);
 
         if (org == null) throw new EHApplicationException("s-org-idNotExist", orgId);
 

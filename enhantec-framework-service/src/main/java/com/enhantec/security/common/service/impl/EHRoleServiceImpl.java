@@ -237,9 +237,9 @@ public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> i
 
     }
 
-    public Page<Map<String, Object>> getPageData(Page<Map<String, Object>> page, QueryWrapper qw) {
+    public Page<Map<String, Object>> getRolePageData(Page<Map<String, Object>> page, QueryWrapper qw, String languageCode) {
 
-        return getBaseMapper().selectMapsPage(page, qw);
+        return getBaseMapper().queryRolePageData(page, qw,languageCode);
 
     }
 
