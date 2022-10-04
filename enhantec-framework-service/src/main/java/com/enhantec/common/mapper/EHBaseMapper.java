@@ -237,14 +237,16 @@ public interface EHBaseMapper<T extends EHBaseModel> extends BaseMapper<T> {
 
         if(entity!=null) {
             EHTranslationHelper.saveTranslation(entity);
-            //update entity translation fields to default language.
+            ////Add translation and update entity translation fields to default language.
             updateById(entity);
+            ////
         }
         if(updateWrapper!=null){
             List<T> rowsUpdated = selectList(updateWrapper);
             if(rowsUpdated.size()>0) {
+                ////Add translation and update entity translation fields to default language.
                 EHTranslationHelper.saveTranslation(rowsUpdated);
-                //update entity translation fields to default language.
+                ////
                 rowsUpdated.forEach(row-> updateById(row));
             }
         }

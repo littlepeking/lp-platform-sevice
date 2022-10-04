@@ -44,7 +44,7 @@ public class EHTranslationHelper {
 
         for (Field field : model.getClass().getDeclaredFields()) {
             Class type = field.getType();
-            String columnName = DBHelper.formatCamelKey2Snake(field.getName());
+            String columnName = StringUtils.upperCase(DBHelper.formatCamelKey2Snake(field.getName()));
 
             if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
 
@@ -56,7 +56,7 @@ public class EHTranslationHelper {
 
                 TableName tableNameAnnotation = model.getClass().getAnnotation(TableName.class);
 
-                String tableName = tableNameAnnotation.value();
+                String tableName = StringUtils.upperCase(tableNameAnnotation.value());
 
                 field.setAccessible(true);
                 Object text = field.get(model);

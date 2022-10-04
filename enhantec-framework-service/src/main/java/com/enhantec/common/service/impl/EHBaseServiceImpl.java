@@ -94,12 +94,14 @@ public class EHBaseServiceImpl<M extends EHBaseMapper<T>, T extends EHBaseModel>
             Object idVal = tableInfo.getPropertyValue(entity, keyProperty);
             return StringUtils.checkValNull(idVal) || CollectionUtils.isEmpty(sqlSession.selectList(this.getSqlStatement(SqlMethod.SELECT_BY_ID), entity));
         }, (sqlSession, entity) -> {
-            MapperMethod.ParamMap<T> param = new MapperMethod.ParamMap();
-            param.put("et", entity);
-            sqlSession.update(this.getSqlStatement(SqlMethod.UPDATE_BY_ID), param);
+
             ///add translation
             EHTranslationHelper.saveTranslation(entity);
             ///
+
+            MapperMethod.ParamMap<T> param = new MapperMethod.ParamMap();
+            param.put("et", entity);
+            sqlSession.update(this.getSqlStatement(SqlMethod.UPDATE_BY_ID), param);
         });
     }
 
@@ -109,11 +111,13 @@ public class EHBaseServiceImpl<M extends EHBaseMapper<T>, T extends EHBaseModel>
     public boolean updateBatchById(Collection<T> entityList, int batchSize) {
         String sqlStatement = this.getSqlStatement(SqlMethod.UPDATE_BY_ID);
         return this.executeBatch(entityList, batchSize, (sqlSession, entity) -> {
+
+            ///add translation
+            EHTranslationHelper.saveTranslation(entity);
+
             MapperMethod.ParamMap<T> param = new MapperMethod.ParamMap();
             param.put("et", entity);
             sqlSession.update(sqlStatement, param);
-            ///add translation
-            EHTranslationHelper.saveTranslation(entity);
             ///
         });
     }
