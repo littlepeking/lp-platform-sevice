@@ -31,16 +31,15 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
- * 
- * @TableName eh_translation
+ *
+ * @TableName EH_TRANSLATION
  */
 
 @Data
 @SuperBuilder
-@TableName(value ="eh_translation")
+@TableName(value ="EH_TRANSLATION")
 @NoArgsConstructor
 @AllArgsConstructor
 public class EhTranslation extends EHBaseModel implements Serializable {
@@ -74,26 +73,6 @@ public class EhTranslation extends EHBaseModel implements Serializable {
      * 
      */
     private String transText;
-
-    /**
-     * 
-     */
-    private String addWho;
-
-    /**
-     * 
-     */
-    private LocalDateTime addDate;
-
-    /**
-     * 
-     */
-    private String editWho;
-
-    /**
-     * 
-     */
-    private LocalDateTime editDate;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

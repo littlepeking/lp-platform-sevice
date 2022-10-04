@@ -22,22 +22,19 @@
 
 package com.enhantec.security.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.enhantec.common.model.EHBaseModel;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import com.enhantec.common.model.EHBaseModel;
-import lombok.Data;
 
 /**
  * 
  * @TableName test_receipt
  */
-@TableName(value ="test_receipt")
+@TableName(value ="TEST_RECEIPT")
 public class TestReceipt extends EHBaseModel implements Serializable {
 
     /**

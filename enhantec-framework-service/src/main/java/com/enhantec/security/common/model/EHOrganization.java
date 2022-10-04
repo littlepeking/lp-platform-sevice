@@ -38,7 +38,7 @@ import java.io.Serializable;
  * 
  * @TableName eh_organization
  */
-@TableName(value ="eh_organization")
+@TableName(value ="EH_ORGANIZATION")
 @Data
 @SuperBuilder
 @NoArgsConstructor
