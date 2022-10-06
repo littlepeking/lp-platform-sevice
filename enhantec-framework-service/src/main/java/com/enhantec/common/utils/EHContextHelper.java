@@ -46,6 +46,12 @@ public class EHContextHelper {
         return  request;
     }
 
+    public static String getCurrentOrgId(){
+
+        return  getRequest().getHeader("orgId");
+
+    }
+
     public static String getLanguageCode(){
 
         return  getRequest().getHeader("Accept-Language");
