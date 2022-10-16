@@ -10,6 +10,37 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>enhantec-wms-service</artifactId>
+<!--    <dependencies>-->
+<!--        <dependency>-->
+<!--            <groupId>com.enhantec</groupId>-->
+<!--            <artifactId>enhantec-framework-service</artifactId>-->
+<!--            <version>0.0.1-SNAPSHOT</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
+<!--    </dependencies>-->
+    <dependencies>
+        <dependency>
+            <groupId>com.enhantec</groupId>
+            <artifactId>enhantec-framework-service</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!--create uber war-->
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>

@@ -20,8 +20,9 @@
 
 
 
-package com.enhantec.test.security.ldap;
+package com.enhantec;
 
+import com.enhantec.security.core.ldap.LDAPUser;
 import com.enhantec.security.core.ldap.LdapUserRepository;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.ldap.DataLdapTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -45,7 +48,7 @@ public class LDAPUserRepoTests {
         String username = "admin";
         String password = "Passw0rd";
        val user = ldapUserRepository.findBysAMAccountNameAndPassword(username,password);
-
+        List<LDAPUser> users = ldapUserRepository.findAll( );
        assertTrue(user.isPresent());
     }
 

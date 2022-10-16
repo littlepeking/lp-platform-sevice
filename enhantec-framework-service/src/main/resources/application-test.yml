@@ -1,8 +1,0 @@
-spring:
-  ldap:
-    base: dc=infor,dc=com
-    embedded:
-      base-dn: dc=infor,dc=com
-      ldif: classpath:test-ldap-server.ldif
-      port: 8389
-      urls: ldap://localhost:8389/

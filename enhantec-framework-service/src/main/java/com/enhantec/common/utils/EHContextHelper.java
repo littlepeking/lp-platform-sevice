@@ -22,9 +22,9 @@
 
 package com.enhantec.common.utils;
 
-import com.enhantec.Application;
 import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.service.EHUserDetailsService;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -34,8 +34,15 @@ import javax.servlet.http.HttpServletRequest;
 
 public class EHContextHelper {
 
+
+    private static ApplicationContext appContext;
+
+    public static void setApplicationContext(ApplicationContext appContext){
+        EHContextHelper.appContext = appContext;
+    }
+
     public static <T> T getBean(Class<T> requiredType){
-        return Application.getAppContext().getBean(requiredType);
+        return appContext.getBean(requiredType);
     }
 
     public static HttpServletRequest getRequest(){
@@ -59,7 +66,7 @@ public class EHContextHelper {
     }
 
     public static EHUser getUser(){
-        return Application.getAppContext().getBean(EHUserDetailsService.class).getUserInfo(getAuthentication().getName());
+        return appContext.getBean(EHUserDetailsService.class).getUserInfo(getAuthentication().getName());
     }
 
     public static Authentication getAuthentication(){

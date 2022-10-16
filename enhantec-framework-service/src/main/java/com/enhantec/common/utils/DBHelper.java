@@ -23,20 +23,16 @@
 package com.enhantec.common.utils;
 
 
-import com.baomidou.dynamic.datasource.DynamicRoutingDataSource;
-import com.enhantec.Application;
-
-import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class DBHelper {
 
-    public static DataSource getOrgDBName(String orgId) {
-        Map<String, DataSource> map =Application.getAppContext().getBeansOfType(DataSource.class);
-       return ((DynamicRoutingDataSource) map.values().stream().findFirst().get()).getDataSource(orgId);
-    }
+//    public static DataSource getOrgDBName(String orgId) {
+//        Map<String, DataSource> map =Application.getAppContext().getBeansOfType(DataSource.class);
+//       return ((DynamicRoutingDataSource) map.values().stream().findFirst().get()).getDataSource(orgId);
+//    }
 
     public static String formatCamelKey2Snake(String key) {
 

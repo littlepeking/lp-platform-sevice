@@ -20,14 +20,14 @@
 
 
 
-package com.enhantec.security.common.controller;
+package com.enhantec.wms.inbound.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHLocaleHelper;
 import com.enhantec.common.utils.EHPaginationHelper;
-import com.enhantec.security.common.model.TestReceipt;
-import com.enhantec.security.common.service.TestReceiptService;
+import com.enhantec.wms.inbound.model.TestReceipt;
+import com.enhantec.wms.inbound.service.TestReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.context.MessageSource;
@@ -64,7 +64,7 @@ public class TestReceiptController {
         return EHLocaleHelper.getMsg("c-testArgs","arg1");
     }
 
-    @PreAuthorize("hasAnyAuthority('WM_ASN')")
+    @PreAuthorize("permitAll()")
     @PostMapping("/queryByPage")
     public Page<Map<String,Object>> findTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
 
