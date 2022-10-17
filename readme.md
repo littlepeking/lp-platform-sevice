@@ -1,11 +1,9 @@
 enhantec-platform
 
-Initialize project:
-mvn install
+- Initialize project:
 
-3.login to cloudsmith and create config files (config.ini and credentials.ini): cloudsmith login
+        1. mvn install
 
-4.start project from intellij.
-
-Deploy library artifact to cloudsmith:
-in the project scripts directory, run: ./deploy.sh [version-number]
+- Deploy library artifact to cloudsmith:
+        1. login to cloudsmith and create config files (config.ini and credentials.ini): cloudsmith login
+        2. in the project scripts directory, run: ./deploy.sh [version-number]
