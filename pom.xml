@@ -5,7 +5,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>enhantec-framework-service</module>
-		<module>enhantec-wms-service</module>
+		<module>enhantec-application-example-service</module>
 	</modules>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
