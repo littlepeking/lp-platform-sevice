@@ -15,7 +15,7 @@
 	</parent>
 	<groupId>com.enhantec</groupId>
 	<artifactId>enhantec-framework</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>enhantec-framework</name>
 	<description>Enhantec Framework Core Project</description>
 	<properties>
