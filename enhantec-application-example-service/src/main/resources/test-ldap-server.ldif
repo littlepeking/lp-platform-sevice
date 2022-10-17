@@ -1,0 +1,25 @@
+dn: dc=infor,dc=com
+objectClass: top
+objectClass: domain
+
+dn: uid=ldapuser,dc=infor,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: admin
+sn: admin
+sAMAccountName:admin
+uid: ldapuser
+userPassword: Passw0rd
+
+dn: uid=john,dc=infor,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: user
+cn: john wang
+sn: john
+sAMAccountName:john
+uid: john
+userPassword: Passw0rd
