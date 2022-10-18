@@ -19,15 +19,24 @@
  */
 
 
+package com.enhantec.security.common.dto;
 
-package com.enhantec.security;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class Constants {
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
-  public static final String loginUrl ="/login";
-  public static final String loginProcessingUrl ="/doLogin";
-  public static final String authUrl ="/api/auth/login";
-  public static final String changePasswordUrl ="/api/security/user/changePassword";
-  public static final String swaggerUrl = "/swagger-ui/*";
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class UserPasswordChangeDTO implements Serializable {
 
+    @NotNull
+    private String username;
+    @NotNull
+    private String originalPassword;
+    @NotNull
+    private String newPassword;
 }

@@ -56,7 +56,6 @@ public class OrganizationController {
     @PreAuthorize("permitAll()")
     @GetMapping("/buildTreeByUserId")
     public List<EHOrganization> buildTreeByUserId(){
-        //System.out.println(EHContextHelper.getUser().toString());
         return ehOrganizationService.buildOrgTreeByUserId(EHContextHelper.getUser().getId());
     }
     @PreAuthorize("hasAnyAuthority('SECURITY_PERMISSION')")

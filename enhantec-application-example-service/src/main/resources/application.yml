@@ -56,6 +56,7 @@ spring:
 enhantec:
   common:
     security:
+      passwordExpiredDays: 60
       authTypes: basic,ldap
       jwt:
         base64Secret: 'YmJlMWVmMjYxODM1ZGVkMWI2MzA5M2UxOGJmMmEzMTYzYTg4ZDk3MTJkYjA1Mzc3YTI3YThlYjBhN2I3YTdlZjk1MThiMmMzYjE5NjYzMWFjYjdlMDZmODlhMDdhNDg3NGRjODg5ZWJlODg5NjYzNzljNDQ0MzllYjYwN2U5ODE='

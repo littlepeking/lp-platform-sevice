@@ -11,8 +11,7 @@
         <result property="authType" column="auth_type" jdbcType="VARCHAR"/>
         <result property="enabled" column="enabled" jdbcType="TINYINT"/>
         <result property="accountLocked" column="account_locked" jdbcType="TINYINT"/>
-        <result property="credentialsExpired" column="credentials_expired" jdbcType="TINYINT"/>
-
+        <result property="passwordChangedTime" column="`password_changed_time" jdbcType="TIMESTAMP"/>
         <result property="addDate" column="add_date" jdbcType="TIMESTAMP"/>
         <result property="editDate" column="edit_date" jdbcType="TIMESTAMP"/>
         <result property="addWho" column="add_who" jdbcType="VARCHAR"/>
@@ -23,7 +22,7 @@
         id,username, domain_username,auth_type,enabled,
         account_expired,
         account_locked,
-        credentials_non_expired,
+        password_changed_time,
         add_date,editDate,addWho,editWho
     </sql>
 

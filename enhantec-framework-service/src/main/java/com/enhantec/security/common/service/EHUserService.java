@@ -38,6 +38,8 @@ public interface EHUserService extends IService<EHUser> {
 
     EHUser createOrUpdate(EHUser user);
 
+    void changePassword(String username, String oldPassword, String newPassword);
+
     void enable(String userId);
 
     void disable(String userId);

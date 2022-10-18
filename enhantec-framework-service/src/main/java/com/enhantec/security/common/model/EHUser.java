@@ -25,17 +25,21 @@ package com.enhantec.security.common.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.common.model.EHVersionModel;
+import com.enhantec.common.utils.EHContextHelper;
 import com.enhantec.config.annotations.EHTransField;
+import com.enhantec.config.properties.ApplicationProperties;
 import com.enhantec.security.core.enums.AuthType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.apache.tomcat.jni.Local;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Data
@@ -50,9 +54,9 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
     private AuthType authType;
 
     private String domainUsername; //ONLY used in AD
-    @EHTransField
+
     private String firstName;
-    @EHTransField
+
     private String lastName;
 
     @JsonIgnore
@@ -62,11 +66,12 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
     @JsonIgnore
     private String password;
 
+    private LocalDateTime passwordChangedTime;
+
     //Enable only used when the user need to be deleted, then we can make it disabled to make all existing data is still consistent.
     private boolean enabled;
 
     private boolean accountLocked;
-    private boolean credentialsExpired;
 
     @TableField(exist = false)
     private Collection<? extends GrantedAuthority> roles;
@@ -84,8 +89,15 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
         return true;
     }
 
-    @JsonIgnore
-    public boolean isCredentialsNonExpired(){
-        return !credentialsExpired;
+    public boolean isCredentialsNonExpired() {
+
+            //For LDAP user, passwordChangedTime set to null to ignore credentials expiration checking.
+            if (this.passwordChangedTime == null) return true;
+
+            LocalDateTime passwordExpiredDateTime = passwordChangedTime.plusDays(EHContextHelper.getBean(ApplicationProperties.class).getSecurity().getPasswordExpiredDays());
+
+            return LocalDateTime.now().isBefore(passwordExpiredDateTime);
+
     }
+
 }

@@ -167,7 +167,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
                         "/code/image"
                         ))
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(req->req.antMatchers(authUrl,swaggerUrl,
+                .authorizeHttpRequests(req->req.antMatchers(authUrl,changePasswordUrl,swaggerUrl,
                         "/swagger-resources/**", "/v3/api-docs", "/code/image"
                         // ,"/api/test-receipt/**"
                 ).permitAll().anyRequest().authenticated())

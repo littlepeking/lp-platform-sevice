@@ -194,7 +194,7 @@ CREATE TABLE `eh_user` (
   `edit_date` datetime DEFAULT NULL,
   `edit_who` varchar(45) DEFAULT NULL,
   `account_locked` tinyint(1) DEFAULT '0',
-  `credentials_expired` tinyint(1) DEFAULT '0',
+  `password_changed_time` datetime DEFAULT NULL,
   `first_name` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `last_name` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `version` int NOT NULL,

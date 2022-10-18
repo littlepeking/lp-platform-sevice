@@ -25,6 +25,7 @@ package com.enhantec.security.common.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.exception.EHApplicationException;
@@ -47,6 +48,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -100,7 +102,7 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
             //Set default access properties to new user.
             user.setAccountLocked(false);
             user.setEnabled(true);
-            user.setCredentialsExpired(false);
+            user.setPasswordChangedTime(LocalDateTime.now());
 
 
         }else {
@@ -120,9 +122,8 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
             if(user.getAuthType().equals(AuthType.BASIC)){
                 //Check if user want change to new password.
                 if(StringUtils.hasLength(user.getPassword())){
-
                     user.setPassword(passwordEncoder.encode(user.getPassword()));
-
+                    user.setPasswordChangedTime(LocalDateTime.now());
                         //no need original password at all here..
 //                    if(!StringUtils.hasLength(user.getOriginalPassword()))
 //                        throw new EHApplicationException("s-usr-originPasswordNotProvided");
@@ -147,6 +148,28 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
         }
 
         return saveOrUpdateRetE(user);
+
+    }
+
+    @Override
+    public void changePassword(String username, String oldPassword, String newPassword) {
+
+        if(!StringUtils.hasText(oldPassword)) throw new EHApplicationException("s-usr-originPasswordNotProvided");
+        if(!StringUtils.hasText(newPassword)) throw new EHApplicationException("s-usr-newPasswordNotProvided");
+
+        EHUser user = getOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
+
+        if(user==null) throw new EHApplicationException("s-usr-usernameNotExist");
+
+        if(!passwordEncoder.matches(oldPassword,user.getPassword()))
+            throw new EHApplicationException("s-usr-passwordNotMatch");
+
+        val updateWrapper = Wrappers.lambdaUpdate(EHUser.class)
+                .set(EHUser::getPassword,passwordEncoder.encode(newPassword))
+                .set(EHUser::getPasswordChangedTime,LocalDateTime.now())
+                .set(EHUser::getEditWho,username)
+                .eq(EHUser::getId,user.getId());
+        baseMapper.updateTr(null, updateWrapper);
 
     }
 

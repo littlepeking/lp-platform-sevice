@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.common.model.PageParams;
 import com.enhantec.common.utils.EHPaginationHelper;
 import com.enhantec.security.common.dto.UserDTO;
+import com.enhantec.security.common.dto.UserPasswordChangeDTO;
 import com.enhantec.security.common.model.EHUser;
 import com.enhantec.security.common.service.EHUserDetailsService;
 import com.enhantec.security.common.service.EHUserService;
@@ -80,7 +81,6 @@ public class UserController {
                 .username(userDTO.getUsername())
                 .authType(userDTO.getAuthType())
                 .accountLocked(userDTO.isAccountLocked())
-                .credentialsExpired(userDTO.isCredentialsExpired())
                 .firstName(userDTO.getFirstName())
                 .lastName(userDTO.getLastName())
                 .originalPassword(userDTO.getOriginalPassword())
@@ -97,6 +97,14 @@ public class UserController {
 
         userIds.forEach(id-> ehUserService.delete(id));
        ;
+    }
+
+    @PreAuthorize("permitAll()")
+    @PostMapping("/changePassword")
+    public void changePassword(@Valid @RequestBody UserPasswordChangeDTO userPasswordChangeDTO) {
+
+        ehUserService.changePassword(userPasswordChangeDTO.getUsername(), userPasswordChangeDTO.getOriginalPassword(), userPasswordChangeDTO.getNewPassword());
+
     }
 
 

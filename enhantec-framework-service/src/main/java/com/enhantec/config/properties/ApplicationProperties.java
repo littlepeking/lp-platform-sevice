@@ -23,6 +23,8 @@
 package com.enhantec.config.properties;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -41,6 +43,10 @@ public class ApplicationProperties {
     private final Security security = new Security();
 
     public static class Security {
+
+        @Getter
+        @Setter
+        private long passwordExpiredDays = 30;
         //basic,ldap
         private List<String> authTypes = Collections.singletonList("BASIC");
 
