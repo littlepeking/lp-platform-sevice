@@ -22,8 +22,8 @@
 
 package com.enhantec;
 
-import com.enhantec.security.core.ldap.LDAPUser;
-import com.enhantec.security.core.ldap.LdapUserRepository;
+import com.enhantec.framework.security.core.ldap.LDAPUser;
+import com.enhantec.framework.security.core.ldap.LdapUserRepository;
 import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
