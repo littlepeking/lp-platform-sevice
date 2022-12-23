@@ -8,7 +8,7 @@
 
 package com.enhantec.framework.scheduler;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.common.utils.EHContextHelper;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

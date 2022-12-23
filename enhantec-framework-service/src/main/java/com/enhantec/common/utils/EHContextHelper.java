@@ -35,14 +35,34 @@ import javax.servlet.http.HttpServletRequest;
 public class EHContextHelper {
 
 
-    private static ApplicationContext appContext;
+    private static ApplicationContext applicationContext;
 
-    public static void setApplicationContext(ApplicationContext appContext){
-        EHContextHelper.appContext = appContext;
+    public static void setApplicationContext(ApplicationContext applicationContext){
+        EHContextHelper.applicationContext = applicationContext;
     }
 
     public static <T> T getBean(Class<T> requiredType){
-        return appContext.getBean(requiredType);
+        return applicationContext.getBean(requiredType);
+    }
+
+    public static Object getBean(String name) {
+        return applicationContext.getBean(name);
+    }
+
+    public static <T> T getBean(String name, Class<T> requiredType) {
+        return applicationContext.getBean(name, requiredType);
+    }
+
+    public static boolean containsBean(String name) {
+        return applicationContext.containsBean(name);
+    }
+
+    public static boolean isSingleton(String name) {
+        return applicationContext.isSingleton(name);
+    }
+
+    public static Class<? extends Object> getType(String name) {
+        return applicationContext.getType(name);
     }
 
     public static HttpServletRequest getRequest(){
@@ -66,7 +86,7 @@ public class EHContextHelper {
     }
 
     public static EHUser getUser(){
-        return appContext.getBean(EHUserDetailsService.class).getUserInfo(getAuthentication().getName());
+        return applicationContext.getBean(EHUserDetailsService.class).getUserInfo(getAuthentication().getName());
     }
 
     public static Authentication getAuthentication(){

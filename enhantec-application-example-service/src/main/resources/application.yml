@@ -69,7 +69,7 @@ enhantec:
 #        width: 100
 #        url: /user/*  #test validationCode filter by urls
 server:
-  port: ${SERVER_PORT:8061}
+  port: ${SERVER_PORT:9000}
 logging:
   level:
     org.springframework.security: DEBUG
