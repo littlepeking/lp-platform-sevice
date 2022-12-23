@@ -1,4 +1,4 @@
-package com.enhantec.framework.security.common.controller;
+package com.enhantec.common.utils.serializer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
