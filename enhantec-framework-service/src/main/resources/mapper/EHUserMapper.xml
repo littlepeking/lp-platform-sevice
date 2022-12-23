@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.enhantec.security.common.mapper.EHUserMapper">
+<mapper namespace="com.enhantec.framework.security.common.mapper.EHUserMapper">
 
-    <resultMap id="BaseResultMap" type="com.enhantec.security.common.model.EHUser">
+    <resultMap id="BaseResultMap" type="com.enhantec.framework.security.common.model.EHUser">
         <id property="id" column="id" jdbcType="VARCHAR"/>
         <result property="username" column="username" jdbcType="VARCHAR"/>
         <result property="domainUsername" column="domain_username" jdbcType="VARCHAR"/>

@@ -2,10 +2,10 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.enhantec.security.common.mapper.EHRoleMapper">
+<mapper namespace="com.enhantec.framework.security.common.mapper.EHRoleMapper">
 
 
-    <resultMap id="BaseResultMap" type="com.enhantec.security.common.model.EHRole">
+    <resultMap id="BaseResultMap" type="com.enhantec.framework.security.common.model.EHRole">
         <id property="id" column="r.id" jdbcType="VARCHAR"/>
         <id property="roleName" column="role_name" jdbcType="VARCHAR"/>
         <result property="displayName" column="display_name" jdbcType="VARCHAR"/>

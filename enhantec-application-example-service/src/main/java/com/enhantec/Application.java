@@ -23,7 +23,7 @@
 package com.enhantec;
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure;
-import com.enhantec.common.utils.EHContextHelper;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;

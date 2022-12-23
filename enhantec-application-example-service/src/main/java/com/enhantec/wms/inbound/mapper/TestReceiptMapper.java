@@ -24,10 +24,11 @@ package com.enhantec.wms.inbound.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.enhantec.common.mapper.EHBaseMapper;
+import com.enhantec.framework.common.mapper.EHBaseMapper;
 import com.enhantec.wms.inbound.model.TestReceipt;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import java.util.Map;
 * @createDate 2022-04-18 17:37:15
 * @Entity com.enhantec.wms.inbound.model.TestReceipt.TestReceipt
 */
+@Repository
 public interface TestReceiptMapper extends EHBaseMapper<TestReceipt> {
 
     List<TestReceipt> selectAllById(@Param("id") String id);

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.enhantec.security.common.mapper.EHOrganizationMapper">
+<mapper namespace="com.enhantec.framework.security.common.mapper.EHOrganizationMapper">
 
-    <resultMap id="BaseResultMap" type="com.enhantec.security.common.model.EHOrganization">
+    <resultMap id="BaseResultMap" type="com.enhantec.framework.security.common.model.EHOrganization">
             <id property="id" column="id" jdbcType="VARCHAR"/>
             <result property="parentId" column="parent_id" jdbcType="VARCHAR"/>
             <result property="name" column="name" jdbcType="VARCHAR"/>

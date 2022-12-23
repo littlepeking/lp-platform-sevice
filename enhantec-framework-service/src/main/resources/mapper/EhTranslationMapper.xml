@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.enhantec.common.mapper.EhTranslationMapper">
+<mapper namespace="com.enhantec.framework.common.mapper.EhTranslationMapper">
 
-    <resultMap id="BaseResultMap" type="com.enhantec.common.model.EhTranslation">
+    <resultMap id="BaseResultMap" type="com.enhantec.framework.common.model.EhTranslation">
             <id property="id" column="id" jdbcType="VARCHAR"/>
             <result property="tableName" column="table_name" jdbcType="VARCHAR"/>
             <result property="columnName" column="column_name" jdbcType="VARCHAR"/>
@@ -24,7 +24,7 @@
         edit_date
     </sql>
 
-    <select id="findByTranslationKeys" resultType="com.enhantec.common.model.EhTranslation">
+    <select id="findByTranslationKeys" resultType="com.enhantec.framework.common.model.EhTranslation">
         select
         <include refid="Base_Column_List"/>
         from eh_translation tr

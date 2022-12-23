@@ -26,7 +26,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.enhantec.common.utils.DBConst;
+import com.enhantec.framework.common.utils.DBConst;
 import com.enhantec.wms.inbound.mapper.TestReceiptMapper;
 import com.enhantec.wms.inbound.model.TestReceipt;
 import com.enhantec.wms.inbound.service.TestReceiptService;

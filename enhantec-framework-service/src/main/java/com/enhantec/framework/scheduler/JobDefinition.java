@@ -9,7 +9,7 @@
 package com.enhantec.framework.scheduler;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.enhantec.common.model.EHVersionModel;
+import com.enhantec.framework.common.model.EHVersionModel;
 import lombok.Data;
 
 import java.time.LocalDateTime;
