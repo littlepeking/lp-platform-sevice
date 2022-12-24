@@ -6,7 +6,7 @@
  * Email: john.wang_ca@hotmail.com
  */
 
-package com.enhantec.framework.scheduler;
+package com.enhantec.framework.scheduler.core;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.framework.common.model.EHVersionModel;
@@ -15,7 +15,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("EH_I_JOB")
+@TableName("EH_JOB")
 public class JobDefinition extends EHVersionModel {
 
     /**
@@ -23,9 +23,13 @@ public class JobDefinition extends EHVersionModel {
      */
     private String id;
     /**
-     * 描述
+     * 名称
      */
-    private String description;
+    private String name;
+    /**
+     * 备注
+     */
+    private String remark;
     /**
      * bean名称
      */

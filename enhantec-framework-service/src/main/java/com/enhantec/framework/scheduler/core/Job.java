@@ -6,7 +6,7 @@
  * Email: john.wang_ca@hotmail.com
  */
 
-package com.enhantec.framework.scheduler;
+package com.enhantec.framework.scheduler.core;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import lombok.Data;

@@ -6,7 +6,7 @@
  * Email: john.wang_ca@hotmail.com
  */
 
-package com.enhantec.framework.scheduler;
+package com.enhantec.framework.scheduler.core;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
