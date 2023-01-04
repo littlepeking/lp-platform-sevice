@@ -1,5 +1,4 @@
-CLOUDSMITH_REPOSITORY=eh-xyp/enhantec-platform-service
-
+CLOUDSMITH_REPOSITORY=eh-xyp/enhantec-framework-service
 
 cloudsmith push maven $CLOUDSMITH_REPOSITORY --pom-file ../../pom.xml ../../enhantec-framework-service-parent.jar
 
