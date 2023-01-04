@@ -14,9 +14,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.enhantec</groupId>
-	<artifactId>enhantec-framework-parent</artifactId>
+	<artifactId>enhantec-framework-service-parent</artifactId>
 	<version>0.9.2</version>
-	<name>enhantec-framework-parent</name>
+	<name>enhantec-framework-service-parent</name>
 	<description>Enhantec Framework Project</description>
 	<properties>
 		<java.version>11</java.version>
