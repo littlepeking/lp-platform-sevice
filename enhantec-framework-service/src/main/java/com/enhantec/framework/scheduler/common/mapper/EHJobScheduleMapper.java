@@ -1,8 +1,7 @@
 package com.enhantec.framework.scheduler.common.mapper;
 
 import com.enhantec.framework.common.mapper.EHBaseMapper;
-import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.enhantec.framework.scheduler.common.model.EHJobSchedule;
 
 /**
 * @author johnw
@@ -10,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2022-12-24 12:56:49
 * @Entity com.enhantec.framework.scheduler.common.EHJobSchedule
 */
-public interface EHJobScheduleMapper extends EHBaseMapper<EHJobScheduleModel> {
+public interface EHJobScheduleMapper extends EHBaseMapper<EHJobSchedule> {
 
 }
 

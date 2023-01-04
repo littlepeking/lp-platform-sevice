@@ -15,9 +15,9 @@ import lombok.Data;
  * 
  * @TableName eh_job
  */
-@TableName(value ="eh_job")
+@TableName(value ="EH_JOB_DEFINITION")
 @Data
-public class EHJobModel extends EHVersionModel {
+public class EHJobDefinition extends EHVersionModel {
     /**
      * 
      */
@@ -42,15 +42,5 @@ public class EHJobModel extends EHVersionModel {
      * 
      */
     private String methodParams;
-
-    /**
-     * 
-     */
-    private String cronExpression;
-
-    /**
-     * 
-     */
-    private Integer enabled;
 
 }

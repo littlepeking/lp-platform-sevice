@@ -8,14 +8,16 @@ import java.util.Date;
 
 import com.enhantec.framework.common.model.EHVersionModel;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 
  * @TableName eh_job_schedule
  */
-@TableName(value ="eh_job_schedule")
+@TableName(value ="EH_JOB_SCHEDULE")
 @Data
-public class EHJobScheduleModel extends EHVersionModel {
+@SuperBuilder(toBuilder = true)
+public class EHJobSchedule extends EHVersionModel {
 
     /**
      * 
@@ -25,16 +27,11 @@ public class EHJobScheduleModel extends EHVersionModel {
     /**
      * 
      */
-    private String remark;
-
-    /**
-     * 
-     */
     private String cronExpression;
 
     /**
      * 
      */
-    private Integer enabled;
+    private boolean enabled;
 
 }

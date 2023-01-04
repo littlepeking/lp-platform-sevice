@@ -4,10 +4,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.enhantec.framework.scheduler.common.mapper.EHJobScheduleMapper">
 
-    <resultMap id="BaseResultMap" type="com.enhantec.framework.scheduler.common.model.EHJobScheduleModel">
+    <resultMap id="BaseResultMap" type="com.enhantec.framework.scheduler.common.model.EHJobSchedule">
             <id property="id" column="id" jdbcType="VARCHAR"/>
             <result property="jobDefId" column="jobDefId" jdbcType="VARCHAR"/>
-            <result property="remark" column="remark" jdbcType="VARCHAR"/>
             <result property="cronExpression" column="cron_expression" jdbcType="VARCHAR"/>
             <result property="enabled" column="enabled" jdbcType="TINYINT"/>
             <result property="addWho" column="add_who" jdbcType="VARCHAR"/>
