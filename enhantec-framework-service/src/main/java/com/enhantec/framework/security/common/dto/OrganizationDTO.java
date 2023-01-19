@@ -42,6 +42,8 @@ public class OrganizationDTO extends VersionDTO implements Serializable {
     private String parentId;
     @NotNull
     private String name;
+    @NotNull
+    private String dbName;
 
     private String address1;
 

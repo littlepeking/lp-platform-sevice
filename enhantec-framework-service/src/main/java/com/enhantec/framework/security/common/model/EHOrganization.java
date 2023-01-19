@@ -53,6 +53,9 @@ public class EHOrganization extends EHTreeModel<EHOrganization> implements Seria
     @EHTransField
     private String name;
 
+    @NotNull
+    private String dbName;
+
     /**
      * 
      */

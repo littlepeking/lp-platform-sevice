@@ -75,6 +75,7 @@ public class OrganizationController {
                 .parentId(organizationDTO.getParentId())
                 .name(organizationDTO.getName())
                 .code(organizationDTO.getCode())
+                .dbName(organizationDTO.getDbName())
                 .address1(organizationDTO.getAddress1())
                 .address2(organizationDTO.getAddress2())
                 .contact1(organizationDTO.getContact1())
