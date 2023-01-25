@@ -9,7 +9,7 @@
 package com.enhantec.framework.scheduler.core;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.framework.scheduler.common.model.EHJobDefinition;
+import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 @AllArgsConstructor
 public class JobRunner implements Runnable{
 
-    EHJobDefinition jobDefinition;
+    EHJobDefinitionModel jobDefinition;
 
     public void run() {
 

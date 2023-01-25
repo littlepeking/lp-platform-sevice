@@ -1,7 +1,7 @@
 package com.enhantec.framework.scheduler.common.mapper;
 
 import com.enhantec.framework.common.mapper.EHBaseMapper;
-import com.enhantec.framework.scheduler.common.model.EHJobSchedule;
+import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
 
 /**
 * @author johnw
@@ -9,7 +9,7 @@ import com.enhantec.framework.scheduler.common.model.EHJobSchedule;
 * @createDate 2022-12-24 12:56:49
 * @Entity com.enhantec.framework.scheduler.common.EHJobSchedule
 */
-public interface EHJobScheduleMapper extends EHBaseMapper<EHJobSchedule> {
+public interface EHJobScheduleMapper extends EHBaseMapper<EHJobScheduleModel> {
 
 }
 

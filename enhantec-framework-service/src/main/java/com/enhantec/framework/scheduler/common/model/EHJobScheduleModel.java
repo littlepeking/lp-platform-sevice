@@ -1,46 +1,37 @@
 package com.enhantec.framework.scheduler.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.enhantec.framework.common.model.EHBaseModel;
 import com.enhantec.framework.common.model.EHVersionModel;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 
- * @TableName eh_job
+ * @TableName eh_job_schedule
  */
-@TableName(value ="EH_JOB_DEFINITION")
+@TableName(value ="EH_JOB_SCHEDULE")
 @Data
-public class EHJobDefinition extends EHVersionModel {
-    /**
-     * 
-     */
-    private String name;
+@SuperBuilder(toBuilder = true)
+public class EHJobScheduleModel extends EHVersionModel {
 
     /**
      * 
      */
-    private String remark;
+    private String jobDefId;
 
     /**
      * 
      */
-    private String beanName;
+    private String cronExpression;
 
     /**
      * 
      */
-    private String methodName;
-
-    /**
-     * 
-     */
-    private String methodParams;
+    private boolean enabled;
 
 }

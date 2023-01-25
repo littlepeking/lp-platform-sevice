@@ -8,15 +8,13 @@
 
 package com.enhantec.framework.scheduler.core;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.framework.common.exception.EHApplicationException;
-import com.enhantec.framework.scheduler.common.model.EHJobDefinition;
-import com.enhantec.framework.scheduler.common.model.EHJobSchedule;
+import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
+import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
 import com.enhantec.framework.scheduler.common.service.EHJobDefinitionService;
 import com.enhantec.framework.scheduler.common.service.EHJobScheduleService;
-import com.enhantec.framework.security.common.model.EHUser;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.slf4j.Logger;
@@ -48,10 +46,10 @@ public class JobManager implements DisposableBean, CommandLineRunner {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
         // 初始化:加载enabled的定时任务
-        List<EHJobSchedule> jobScheduleList = ehJobScheduleService.list(Wrappers.lambdaQuery(EHJobSchedule.class).eq(EHJobSchedule::isEnabled,true));
+        List<EHJobScheduleModel> jobScheduleList = ehJobScheduleService.list(Wrappers.lambdaQuery(EHJobScheduleModel.class).eq(EHJobScheduleModel::isEnabled,true));
         if (CollectionUtils.isNotEmpty(jobScheduleList)) {
-            for (EHJobSchedule jobSchedule : jobScheduleList) {
-                EHJobDefinition jobDefinition = ehJobDefinitionService.getById(jobSchedule.getJobDefId());
+            for (EHJobScheduleModel jobSchedule : jobScheduleList) {
+                EHJobDefinitionModel jobDefinition = ehJobDefinitionService.getById(jobSchedule.getJobDefId());
                 ScheduledFuture scheduledFuture = this.taskScheduler.schedule(new JobRunner(jobDefinition), new CronTrigger(jobSchedule.getCronExpression()));
                 scheduledJobs.put(jobSchedule.getId(), scheduledFuture);
             }
@@ -60,20 +58,66 @@ public class JobManager implements DisposableBean, CommandLineRunner {
         logger.info("定时任务加载完毕...");
     }
 
-    public void stopJob(String jobScheduleId) {
+    public void saveJob(EHJobDefinitionModel jobDefinition) {
+        if (jobDefinition != null) {
+            if(jobDefinition.getId()!=null){
+              var jobScheduleList =  ehJobScheduleService.list(Wrappers.lambdaQuery(EHJobScheduleModel.class).eq(EHJobScheduleModel::getJobDefId, jobDefinition.getId()));
+
+              if(jobScheduleList!=null) {
+                  for (EHJobScheduleModel jobSchedule : jobScheduleList) {
+                     if(scheduledJobs.containsKey(jobSchedule.getId()))
+                              throw new EHApplicationException("s-job-stopScheduleBeforeSaveJob");
+                  }
+              }
+
+            }
+            ehJobDefinitionService.save(jobDefinition);
+        }
+    }
+
+    public void removeJob(String jobId) {
+
+        long jobScheduleCount = ehJobScheduleService.count(Wrappers.lambdaQuery(EHJobScheduleModel.class).eq(EHJobScheduleModel::getJobDefId,jobId));
+
+        if(jobScheduleCount > 0){
+            throw new EHApplicationException("s-job-deleteScheduleBeforeDeleteJob");
+        } else {
+            ehJobDefinitionService.removeById(jobId);
+        }
+    }
+
+
+    public void saveSchedule(EHJobScheduleModel jobSchedule) {
+        if (jobSchedule != null) {
+            ehJobScheduleService.save(jobSchedule);
+        }
+    }
+
+    public void removeSchedule(String schedulerId) {
+
+        if(scheduledJobs.containsKey(schedulerId)) {
+            throw new EHApplicationException("s-schedule-stopScheduleBeforeDelete");
+        }
+
+        ehJobScheduleService.removeById(schedulerId);
+
+    }
+
+
+    public void stopSchedule(String jobScheduleId) {
         if (jobScheduleId != null) {
             if(scheduledJobs.containsKey(jobScheduleId)) {
                  scheduledJobs.get(jobScheduleId).cancel(true);
                 this.scheduledJobs.remove(jobScheduleId);
             }
 
-            val updateWrapper = Wrappers.lambdaUpdate(EHJobSchedule.class).set(EHJobSchedule::isEnabled,false)
-                    .eq(EHJobSchedule::getId,jobScheduleId);
+            val updateWrapper = Wrappers.lambdaUpdate(EHJobScheduleModel.class).set(EHJobScheduleModel::isEnabled,false)
+                    .eq(EHJobScheduleModel::getId,jobScheduleId);
             ehJobScheduleService.update(null, updateWrapper);
         }
     }
 
-    public void runJob(String jobScheduleId){
+    public void runSchedule(String jobScheduleId){
 
         if(jobScheduleId != null){
 
@@ -83,8 +127,8 @@ public class JobManager implements DisposableBean, CommandLineRunner {
                 this.scheduledJobs.remove(jobScheduleId);
             }
 
-            EHJobSchedule jobSchedule = ehJobScheduleService.getById(jobScheduleId);
-            EHJobDefinition jobDefinition = ehJobDefinitionService.getById(jobSchedule.getJobDefId());
+            EHJobScheduleModel jobSchedule = ehJobScheduleService.getById(jobScheduleId);
+            EHJobDefinitionModel jobDefinition = ehJobDefinitionService.getById(jobSchedule.getJobDefId());
             ehJobScheduleService.saveOrUpdate(jobSchedule.toBuilder().enabled(true).build());
             ScheduledFuture scheduledFuture = this.taskScheduler.schedule(new JobRunner(jobDefinition), new CronTrigger(jobSchedule.getCronExpression()));
             scheduledJobs.put(jobScheduleId, scheduledFuture);
