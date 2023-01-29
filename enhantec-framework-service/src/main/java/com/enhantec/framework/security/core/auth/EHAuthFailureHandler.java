@@ -20,7 +20,7 @@
 
 
 
-package com.enhantec.framework.security.core.jwt;
+package com.enhantec.framework.security.core.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -31,13 +31,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class JwtAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+public class EHAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -45,12 +44,12 @@ public class JwtAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler
     private ObjectMapper objectMapper;
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        logger.info("JWT verification failed!");
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
+        logger.info("JWT or apiKey token verification failed!");
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(new JwtAuthSimpleResponse(exception.getMessage())));
+        response.getWriter().write(objectMapper.writeValueAsString(new EHAuthSimpleResponse(exception.getMessage())));
 
     }
 }

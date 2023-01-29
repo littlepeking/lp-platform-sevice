@@ -20,18 +20,18 @@
 
 
 
-package com.enhantec.framework.security.core.jwt;
+package com.enhantec.framework.security.core.auth;
 
 import com.enhantec.framework.common.utils.EHLocaleHelper;
 import org.springframework.security.core.AuthenticationException;
 
-public class JwtAuthException extends AuthenticationException {
+public class EHAuthException extends AuthenticationException {
 
-    public JwtAuthException(String msgKey){
+    public EHAuthException(String msgKey){
         super(EHLocaleHelper.getMsg(msgKey, null));
     }
 
-    public JwtAuthException(String msgKey, String... args) {
+    public EHAuthException(String msgKey, String... args) {
         super(EHLocaleHelper.getMsg(msgKey, args));
     }
 }

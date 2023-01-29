@@ -24,7 +24,8 @@ package com.enhantec.framework.security.core;
 
 import com.enhantec.framework.config.properties.ApplicationProperties;
 import com.enhantec.framework.security.Constants;
-import com.enhantec.framework.security.core.jwt.JWTFilter;
+import com.enhantec.framework.security.core.filter.ApiKeyFilter;
+import com.enhantec.framework.security.core.filter.JWTFilter;
 import com.enhantec.framework.security.core.jwt.JWTTokenProvider;
 import com.enhantec.framework.security.common.model.EHUser;
 import com.enhantec.framework.security.common.service.EHUserDetailsService;
@@ -102,6 +103,8 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JWTTokenProvider jwtTokenProvider;
 
+    private final ApiKeyFilter apiKeyFilter;
+
     private final JWTFilter jwtFilter;
 
     private final Environment environment;
@@ -171,6 +174,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
                         // ,"/api/test-receipt/**"
                 ).permitAll().anyRequest().authenticated())
                 //REPLACE UsernamePasswordAuthenticationFilter WITH RestAuthenticationFilter
+                .addFilterBefore(apiKeyFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(getRestAuthenticationFilter(),UsernamePasswordAuthenticationFilter.class)
                 //.exceptionHandling(exHandler -> exHandler.accessDeniedHandler(customAccessDeniedHandler()))

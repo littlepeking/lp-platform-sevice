@@ -57,6 +57,8 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
 
     private String lastName;
 
+    private String senderOrReceiverName; ////ONLY used in APIKEY
+
     @JsonIgnore
     @TableField(exist = false)
     private String originalPassword;
@@ -65,6 +67,8 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
     private String password;
 
     private LocalDateTime passwordChangedTime;
+
+    private String apiKey;
 
     //Enable only used when the user need to be deleted, then we can make it disabled to make all existing data is still consistent.
     private boolean enabled;

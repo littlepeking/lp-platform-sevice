@@ -26,6 +26,7 @@ public enum AuthType {
 
     BASIC,
     LDAP,
-    ADFS
+    ADFS,
+    APIKEY
 
 }

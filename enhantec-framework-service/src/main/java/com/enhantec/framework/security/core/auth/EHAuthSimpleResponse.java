@@ -20,7 +20,7 @@
 
 
 
-package com.enhantec.framework.security.core.jwt;
+package com.enhantec.framework.security.core.auth;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Data
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class JwtAuthSimpleResponse {
+public class EHAuthSimpleResponse {
 
    private final Object details;
 

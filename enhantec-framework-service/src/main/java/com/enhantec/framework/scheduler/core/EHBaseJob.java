@@ -2,8 +2,6 @@ package com.enhantec.framework.scheduler.core;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.enhantec.framework.common.utils.DSConstants;
-import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.framework.config.EHRequestContextHolder;
 import com.enhantec.framework.config.MultiDataSourceConfig;
 
 public interface EHBaseJob {

@@ -37,7 +37,7 @@ import com.enhantec.framework.security.common.model.EHUserRole;
 import com.enhantec.framework.security.common.service.EHRoleService;
 import com.enhantec.framework.security.common.service.EHUserService;
 import com.enhantec.framework.security.core.enums.AuthType;
-import com.enhantec.framework.security.core.jwt.JwtAuthException;
+import com.enhantec.framework.security.core.auth.EHAuthException;
 import com.enhantec.framework.security.core.ldap.LDAPUser;
 import com.enhantec.framework.security.core.ldap.LdapUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -218,7 +218,7 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
 
         EHUser user = getBaseMapper().selectOne(Wrappers.lambdaQuery(EHUser.class).eq(EHUser::getUsername,username));
 
-        if(user == null) throw new JwtAuthException("s-usr-usernameNotExist");
+        if(user == null) throw new EHAuthException("s-usr-usernameNotExist");
 
     }
 

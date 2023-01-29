@@ -20,15 +20,18 @@
 
 
 
-package com.enhantec.framework.security.core.jwt;
+package com.enhantec.framework.security.core.filter;
 
 import com.enhantec.framework.config.EHRequestContextHolder;
 import com.enhantec.framework.config.MultiDataSourceConfig;
 import com.enhantec.framework.security.Constants;
 import com.enhantec.framework.security.common.model.EHRole;
+import com.enhantec.framework.security.common.model.EHUser;
 import com.enhantec.framework.security.common.service.EHRoleService;
 import com.enhantec.framework.security.common.service.EHUserService;
 import com.enhantec.framework.security.common.service.JWTCacheService;
+import com.enhantec.framework.security.core.auth.EHAuthException;
+import com.enhantec.framework.security.core.jwt.JWTTokenProvider;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,7 +60,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTTokenProvider tokenProvider;
 
-    private final JwtAuthFailureHandler jwtAuthFailureHandler;
+    private final com.enhantec.framework.security.core.auth.EHAuthFailureHandler EHAuthFailureHandler;
 
     private final EHRoleService roleService;
 
@@ -83,13 +86,15 @@ public class JWTFilter extends OncePerRequestFilter {
                     if (claims.isPresent()) {
                         //check if jwt is still active in redis
                         if (null == jwtCacheService.getToken(jwt)) {
-                            jwtAuthFailureHandler.onAuthenticationFailure(servletRequest, servletResponse, new JwtAuthException("s-auth-userLoginExpired"));
+                            EHAuthFailureHandler.onAuthenticationFailure(servletRequest, servletResponse, new EHAuthException("s-auth-userLoginExpired"));
                             return;
                         } else {
                             //refresh redis cache
                             jwtCacheService.addOrRenewToken(jwt, servletRequest.getRemoteAddr());
                             jwtCacheService.addOrRenewUserToken(claims.get().get("userId").toString(), jwt);
                         }
+
+                        EHUser user = userService.getById(claims.get().get("userId").toString());
 
                         //Loading roles by organization
                         List<EHRole> roleList;
@@ -100,18 +105,17 @@ public class JWTFilter extends OncePerRequestFilter {
                         ehRequestContextHolder.setDataSource(MultiDataSourceConfig.DATA_SOURCE_ORG_PREFIX + orgId);
 
                         if(StringUtils.hasText(orgId)){
-                            roleList = roleService.findByOrgIdAndUserId(orgId, (claims.get().get("userId").toString()),true);
+                            roleList = roleService.findByOrgIdAndUserId(orgId, user.getId(),true);
 
                         }else {
                             roleList = Collections.emptyList();
                         }
 
                         //loading authentication
-                        Authentication authentication =
-                                new UsernamePasswordAuthenticationToken(userService.getById(claims.get().get("userId").toString()), "", roleList);
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(user, "", roleList);
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     } else {
-                        jwtAuthFailureHandler.onAuthenticationFailure(servletRequest, servletResponse, new JwtAuthException("s-auth-noClaimInfoInJWTToken"));
+                        EHAuthFailureHandler.onAuthenticationFailure(servletRequest, servletResponse, new EHAuthException("s-auth-noClaimInfoInJWTToken"));
                         return;
                     }
                 }
