@@ -22,6 +22,8 @@
 
 package com.enhantec.framework.security.core.jwt;
 
+import com.enhantec.framework.config.EHRequestContextHolder;
+import com.enhantec.framework.config.MultiDataSourceConfig;
 import com.enhantec.framework.security.Constants;
 import com.enhantec.framework.security.common.model.EHRole;
 import com.enhantec.framework.security.common.service.EHRoleService;
@@ -64,6 +66,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTCacheService jwtCacheService;
 
+    private final EHRequestContextHolder ehRequestContextHolder;
+
     @Override
     protected void doFilterInternal(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) throws ServletException, IOException {
 
@@ -90,6 +94,10 @@ public class JWTFilter extends OncePerRequestFilter {
                         //Loading roles by organization
                         List<EHRole> roleList;
                         String orgId = servletRequest.getHeader("orgId");
+
+                        ehRequestContextHolder.setOrgId(orgId);
+                        //框架默认的数据源使用ORGID的数据源,Job或接口程序可根据实际情况进行覆盖。
+                        ehRequestContextHolder.setDataSource(MultiDataSourceConfig.DATA_SOURCE_ORG_PREFIX + orgId);
 
                         if(StringUtils.hasText(orgId)){
                             roleList = roleService.findByOrgIdAndUserId(orgId, (claims.get().get("userId").toString()),true);

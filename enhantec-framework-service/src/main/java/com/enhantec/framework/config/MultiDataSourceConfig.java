@@ -52,6 +52,8 @@ public class MultiDataSourceConfig {
     @Value("${spring.datasource.dynamic.datasource.master.password}")
     private String password;
 
+    public static String DATA_SOURCE_ORG_PREFIX = "ORG__";
+
 
     @Bean
     public DynamicDataSourceProvider dynamicDataSourceProvider() {
@@ -71,7 +73,7 @@ public class MultiDataSourceConfig {
                         property.setPassword(password);
                         property.setUrl(String.format(orgUrlTemplate, dbName));
                         property.setDriverClassName(driverClassName);
-                        map.put(orgId, property);
+                        map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
                         log.info("===load datasource {}===", orgId);
                     }
 

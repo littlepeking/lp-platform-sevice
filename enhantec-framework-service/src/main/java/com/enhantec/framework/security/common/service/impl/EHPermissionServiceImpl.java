@@ -29,14 +29,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.service.EhTranslationService;
 import com.enhantec.framework.common.service.impl.EHBaseServiceImpl;
-import com.enhantec.framework.common.utils.DBConst;
+import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.security.common.enums.PermissionType;
 import com.enhantec.framework.security.common.mapper.*;
 import com.enhantec.framework.security.common.model.*;
 import com.enhantec.framework.security.common.service.EHPermissionService;
 import com.enhantec.framework.security.core.annotation.ReloadRoleHierarchy;
-import com.enhantec.framework.security.common.mapper.*;
-import com.enhantec.framework.security.common.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +48,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-@DS(DBConst.DS_MASTER)
+@DS(DSConstants.DS_MASTER)
 public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMapper, EHPermission> implements EHPermissionService {
 
     private final EHRoleMapper roleMapper;

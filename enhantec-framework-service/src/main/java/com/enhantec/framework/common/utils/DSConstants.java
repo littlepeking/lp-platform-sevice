@@ -22,11 +22,15 @@
 
 package com.enhantec.framework.common.utils;
 
-public interface DBConst {
+public interface DSConstants {
+
     static String DS_MASTER = "master";
-    //To choose a db schema for DB operation based on http header 'orgId'
-    static String DS_CONTEXT_ORG = "#header.orgId";
-    //To choose a db schema for DB operation based on current method parameter 'orgId'
-    static String DS_PARAM_ORG = "#orgId";
+    //To choose a db schema for DB operation based on http header 'orgId',replaced by DS_ORG
+    //static String DS_HEADER_ORG = "#header.orgId";
+
+    static String DS_PARAM = "#dataSource";
+
+    //To choose a db schema for DB operation based on datasource of EHRequestContext
+    static String DS_DEFAULT = "DS_DEFAULT";
 
 }

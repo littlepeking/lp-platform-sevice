@@ -26,7 +26,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.enhantec.framework.common.utils.DBConst;
+import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.wms.inbound.mapper.TestReceiptMapper;
 import com.enhantec.wms.inbound.model.TestReceipt;
 import com.enhantec.wms.inbound.service.TestReceiptService;
@@ -41,7 +41,7 @@ import java.util.Map;
 * @createDate 2022-04-18 17:37:15
 */
 @Service
-@DS(DBConst.DS_CONTEXT_ORG)
+@DS(DSConstants.DS_DEFAULT)
 public class TestReceiptServiceImpl extends ServiceImpl<TestReceiptMapper, TestReceipt>
     implements TestReceiptService {
 

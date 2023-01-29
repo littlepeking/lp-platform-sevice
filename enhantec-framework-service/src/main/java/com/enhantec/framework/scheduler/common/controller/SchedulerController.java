@@ -8,6 +8,7 @@
 
 package com.enhantec.framework.scheduler.common.controller;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
 import com.enhantec.framework.scheduler.core.JobManager;
 import lombok.RequiredArgsConstructor;
@@ -23,25 +24,29 @@ public class SchedulerController {
 
     private final JobManager jobManager;
 
-    @PreAuthorize("hasAuthority('SCHEDULER_SAVE')")
+    @PreAuthorize("hasAuthority('SCHEDULE_SAVE')")
     @GetMapping("/save")
     public void save(@RequestBody @NotNull EHJobScheduleModel jobSchedule){
-        jobManager.saveSchedule(jobSchedule);
+        var jobScheduleModel = jobSchedule;
+        if(!"0".equals(EHContextHelper.getCurrentOrgId())) {
+            jobScheduleModel = jobSchedule.toBuilder().orgId(EHContextHelper.getCurrentOrgId()).build();
+        }
+        jobManager.saveSchedule(jobScheduleModel);
     }
 
-    @PreAuthorize("hasAuthority('SCHEDULER_REMOVE')")
+    @PreAuthorize("hasAuthority('SCHEDULE_REMOVE')")
     @GetMapping("/remove/{scheduleId}")
     public void removeByScheduleId(@NotNull @PathVariable String scheduleId){
         jobManager.removeSchedule(scheduleId);
     }
 
-    @PreAuthorize("hasAuthority('SCHEDULER_RUN')")
+    @PreAuthorize("hasAuthority('SCHEDULE_RUN')")
     @GetMapping("/runBySchedulerId/{scheduleId}")
     public void runBySchedulerId(@NotNull @PathVariable String scheduleId){
         jobManager.runSchedule(scheduleId);
     }
 
-    @PreAuthorize("hasAuthority('SCHEDULER_STOP')")
+    @PreAuthorize("hasAuthority('SCHEDULE_STOP')")
     @GetMapping("/stopBySchedulerId/{scheduleId}")
     public void stopBySchedulerId(@NotNull @PathVariable String scheduleId){
         jobManager.stopSchedule(scheduleId);

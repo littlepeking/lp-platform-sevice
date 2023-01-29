@@ -9,8 +9,6 @@
             <result property="name" column="name" jdbcType="VARCHAR"/>
             <result property="remark" column="remark" jdbcType="VARCHAR"/>
             <result property="beanName" column="beanName" jdbcType="VARCHAR"/>
-            <result property="methodName" column="methodName" jdbcType="VARCHAR"/>
-            <result property="methodParams" column="methodParams" jdbcType="VARCHAR"/>
             <result property="addWho" column="add_who" jdbcType="VARCHAR"/>
             <result property="addDate" column="add_date" jdbcType="TIMESTAMP"/>
             <result property="editWho" column="edit_who" jdbcType="VARCHAR"/>
@@ -20,7 +18,7 @@
 
     <sql id="Base_Column_List">
         id,name,remark,
-        beanName,methodName,methodParams,
+        beanName,
         cronExpression,enabled,add_who,
         add_date,edit_who,edit_date,
         version

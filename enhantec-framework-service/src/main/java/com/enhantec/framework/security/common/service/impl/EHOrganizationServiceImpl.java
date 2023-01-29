@@ -26,7 +26,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.service.impl.EHBaseServiceImpl;
-import com.enhantec.framework.common.utils.DBConst;
+import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.security.common.mapper.EHOrgPermissionMapper;
 import com.enhantec.framework.security.common.mapper.EHOrganizationMapper;
 import com.enhantec.framework.security.common.model.EHOrgPermission;
@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-@DS(DBConst.DS_MASTER)
+@DS(DSConstants.DS_MASTER)
 @Transactional(rollbackFor = Exception.class)
 public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationMapper, EHOrganization>
         implements EHOrganizationService {

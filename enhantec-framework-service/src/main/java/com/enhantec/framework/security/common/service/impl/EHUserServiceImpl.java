@@ -29,7 +29,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.service.impl.EHBaseServiceImpl;
-import com.enhantec.framework.common.utils.DBConst;
+import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.security.common.mapper.EHUserMapper;
 import com.enhantec.framework.security.common.mapper.EHUserRoleMapper;
 import com.enhantec.framework.security.common.model.EHUser;
@@ -57,7 +57,7 @@ import java.util.Map;
 */
 @Service
 @RequiredArgsConstructor
-@DS(DBConst.DS_MASTER)
+@DS(DSConstants.DS_MASTER)
 public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
     implements EHUserService {
 

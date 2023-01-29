@@ -18,6 +18,7 @@ import lombok.Data;
 @TableName(value ="EH_JOB_DEFINITION")
 @Data
 public class EHJobDefinitionModel extends EHVersionModel {
+
     /**
      * 
      */
@@ -33,14 +34,14 @@ public class EHJobDefinitionModel extends EHVersionModel {
      */
     private String beanName;
 
-    /**
-     * 
-     */
-    private String methodName;
+//    /**
+//     *
+//     */
+//    private String methodName;
 
-    /**
-     * 
-     */
-    private String methodParams;
+//    /**
+//     *
+//     */
+//    private String methodParams;
 
 }

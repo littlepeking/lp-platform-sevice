@@ -19,19 +19,16 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 public class EHJobScheduleModel extends EHVersionModel {
 
-    /**
-     * 
-     */
+    private String orgId;
+
     private String jobDefId;
 
-    /**
-     * 
-     */
+    private String JobOrgIds;//逗号分开
+
+    private String jobParams;
+
     private String cronExpression;
 
-    /**
-     * 
-     */
     private boolean enabled;
 
 }

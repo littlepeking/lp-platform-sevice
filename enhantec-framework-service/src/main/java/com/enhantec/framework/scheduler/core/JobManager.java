@@ -8,9 +8,11 @@
 
 package com.enhantec.framework.scheduler.core;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.framework.common.exception.EHApplicationException;
+import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
 import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
 import com.enhantec.framework.scheduler.common.service.EHJobDefinitionService;
@@ -31,6 +33,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@DS(DSConstants.DS_MASTER)
 public class JobManager implements DisposableBean, CommandLineRunner {
 
     private final EHJobDefinitionService ehJobDefinitionService;
@@ -50,7 +53,7 @@ public class JobManager implements DisposableBean, CommandLineRunner {
         if (CollectionUtils.isNotEmpty(jobScheduleList)) {
             for (EHJobScheduleModel jobSchedule : jobScheduleList) {
                 EHJobDefinitionModel jobDefinition = ehJobDefinitionService.getById(jobSchedule.getJobDefId());
-                ScheduledFuture scheduledFuture = this.taskScheduler.schedule(new JobRunner(jobDefinition), new CronTrigger(jobSchedule.getCronExpression()));
+                ScheduledFuture scheduledFuture = this.taskScheduler.schedule(new JobRunner(jobDefinition, jobSchedule), new CronTrigger(jobSchedule.getCronExpression()));
                 scheduledJobs.put(jobSchedule.getId(), scheduledFuture);
             }
         }
@@ -130,7 +133,7 @@ public class JobManager implements DisposableBean, CommandLineRunner {
             EHJobScheduleModel jobSchedule = ehJobScheduleService.getById(jobScheduleId);
             EHJobDefinitionModel jobDefinition = ehJobDefinitionService.getById(jobSchedule.getJobDefId());
             ehJobScheduleService.saveOrUpdate(jobSchedule.toBuilder().enabled(true).build());
-            ScheduledFuture scheduledFuture = this.taskScheduler.schedule(new JobRunner(jobDefinition), new CronTrigger(jobSchedule.getCronExpression()));
+            ScheduledFuture scheduledFuture = this.taskScheduler.schedule(new JobRunner(jobDefinition, jobSchedule), new CronTrigger(jobSchedule.getCronExpression()));
             scheduledJobs.put(jobScheduleId, scheduledFuture);
 
         }

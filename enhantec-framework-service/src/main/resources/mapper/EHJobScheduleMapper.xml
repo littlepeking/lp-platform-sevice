@@ -6,7 +6,10 @@
 
     <resultMap id="BaseResultMap" type="com.enhantec.framework.scheduler.common.model.EHJobScheduleModel">
             <id property="id" column="id" jdbcType="VARCHAR"/>
-            <result property="jobDefId" column="jobDefId" jdbcType="VARCHAR"/>
+            <result property="orgId" column="org_id" jdbcType="VARCHAR"/>
+            <result property="jobDefId" column="job_def_id" jdbcType="VARCHAR"/>
+            <result property="jobOrgIds" column="job_org_ids" jdbcType="VARCHAR"/>
+            <result property="jobParams" column="job_params" jdbcType="VARCHAR"/>
             <result property="cronExpression" column="cron_expression" jdbcType="VARCHAR"/>
             <result property="enabled" column="enabled" jdbcType="TINYINT"/>
             <result property="addWho" column="add_who" jdbcType="VARCHAR"/>
@@ -17,7 +20,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,jobDefId,remark,
+        id,org_id,job_def_id,job_org_ids,job_params,remark,
         cron_expression,enabled,add_who,
         add_date,edit_who,edit_date,
         version
