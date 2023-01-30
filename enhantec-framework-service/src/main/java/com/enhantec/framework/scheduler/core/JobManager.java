@@ -49,6 +49,7 @@ public class JobManager implements DisposableBean, CommandLineRunner {
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
         // 初始化:加载enabled的定时任务
+        logger.info("开始加载已启用的定时任务...");
         List<EHJobScheduleModel> jobScheduleList = ehJobScheduleService.list(Wrappers.lambdaQuery(EHJobScheduleModel.class).eq(EHJobScheduleModel::isEnabled,true));
         if (CollectionUtils.isNotEmpty(jobScheduleList)) {
             for (EHJobScheduleModel jobSchedule : jobScheduleList) {
@@ -58,7 +59,7 @@ public class JobManager implements DisposableBean, CommandLineRunner {
             }
         }
 
-        logger.info("定时任务加载完毕...");
+        logger.info("定时任务加载完毕。");
     }
 
     public void saveJob(EHJobDefinitionModel jobDefinition) {

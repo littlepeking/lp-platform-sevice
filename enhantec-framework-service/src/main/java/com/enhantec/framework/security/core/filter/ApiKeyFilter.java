@@ -113,9 +113,11 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 
             }
 
-            filterChain.doFilter(servletRequest, servletResponse);
-
         }
+
+
+        filterChain.doFilter(servletRequest, servletResponse);
+
     }
 
 
