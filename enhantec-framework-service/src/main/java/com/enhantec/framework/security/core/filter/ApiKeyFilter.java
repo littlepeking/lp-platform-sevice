@@ -96,14 +96,13 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 
                     if (StringUtils.hasText(orgId)) {
                         roleList = roleService.findByOrgIdAndUserId(orgId, (user.getId()), true);
-
                     } else {
                         roleList = Collections.emptyList();
                     }
 
                     //loading authentication
                     Authentication authentication =
-                            new UsernamePasswordAuthenticationToken(user.getId(), "", roleList);
+                            new UsernamePasswordAuthenticationToken(user, "", roleList);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 } catch (Exception e) {
