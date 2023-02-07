@@ -31,6 +31,6 @@ public interface DSConstants {
     static String DS_PARAM = "#dataSource";
 
     //To choose a db schema for DB operation based on datasource of EHRequestContext
-    static String DS_DEFAULT = "DS_DEFAULT";
+    static String DS_DEFAULT = "#DS_DEFAULT";
 
 }

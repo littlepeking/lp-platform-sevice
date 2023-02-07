@@ -14,24 +14,17 @@ import org.springframework.core.GenericTypeResolver;
  * Email: john.wang_ca@hotmail.com
  */
 
-public class JsonDataSerializer<T> implements IDataSerializer<T> {
 
-    final static private ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
+public class JsonDataSerializer {
+    private static final ObjectMapper om = (new ObjectMapper()).registerModule(new JavaTimeModule());
 
-    public String serializeData(T data) throws JsonProcessingException {
-
+    public static String serializeData(Object data) throws JsonProcessingException {
         ObjectWriter ow = om.writer().withDefaultPrettyPrinter();
         String jsonString = ow.writeValueAsString(data);
-
         return jsonString;
     }
 
-    public T deserializeData(String data) throws JsonProcessingException {
-        Class<T> type = (Class<T>) GenericTypeResolver.resolveTypeArgument(getClass(), JsonDataSerializer.class);
-
-        T readDto = om.readValue(data, type);
-
-        return  readDto;
+    public static  <T> T deserializeData(String data, Class<T> clazz) throws JsonProcessingException {
+        return om.readValue(data, clazz);
     }
-
 }

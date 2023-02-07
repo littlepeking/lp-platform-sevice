@@ -22,6 +22,8 @@
 
 package com.enhantec.framework.common.utils;
 
+import com.enhantec.framework.common.exception.EHApplicationException;
+import com.enhantec.framework.security.common.model.EHRole;
 import com.enhantec.framework.security.common.model.EHUser;
 import com.enhantec.framework.security.common.service.EHUserDetailsService;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +33,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class EHContextHelper {
 
@@ -87,6 +92,23 @@ public class EHContextHelper {
 
     public static EHUser getUser(){
         return applicationContext.getBean(EHUserDetailsService.class).getUserInfo(getAuthentication().getName());
+    }
+
+    public static List<EHRole> getRoles(){
+        return (List<EHRole>) getUser().getRoles();
+    }
+
+    public static void checkUserPermissions(String[] authorities){
+
+        if(authorities!=null && authorities.length > 0){
+
+          Arrays.stream(authorities).forEach(auth->{
+              long count = getRoles().stream().map(r->r.getPermissions()).flatMap(Collection::stream).map(perm-> perm.getAuthority()).filter(permission -> permission.equals(auth)).count();
+                if(count == 0) throw new EHApplicationException("s-auth-permissionDenied");
+          });
+
+        }
+
     }
 
     public static Authentication getAuthentication(){
