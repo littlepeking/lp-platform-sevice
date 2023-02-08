@@ -103,7 +103,7 @@ public class EHContextHelper {
         if(authorities!=null && authorities.length > 0){
 
           Arrays.stream(authorities).forEach(auth->{
-              long count = getRoles().stream().map(r->r.getPermissions()).flatMap(Collection::stream).map(perm-> perm.getAuthority()).filter(permission -> permission.equals(auth)).count();
+              long count = getRoles().stream().filter(r->r.getOrgId().equals(getCurrentOrgId())).map(r->r.getPermissions()).flatMap(Collection::stream).map(perm-> perm.getAuthority()).filter(permission -> permission.equals(auth)).count();
                 if(count == 0) throw new EHApplicationException("s-auth-permissionDenied");
           });
 
@@ -112,6 +112,6 @@ public class EHContextHelper {
     }
 
     public static Authentication getAuthentication(){
-      return  SecurityContextHolder.getContext().getAuthentication();
+      return SecurityContextHolder.getContext().getAuthentication();
     }
 }
