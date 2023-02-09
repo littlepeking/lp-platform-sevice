@@ -9,7 +9,9 @@ import java.util.Date;
 
 import com.enhantec.framework.common.model.EHBaseModel;
 import com.enhantec.framework.common.model.EHVersionModel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 
@@ -17,6 +19,8 @@ import lombok.Data;
  */
 @TableName(value ="EH_JOB_DEFINITION")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EHJobDefinitionModel extends EHVersionModel {
 
     /**

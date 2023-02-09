@@ -38,25 +38,29 @@ public class AutoFillFieldsConfig implements MetaObjectHandler {
 
     private EHUser getUser() {
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(SecurityContextHolder.getContext()!=null && SecurityContextHolder.getContext().getAuthentication()!=null) {
 
-        if (principal instanceof EHUser) {
-            return (EHUser) principal;
-        } else {
-            //might be anonymousUser
-            //String username = principal.toString();
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            if (principal instanceof EHUser) {
+                return (EHUser) principal;
+            } else {
+                //might be anonymousUser
+                //String username = principal.toString();
+                return null;
+            }
+        }else {
             return null;
         }
 
     }
 
-    @Override
     public void insertFill(MetaObject metaObject) {
         LocalDateTime date = LocalDateTime.now();
         this.strictInsertFill(metaObject, "addDate", () -> date, LocalDateTime.class);
-        this.strictInsertFill(metaObject, "addWho", () -> getUser().getUsername(), String.class);
+        this.strictInsertFill(metaObject, "addWho", () -> getUser() ==null ? "sys" : getUser().getUsername(), String.class);
         this.strictInsertFill(metaObject, "editDate", () -> date, LocalDateTime.class);
-        this.strictInsertFill(metaObject, "editWho", () -> getUser().getUsername(), String.class);
+        this.strictInsertFill(metaObject, "editWho", () -> getUser() ==null ? "sys" : getUser().getUsername(), String.class);
         //Init version column to 1.
         this.setFieldValByName("version",1,metaObject);
 
@@ -73,7 +77,7 @@ public class AutoFillFieldsConfig implements MetaObjectHandler {
             //From MyBatisPlus: MetaObjectHandler提供的默认方法的策略均为:如果属性有值则不覆盖,如果填充值为null则不填充
             // So we have to call update method directly here.
             this.setFieldValByName("editDate", LocalDateTime.now(), metaObject);
-            this.setFieldValByName("editWho", getUser().getUsername(), metaObject);
+            this.setFieldValByName("editWho", getUser() ==null ? "sys" : getUser().getUsername(), metaObject);
         }
 
     }

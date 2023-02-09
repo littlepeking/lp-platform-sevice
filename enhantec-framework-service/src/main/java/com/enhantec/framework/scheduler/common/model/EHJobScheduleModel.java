@@ -7,7 +7,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.enhantec.framework.common.model.EHVersionModel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -17,6 +19,8 @@ import lombok.experimental.SuperBuilder;
 @TableName(value ="EH_JOB_SCHEDULE")
 @Data
 @SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class EHJobScheduleModel extends EHVersionModel {
 
     private String orgId;

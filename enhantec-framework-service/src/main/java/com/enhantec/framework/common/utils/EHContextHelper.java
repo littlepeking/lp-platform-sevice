@@ -23,6 +23,7 @@
 package com.enhantec.framework.common.utils;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
+import com.enhantec.framework.config.EHRequestContextHolder;
 import com.enhantec.framework.security.common.model.EHRole;
 import com.enhantec.framework.security.common.model.EHUser;
 import com.enhantec.framework.security.common.service.EHUserDetailsService;
@@ -80,13 +81,13 @@ public class EHContextHelper {
 
     public static String getCurrentOrgId(){
 
-        return  getRequest().getHeader("orgId");
+        return getBean(EHRequestContextHolder.class).getOrgId();
 
     }
 
     public static String getLanguageCode(){
 
-        return  getRequest().getHeader("Accept-Language");
+        return getBean(EHRequestContextHolder.class).getLanguageCode();
 
     }
 

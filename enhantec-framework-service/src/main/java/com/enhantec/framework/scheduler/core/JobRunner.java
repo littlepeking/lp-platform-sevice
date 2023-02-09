@@ -9,12 +9,15 @@
 package com.enhantec.framework.scheduler.core;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.framework.common.utils.EHLocaleHelper;
+import com.enhantec.framework.common.utils.EHTranslationHelper;
 import com.enhantec.framework.config.EHRequestAttributes;
 import com.enhantec.framework.config.EHRequestContextHolder;
 import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
 import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -61,7 +64,7 @@ public class JobRunner implements Runnable{
                         //RequestContextHolder.getRequestAttributes().setAttribute("dataSource", dataSource ,RequestAttributes.SCOPE_REQUEST);
                         job.run(orgId, params);
                     }catch (Exception e){
-                        logger.error("s-job-runJobError",orgId, jobDefinitionModel.getName(), e.getStackTrace().toString());
+                        logger.error(EHLocaleHelper.getMsg("s-job-runJobError",orgId, jobDefinitionModel.getName(), ExceptionUtils.getStackTrace(e)));
                     } finally {
                         RequestContextHolder.resetRequestAttributes();
                     }
@@ -86,7 +89,7 @@ public class JobRunner implements Runnable{
 //            }
 
         } catch (Exception ex) {
-            logger.error(String.format("定时任务执行异常 - bean：{}，参数：{}\n错误: {}", jobDefinitionModel.getBeanName(), jobScheduleModel.getJobParams(), ex.toString()));
+            logger.error("定时任务执行异常 - bean：{}，参数：{}\n错误: {}", jobDefinitionModel.getBeanName(), jobScheduleModel.getJobParams(), ex.toString());
         }
 
         long times = System.currentTimeMillis() - startTime;

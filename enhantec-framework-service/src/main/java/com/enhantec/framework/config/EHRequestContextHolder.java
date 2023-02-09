@@ -20,6 +20,7 @@ import java.util.HashMap;
 public class EHRequestContextHolder {
 
     String orgId;
+    String languageCode ="zh-CN";
     String dataSource;
     //用于存储和传递request级别的自定义上下文变量
     HashMap<String,Object> data = new HashMap();

@@ -22,6 +22,7 @@
 
 package com.enhantec.framework.security.core.filter;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.config.EHRequestContextHolder;
 import com.enhantec.framework.config.MultiDataSourceConfig;
 import com.enhantec.framework.security.Constants;
@@ -93,6 +94,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
                     ehRequestContextHolder.setOrgId(orgId);
                     //框架默认的数据源使用ORGID的数据源,Job或接口程序可根据实际情况进行覆盖。
                     ehRequestContextHolder.setDataSource(MultiDataSourceConfig.DATA_SOURCE_ORG_PREFIX + orgId);
+                    ehRequestContextHolder.setLanguageCode(EHContextHelper.getLanguageCode());
 
                     if (StringUtils.hasText(orgId)) {
                         roleList = roleService.findByOrgIdAndUserId(orgId, (user.getId()), true);
