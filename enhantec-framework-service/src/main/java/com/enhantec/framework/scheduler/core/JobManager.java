@@ -133,7 +133,7 @@ public class JobManager implements DisposableBean, CommandLineRunner {
 
             EHJobScheduleModel jobSchedule = ehJobScheduleService.getById(jobScheduleId);
             EHJobDefinitionModel jobDefinition = ehJobDefinitionService.getById(jobSchedule.getJobDefId());
-            ehJobScheduleService.saveOrUpdate(jobSchedule.toBuilder().enabled(true).build());
+            ehJobScheduleService.saveOrUpdateRetE(jobSchedule.toBuilder().enabled(true).build());
             ScheduledFuture scheduledFuture = this.taskScheduler.schedule(new JobRunner(jobDefinition, jobSchedule), new CronTrigger(jobSchedule.getCronExpression()));
             scheduledJobs.put(jobScheduleId, scheduledFuture);
 

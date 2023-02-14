@@ -18,13 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 
 @RestController
-@RequestMapping("/api/scheduler")
+@RequestMapping("/api/schedule")
 @RequiredArgsConstructor
-public class SchedulerController {
-
+public class ScheduleController {
     private final JobManager jobManager;
-
-    @PreAuthorize("hasAuthority('SCHEDULE_SAVE')")
+    @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
     @GetMapping("/save")
     public void save(@RequestBody @NotNull EHJobScheduleModel jobSchedule){
         var jobScheduleModel = jobSchedule;
@@ -34,20 +32,20 @@ public class SchedulerController {
         jobManager.saveSchedule(jobScheduleModel);
     }
 
-    @PreAuthorize("hasAuthority('SCHEDULE_REMOVE')")
     @GetMapping("/remove/{scheduleId}")
+    @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
     public void removeByScheduleId(@NotNull @PathVariable String scheduleId){
         jobManager.removeSchedule(scheduleId);
     }
 
-    @PreAuthorize("hasAuthority('SCHEDULE_RUN')")
-    @GetMapping("/runBySchedulerId/{scheduleId}")
+    @GetMapping("/run/{scheduleId}")
+    @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
     public void runBySchedulerId(@NotNull @PathVariable String scheduleId){
         jobManager.runSchedule(scheduleId);
     }
 
-    @PreAuthorize("hasAuthority('SCHEDULE_STOP')")
-    @GetMapping("/stopBySchedulerId/{scheduleId}")
+    @GetMapping("/stop/{scheduleId}")
+    @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
     public void stopBySchedulerId(@NotNull @PathVariable String scheduleId){
         jobManager.stopSchedule(scheduleId);
     }

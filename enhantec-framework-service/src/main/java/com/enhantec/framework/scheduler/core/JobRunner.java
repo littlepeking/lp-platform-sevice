@@ -61,6 +61,8 @@ public class JobRunner implements Runnable{
                         String dataSource = job.getBatchDataSource(orgId,params);
                         ehRequestContextHolder.setDataSource(dataSource);
                         ehRequestContextHolder.setOrgId(orgId);
+                        job.setJobDefinition(jobDefinitionModel);
+                        job.setSchedule(jobScheduleModel);
                         //RequestContextHolder.getRequestAttributes().setAttribute("dataSource", dataSource ,RequestAttributes.SCOPE_REQUEST);
                         job.run(orgId, params);
                     }catch (Exception e){

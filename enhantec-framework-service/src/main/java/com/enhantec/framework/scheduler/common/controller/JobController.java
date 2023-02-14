@@ -19,18 +19,19 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/api/job")
 @RequiredArgsConstructor
+
 public class JobController {
 
     JobManager jobManager;
 
-    @PreAuthorize("hasAuthority('JOB_ADD')")
     @PostMapping("/save")
+    @PreAuthorize("hasAuthority('SCHEDULER_JOB')")
     public void saveJob(@RequestBody @NotNull EHJobDefinitionModel jobDefinition){
         jobManager.saveJob(jobDefinition);
     }
 
-    @PreAuthorize("hasAuthority('JOB_REMOVE')")
     @GetMapping("/remove/{jobId}")
+    @PreAuthorize("hasAuthority('SCHEDULER_JOB')")
     public void removeJob(@PathVariable @NotNull String jobId){
         jobManager.removeJob(jobId);
     }
