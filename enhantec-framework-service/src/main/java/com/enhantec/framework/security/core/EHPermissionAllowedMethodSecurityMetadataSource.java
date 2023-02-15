@@ -33,6 +33,10 @@ public class EHPermissionAllowedMethodSecurityMetadataSource  extends AbstractFa
 
             // if the class is annotated as @Controller we should by default deny access to all methods
             if (AnnotationUtils.findAnnotation(targetClass, Controller.class) != null) {
+                //TODO:当开启如下开关将默认禁止访问未标明权限的方法，但会导致在访问不存在的的URL时，AbstractSecurityInterceptor在执行beforeInvocation时Authentication对象为空
+                // （这是由于此时SecurityContextPersistenceFilter此时已经完成SecurityContextHolder.clearContext()，
+                // 而正常的代码执行过程应该是先执行AbstractSecurityInterceptor.beforeInvocation，再执行SecurityContextPersistenceFilter的上述逻辑），
+                // 系统报An Authentication object was not found in the SecurityContext，而非错误代码404，此部分待后续优化。在没有好的办法前可先注释下面这行以禁用默认禁止访问无annotation的逻辑。
                 attributes.add(DENY_ALL_ATTRIBUTE);
             }
 
