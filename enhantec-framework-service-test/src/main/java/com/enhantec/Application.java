@@ -36,7 +36,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 //https://blog.csdn.net/superyu1992/article/details/80336928
 @SpringBootApplication(exclude = DruidDataSourceAutoConfigure.class)
 @EnableSwagger2
-@RestController
 @EnableCaching
 @EnableAspectJAutoProxy
 @EnableTransactionManagement
