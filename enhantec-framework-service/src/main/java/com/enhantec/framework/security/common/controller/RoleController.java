@@ -103,8 +103,8 @@ public class RoleController {
     }
     @PreAuthorize("hasAnyAuthority('SECURITY_ROLE')")
     @DeleteMapping("")
-    public void delete(@RequestParam @NotNull String roleId) {
-        ehRoleService.delete(roleId);
+    public void delete(@RequestBody @NotNull String id) {
+        ehRoleService.delete(id);
     }
 
     @PreAuthorize("hasAnyAuthority('SECURITY_USER')")

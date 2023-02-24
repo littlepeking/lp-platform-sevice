@@ -93,9 +93,9 @@ public class UserController {
 
     @PreAuthorize("hasAnyAuthority('SECURITY_USER')")
     @DeleteMapping("")
-    public void delete(@RequestParam @NotNull List<String> userIds) {
+    public void delete(@RequestBody @NotNull List<String> ids) {
 
-        userIds.forEach(id-> ehUserService.delete(id));
+        ids.forEach(id-> ehUserService.delete(id));
        ;
     }
 
