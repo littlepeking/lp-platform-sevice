@@ -40,11 +40,11 @@ import java.util.stream.Collectors;
 public class EHPaginationHelper {
 
 
-    public static Page<Map<String, Object>> buildPageInfo(PageParams pageParams) {
-        Page<Map<String, Object>> mapPage = new Page<>(pageParams.getPageNum(), pageParams.getPageSize());
+    public static <T> Page<T> buildPageInfo(PageParams pageParams) {
+        Page<T> page = new Page(pageParams.getPageNum(), pageParams.getPageSize());
         //John - DO NOT Optimize Join since it will make some join conditions lose when generating page count sql.
-        mapPage.setOptimizeJoinOfCountSql(false);
-        return mapPage;
+        page.setOptimizeJoinOfCountSql(false);
+        return page;
     }
 
     public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams) {

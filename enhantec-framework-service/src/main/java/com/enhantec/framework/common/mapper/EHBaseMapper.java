@@ -168,6 +168,7 @@ public interface EHBaseMapper<T extends EHBaseModel> extends BaseMapper<T> {
         return result;
 
     }
+
     default int deleteByIdTr(Serializable id){
 
         Class<T> tClass = (Class<T>) ReflectionKit.getSuperClassGenericType(this.getClass(),EHBaseMapper.class,0);

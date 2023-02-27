@@ -4,8 +4,12 @@ enhantec-platform
 
         1. mvn install
 
-- Deploy library artifact to cloudsmith:
+- Deploy library artifact to cloudSmith:
   
-        1. login to cloudsmith and create config files (config.ini and credentials.ini): cloudsmith login
+        1. configure your $HOME/.m2/settings.xml file with the API key of the uploading user
+
+        2. change version number in projectDir/.mvn/Maven.config file
   
-        2. in the project scripts directory, run: ./deploy.sh [version-number]
+        2. mvn clean package
+
+        3, mvn clean deploy

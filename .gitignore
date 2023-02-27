@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+/enhantec-framework-service/.flattened-pom.xml
+/enhantec-framework-service-test/.flattened-pom.xml
+/.flattened-pom.xml

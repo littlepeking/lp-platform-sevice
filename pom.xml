@@ -15,10 +15,11 @@
 	</parent>
 	<groupId>com.enhantec</groupId>
 	<artifactId>enhantec-framework-parent-service</artifactId>
-	<version>0.9.3</version>
+	<version>${revision}</version>
 	<name>enhantec-framework-parent-service</name>
 	<description>Enhantec Framework Project</description>
 	<properties>
+		<revision>1.0.0.1</revision>
 		<java.version>11</java.version>
 		<spring.cloud-version>2021.0.1</spring.cloud-version>
 		<swagger.version>3.0.0</swagger.version>
@@ -219,5 +220,47 @@
 			<version>2.6.5</version>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+	<!--	add this plugin for preventing to use version ${revision} when jar deploy to cloudSmith:
+		https://blog.soebes.io/posts/2017/04/2017-04-02-maven-pom-files-without-a-version-in-it/-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+<!--				<version>1.3.0</version>-->
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<flattenMode>resolveCiFriendliesOnly</flattenMode>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
+		</plugins>
+	</build>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>cloudsmith</id>
+			<url>https://maven.cloudsmith.io/eh-xyp/enhantec-framework-service/</url>
+		</snapshotRepository>
+		<repository>
+			<id>cloudsmith</id>
+			<url>https://maven.cloudsmith.io/eh-xyp/enhantec-framework-service/</url>
+		</repository>
+	</distributionManagement>
 </project>
