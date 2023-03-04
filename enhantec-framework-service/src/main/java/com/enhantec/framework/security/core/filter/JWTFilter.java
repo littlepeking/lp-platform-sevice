@@ -104,7 +104,7 @@ public class JWTFilter extends OncePerRequestFilter {
                         ehRequestContextHolder.setOrgId(orgId);
                         //框架默认的数据源使用ORGID的数据源,Job或接口程序可根据实际情况进行覆盖。
                         ehRequestContextHolder.setDataSource(MultiDataSourceConfig.DATA_SOURCE_ORG_PREFIX + orgId);
-                        ehRequestContextHolder.setLanguageCode(EHContextHelper.getLanguageCode());
+                        ehRequestContextHolder.setLanguageCode(servletRequest.getHeader("Accept-Language"));
 
                         if(StringUtils.hasText(orgId)){
                             roleList = roleService.findByOrgIdAndUserId(orgId, user.getId(),true);

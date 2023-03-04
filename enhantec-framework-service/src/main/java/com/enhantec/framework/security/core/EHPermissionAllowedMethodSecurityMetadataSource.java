@@ -41,7 +41,7 @@ public class EHPermissionAllowedMethodSecurityMetadataSource  extends AbstractFa
                 // （这是由于此时SecurityContextPersistenceFilter此时已经完成SecurityContextHolder.clearContext()，
                 // 而正常的代码执行过程应该是先执行AbstractSecurityInterceptor.beforeInvocation，再执行SecurityContextPersistenceFilter的上述逻辑），
                 // 系统报An Authentication object was not found in the SecurityContext，而非错误代码404，此部分待后续优化。在没有好的办法前可先注释下面这行以禁用默认禁止访问无annotation的逻辑。
-                attributes.add(DENY_ALL_ATTRIBUTE);
+               // attributes.add(DENY_ALL_ATTRIBUTE);
 //                isControllerClass = true;
             }
 
