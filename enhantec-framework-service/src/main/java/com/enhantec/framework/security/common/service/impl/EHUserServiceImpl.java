@@ -94,9 +94,11 @@ public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
                     throw new EHApplicationException("s-usr-ADUserNotFound",user.getUsername());
                 }
 
-            }else {
+            } else if (AuthType.BASIC.equals(user.getAuthType())) {
                 //only basic auth type record password hash.
                   user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }else if(AuthType.APIKEY.equals(user.getAuthType())) {
+
             }
             //Set default access properties to new user.
             user.setAccountLocked(false);

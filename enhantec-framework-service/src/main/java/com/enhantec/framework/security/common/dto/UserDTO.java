@@ -43,12 +43,17 @@ public class UserDTO extends VersionDTO implements Serializable {
     private String originalPassword;
 
     private String password;
+
+    private String apiKey;
+
     @NotNull
     private AuthType authType;
 
     private String firstName;
 
     private String lastName;
+
+    private String remark;
 
     private boolean accountLocked;
 

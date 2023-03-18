@@ -57,7 +57,7 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
 
     private String lastName;
 
-    private String senderOrReceiverName; ////ONLY used in APIKEY
+    private String remark;
 
     @JsonIgnore
     @TableField(exist = false)

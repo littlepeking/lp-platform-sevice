@@ -86,7 +86,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 
                 try {
                     EHUser user = userService.lambdaQuery().eq(EHUser::getApiKey, apiKey).one();
-
+                    //TODO: check if user is enabled or account locked
                     //Loading roles by organization
                     List<EHRole> roleList;
                     String orgId = servletRequest.getHeader("orgId");

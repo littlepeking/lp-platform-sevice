@@ -85,6 +85,8 @@ public class UserController {
                 .lastName(userDTO.getLastName())
                 .originalPassword(userDTO.getOriginalPassword())
                 .password(userDTO.getPassword())
+                .apiKey(userDTO.getApiKey())
+                .remark(userDTO.getRemark())
                 .version(userDTO.getVersion())
                 .build();
 
