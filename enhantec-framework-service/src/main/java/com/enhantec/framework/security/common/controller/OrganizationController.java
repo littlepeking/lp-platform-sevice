@@ -53,7 +53,8 @@ public class OrganizationController {
         return ehOrganizationService.buildOrgTree();
     }
 
-    @PreAuthorize("permitAll()")
+    //@PreAuthorize("permitAll()")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/buildTreeByUserId")
     public List<EHOrganization> buildTreeByUserId(){
         return ehOrganizationService.buildOrgTreeByUserId(EHContextHelper.getUser().getId());
