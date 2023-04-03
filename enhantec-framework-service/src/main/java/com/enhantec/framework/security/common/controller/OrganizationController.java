@@ -47,6 +47,12 @@ public class OrganizationController {
         return ehOrganizationService.list();
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/listByIds")
+    public List<EHOrganization> listByIds(@RequestBody List<String> ids) {
+        return ehOrganizationService.listByIds(ids);
+    }
+
     @PreAuthorize("hasAnyAuthority('SECURITY_ORG')")
     @GetMapping("/buildTree")
     public List<EHOrganization> buildTree(){
