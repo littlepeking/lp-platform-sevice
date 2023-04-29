@@ -62,21 +62,22 @@ public class JobManager implements DisposableBean, CommandLineRunner {
         logger.info("定时任务加载完毕。");
     }
 
-    public void saveJob(EHJobDefinitionModel jobDefinition) {
-        if (jobDefinition != null) {
-            if(jobDefinition.getId()!=null){
-              var jobScheduleList =  ehJobScheduleService.list(Wrappers.lambdaQuery(EHJobScheduleModel.class).eq(EHJobScheduleModel::getJobDefId, jobDefinition.getId()));
+    public EHJobDefinitionModel saveJob(EHJobDefinitionModel jobDefinition) {
 
-              if(jobScheduleList!=null) {
-                  for (EHJobScheduleModel jobSchedule : jobScheduleList) {
-                     if(scheduledJobs.containsKey(jobSchedule.getId()))
-                              throw new EHApplicationException("s-job-stopScheduleBeforeSaveJob");
-                  }
-              }
+        //保存作业定义并不会影响当前已运行的作业，注释如下代码，暂不做强校验。
+//            if(jobDefinition.getId()!=null){
+//              var jobScheduleList =  ehJobScheduleService.list(Wrappers.lambdaQuery(EHJobScheduleModel.class).eq(EHJobScheduleModel::getJobDefId, jobDefinition.getId()));
+//
+//              if(jobScheduleList!=null) {
+//                  for (EHJobScheduleModel jobSchedule : jobScheduleList) {
+//                     if(scheduledJobs.containsKey(jobSchedule.getId()))
+//                              throw new EHApplicationException("s-job-stopScheduleBeforeSaveJob");
+//                  }
+//              }
+//
+//            }
+          return  ehJobDefinitionService.saveOrUpdateRetE(jobDefinition);
 
-            }
-            ehJobDefinitionService.save(jobDefinition);
-        }
     }
 
     public void removeJob(String jobId) {

@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 public class EHPaginationHelper {
 
 
-    public static <T> Page<T> buildPageInfo(PageParams pageParams) {
-        Page<T> page = new Page(pageParams.getPageNum(), pageParams.getPageSize());
+    public static  Page buildPageInfo(PageParams pageParams) {
+        Page page = new Page(pageParams.getPageNum(), pageParams.getPageSize());
         //John - DO NOT Optimize Join since it will make some join conditions lose when generating page count sql.
         page.setOptimizeJoinOfCountSql(false);
         return page;

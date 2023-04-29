@@ -27,7 +27,7 @@ public class EHJobScheduleModel extends EHVersionModel {
 
     private String jobDefId;
 
-    private String JobOrgIds;//逗号分开
+    private String jobOrgIds;//逗号分开
 
     private String jobParams;
 
