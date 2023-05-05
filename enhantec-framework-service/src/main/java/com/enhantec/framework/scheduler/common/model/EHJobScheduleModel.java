@@ -1,5 +1,6 @@
 package com.enhantec.framework.scheduler.common.model;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -25,6 +26,9 @@ public class EHJobScheduleModel extends EHVersionModel {
 
     private String orgId;
 
+    private String description;
+
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String jobDefId;
 
     private String jobOrgIds;//逗号分开

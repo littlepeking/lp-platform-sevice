@@ -12,7 +12,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
+import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
 import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
+import com.enhantec.framework.scheduler.common.service.EHJobDefinitionService;
+import com.enhantec.framework.scheduler.common.service.EHJobScheduleService;
 import com.enhantec.framework.scheduler.core.JobManager;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -27,14 +30,24 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ScheduleController {
     private final JobManager jobManager;
+
+    private final EHJobScheduleService ehJobScheduleService;
+
+
+    @PreAuthorize("hasAnyAuthority('SCHEDULER_SCHEDULE')")
+    @GetMapping("/findById/{id}")
+    public EHJobScheduleModel findById(@NotNull @PathVariable String id) {
+        return ehJobScheduleService.getById(id);
+    }
+
     @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
-    @GetMapping("/save")
-    public void save(@RequestBody @NotNull EHJobScheduleModel jobSchedule){
+    @PostMapping("/save")
+    public EHJobScheduleModel save(@RequestBody @NotNull EHJobScheduleModel jobSchedule){
         var jobScheduleModel = jobSchedule;
         if(!"0".equals(EHContextHelper.getCurrentOrgId())) {
             jobScheduleModel = jobSchedule.toBuilder().orgId(EHContextHelper.getCurrentOrgId()).build();
         }
-        jobManager.saveSchedule(jobScheduleModel);
+       return jobManager.saveSchedule(jobScheduleModel);
     }
 
     @GetMapping("/remove/{scheduleId}")
@@ -56,4 +69,20 @@ public class ScheduleController {
     }
 
 
+    @PostMapping("/queryByPage")
+    public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
+
+        //todo: check if userId is current user, if not, set userId to current UserId if request user is not admin user.
+
+        Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
+
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+
+        Page<Map<String, Object>> res = ehJobScheduleService.getPageData(pageInfo, queryWrapper);
+
+        //DataFormatHelper.formatPageData(res);
+
+        return res;
+
+    }
 }

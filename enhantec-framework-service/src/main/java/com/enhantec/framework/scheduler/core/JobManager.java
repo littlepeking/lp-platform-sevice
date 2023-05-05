@@ -92,10 +92,10 @@ public class JobManager implements DisposableBean, CommandLineRunner {
     }
 
 
-    public void saveSchedule(EHJobScheduleModel jobSchedule) {
-        if (jobSchedule != null) {
-            ehJobScheduleService.save(jobSchedule);
-        }
+    public EHJobScheduleModel saveSchedule(EHJobScheduleModel jobSchedule) {
+
+          return ehJobScheduleService.saveOrUpdateRetE(jobSchedule);
+
     }
 
     public void removeSchedule(String schedulerId) {

@@ -59,6 +59,14 @@ public class OrganizationController {
         return ehOrganizationService.buildOrgTree();
     }
 
+
+    @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
+    @GetMapping("/buildSubOrgTreeByOrgId")
+    public EHOrganization buildSubOrgTreeByOrgId(@RequestParam String orgId){
+        //TODO:CHECK ORG PARAM PERM for current user
+        return ehOrganizationService.buildSubOrgTreeByOrgId(orgId);
+    }
+
     //@PreAuthorize("permitAll()")
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/buildTreeByUserId")

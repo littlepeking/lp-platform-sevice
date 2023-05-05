@@ -38,6 +38,8 @@ public interface EHOrganizationService extends EHBaseService<EHOrganization> {
 
     List<EHOrganization> buildOrgTree();
 
+    EHOrganization buildSubOrgTreeByOrgId(String orgId);
+
     List<EHOrganization> buildOrgTreeByUserId(String userId);
 
     List<EHOrganization> buildOrgTreeByPermId(String permissionId);

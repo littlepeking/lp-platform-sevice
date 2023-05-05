@@ -142,6 +142,18 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
     }
 
+
+    public EHOrganization buildSubOrgTreeByOrgId(String orgId) {
+
+
+        EHOrganization organization = getById(orgId);
+
+        buildSubOrgTree(organization, list());
+
+        return organization;
+    }
+
+
     public List<EHOrganization> buildOrgTreeByPermId(String permissionId) {
 
         List<EHOrgPermission> orgPermissionList = orgPermissionMapper.selectListTr(Wrappers.lambdaQuery(EHOrgPermission.class)
@@ -185,6 +197,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
     }
 
 
+
     /**
      * build a minimum org tree only contains selected orgs and all their parent orgs.
      *
@@ -194,7 +207,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
         EHOrganization rootOrg = organizationList.stream().filter(p -> p.getId().equals("0")).collect(Collectors.toList()).stream().findFirst().get();
 
-        if (keepOrgSubTree(rootOrg,organizationList))
+        if (shouldKeepOrgSubTree(rootOrg,organizationList))
             return Arrays.asList(new EHOrganization[]{rootOrg});
         else return Collections.EMPTY_LIST;
 
@@ -202,7 +215,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
     }
 
 
-    private boolean keepOrgSubTree(EHOrganization currentOrg, List<EHOrganization> organizationList) {
+    private boolean shouldKeepOrgSubTree(EHOrganization currentOrg, List<EHOrganization> organizationList) {
 
         currentOrg.setChildren(new ArrayList<>());
 
@@ -210,7 +223,7 @@ public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationM
 
         if(childOrganizations.size()>0) {
             for (EHOrganization childOrg : childOrganizations) {
-                if (keepOrgSubTree(childOrg,organizationList)) {
+                if (shouldKeepOrgSubTree(childOrg,organizationList)) {
                     currentOrg.getChildren().add(childOrg);
                 }
             }

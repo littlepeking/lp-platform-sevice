@@ -25,4 +25,23 @@
         add_date,edit_who,edit_date,
         version
     </sql>
+    <select id="queryPageData" resultType="java.util.Map">
+        select
+        s.id,
+        s.org_id,
+        s.description,
+        s.job_org_ids,
+        s.job_params,
+        s.cron_expression,
+        s.enabled,
+        s.add_who,
+        s.add_date,
+        s.edit_who,
+        s.edit_date,
+        s.version,
+        j.name job_def_name
+        from eh_job_schedule s
+        JOIN eh_job_definition j ON s.job_def_id = j.id
+        ${ew.customSqlSegment}
+    </select>
 </mapper>
