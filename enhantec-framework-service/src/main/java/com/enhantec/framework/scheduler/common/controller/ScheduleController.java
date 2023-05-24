@@ -50,19 +50,19 @@ public class ScheduleController {
        return jobManager.saveSchedule(jobScheduleModel);
     }
 
-    @GetMapping("/remove/{scheduleId}")
+    @PostMapping("/remove/{scheduleId}")
     @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
     public void removeByScheduleId(@NotNull @PathVariable String scheduleId){
         jobManager.removeSchedule(scheduleId);
     }
 
-    @GetMapping("/run/{scheduleId}")
+    @PostMapping("/run/{scheduleId}")
     @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
     public void runBySchedulerId(@NotNull @PathVariable String scheduleId){
         jobManager.runSchedule(scheduleId);
     }
 
-    @GetMapping("/stop/{scheduleId}")
+    @PostMapping("/stop/{scheduleId}")
     @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
     public void stopBySchedulerId(@NotNull @PathVariable String scheduleId){
         jobManager.stopSchedule(scheduleId);
