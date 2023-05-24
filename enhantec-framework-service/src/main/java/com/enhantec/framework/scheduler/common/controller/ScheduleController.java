@@ -50,9 +50,9 @@ public class ScheduleController {
        return jobManager.saveSchedule(jobScheduleModel);
     }
 
-    @PostMapping("/remove/{scheduleId}")
+    @DeleteMapping("/remove")
     @PreAuthorize("hasAuthority('SCHEDULER_SCHEDULE')")
-    public void removeByScheduleId(@NotNull @PathVariable String scheduleId){
+    public void removeByScheduleId(@NotNull @RequestBody String scheduleId){
         jobManager.removeSchedule(scheduleId);
     }
 
