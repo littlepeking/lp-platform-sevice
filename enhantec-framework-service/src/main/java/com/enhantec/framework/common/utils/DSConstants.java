@@ -21,7 +21,7 @@ package com.enhantec.framework.common.utils;
 
 public interface DSConstants {
 
-    static String DS_MASTER = "master";
+    static String DS_ADMIN = "admin";
     //To choose a db schema for DB operation based on http header 'orgId',replaced by DS_ORG
     //static String DS_HEADER_ORG = "#header.orgId";
 

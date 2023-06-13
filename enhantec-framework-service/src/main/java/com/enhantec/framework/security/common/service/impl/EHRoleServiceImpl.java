@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@DS(DSConstants.DS_MASTER)
+@DS(DSConstants.DS_ADMIN)
 public class EHRoleServiceImpl extends EHBaseServiceImpl<EHRoleMapper, EHRole> implements EHRoleService {
 
     private final EHRoleMapper roleMapper;

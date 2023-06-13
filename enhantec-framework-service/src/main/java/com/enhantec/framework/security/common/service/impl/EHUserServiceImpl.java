@@ -54,7 +54,7 @@ import java.util.Map;
 */
 @Service
 @RequiredArgsConstructor
-@DS(DSConstants.DS_MASTER)
+@DS(DSConstants.DS_ADMIN)
 public class EHUserServiceImpl extends EHBaseServiceImpl<EHUserMapper, EHUser>
     implements EHUserService {
 

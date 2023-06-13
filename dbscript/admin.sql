@@ -252,7 +252,7 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- -- Dump completed on 2022-09-21  9:31:49
--- mysqldump -u root -p hq < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/master.sql
--- mysqldump -u root -p sh < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/master.sql
--- mysqldump -u root -p bj < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/master.sql
--- mysqldump -u root -p bj_ft < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/master.sql
+-- mysqldump -u root -p hq < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/admin.sql
+-- mysqldump -u root -p sh < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/admin.sql
+-- mysqldump -u root -p bj < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/admin.sql
+-- mysqldump -u root -p bj_ft < /Users/johnw/WorkFolder/EnhantecProducts/enhantec-platform/dbscript/admin.sql

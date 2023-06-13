@@ -42,7 +42,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@DS(DSConstants.DS_MASTER)
+@DS(DSConstants.DS_ADMIN)
 public class JobManager implements DisposableBean, CommandLineRunner {
 
     private final EHJobDefinitionService ehJobDefinitionService;

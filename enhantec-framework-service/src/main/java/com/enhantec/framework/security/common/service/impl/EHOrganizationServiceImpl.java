@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-@DS(DSConstants.DS_MASTER)
+@DS(DSConstants.DS_ADMIN)
 @Transactional(rollbackFor = Exception.class)
 public class EHOrganizationServiceImpl extends EHBaseServiceImpl<EHOrganizationMapper, EHOrganization>
         implements EHOrganizationService {

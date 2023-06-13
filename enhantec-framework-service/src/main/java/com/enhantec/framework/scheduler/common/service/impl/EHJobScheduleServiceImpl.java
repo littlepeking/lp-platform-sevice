@@ -18,7 +18,7 @@ import java.util.Map;
 * @createDate 2022-12-24 12:56:49
 */
 @Service
-@DS(DSConstants.DS_MASTER)
+@DS(DSConstants.DS_ADMIN)
 public class EHJobScheduleServiceImpl extends EHBaseServiceImpl<EHJobScheduleMapper, EHJobScheduleModel>
     implements EHJobScheduleService {
 

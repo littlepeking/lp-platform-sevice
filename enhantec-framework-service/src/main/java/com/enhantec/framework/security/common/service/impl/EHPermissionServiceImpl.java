@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-@DS(DSConstants.DS_MASTER)
+@DS(DSConstants.DS_ADMIN)
 public class EHPermissionServiceImpl extends EHBaseServiceImpl<EHPermissionMapper, EHPermission> implements EHPermissionService {
 
     private final EHRoleMapper roleMapper;

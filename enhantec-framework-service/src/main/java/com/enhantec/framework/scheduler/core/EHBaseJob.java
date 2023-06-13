@@ -23,7 +23,7 @@ public abstract class EHBaseJob {
      * @param args
      * @return
      */
-    @DS(DSConstants.DS_MASTER)
+    @DS(DSConstants.DS_ADMIN)
     public String getBatchDataSource(String orgId, String[] args){
         return MultiDataSourceConfig.DATA_SOURCE_ORG_PREFIX + orgId;
 

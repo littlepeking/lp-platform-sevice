@@ -38,15 +38,15 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class MultiDataSourceConfig {
-    @Value("${spring.datasource.dynamic.datasource.master.driver-class-name}")
+    @Value("${spring.datasource.dynamic.datasource.admin.driver-class-name}")
     private String driverClassName;
-    @Value("${spring.datasource.dynamic.datasource.master.url}")
+    @Value("${spring.datasource.dynamic.datasource.admin.url}")
     private String url;
-    @Value("${spring.datasource.dynamic.datasource.master.orgUrlTemplate}")
+    @Value("${spring.datasource.dynamic.datasource.admin.orgUrlTemplate}")
     private String orgUrlTemplate;
-    @Value("${spring.datasource.dynamic.datasource.master.username}")
+    @Value("${spring.datasource.dynamic.datasource.admin.username}")
     private String username;
-    @Value("${spring.datasource.dynamic.datasource.master.password}")
+    @Value("${spring.datasource.dynamic.datasource.admin.password}")
     private String password;
 
     public static String DATA_SOURCE_ORG_PREFIX = "ORG__";
