@@ -6,13 +6,22 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.core.GenericTypeResolver;
 
-/**
- * Copyright (C) 2022, Enhantec
- * All rights reserved.
- * <p>
- * Author: John Wang
- * Email: john.wang_ca@hotmail.com
- */
+/*******************************************************************************
+ *                                     NOTICE
+ *
+ *             THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS CONFIDENTIAL
+ *             INFORMATION. AND SHALL NOT BE DISCLOSED WITHOUT PRIOR
+ *             WRITTEN PERMISSION OF AUTHOR. LICENSED CUSTOMERS MAY COPY AND
+ *             ADAPT THIS SOFTWARE FOR THEIR OWN USE IN ACCORDANCE WITH
+ *             THE TERMS OF THEIR SOFTWARE LICENSE AGREEMENT.
+ *             ALL OTHER RIGHTS RESERVED BY AUTHOR.
+ *
+ *             (c) COPYRIGHT 2022. ALL RIGHTS RESERVED.
+ *
+ *             Author: John Wang
+ *             Email: john.wang_ca@hotmail.com
+ * 
+ *******************************************************************************/
 
 
 public class JsonDataSerializer {
