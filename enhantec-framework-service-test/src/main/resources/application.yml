@@ -18,19 +18,19 @@ spring:
         validation-query: SELECT 1
       datasource:
 #########Mysql
-        admin:
-          url: jdbc:mysql://127.0.0.1:3306/admin?useUnicode=yes&characterEncoding=utf-8
-          orgUrlTemplate: jdbc:mysql://127.0.0.1:3306/%s?useUnicode=yes&characterEncoding=utf-8
-          username: root
-          password: Passw0rd
-          driver-class-name: com.mysql.cj.jdbc.Driver
-#########SQLServer
 #        admin:
-#            url: jdbc:sqlserver://192.168.4.253;databaseName=EHTEST
-#            orgUrlTemplate: jdbc:sqlserver://192.168.4.253;databaseName=EHTEST
-#            username: admin
-#            password: Passw0rd
-#            driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#          url: jdbc:mysql://127.0.0.1:3306/admin?useUnicode=yes&characterEncoding=utf-8
+#          orgUrlTemplate: jdbc:mysql://127.0.0.1:3306/%s?useUnicode=yes&characterEncoding=utf-8
+#          username: root
+#          password: Passw0rd
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#########SQLServer
+        admin:
+            url: jdbc:sqlserver://192.168.4.253;databaseName=EHTEST
+            orgUrlTemplate: jdbc:sqlserver://192.168.4.253;databaseName=EHTEST
+            username: admin
+            password: Passw0rd
+            driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 
   cache:
     type: redis
