@@ -1,40 +1,30 @@
-/*******************************************************************************
- *                                     NOTICE
- *
- *             THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS CONFIDENTIAL
- *             INFORMATION. AND SHALL NOT BE DISCLOSED WITHOUT PRIOR
- *             WRITTEN PERMISSION OF AUTHOR. LICENSED CUSTOMERS MAY COPY AND
- *             ADAPT THIS SOFTWARE FOR THEIR OWN USE IN ACCORDANCE WITH
- *             THE TERMS OF THEIR SOFTWARE LICENSE AGREEMENT.
- *             ALL OTHER RIGHTS RESERVED BY AUTHOR.
- *
- *             (c) COPYRIGHT 2022. ALL RIGHTS RESERVED.
- *
- *             Author: John Wang
- *             Email: john.wang_ca@hotmail.com
- * 
- *******************************************************************************/
 
+package com.enhantec.framework.config.mybatisplus;
 
-
-package com.enhantec.framework.config;
-
-import com.baomidou.mybatisplus.autoconfigure.ConfigurationCustomizer;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Configuration
-public class MybatisConfig {
-    @Bean
-    public ConfigurationCustomizer configurationCustomizer() {
-        return configuration -> configuration.setObjectWrapperFactory(new MapWrapperFactory());
+
+@Component
+class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesCustomizer {
+
+    @Override
+    public void customize(MybatisPlusProperties properties) {
+        // Customize the MybatisPlusProperties object
+        // Modify the properties according to your requirements
+        EHMybatisConfiguration configuration = new EHMybatisConfiguration();
+        configuration.setObjectWrapperFactory(new EHMybatisPlusConfigurationPropCustomizer.MapWrapperFactory());
+        properties.setConfiguration(configuration);
+        // Customize globalConfig or other properties as needed
     }
+
 
 
     static class MapWrapperFactory implements ObjectWrapperFactory {
@@ -45,7 +35,7 @@ public class MybatisConfig {
 
         @Override
         public ObjectWrapper getWrapperFor(MetaObject metaObject, Object object) {
-            return new MyMapWrapper(metaObject, (Map) object);
+            return new EHMybatisPlusConfigurationPropCustomizer.MyMapWrapper(metaObject, (Map) object);
         }
     }
 

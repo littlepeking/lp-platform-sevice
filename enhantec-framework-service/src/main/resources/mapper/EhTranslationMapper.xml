@@ -31,6 +31,6 @@
         where tr.table_name = '${tableName}'
         and tr.column_name = '${columnName}'
         and tr.language_code = '${languageCode}'
-        and tr.trans_id = ${transId}
+        and tr.trans_id = '${transId}'
     </select>
 </mapper>

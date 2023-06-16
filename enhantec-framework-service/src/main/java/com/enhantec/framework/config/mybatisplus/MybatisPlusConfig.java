@@ -17,7 +17,7 @@
 
 
 
-package com.enhantec.framework.config;
+package com.enhantec.framework.config.mybatisplus;
 
 
 import com.baomidou.mybatisplus.annotation.DbType;
@@ -32,15 +32,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MybatisPlusConfig {
 
-    @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor(){
 
-        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
-        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
-        return interceptor;
 
-    }
+    //as we introduced ConfigurationCustomizer, so have to remove this bean to avoid conflict
+//    @Bean
+//    public MybatisConfiguration mybatisConfiguration() {
+//        return new LocalDateTimeConfiguration();
+//    }
+
 
 
 }

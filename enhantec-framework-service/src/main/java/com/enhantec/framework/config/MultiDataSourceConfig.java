@@ -22,8 +22,13 @@ package com.enhantec.framework.config;
 import com.baomidou.dynamic.datasource.provider.AbstractJdbcDataSourceProvider;
 import com.baomidou.dynamic.datasource.provider.DynamicDataSourceProvider;
 import com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DataSourceProperty;
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,23 +66,63 @@ public class MultiDataSourceConfig {
                 Map<String, DataSourceProperty> map = new HashMap<>();
 
                 ResultSet rs = statement.executeQuery("select * from EH_ORGANIZATION");
+
                 while (rs.next()) {
-                    if(rs.getString("DB_NAME")!=null) {
-                        String orgId = rs.getString("ID");
-                        String dbName = rs.getString("DB_NAME");
-                        DataSourceProperty property = new DataSourceProperty();
-                        property.setUsername(username);
-                        property.setPassword(password);
-                        property.setUrl(String.format(orgUrlTemplate, dbName));
-                        property.setDriverClassName(driverClassName);
-                        map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
-                        log.info("===load datasource {}===", orgId);
+                    String connectionStringParams = rs.getString("CONNECTION_STRING_PARAMS");
+                    if(driverClassName.contains("sqlserver")){
+                        if(connectionStringParams !=null) {
+                            String[] paramsArray = connectionStringParams.split(";;;");
+
+                            if(paramsArray.length!=2)
+                                throw new RuntimeException("Database connection string parameters is incorrect: SQLServer need 2 parameters, string format should be: username;;;password. Parameter value is: "+connectionStringParams);
+
+                            String orgId = rs.getString("ID");
+                            DataSourceProperty property = new DataSourceProperty();
+                            property.setUsername(paramsArray[0]);
+                            property.setPassword(paramsArray[1]);
+
+                            if(StringUtils.isEmpty(orgUrlTemplate)){
+                                orgUrlTemplate = url;
+                            }
+
+                            property.setUrl(orgUrlTemplate);
+                            property.setDriverClassName(driverClassName);
+                            map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
+                            log.info("===load datasource {}===", orgId);
+                        }
+                    }else if(driverClassName.contains("mysql")){
+                        if(connectionStringParams !=null) {
+                            String orgId = rs.getString("ID");
+                            DataSourceProperty property = new DataSourceProperty();
+                            property.setUsername(username);
+                            property.setPassword(password);
+                            property.setUrl(String.format(orgUrlTemplate, connectionStringParams));
+                            property.setDriverClassName(driverClassName);
+                            map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
+                            log.info("===load datasource {}===", orgId);
+                        }
                     }
+
 
                 }
                 return map;
             }
         };
+    }
+
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor(){
+
+        MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        //For define boolean column: sqlserver => bit, mysql => TINYINT(1)
+        if(driverClassName.contains("sqlserver")) {
+            interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.SQL_SERVER2005));
+        }else if(driverClassName.contains("mysql")){
+            interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
+        }
+        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+        return interceptor;
+
     }
 
 }

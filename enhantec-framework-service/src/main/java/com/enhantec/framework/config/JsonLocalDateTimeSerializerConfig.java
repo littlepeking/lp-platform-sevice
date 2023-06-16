@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.time.*;
 
 @Configuration
-public class LocalDateTimeSerializerConfig {
+public class JsonLocalDateTimeSerializerConfig {
 
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
@@ -49,7 +49,7 @@ public class LocalDateTimeSerializerConfig {
     }
 
     /**
-     * Serialization to server Local date time
+     * Serialization from server Local date time to epoch number
      */
     public static class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
         @Override
@@ -64,7 +64,7 @@ public class LocalDateTimeSerializerConfig {
     }
 
     /**
-     *Deserialization to server Local date time
+     *Deserialization from epoch number to server Local date time
      */
     public static class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
         @Override

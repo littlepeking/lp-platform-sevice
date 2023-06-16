@@ -55,5 +55,8 @@
                       AND tr_role.trans_id = r.id
                       AND tr_role.language_code = '${languageCode}'
         ${ew.customSqlSegment}
+<!--        <if test="ew.customSqlSegment != null and ew.customSqlSegment.indexOf('ORDER BY') == -1">-->
+<!--        ORDER BY r.id desc-->
+<!--        </if>-->
     </select>
 </mapper>

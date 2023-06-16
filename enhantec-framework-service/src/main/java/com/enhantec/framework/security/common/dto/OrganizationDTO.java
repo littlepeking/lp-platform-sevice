@@ -40,7 +40,7 @@ public class OrganizationDTO extends VersionDTO implements Serializable {
     @NotNull
     private String name;
     @NotNull
-    private String dbName;
+    private String connectionStringParams;
 
     private String address1;
 
