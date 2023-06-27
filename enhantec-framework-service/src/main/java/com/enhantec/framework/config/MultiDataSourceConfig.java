@@ -88,7 +88,7 @@ public class MultiDataSourceConfig {
                             property.setUrl(orgUrlTemplate);
                             property.setDriverClassName(driverClassName);
                             map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
-                            log.info("===load datasource {}===", orgId);
+                            log.info("Loaded SQLServer datasource for org {} ", orgId);
                         }
                     }else if(driverClassName.contains("mysql")){
                         if(connectionStringParams !=null) {
@@ -99,7 +99,7 @@ public class MultiDataSourceConfig {
                             property.setUrl(String.format(orgUrlTemplate, connectionStringParams));
                             property.setDriverClassName(driverClassName);
                             map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
-                            log.info("===load datasource {}===", orgId);
+                            log.info("Loaded mysql datasource for org {} ", orgId);
                         }
                     }
 
