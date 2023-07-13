@@ -82,6 +82,12 @@
 			<artifactId>druid-spring-boot-starter</artifactId>
 			<version>${druid.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.67</version>
+		</dependency>
 		<!-- ldap start -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

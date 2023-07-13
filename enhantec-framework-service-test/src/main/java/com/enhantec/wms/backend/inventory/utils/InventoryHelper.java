@@ -1,0 +1,283 @@
+package com.enhantec.wms.backend.inventory.utils;
+
+import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
+import com.enhantec.wms.backend.common.base.IDNotes;
+import com.enhantec.wms.backend.common.base.UOM;
+import com.enhantec.wms.backend.common.base.code.CDSysSet;
+import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.wms.backend.framework.ServiceDataMap;
+import com.enhantec.wms.backend.utils.common.*;
+import com.enhantec.wms.backend.utils.print.Labels;
+
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr;
+import static com.enhantec.wms.backend.utils.print.PrintHelper.printOrUpdateTaskLPNByIDNotes;
+
+public class InventoryHelper {
+
+    /**
+     * @return
+     *  key:TOID,value:拆分至容器
+     *  key:PRINT,value:是否需要重新打印标签
+     * @throws Exception
+     */
+    public static HashMap<String,String> doMove(Context context, Connection conn, String OPNAME, HashMap<String, String> fromIdHashMap, List<String> snList, String toId, String fromLoc, String toLoc, String toBeMovedNetWgt, String toBeMovedGrossWgt, String toBeMovedTareWgt, String tobeMovedUOM, String printer, boolean isSplitLpn) throws Exception {
+
+        String fromId = fromIdHashMap.get("ID");
+
+        BigDecimal idQty = new BigDecimal(fromIdHashMap.get("QTY"));
+        BigDecimal allocatedQty = new BigDecimal(fromIdHashMap.get("QTYALLOCATED"));
+        BigDecimal pickedQty = new BigDecimal(fromIdHashMap.get("QTYPICKED"));
+        BigDecimal availableQty = idQty.subtract(allocatedQty).subtract(pickedQty);
+
+        if(UtilHelper.isEmpty(tobeMovedUOM)){
+            tobeMovedUOM = fromIdHashMap.get("UOM");
+        }
+        if(UtilHelper.isEmpty(toBeMovedNetWgt)){
+            toBeMovedNetWgt = snList.size()>0 ? String.valueOf(snList.size()) : fromIdHashMap.get("QTY");
+        }
+        if(UtilHelper.isEmpty(toBeMovedGrossWgt)){
+            toBeMovedGrossWgt = toBeMovedNetWgt;
+        }
+
+        if(UtilHelper.isEmpty(toBeMovedTareWgt)){
+            toBeMovedTareWgt = "0";
+        }
+
+        BigDecimal deltaGrossWgt = UOM.UOMQty2StdQty(context, conn, fromIdHashMap.get("PACKKEY"), tobeMovedUOM, new BigDecimal(toBeMovedGrossWgt));
+        BigDecimal deltaNetWgt = UOM.UOMQty2StdQty(context, conn, fromIdHashMap.get("PACKKEY"), tobeMovedUOM, new BigDecimal(toBeMovedNetWgt));
+        BigDecimal deltaTareWgt = UOM.UOMQty2StdQty(context, conn, fromIdHashMap.get("PACKKEY"), tobeMovedUOM, new BigDecimal(toBeMovedTareWgt));
+
+        if (availableQty.compareTo(deltaNetWgt) == -1)
+            ExceptionHelper.throwRfFulfillLogicException(OPNAME +"数量" + trimZerosAndToStr(deltaNetWgt) + "大于当前库存可用量" + trimZerosAndToStr(trimZerosAndToStr(availableQty)));
+
+        String status =fromIdHashMap.get("STATUS");
+
+        Loc.findById(context, conn, toLoc,true);
+
+        if(fromId.equals(toId) && fromLoc.equals(toLoc)) {
+            ExceptionHelper.throwRfFulfillLogicException("库位和容器条码均相同，无需进行操作");
+        }
+
+        if(fromId.equals(toId) && !fromLoc.equals(toLoc)) {
+            //否定校验
+            InventoryValidationHelper.validateLocMix(context, conn, toId, fromLoc, toLoc);
+        }
+        /**
+         * fromId原始容器，拆分/合并后依旧有重量且启用标签重量，打印fromId原始容器标签
+         */
+        boolean printFromIdLabel = false;
+        if(UtilHelper.decimalStrCompare(fromIdHashMap.get("NETWGT"),toBeMovedNetWgt) > 0
+                && CDSysSet.enableLabelWgt(context,conn)){
+            printFromIdLabel = true;
+        }
+        boolean printToIdLabel = false;
+        /**
+         * toId为空，说明需要创建新容器，打印新容器的标签
+         * toId不为空
+         * fromId == toId，移动，不需要打印标签
+         * fromId != toId且启用重量，打印标签(当toId已经指定的情况下，这时候认为已经存在toId的标签，无需重新打印)
+         */
+        if(UtilHelper.isEmpty(toId)){
+            printToIdLabel = true;
+        }else{
+            if(!fromId.equals(toId) && CDSysSet.enableLabelWgt(context,conn)){
+                printToIdLabel = true;
+            }
+        }
+
+        //fromid==toid为移动操作，不需要拆分合并容器，只需要移动库存和唯一码
+        if(!fromId.equals(toId)){
+            //update existing IDNOTES and insert new record to IDNOTES
+            toId = IDNotes.splitWgtById(context,conn,deltaGrossWgt,deltaNetWgt,deltaTareWgt,toBeMovedGrossWgt,toBeMovedNetWgt,toBeMovedTareWgt,tobeMovedUOM,fromId,toId,"", isSplitLpn);
+        }
+
+        if(snList.size()>0) {
+            for (String sn: snList) {
+                LinkedHashMap<String, String> serialMove = new LinkedHashMap<>();
+                serialMove.put("WHSEID", "@user");
+                serialMove.put("STORERKEY", CDSysSet.getStorerKey(context, conn));
+                serialMove.put("SKU", fromIdHashMap.get("SKU"));
+                serialMove.put("LOT", fromIdHashMap.get("LOT"));
+                serialMove.put("ID", fromId);
+                serialMove.put("LOC", fromIdHashMap.get("LOC"));
+                serialMove.put("ADDWHO", context.getUserID());
+                serialMove.put("EDITWHO", context.getUserID());
+                serialMove.put("ADDDATE", "@date");
+                serialMove.put("EDITDATE", "@date");
+                serialMove.put("SERIALNUMBER",sn);
+                LegacyDBHelper.ExecInsert(context, conn, "SERIALMOVE", serialMove);
+            }
+        }
+
+        ServiceDataMap moveDO = buildParams(context, conn, fromIdHashMap.get("STORERKEY"), fromIdHashMap.get("SKU"), fromIdHashMap.get("LOT"), status, fromId, toId, fromLoc, toLoc, deltaNetWgt.toPlainString());
+
+        //todo
+//        context.theEXEDataObjectStack.push(moveDO);
+//        Process rfMove = context.searchObjectLibrary("NSPITRNADDMOVE"));
+//        rfMove.execute(context);
+//        context.theEXEDataObjectStack.pop();
+
+
+        if (!toId.equalsIgnoreCase(fromId)){//拆分SN时 不一致
+            ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(context,conn,fromIdHashMap.get("SKU"),toId,fromId);
+        }
+        boolean printLabel = false;
+        //print lpn
+        if(printFromIdLabel && IDNotes.isLpnOrBoxId(context,conn,fromId)){
+            printLabel = true;
+            printOrUpdateTaskLPNByIDNotes(context,conn,fromId, Labels.LPN_UI_SY,printer,"","打印拆分容器余量标签");
+        }
+        if(printToIdLabel && IDNotes.isLpnOrBoxId(context,conn,toId)){
+            printLabel = true;
+            printOrUpdateTaskLPNByIDNotes(context,conn,toId, Labels.LPN_UI_SY,printer,"","打印拆分至容器余量标签");
+        }
+
+        HashMap<String, String> result = new HashMap<>();
+        result.put("TOID",toId);
+        result.put("PRINT",String.valueOf(printLabel));
+        return result;
+
+    }
+
+    private static ServiceDataMap buildParams(Context context, Connection connection, String STORERKEY, String SKU, String LOT, String status, String FROMID, String TOID, String FROMLOC, String TOLOC, String TOBEMOVEDQTY) {
+        ServiceDataMap moveDO = new ServiceDataMap();
+        Object nullData = "null";
+        String zeroData = "0";
+        moveDO.setAttribValue("ItrnSysId",nullData);
+        moveDO.setAttribValue("StorerKey",STORERKEY);
+        moveDO.setAttribValue("Sku",SKU);
+        moveDO.setAttribValue("Lot",LOT);
+        moveDO.setAttribValue("FromID",FROMID);
+        moveDO.setAttribValue("FromLoc",FROMLOC);
+        moveDO.setAttribValue("ToLoc",TOLOC);
+        moveDO.setAttribValue("ToID",TOID);
+
+        if(isOnlyLocOnHold(context,connection,FROMLOC,LOT,FROMID)){
+            moveDO.setAttribValue("Status","OK");
+        }else{
+            moveDO.setAttribValue("Status",status);
+        }
+
+        moveDO.setAttribValue("lottable01",nullData);
+        moveDO.setAttribValue("lottable02",nullData);
+        moveDO.setAttribValue("lottable03",nullData);
+        moveDO.setAttribValue("lottable04",nullData);
+        moveDO.setAttribValue("lottable05",nullData);
+        moveDO.setAttribValue("lottable06",nullData);
+        moveDO.setAttribValue("lottable07",nullData);
+        moveDO.setAttribValue("lottable08",nullData);
+        moveDO.setAttribValue("lottable09",nullData);
+        moveDO.setAttribValue("lottable10",nullData);
+        moveDO.setAttribValue("casecnt",zeroData);
+        moveDO.setAttribValue("innerpack",zeroData);
+        moveDO.setAttribValue("Qty",TOBEMOVEDQTY);
+        moveDO.setAttribValue("pallet",zeroData);
+        moveDO.setAttribValue("cube",zeroData);
+        moveDO.setAttribValue("grosswgt",zeroData);
+        moveDO.setAttribValue("netwgt",zeroData);
+        moveDO.setAttribValue("otherunit1",zeroData);
+        moveDO.setAttribValue("otherunit2",zeroData);
+        moveDO.setAttribValue("SourceKey","");
+        moveDO.setAttribValue("SourceType","Console Move");
+        moveDO.setAttribValue("PackKey","");
+        moveDO.setAttribValue("UOM","");
+        moveDO.setAttribValue("UOMCalc","1");
+        moveDO.setAttribValue("EffectiveDate",nullData);
+        moveDO.setAttribValue("Dummy1",nullData);
+        moveDO.setAttribValue("Dummy2",nullData);
+        moveDO.setAttribValue("Dummy3",nullData);
+        moveDO.setAttribValue("TOGROSSWT","0");
+        moveDO.setAttribValue("TONETWT","0");
+        moveDO.setAttribValue("TOTAREWT","0");
+
+
+        return  moveDO;
+    }
+
+
+    //Logic referred from InventoryMoveExecuteMovesAction
+    private static boolean isOnlyLocOnHold(Context context, Connection conn, String loc, String lot, String ID)  {
+        boolean locOnHold = false;
+        if(!"".equalsIgnoreCase(loc)){
+            String locQuery = "SELECT count(1) TOTALNUM FROM INVENTORYHOLD WHERE loc = ? AND Hold = '1'";
+            HashMap<String,String> record=DBHelper.getRecord(context, conn, locQuery, new Object[]{ loc},"库存冻结");
+
+            if(!record.get("TOTALNUM").equals("0")){
+                locOnHold = true;
+            }
+        }
+        boolean lotOnHold = false;
+        if(!"".equalsIgnoreCase(lot)){
+            String lotQuery = "SELECT count(1) TOTALNUM FROM INVENTORYHOLD WHERE lot = ? AND Hold = '1'";
+            HashMap<String,String> record=DBHelper.getRecord(context, conn, lotQuery, new Object[]{ lot},"库存冻结");
+
+            if(!record.get("TOTALNUM").equals("0")){
+                lotOnHold = true;
+            }
+
+        }
+
+
+        boolean idOnHold = false;
+        if(!"".equalsIgnoreCase(ID)){
+            String idQuery = "SELECT count(1) TOTALNUM FROM INVENTORYHOLD WHERE id = ? AND Hold = '1'";
+            HashMap<String,String> record=DBHelper.getRecord(context, conn, idQuery, new Object[]{ID},"库存冻结");
+            if(!record.get("TOTALNUM").equals("0")){
+                idOnHold = true;
+            }
+        }
+
+        if(locOnHold && !lotOnHold && !idOnHold){//means only loc on hold
+            return true;
+        }
+        return false;
+    }
+
+    public static String getHoldStatus4Pick(Context context, Connection conn, HashMap<String,String> lotxLocxIdInfo)  {
+
+        List<String> holdStatuses = getHoldStatuses(context,conn,lotxLocxIdInfo);
+
+        if(holdStatuses.size()>0){
+            return holdStatuses.get(0);
+        }else {
+            return "OK";
+        }
+    }
+
+
+    public static List<String> getHoldStatuses(Context context, Connection conn, HashMap<String,String> lotxLocxIdInfo)  {
+
+        String statusQuery = "SELECT STATUS FROM INVENTORYHOLD WHERE HOLD = 1 AND STATUS <> 'OK' AND (LOC =? OR ID = ? OR LOT = ?) ";
+        List<HashMap<String,String>>  statusList = DBHelper.executeQuery(context, conn, statusQuery, new Object[]{
+                lotxLocxIdInfo.get("LOC"),
+                lotxLocxIdInfo.get("ID"),
+                lotxLocxIdInfo.get("LOT")});
+
+        List<String> holdStatuses = statusList.stream().map(x->x.get("STATUS")).collect(Collectors.toList());
+        if(holdStatuses.size() == 0){
+            holdStatuses.add("OK");
+        }
+        return holdStatuses;
+    }
+    public static void checkLocQuantityLimit(Context context, Connection conn, String loc) throws Exception {
+        String locNumQuery = "select COUNT(*) from LOTXLOCXID l,idnotes i where l.LOC=? and i.id=l.ID and l.QTY>0";
+        String  locNum = DBHelper.getValue(context, conn, locNumQuery, new Object[]{loc},"库位LPN数量");
+        HashMap<String,String> locHash= Loc.findById(context,conn,loc,true);
+        String stackLimit = UtilHelper.isEmpty(locHash.get("STACKLIMIT"))?"0":locHash.get("STACKLIMIT");
+        String footPrint = UtilHelper.isEmpty(locHash.get("FOOTPRINT"))?"0":locHash.get("FOOTPRINT");
+        String maxLocQuantity =  (new BigDecimal(stackLimit).multiply(new BigDecimal(footPrint))).toPlainString();
+        if (!UtilHelper.isEmpty(maxLocQuantity)&&!"0".equalsIgnoreCase(maxLocQuantity)){
+            if (Integer.parseInt(locNum) >= Integer.parseInt(maxLocQuantity))
+                throw new Exception("超出库位最大容器存放量");
+        }
+
+    }
+
+}

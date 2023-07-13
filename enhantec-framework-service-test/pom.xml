@@ -24,6 +24,12 @@
             <artifactId>enhantec-framework-service</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.67</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
