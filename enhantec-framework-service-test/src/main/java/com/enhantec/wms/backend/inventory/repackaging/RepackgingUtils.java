@@ -37,9 +37,9 @@ public class RepackgingUtils {
         return list;
     }
 
-    public static boolean isInRepackProcess(Context context, Connection conn, String orderKey, String orderLineNumber){
+    public static boolean isInRepackProcess(Context context, String orderKey, String orderLineNumber){
 
-        HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,conn,orderKey,orderLineNumber,true);
+        HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,orderKey,orderLineNumber,true);
 
         //如果repackOrderKey不为空，说明单据已经创建但未自动完成后续操作，需要手工执行。
         return !UtilHelper.isEmpty(orderDetailHashMap.get("SUSR2"));

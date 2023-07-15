@@ -37,19 +37,19 @@ public class CreateRelease  extends LegacyBaseService {
 
 
         String userid = context.getUserID();  //当用户
-        Connection conn = context.getConnection();
+        
         try
         {
             String LOTTABLE06= serviceDataHolder.getInputDataAsMap().getString("LOTTABLE06"); //传入批次
             if (UtilHelper.isEmpty(LOTTABLE06)) ExceptionHelper.throwRfFulfillLogicException("所选生成放行单的批号不能为空");
 
             //放行单号
-            String RELEASEKEY= LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter(context, conn, "QA_RELEASE"),10);  //获取新的请检单号
+            String RELEASEKEY= LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter(context, "QA_RELEASE"),10);  //获取新的请检单号
 
-            String STORERKEY= LegacyDBHelper.GetValue(context, conn, "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
+            String STORERKEY= DBHelper.getValue(context, "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
             
             //取批次的相关信息
-            LinkedHashMap<String,String> FromLot= LegacyDBHelper.GetValueMap(context, conn, "SELECT A.BUSR4 SKUTYPE, A.SKU , LA.ELOTTABLE02, LA.ELOTTABLE04, LA.ELOTTABLE03 QUALITYSTATUS,LA.ELOTTABLE01,LA.ELOTTABLE19,LA.ELOTTABLE20,LA.ELOTTABLE07, " +
+            HashMap<String,String> FromLot= DBHelper.getRecord(context, "SELECT A.BUSR4 SKUTYPE, A.SKU , LA.ELOTTABLE02, LA.ELOTTABLE04, LA.ELOTTABLE03 QUALITYSTATUS,LA.ELOTTABLE01,LA.ELOTTABLE19,LA.ELOTTABLE20,LA.ELOTTABLE07, " +
               " LA.ELOTTABLE09 SUPPLIERLOT," +
               " LA.ELOTTABLE08 AS SUPPLIERCODE," +
               " FORMAT(ELOTTABLE05, 'yyyy-MM-dd HH:mm:ss') AS ELOTTABLE05, FORMAT(ELOTTABLE11,'yyyy-MM-dd HH:mm:ss') AS ELOTTABLE11 , A.DESCR" +
@@ -62,13 +62,12 @@ public class CreateRelease  extends LegacyBaseService {
 
             if(!UtilHelper.isEmpty(FromLot.get("ELOTTABLE08"))) {
 
-                SUPPLIERNAME = LegacyDBHelper.GetValue(context, conn,
-                        "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{FromLot.get("ELOTTABLE08")}," ");
+                SUPPLIERNAME = DBHelper.getValue(context, "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{FromLot.get("ELOTTABLE08")}," ");
 
             }
 
             //取库存的信息
-            HashMap<String,String> record= DBHelper.getRecord(context, conn, "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
+            HashMap<String,String> record= DBHelper.getRecord(context, "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
                         + " WHERE A.LOT=B.LOT AND QTY>0 AND B.LOTTABLE06=?", new Object[]{LOTTABLE06},"库存明细");
 
                 String barrelNum = record.get("CNT"); //取库存桶数
@@ -77,7 +76,7 @@ public class CreateRelease  extends LegacyBaseService {
 
 
             //创建请检单
-            LinkedHashMap<String,String> mRELEASE=new LinkedHashMap<String,String>();
+            HashMap<String,String> mRELEASE=new HashMap<String,String>();
             mRELEASE.put("ADDWHO", userid);  //创建人
             mRELEASE.put("EDITWHO", userid);  //更新人
 
@@ -119,7 +118,7 @@ public class CreateRelease  extends LegacyBaseService {
             mRELEASE.put("SKUTYPE", FromLot.get("SKUTYPE"));  // 物料类型
 
             //取放行检测内容项目
-            LegacyDBHelper.ExecInsert(context, conn, "RELEASE", mRELEASE);  //放行单写入数据库
+            LegacyDBHelper.ExecInsert(context, "RELEASE", mRELEASE);  //放行单写入数据库
 
             //创建反馈对象
 
@@ -131,15 +130,13 @@ public class CreateRelease  extends LegacyBaseService {
 
         }
         catch (Exception e)
-        { //如果出错,先关闭数据库连接,再按系统要求转换成标准的错误类型抛出错误
-            try	{	context.releaseConnection(conn); 	}	catch (Exception e1)  {	e1.printStackTrace();	}  //关闭数据库连接
-
+        {
             if ( e instanceof FulfillLogicException )
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
 

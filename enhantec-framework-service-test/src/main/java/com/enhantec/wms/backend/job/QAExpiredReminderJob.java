@@ -32,11 +32,11 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 	{
 
 		String userid = context.getUserID();  //当用户
-		Connection conn = context.getConnection();  //取数据库连接
+  //取数据库连接
 		try
 		{
 
-			DBHelper.executeUpdate(context, conn,
+			DBHelper.executeUpdate(context,
 					"DELETE FROM REMINDER WHERE REMINDERTYPE in (?,?,?)"
 					, new Object[]{
 							Const.QA_STATUS_AT_EXPIRED_DATE_TYPE,
@@ -44,14 +44,14 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 							Const.QA_STATUS_BEYOND_EXPIRED_DATE_TYPE
 					});
 
-			int remindDays = CDSysSet.getElot05MaxRemindDays(context,conn);
-			String elot05DisplayName = CDSysSet.getElot05DisplayName(context,conn);
+			int remindDays = CDSysSet.getElot05MaxRemindDays(context);
+			String elot05DisplayName = CDSysSet.getElot05DisplayName(context);
 			///////////////////////////////////////
 
 			//查找满足复测期提醒要求的库存批次
 			//DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))     --first second of today
 			//DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()) + 1, 0)) --last second of today
-			List<HashMap<String,String>> list =  DBHelper.executeQuery(context, conn,
+			List<HashMap<String,String>> list =  DBHelper.executeQuery(context,
 					"SELECT DISTINCT la.SKU, la.LOT, la.LOTTABLE06, FORMAT(DATEADD(HH,8,ELOTTABLE05), 'yyyy-MM-dd') ELOTTABLE05,la.ELOTTABLE13 RETESTTIMES," +
 							" DATEDIFF(DAY,DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()) + 1, 0)), DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, ELOTTABLE05) + 1, 0))) AS LEFTDAYS " +
 							" FROM V_LOTATTRIBUTE la " +
@@ -66,7 +66,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 					int leftDays = Integer.parseInt(tempLotAttr.get("LEFTDAYS"));
 
 					if(leftDays>0){
-						DBHelper.executeUpdate(context, conn,
+						DBHelper.executeUpdate(context,
 								"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 								, new Object[]{
 										Const.QA_STATUS_NEAR_EXPIRED_DATE_TYPE,
@@ -81,7 +81,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 								});
 
 					}else if(leftDays==0){
-						DBHelper.executeUpdate(context, conn,
+						DBHelper.executeUpdate(context,
 								"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 								, new Object[]{
 										Const.QA_STATUS_AT_EXPIRED_DATE_TYPE,
@@ -96,8 +96,8 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 								});
 
 					}else{
-						if(retestTimes< CDSysSet.getElot05MaxRemindTimes(context,conn)) {
-							DBHelper.executeUpdate(context, conn,
+						if(retestTimes< CDSysSet.getElot05MaxRemindTimes(context)) {
+							DBHelper.executeUpdate(context,
 									"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 									, new Object[]{
 											Const.QA_STATUS_BEYOND_EXPIRED_DATE_TYPE,
@@ -111,7 +111,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 															" 已超"+elot05DisplayName+"期" + (-leftDays) + "天,需检验"
 									});
 						}else{
-							DBHelper.executeUpdate(context, conn,
+							DBHelper.executeUpdate(context,
 									"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 									, new Object[]{
 											Const.QA_STATUS_BEYOND_EXPIRED_DATE_TYPE,
@@ -136,7 +136,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 			//查找满足有效期提醒要求的库存批次
 			//DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))     --first second of today
 			//DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()) + 1, 0)) --last second of today
-			list =  DBHelper.executeQuery(context, conn,
+			list =  DBHelper.executeQuery(context,
 					"SELECT DISTINCT la.SKU, la.LOT, FORMAT(DATEADD(HH,8,ELOTTABLE11), 'yyyy-MM-dd') ELOTTABLE11, la.LOTTABLE06 ," +
 							" DATEDIFF(DAY,DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()) + 1, 0)), DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, ELOTTABLE11) + 1, 0))) AS LEFTDAYS " +
 							" FROM V_LOTATTRIBUTE la " +
@@ -149,7 +149,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 
 					int leftDays = Integer.parseInt(tempLotAttr.get("LEFTDAYS"));
 					if(leftDays>0){
-						DBHelper.executeUpdate(context, conn,
+						DBHelper.executeUpdate(context,
 								"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 								, new Object[]{
 										Const.QA_STATUS_NEAR_EXPIRED_DATE_TYPE,
@@ -163,7 +163,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 								});
 
 					}if(leftDays==0){
-						DBHelper.executeUpdate(context, conn,
+						DBHelper.executeUpdate(context,
 								"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 								, new Object[]{
 										Const.QA_STATUS_AT_EXPIRED_DATE_TYPE,
@@ -177,7 +177,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 								});
 
 					}else{
-						DBHelper.executeUpdate(context, conn,
+						DBHelper.executeUpdate(context,
 								"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 								, new Object[]{
 										Const.QA_STATUS_BEYOND_EXPIRED_DATE_TYPE,
@@ -197,14 +197,12 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 		}
 		catch (Exception e)
 		{//如果出错,先关闭数据库连接,再按系统要求转换成标准的错误类型抛出错误
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {	e1.printStackTrace();	}
-
 			if ( e instanceof FulfillLogicException)
 				throw (FulfillLogicException)e;
 			else
 				throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 		}
 
 

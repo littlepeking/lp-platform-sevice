@@ -31,7 +31,7 @@ public class UdtrnSaveCommit extends LegacyBaseService
 
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
+
 
 		try
 		{
@@ -45,8 +45,8 @@ public class UdtrnSaveCommit extends LegacyBaseService
 		    
 		    for(int i1=0;i1<aSERIALKEY.length;i1++)
 		    {
-		    	LegacyDBHelper.ExecSql(context, conn, "INSERT INTO UDTRN("+FIELDS+") SELECT "+FIELDS+" FROM UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
-		    	LegacyDBHelper.ExecSql(context, conn, "DELETE UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
+		    	DBHelper.executeUpdate(context, "INSERT INTO UDTRN("+FIELDS+") SELECT "+FIELDS+" FROM UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
+		    	DBHelper.executeUpdate(context, "DELETE UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
 		    }
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
@@ -62,7 +62,7 @@ public class UdtrnSaveCommit extends LegacyBaseService
 			else
 		        throw new FulfillLogicException( e.getMessage());
 		}finally {
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 		}
 
 

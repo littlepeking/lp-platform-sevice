@@ -26,17 +26,17 @@ public class SignOrder extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = null;
+
 
         try {
 
             String userid = context.getUserID();
 
-            conn = context.getConnection();
+
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderkey");
 
-            HashMap<String, String> orderInfo = Orders.findByOrderKey(context, conn, orderKey, true);
+            HashMap<String, String> orderInfo = Orders.findByOrderKey(context, orderKey, true);
 
             if (!orderInfo.get("STATUS").equals("95")) {
                 ExceptionHelper.throwRfFulfillLogicException("不能签收未发运的订单");
@@ -44,10 +44,10 @@ public class SignOrder extends LegacyBaseService {
 
             String esignaturekey = serviceDataHolder.getInputDataAsMap().getString("esignaturekey");
 
-            String signedUser = DBHelper.getValue(context,conn,"SELECT SIGN FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+            String signedUser = DBHelper.getValue(context,"SELECT SIGN FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignaturekey},String.class, "电子签名");
 
-            DBHelper.executeUpdate(context, conn
+            DBHelper.executeUpdate(context
                     , "UPDATE orders SET SUSR5 = ? where orderkey = ? ",
                     new Object[]{signedUser, orderKey});
 
@@ -62,9 +62,9 @@ public class SignOrder extends LegacyBaseService {
             UDTRN.TITLE01 = "签收人";
             UDTRN.CONTENT01 = signedUser;
 
-            conn = context.getConnection();
 
-            UDTRN.Insert(context, conn, context.getUserID());
+
+            UDTRN.Insert(context, context.getUserID());
 
 
         }catch (Exception e)
@@ -74,7 +74,7 @@ public class SignOrder extends LegacyBaseService {
            else
                throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 

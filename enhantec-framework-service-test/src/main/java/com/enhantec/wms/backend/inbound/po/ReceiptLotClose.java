@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -12,9 +13,6 @@ import java.sql.Connection;
 
 public class ReceiptLotClose  extends LegacyBaseService
 {
-
-
-
 	/**
 	 *  JOHN 20201010按日期 关闭采购批次检查记录
 	 DELETE FROM SCPRDMST.wmsadmin.sproceduremap WHERE COMPOSITE='ReceiptLotClose';
@@ -35,25 +33,19 @@ public class ReceiptLotClose  extends LegacyBaseService
 		
 		String userid = context.getUserID();
 
-		Connection conn = null;
-		LegacyDBHelper r1=null;
 	    String RECEIPTLOT= serviceDataHolder.getInputDataAsMap().getString("RECEIPTLOT");
 	    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 		try
 		{
-			conn = context.getConnection();
+			
 
-			String[] LOTS= LegacyDBHelper.GetValueList(context, conn
-					, "select STATUS from PRERECEIPTCHECK where RECEIPTLOT=?"
-					, new String[]{RECEIPTLOT});
-			if (LOTS==null)
-		        throw new FulfillLogicException("收货批次(%1)未找到", RECEIPTLOT);
-			if (!LOTS[0].equals("0"))
+			String lot = DBHelper.getValue(context, "select STATUS from PRERECEIPTCHECK where RECEIPTLOT=?"
+					, new String[]{RECEIPTLOT},String.format("收货批次(%1)未找到", RECEIPTLOT));
+			if (!lot.equals("0"))
 		        throw new FulfillLogicException("当前状态不支持此操作");
 		
-			LegacyDBHelper.ExecSql(context, conn
-					, "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"99",userid,"@date",RECEIPTLOT});
+			DBHelper.executeUpdate(context, "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"99",userid,"@date",RECEIPTLOT});
 	
 			Udtrn UDTRN=new Udtrn();
 				UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -64,20 +56,13 @@ public class ReceiptLotClose  extends LegacyBaseService
 			    UDTRN.FROMKEY2="";
 			    UDTRN.FROMKEY3="";
 			    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
-			    UDTRN.Insert(context, conn, userid);
+			    UDTRN.Insert(context, userid);
 			
 		
 		}
 		catch (Exception e)
 		{
-			try
-			{
-				r1.Close();
-			}	catch (Exception e1) {		}
-			try
-			{
-				context.releaseConnection(conn);
-			}	catch (Exception e1) {		}
+
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else
@@ -85,7 +70,7 @@ public class ReceiptLotClose  extends LegacyBaseService
 		}
 		
 
-		try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+		
 
 		ServiceDataMap theOutDO = new ServiceDataMap();
 

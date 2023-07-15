@@ -11,17 +11,13 @@ import com.enhantec.wms.backend.outbound.allocation.OrderProcessingP1S1;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 public class OutboundUtils {
 
-    public static void checkQtyIsAvailableInLotxLocxId(Context context, Connection conn, String ID, BigDecimal qty, BigDecimal allocatedQty) {
-        HashMap<String, String> lotxLocxIdHashMap =  LotxLocxId.findById(context, conn, ID,true);
+    public static void checkQtyIsAvailableInLotxLocxId(Context context, String ID, BigDecimal qty, BigDecimal allocatedQty) {
+        HashMap<String, String> lotxLocxIdHashMap =  LotxLocxId.findById(context, ID,true);
 
         BigDecimal availQty = new BigDecimal(lotxLocxIdHashMap.get("AVAILABLEQTY"));
 
@@ -30,8 +26,8 @@ public class OutboundUtils {
             ExceptionHelper.throwRfFulfillLogicException(ID+"的拣货数量"+ UtilHelper.trimZerosAndToStr(qty)+"大于最大可拣货量"+UtilHelper.trimZerosAndToStr(availQty));
     }
 
-    public static void checkQtyIsAvailableInIDNotes(Context context, Connection conn, String ID, BigDecimal qty) {
-        HashMap<String, String> idNotesHashMap = IDNotes.findById(context, conn, ID,true);
+    public static void checkQtyIsAvailableInIDNotes(Context context, String ID, BigDecimal qty) {
+        HashMap<String, String> idNotesHashMap = IDNotes.findById(context, ID,true);
 
         BigDecimal idNotesQty = new BigDecimal(idNotesHashMap.get("NETWGT"));
 
@@ -39,26 +35,26 @@ public class OutboundUtils {
     }
 
 
-    public static void allocateAndShip(Context context, Connection conn, String orderKey) throws Exception {
-        allocateAndShip(context,conn,orderKey,true);
+    public static void allocateAndShip(Context context, String orderKey) throws Exception {
+        allocateAndShip(context,orderKey,true);
     }
-    public static void allocateAndShip(Context context, Connection conn, String orderKey, boolean shipWithIDNotes) throws Exception {
+    public static void allocateAndShip(Context context, String orderKey, boolean shipWithIDNotes) throws Exception {
         //Start allocation & ship
         if(shipWithIDNotes) {
 
             //同步减少IDNOTES的库存
-            ArrayList<LinkedHashMap<String, String>> Details = LegacyDBHelper.GetRecordMap(context, conn
+            List<HashMap<String,String>> Details = DBHelper.executeQuery(context
                     , "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
                             + ",ORIGINALQTY,OPENQTY,SHIPPEDQTY,QTYPREALLOCATED,QTYALLOCATED,QTYPICKED,UOM,PACKKEY "
                             + " from orderdetail where orderkey=? order by orderlinenumber", new String[]{orderKey});
 
             for (int iDetail = 0; iDetail < Details.size(); iDetail++) {
 
-                LinkedHashMap<String, String> mDetail = Details.get(iDetail);
+                HashMap<String,String> mDetail = Details.get(iDetail);
                 String id = mDetail.get("IDREQUIRED");
                 String openQty = mDetail.get("ORIGINALQTY");
 
-                IDNotes.decreaseWgtByIdWithAvailQtyCheck(context, conn, id, openQty, "分装数量");
+                IDNotes.decreaseWgtByIdWithAvailQtyCheck(context, id, openQty, "分装数量");
             }
         }
 
@@ -85,7 +81,7 @@ public class OutboundUtils {
 //        shipProcess.execute(context);
 //        context.theEXEDataObjectStack.pop();
 
-        String status = DBHelper.getValue(context, context.getConnection()
+        String status = DBHelper.getValue(context
                 , "select status from orders where orderkey = ? ", new Object[]{orderKey}, String.class, "订单");
 
         if (!"95".equals(status))
@@ -123,29 +119,8 @@ public class OutboundUtils {
 
         String status = isExternalCancel ? "98":"99";
 
-        Connection connection = context.getConnection();
-        PreparedStatement updateDetailStatement = null;
-        PreparedStatement updateOrderStatement = null;
-
-        try {
-
-            updateDetailStatement = connection.prepareStatement("UPDATE ORDERDETAIL SET STATUS = ? WHERE ORDERKEY = ? ");
-            updateDetailStatement.setString(1, status);
-            updateDetailStatement.setString(2,orderkey);
-            updateDetailStatement.executeUpdate();
-            updateOrderStatement = connection.prepareStatement("UPDATE ORDERS SET STATUS = ? WHERE ORDERKEY = ?");
-            updateOrderStatement.setString(1, status);
-            updateOrderStatement.setString(2,orderkey);
-            updateOrderStatement.executeUpdate();
-
-
-        }catch (SQLException e){
-            throw new DBResourceException(e);
-        }finally {
-            context.releaseStatement(updateDetailStatement);
-            context.releaseStatement(updateOrderStatement);
-            context.releaseConnection(connection);
-        }
+        DBHelper.executeUpdate(context,"UPDATE ORDERDETAIL SET STATUS = ? WHERE ORDERKEY = ? ",new Object[]{ status,orderkey});
+        DBHelper.executeUpdate(context,"UPDATE ORDERS SET STATUS = ? WHERE ORDERKEY = ?",new Object[]{ status,orderkey});
 
     }
 

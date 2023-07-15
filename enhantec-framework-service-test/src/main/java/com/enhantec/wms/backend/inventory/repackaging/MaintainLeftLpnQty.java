@@ -39,7 +39,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
     {
         String userid = context.getUserID();
 
-        Connection conn = null;
+
 
         try
         {
@@ -53,7 +53,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
             if (UtilHelper.isEmpty(type)) throw new Exception("类型不能为空");
             if (UtilHelper.isEmpty(receiptKey)) throw new Exception("分装入库单号不能为空");
 
-            HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(context,conn,receiptKey,true);
+            HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(context,receiptKey,true);
 
             /*
                 RECEIPT.SUSR2 分装单关联的收货批次号
@@ -65,7 +65,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
             String orderKeyStr = receiptHashMap.get("SUSR4");
             String orderKey = orderKeyStr.substring(0,10);
             String orderLineNumber = orderKeyStr.substring(10);
-            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(context,conn,orderKey,orderLineNumber);
+            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(context,orderKey,orderLineNumber);
 
             List<HashMap<String,String>> leftLpnList = RepackgingUtils.getLeftLPNListFromStr(receiptHashMap.get("SUSR5"));
 
@@ -83,16 +83,16 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
                 Optional<HashMap<String, String>> optionalLeftLpnInfo = leftLpnList.stream().filter(x->x.get("ID").equals(id)).findFirst();
 
 
-                HashMap<String,String> idHashMap = LotxLocxId.findAvailInvByLocId(context,conn,receiptHashMap.get("SUSR3"),id,true,true);
+                HashMap<String,String> idHashMap = LotxLocxId.findAvailInvByLocId(context,receiptHashMap.get("SUSR3"),id,true,true);
 
                 if(!UtilHelper.equals(idHashMap.get("LOTTABLE06"),receiptHashMap.get("SUSR2")))
                     ExceptionHelper.throwRfFulfillLogicException("所选容器的批次非当前分装批次"+receiptHashMap.get("SUSR2"));
 
-                HashMap<String,String> skuHashMap = SKU.findById(context,conn,idHashMap.get("SKU"),true);
+                HashMap<String,String> skuHashMap = SKU.findById(context,idHashMap.get("SKU"),true);
 
                 //检查分装间是否存在该容器且库存量>余料数量
 
-                BigDecimal stdLeftQty = UOM.UOMQty2StdQty(context,conn,skuHashMap.get("PACKKEY"),uom,UtilHelper.str2Decimal(leftQty,"余料数量",false));
+                BigDecimal stdLeftQty = UOM.UOMQty2StdQty(context,skuHashMap.get("PACKKEY"),uom,UtilHelper.str2Decimal(leftQty,"余料数量",false));
 
                 if(UtilHelper.decimalStrCompare(idHashMap.get("QTY"),stdLeftQty.toPlainString())<0){
                     ExceptionHelper.throwRfFulfillLogicException("容器余料数量不能大于当前库存数量");
@@ -126,7 +126,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
                 UDTRN.TITLE02 = "单位";
                 UDTRN.CONTENT02 = uom;
 
-                UDTRN.Insert(context, conn, userid);
+                UDTRN.Insert(context, userid);
 
             }else if(UtilHelper.equals(type,"REMOVE")) {
 
@@ -152,7 +152,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
                 UDTRN.FROMKEY1 = receiptKey;
                 UDTRN.FROMKEY2LABEL = "余料容器号";
                 UDTRN.FROMKEY2 = id;
-                UDTRN.Insert(context, conn, userid);
+                UDTRN.Insert(context, userid);
 
             }else{
                 //query
@@ -161,7 +161,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
 
             LeftLpnStr = buildLeftLpnInfoStr(leftLpnList);
 
-            DBHelper.executeUpdate(context,conn,"UPDATE RECEIPT SET SUSR5 = ? WHERE RECEIPTKEY = ? ",
+            DBHelper.executeUpdate(context,"UPDATE RECEIPT SET SUSR5 = ? WHERE RECEIPTKEY = ? ",
                     new Object[]{
                             LeftLpnStr,
                             receiptKey,
@@ -173,12 +173,12 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
 
             if(leftLpnList.size()>0) {
 
-                HashMap<String,String> idHashMap = LotxLocxId.findById(context,conn,leftLpnList.get(0).get("ID"),true);
+                HashMap<String,String> idHashMap = LotxLocxId.findById(context,leftLpnList.get(0).get("ID"),true);
 
-                HashMap<String,String> skuHashMap = SKU.findById(context,conn,idHashMap.get("SKU"),true);
+                HashMap<String,String> skuHashMap = SKU.findById(context,idHashMap.get("SKU"),true);
 
                 for (HashMap<String, String> leftLpnInfo : leftLpnList) {
-                    BigDecimal lpnQty = UOM.UOMQty2StdQty(context, conn, skuHashMap.get("PACKKEY"), leftLpnInfo.get("UOM"), new BigDecimal(leftLpnInfo.get("LEFTQTY")));
+                    BigDecimal lpnQty = UOM.UOMQty2StdQty(context, skuHashMap.get("PACKKEY"), leftLpnInfo.get("UOM"), new BigDecimal(leftLpnInfo.get("LEFTQTY")));
                     totalLeftQty = totalLeftQty.add(lpnQty);
                 }
             }
@@ -197,13 +197,13 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
         }
         catch (Exception e)
         {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
     }

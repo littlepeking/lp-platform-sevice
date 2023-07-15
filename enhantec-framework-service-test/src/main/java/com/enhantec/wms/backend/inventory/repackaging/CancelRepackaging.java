@@ -32,11 +32,11 @@ public class CancelRepackaging extends LegacyBaseService {
     {
         String userid = context.getUserID();
 
-        Connection conn = null;
+
 
         try
         {
-            conn = context.getConnection();
+
             final String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             final String orderLineNumber = serviceDataHolder.getInputDataAsMap().getString("ORDERLINENUMBER");
             final String esignatureKey= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
@@ -45,7 +45,7 @@ public class CancelRepackaging extends LegacyBaseService {
             if (UtilHelper.isEmpty(orderLineNumber)) throw new Exception("订单行号不能为空");
             if (UtilHelper.isEmpty(esignatureKey)) throw new Exception("电子签名不能为空");
 
-            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,conn,orderKey,orderLineNumber,true);
+            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,orderKey,orderLineNumber,true);
 
             String repackReceiptKey = orderDetailHashMap.get("SUSR1");
 
@@ -58,20 +58,20 @@ public class CancelRepackaging extends LegacyBaseService {
 
             if(!UtilHelper.isEmpty(rePackOrderKey)) ExceptionHelper.throwRfFulfillLogicException("分装在执行过程中，不允许取消");
 
-            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(context, conn, repackReceiptKey,true);
+            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(context, repackReceiptKey,true);
 
             String lottable06 =receiptHashMap.get("SUSR2");
 
             // SUSR1 分装入库单号
             // SUSR2 分装出库单号
             // SUSR4 已分装完成的单据列表, 格式:  收货批次1|分装入库单号1|分装出库单号1 ; 收货批次2|分装入库单号2分装出库单号2;
-            DBHelper.executeUpdate(context,conn,"UPDATE ORDERDETAIL SET SUSR1 = null WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
+            DBHelper.executeUpdate(context,"UPDATE ORDERDETAIL SET SUSR1 = null WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
                     orderKey ,  orderLineNumber });
 
-            DBHelper.executeUpdate(context,conn,"UPDATE RECEIPTDETAIL SET STATUS = '20' WHERE RECEIPTKEY = ? AND STATUS = '0' ",new Object[]{
+            DBHelper.executeUpdate(context,"UPDATE RECEIPTDETAIL SET STATUS = '20' WHERE RECEIPTKEY = ? AND STATUS = '0' ",new Object[]{
                     repackReceiptKey  });
 
-            DBHelper.executeUpdate(context,conn,"UPDATE RECEIPT SET STATUS = '20' WHERE RECEIPTKEY = ? ",new Object[]{
+            DBHelper.executeUpdate(context,"UPDATE RECEIPT SET STATUS = '20' WHERE RECEIPTKEY = ? ",new Object[]{
                     repackReceiptKey  });
 
 
@@ -90,7 +90,7 @@ public class CancelRepackaging extends LegacyBaseService {
             UDTRN.CONTENT02 = orderKey + orderLineNumber;
             UDTRN.TITLE03 = "分装入库单号";
             UDTRN.CONTENT03 = repackReceiptKey;
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
           
         }
@@ -101,7 +101,7 @@ public class CancelRepackaging extends LegacyBaseService {
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
 

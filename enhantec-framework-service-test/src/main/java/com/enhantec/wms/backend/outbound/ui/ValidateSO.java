@@ -28,35 +28,35 @@ public class ValidateSO extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String ORDERKEY = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String> orderInfo =  Orders.findByOrderKey(context,conn,ORDERKEY,true);
+            HashMap<String, String> orderInfo =  Orders.findByOrderKey(context,ORDERKEY,true);
 
             //john -- check if order type and quality status is match
-            OrderValidationHelper.checkOrderTypeAndQualityStatusMatch4Alloc(context,conn,ORDERKEY);
-            OrderValidationHelper.validateFieldsBeforeShip(context,conn,ORDERKEY);
-            HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, conn, "ORDERTYPE", orderInfo.get("TYPE"));
+            OrderValidationHelper.checkOrderTypeAndQualityStatusMatch4Alloc(context,ORDERKEY);
+            OrderValidationHelper.validateFieldsBeforeShip(context,ORDERKEY);
+            HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderInfo.get("TYPE"));
             if ("Y".equalsIgnoreCase(orderTypeEntry.get("EXT_UDF_STR4"))) {
-                OrderValidationHelper.validateReturnPo(context, conn, ORDERKEY);
+                OrderValidationHelper.validateReturnPo(context, ORDERKEY);
             }
 
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException( e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 

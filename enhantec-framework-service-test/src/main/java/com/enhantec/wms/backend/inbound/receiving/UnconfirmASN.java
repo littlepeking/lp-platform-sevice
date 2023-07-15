@@ -32,24 +32,24 @@ public class UnconfirmASN extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(context,conn,receiptKey,true);
+            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(context,receiptKey,true);
 
             if(!receiptInfo.get("STATUS").equals("0")) ExceptionHelper.throwRfFulfillLogicException("非新建状态的ASN不允许取消确认");
 
-            String isFromInterface = CodeLookup.getCodeLookupValue(context,conn,"RECEIPTYPE",receiptInfo.get("TYPE"),"UDF4","收货类型");
+            String isFromInterface = CodeLookup.getCodeLookupValue(context,"RECEIPTYPE",receiptInfo.get("TYPE"),"UDF4","收货类型");
 
             if("Y".equalsIgnoreCase(isFromInterface)) ExceptionHelper.throwRfFulfillLogicException("接口发送的收货指令不允许取消确认");
 
-            DBHelper.executeUpdate(context, conn, "UPDATE RECEIPT SET ISCONFIRMEDUSER ='', ISCONFIRMEDUSER2 = '', ISCONFIRMED = 0  WHERE RECEIPTKEY = ? ",
+            DBHelper.executeUpdate(context, "UPDATE RECEIPT SET ISCONFIRMEDUSER ='', ISCONFIRMEDUSER2 = '', ISCONFIRMED = 0  WHERE RECEIPTKEY = ? ",
                     new Object[]{ receiptKey });
 
 
@@ -63,7 +63,7 @@ public class UnconfirmASN extends LegacyBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="ASN单号";    UDTRN.CONTENT01=receiptKey;
             UDTRN.TITLE02="确认状态";    UDTRN.CONTENT02="N";
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
 
 
@@ -71,14 +71,14 @@ public class UnconfirmASN extends LegacyBaseService {
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 }

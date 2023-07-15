@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.outbound;
 
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -33,12 +34,12 @@ public class OrderReserveIds extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = null;
+
 
         String userid = context.getUserID();
         try
         {
-            conn = context.getConnection();
+
             String projectId = serviceDataHolder.getInputDataAsMap().getString("PROJECTCODE");
             String ids = serviceDataHolder.getInputDataAsMap().getString( "IDS");
 
@@ -46,7 +47,7 @@ public class OrderReserveIds extends LegacyBaseService {
 
             String idStr = "'" + String.join("','",idArray)+ "'" ;
 
-            LegacyDBHelper.ExecSql(context, conn, "UPDATE IDNOTES SET PROJECTCODE = ? WHERE ID IN ("+idStr+")", new String[]{projectId});
+            DBHelper.executeUpdate(context, "UPDATE IDNOTES SET PROJECTCODE = ? WHERE ID IN ("+idStr+")", new String[]{projectId});
 
             Udtrn UDTRN=new Udtrn();
             //UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -55,9 +56,9 @@ public class OrderReserveIds extends LegacyBaseService {
             UDTRN.FROMKEY=projectId;
             UDTRN.TITLE01="项目号"; UDTRN.CONTENT01=projectId;
             UDTRN.TITLE02="容器条码列表"; UDTRN.CONTENT01=ids;
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
             //--------------------------------------------------------------
-            try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             serviceDataHolder.setOutputData(theOutDO);
@@ -66,16 +67,12 @@ public class OrderReserveIds extends LegacyBaseService {
         }
         catch (Exception e)
         {
-            try
-            {
-                context.releaseConnection(conn);
-            }	catch (Exception e1) {		}
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException( e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 }

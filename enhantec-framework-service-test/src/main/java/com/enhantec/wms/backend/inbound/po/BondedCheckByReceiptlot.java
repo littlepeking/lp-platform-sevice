@@ -8,6 +8,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class BondedCheckByReceiptlot extends LegacyBaseService
@@ -34,17 +35,17 @@ public class BondedCheckByReceiptlot extends LegacyBaseService
 
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
-		Connection conn = context.getConnection();
+
 		try
 		{
 		    String serialkey= serviceDataHolder.getInputDataAsMap().getString("SERIALKEY");
-			//String receiptLot=DBHelper.getValue(context,conn,"select  RECEIPTLOT from prreceiptcheck where SERIALKEY=?",new Object[]{serialkey)},"收货检查记录");;
-			String count = DBHelper.getValue(context,conn,"select COUNT(*) from prereceiptcheck where RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?)",new Object[]{serialkey},"收货检查记录");
+			//String receiptLot=DBHelper.getValue(context,"select  RECEIPTLOT from prreceiptcheck where SERIALKEY=?",new Object[]{serialkey)},"收货检查记录");;
+			String count = DBHelper.getValue(context,"select COUNT(*) from prereceiptcheck where RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?)",new Object[]{serialkey},"收货检查记录");
 			if (Integer.parseInt(count)>1) {
-			LinkedHashMap<String, String> bondedCheck = LegacyDBHelper.GetValueMap(context, conn
+			HashMap<String, String> bondedCheck = DBHelper.getRecord(context
 					, "SELECT BONDEDCHECK,BONDEDNOTES4,BONDEDRECQTY,BONDEDSTORES,BONDEDUOM,LOTTABLE10,MHLINENO,MHTASKKEY,RECEIPTLOT " +
-							" FROM PRERECEIPTCHECK WHERE RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?) and not(BONDEDSTORES is NULL)", new String[]{serialkey});
-			LegacyDBHelper.ExecSql(context, conn, "update prereceiptcheck set BONDEDCHECK=?,BONDEDRECQTY=?,BONDEDSTORES=?,BONDEDUOM=?," +
+							" FROM PRERECEIPTCHECK WHERE RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?) and not(BONDEDSTORES is NULL)", new String[]{serialkey},"");
+			DBHelper.executeUpdate(context, "update prereceiptcheck set BONDEDCHECK=?,BONDEDRECQTY=?,BONDEDSTORES=?,BONDEDUOM=?," +
 							"LOTTABLE10=?,MHLINENO=?,MHTASKKEY=? " +
 							"where RECEIPTLOT=? "
 					, new String[]{bondedCheck.get("BONDEDCHECK"),
@@ -54,7 +55,7 @@ public class BondedCheckByReceiptlot extends LegacyBaseService
 							bondedCheck.get("RECEIPTLOT")
 							});
 			}
-		    try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 			serviceDataHolder.setReturnCode(1);
@@ -62,9 +63,6 @@ public class BondedCheckByReceiptlot extends LegacyBaseService
 
 		}
 		catch (Exception e) {
-			try {
-				context.releaseConnection(conn);
-			}catch (Exception e1) {		}
 			if ( e instanceof FulfillLogicException)
 				throw (FulfillLogicException)e;
 			else

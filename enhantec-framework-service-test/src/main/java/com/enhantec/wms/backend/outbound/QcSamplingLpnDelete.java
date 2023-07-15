@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.outbound;
 
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -9,6 +10,7 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegecyUtilHelper;
 
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class QcSamplingLpnDelete extends LegacyBaseService
@@ -36,7 +38,7 @@ public class QcSamplingLpnDelete extends LegacyBaseService
 		
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
+
 
 		try
 		{
@@ -53,15 +55,15 @@ public class QcSamplingLpnDelete extends LegacyBaseService
 			String TOTAL3="";
 			
 			
-			String Status= LegacyDBHelper.GetValue(context, conn
+			String Status= DBHelper.getValue(context
 					, "select Status from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE}, "");
 			if (LegecyUtilHelper.isNull(Status)) throw new Exception("未找到在库取样单("+ORDERKEY+")");
 			if (Status.compareTo("09")>0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭或扣量,不能继续操作");
 				
-			LinkedHashMap<String,String> mORDER= LegacyDBHelper.GetValueMap(context, conn, "SELECT EXTERNLINENO,SKU,SUSR1,SUSR2,SUSR3 FROM ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=?", new String[]{ORDERKEY,ORDERLINENUMBER});
+			HashMap<String,String> mORDER= DBHelper.getRecord(context, "SELECT EXTERNLINENO,SKU,SUSR1,SUSR2,SUSR3 FROM ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=?", new String[]{ORDERKEY,ORDERLINENUMBER});
 			if (mORDER.isEmpty()) throw new Exception("未找到记录,是确认否重复删除");
 			
-			LegacyDBHelper.ExecSql(context, conn, "DELETE ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=?", new String[]{ORDERKEY,ORDERLINENUMBER});
+			DBHelper.executeUpdate(context, "DELETE ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=?", new String[]{ORDERKEY,ORDERLINENUMBER});
 
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -80,12 +82,12 @@ public class QcSamplingLpnDelete extends LegacyBaseService
 		    UDTRN.TITLE07="取样量";    UDTRN.CONTENT07=mORDER.get("SUSR1");
 		    UDTRN.TITLE08="扣样量";    UDTRN.CONTENT08=mORDER.get("SUSR2");
 		    UDTRN.TITLE09="取样库位";    UDTRN.CONTENT09=mORDER.get("SUSR3");
-		    UDTRN.Insert(context, conn, userid);
+		    UDTRN.Insert(context, userid);
 			
 				
 			//----------------
-			TOTAL1= LegacyDBHelper.GetValue(context, conn, "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
-			TOTAL3= LegacyDBHelper.GetValue(context, conn, "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL1= DBHelper.getValue(context, "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL3= DBHelper.getValue(context, "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
 
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
@@ -99,16 +101,13 @@ public class QcSamplingLpnDelete extends LegacyBaseService
 		}
 		catch (Exception e)
 		{
-			try
-			{
-				context.releaseConnection(conn);
-			}	catch (Exception e1) {		}
+
 			if ( e instanceof FulfillLogicException)
 				throw (FulfillLogicException)e;
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 		}
 
 	}

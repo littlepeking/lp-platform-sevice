@@ -32,7 +32,7 @@ public class CancelPickTask  extends LegacyBaseService {
 
             String taskDetailKey = serviceDataHolder.getInputDataAsMap().getString("TASKDETAILKEY");
 
-            HashMap<String, String> taskDetailInfo = TaskDetail.findById(context,null,taskDetailKey,true);
+            HashMap<String, String> taskDetailInfo = TaskDetail.findById(context,taskDetailKey,true);
 
             if(!taskDetailInfo.get("STATUS").equals("0") && !taskDetailInfo.get("STATUS").equals("3"))
                 ExceptionHelper.throwRfFulfillLogicException("待删除的任务状态必须为未定或处理中");
@@ -57,27 +57,13 @@ public class CancelPickTask  extends LegacyBaseService {
 
     public void cancelPickDetail(Context context, HashMap<String,String> taskDetailInfo) throws SQLException {
 
-        Connection qqConnection = null;
-        PreparedStatement qqPrepStmt = null;
 
-        try {
-            HashMap<String, String> pickDetailInfo = PickDetail.findByPickDetailKey(context, null, taskDetailInfo.get("PICKDETAILKEY"), true);
-            int qqRowCount = 0;
+            HashMap<String, String> pickDetailInfo = PickDetail.findByPickDetailKey(context, taskDetailInfo.get("PICKDETAILKEY"), true);
 
-            try {
+            DBHelper.executeUpdate(context,
+                        "UPDATE PICKDETAIL SET STATUS = 0 WHERE PICKDETAILKEY = ?",
+                new Object[]{ pickDetailInfo.get("PICKDETAILKEY")});
 
-                qqConnection = context.getConnection();
-                qqPrepStmt = qqConnection.prepareStatement(
-                        "UPDATE PICKDETAIL SET STATUS = 0 WHERE PICKDETAILKEY = ?");
-                DBHelper.setValue(qqPrepStmt, 1, taskDetailInfo.get("PICKDETAILKEY"));
-                qqRowCount = qqRowCount + qqPrepStmt.executeUpdate();
-            } catch (SQLException qqSQLException) {
-                throw new DBResourceException(qqSQLException);
-            } finally {
-                try {context.releaseStatement(qqPrepStmt);}catch (Exception e) { }
-                try {context.releaseConnection(qqConnection);}catch (Exception e) { }
-
-            }
 //            EXEDataObject thePickDO = new EXEDataObject();
 //            thePickDO.clearDO();
 //            thePickDO.setConstraintItem("pickdetailkey", taskDetailInfo.get("PICKDETAILKEY"));
@@ -85,18 +71,12 @@ public class CancelPickTask  extends LegacyBaseService {
 //            context.theEXEDataObjectStack.push(thePickDO);
 //            logger.info("Calling TrPickDetail.preUpdateFire()");
 //            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preDeleteFire(context);
-//            qqConnection = context.getConnection();
-//            qqPrepStmt = qqConnection.prepareStatement(" DELETE FROM PICKDETAIL WHERE PickDetailKey = ?");
-//            DBHelper.setValue(qqPrepStmt, 1, pickDetailInfo.get("PICKDETAILKEY"));
+//            
+//            qqPrepStmt = DBHelper.executeUpdate(" DELETE FROM PICKDETAIL WHERE PickDetailKey = ?");
+//            new Object[]{ pickDetailInfo.get("PICKDETAILKEY"));
 //            qqPrepStmt.executeUpdate();
 //            context.theSQLMgr.searchTriggerLibrary("PickDetail")).postDeleteFire(context);
 
-        }finally{
-
-
-            try {context.releaseStatement(qqPrepStmt);}catch (Exception e) { }
-            try {context.releaseConnection(qqConnection);}catch (Exception e) { }
-        }
     }
 
 }

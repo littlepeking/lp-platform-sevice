@@ -41,7 +41,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
 
         String userid = context.getUserID();
 
-        Connection conn = context.getConnection();
+        
 
 
         String LOTTABLE06= serviceDataHolder.getInputDataAsMap().getString("LOTTABLE06");
@@ -55,38 +55,38 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
         String skuDescr="";
         String total1="0";
         String total3="0";
-        String ORDERTYPE = CDSysSet.getSampleOrderType(context,conn);//原料取样出库
+        String ORDERTYPE = CDSysSet.getSampleOrderType(context);//原料取样出库
         boolean orderExists =false;
         HashMap<String,String> samplePackInfo=null;
         try
         {
-            String STORERKEY= LegacyDBHelper.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
-            //String LGPROJECT=XtSql.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","LGPROJECT"}, "");
+            String STORERKEY= DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+            //String LGPROJECT=XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","LGPROJECT"}, "");
 
-            String lot= LegacyDBHelper.GetValue(context, conn
+            String lot= DBHelper.getValue(context
                     , "select a.lot LOT from lotxlocxid a,v_lotattribute b where a.lot=b.lot and a.qty>0 and a.STORERKEY = ? and b.lottable06=? ", new String[]{STORERKEY, LOTTABLE06},"");
             if (UtilHelper.isEmpty(lot)) throw new Exception("当前批次在系统中无库存");
 
 
-            LinkedHashMap<String,String> res= LegacyDBHelper.GetValueMap(context, conn,"select c.PACKKEY, c.PACKUOM3  UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and c.PACKKEY = s.PACKKEY and a.STORERKEY = ? and a.lot=?", new String[]{STORERKEY, lot});
+            HashMap<String,String> res= DBHelper.getRecord(context,"select c.PACKKEY, c.PACKUOM3  UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and c.PACKKEY = s.PACKKEY and a.STORERKEY = ? and a.lot=?", new String[]{STORERKEY, lot});
 
             uom = res.get("UOM");
             sku = res.get("SKU");
             packKey = res.get("PACKKEY");
             skuDescr = res.get("SKUDESCR");
 
-            samplePackInfo= DBHelper.getRecord(context, conn,"select c.PACKKEY, c.PACKUOM3 UOM, s.SKU SKU, s.DESCR SKUDESCR " +
+            samplePackInfo= DBHelper.getRecord(context,"select c.PACKKEY, c.PACKUOM3 UOM, s.SKU SKU, s.DESCR SKUDESCR " +
                     " from v_lotattribute a, pack c, SKU s " +
                     " where s.SKU = a.SKU and c.PACKKEY = s.SUSR6 and a.STORERKEY = ? and a.lot=?",new Object[]{STORERKEY, lot},sku+"的取样包装配置",true);
 
 
-            String OldOrderKey= LegacyDBHelper.GetValue(context, conn
+            String OldOrderKey= DBHelper.getValue(context
                     , "select orderkey from orders where STORERKEY = ? and REFERENCENUM=? and type = ? and status<'90'", new String[]{STORERKEY, LOTTABLE06, ORDERTYPE}, "");
             //if (!XtUtils.isNull(OldOrderKey)) throw new Exception("当前批次有未关闭的在库取样单("+OldOrderKey+")");
 
             if (LegecyUtilHelper.isNull(OldOrderKey)) {
-                OrderKey = LegacyDBHelper.GetNCounterBill(context, conn, "ORDER");
-                LinkedHashMap<String, String> Fields = new LinkedHashMap<String, String>();
+                OrderKey = LegacyDBHelper.GetNCounterBill(context, "ORDER");
+                HashMap<String,String> Fields = new HashMap<String,String>();
                 Fields.put("AddWho", userid);
                 Fields.put("EditWho", userid);
                 Fields.put("type", ORDERTYPE);
@@ -98,7 +98,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
                 Fields.put("storerkey", STORERKEY);
                 //Fields.put("SUSR1", XtUtils.FormatUdf("PROJECTCODE", LGPROJECT, 30));
                 //Fields.put("notes", PROJECTCODE);
-                LegacyDBHelper.ExecInsert(context, conn, "orders", Fields);
+                LegacyDBHelper.ExecInsert(context, "orders", Fields);
 
                 Udtrn UDTRN = new Udtrn();
                 UDTRN.EsignatureKey = ESIGNATUREKEY;
@@ -113,15 +113,15 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
                 UDTRN.TITLE02 = "出库单号";
                 UDTRN.CONTENT02 = OrderKey;
                 //UDTRN.TITLE03="项目";    UDTRN.CONTENT03=PROJECTCODE;
-                UDTRN.Insert(context, conn, userid);
+                UDTRN.Insert(context, userid);
             }else{
                 orderExists = true;
                 OrderKey = OldOrderKey;
-//                ArrayList<LinkedHashMap<String,String>> mapList =XtSql.GetRecordMap(context, conn, "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{OrderKey});
+//                List<HashMap<String,String>> mapList =XtSql.GetRecordMap(context, "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{OrderKey});
 //
 //                UOMConverter uomConverter =  new UOMConverter(context);
 //                String finalPackKey = packKey;
-//                Function<LinkedHashMap<String,String>, BigDecimal> calcORIGINALQTY = e-> {
+//                Function<HashMap<String,String>, BigDecimal> calcORIGINALQTY = e-> {
 //                    try {
 //                        return uomConverter.UOMQty2StdQty(finalPackKey, e.get("UOM"), new BigDecimal(e.get("ORIGINALQTY")));
 //                    } catch (Exception exception) {
@@ -129,7 +129,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
 //                    }
 //                };
 //
-//                Function<LinkedHashMap<String,String>, BigDecimal> calcOPENQTY = e-> {
+//                Function<HashMap<String,String>, BigDecimal> calcOPENQTY = e-> {
 //                    try {
 //                        return uomConverter.UOMQty2StdQty(finalPackKey, e.get("UOM"), new BigDecimal(e.get("OPENQTY")));
 //                    } catch (Exception exception) {
@@ -141,8 +141,8 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
 //                    total1 = String.valueOf(mapList.stream().map(calcORIGINALQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //                    total2 = String.valueOf(mapList.stream().map(calcOPENQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //                }
-                total1= LegacyDBHelper.GetValue(context, conn, "SELECT SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
-                total3= LegacyDBHelper.GetValue(context, conn, "select sum(ORIGINALQTY) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
+                total1= DBHelper.getValue(context, "SELECT SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
+                total3= DBHelper.getValue(context, "select sum(ORIGINALQTY) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
 
             }
 
@@ -155,7 +155,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
         //减少系统库存

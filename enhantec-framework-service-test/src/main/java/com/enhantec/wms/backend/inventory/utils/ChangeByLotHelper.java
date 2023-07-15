@@ -8,9 +8,9 @@ import java.sql.Connection;
 import java.util.HashMap;
 
 public class ChangeByLotHelper {
-    public static void checkSkuAttributeIsMatch(String fromSku, String toSku, Context context, Connection connection){
-        HashMap<String,String> fromSkuHashMap = SKU.findById(context,connection,fromSku,true);
-        HashMap<String,String> toSkuHashMap = SKU.findById(context,connection,toSku,true);
+    public static void checkSkuAttributeIsMatch(String fromSku, String toSku, Context context){
+        HashMap<String,String> fromSkuHashMap = SKU.findById(context,fromSku,true);
+        HashMap<String,String> toSkuHashMap = SKU.findById(context,toSku,true);
         if (!fromSkuHashMap.get("PACKKEY").equalsIgnoreCase(toSkuHashMap.get("PACKKEY")))
             ExceptionHelper.throwRfFulfillLogicException("物料代码"+fromSku+"与物料代码"+toSku+"包装不一致无法转换");
         if (!fromSkuHashMap.get("SNUM_ENDTOEND").equalsIgnoreCase(toSkuHashMap.get("SNUM_ENDTOEND")))

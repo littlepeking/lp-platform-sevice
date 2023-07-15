@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -7,9 +8,8 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.HashMap;
 
 import static com.enhantec.wms.backend.utils.common.LegecyUtilHelper.Nz;
 
@@ -39,7 +39,7 @@ public class AddReceiptLotByPO extends LegacyBaseService
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		String userid = context.getUserID();
-		Connection conn = context.getConnection();
+
 		
 
 		try
@@ -54,22 +54,20 @@ public class AddReceiptLotByPO extends LegacyBaseService
 		    String POLINENUMBER=POKEY.substring(iPoKey+1);
 		    POKEY=POKEY.substring(0,iPoKey);
 
-			int Cnt= LegacyDBHelper.GetCount(context, conn
-					, "SELECT COUNT(1) FROM PRERECEIPTCHECK WHERE FROMKEY=? AND FROMLINENO=? AND RECEIPTLOT=?"
-					, new String[]{POKEY,POLINENUMBER,RECEIPTLOT});
+			int Cnt= (int) DBHelper.getRawValue(context, "SELECT COUNT(1) FROM PRERECEIPTCHECK WHERE FROMKEY=? AND FROMLINENO=? AND RECEIPTLOT=?"
+					, new Object[]{POKEY,POLINENUMBER,RECEIPTLOT});
 			if (Cnt>0)
 		        throw new FulfillLogicException("记录已存在,不能重复生成");
 
 
-			LinkedHashMap<String, String> mRec = LegacyDBHelper.GetValueMap(context, conn
-					, "SELECT FROMTYPE,FROMKEY,FROMLINENO,FROMSKU,FROMSKUDESCR,A.SKU,B.ERPLOC,A.FROMLOT" +
+			HashMap<String,String> mRec = DBHelper.getRecord(context, "SELECT FROMTYPE,FROMKEY,FROMLINENO,FROMSKU,FROMSKUDESCR,A.SKU,B.ERPLOC,A.FROMLOT" +
 							"RECEIPTLOT,MANUFACTURERCODE,A.UOM,A.QTY,A.STATUS,PROCESSINGMODE,SKUSTATUSCHECK,SKUSTATUSINPUT,A.PROJECTCODE,A.ISCOMMONPROJECT,A.ELOTTABLE07,A.ELOTTABLE22,A.ELOTTABLE11," +
 							"SKUSTATUSFROM,POSUPPLIERCODE,POSUPPLIERNAME,TOTALBARREL,MANUFACTURERDATE,RETESTDATE,TRANSCHECK,FILECHECK,PACKCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,A.supplieritem,A.qualifiedproducer,PACKCOUNTCHECK" +
 							" FROM PRERECEIPTCHECK A, WMS_PO_DETAIL B,WMS_PO S WHERE A.FROMKEY = B.POKEY  AND A.FROMLINENO = B.POLINENUMBER AND S.POKEY = B.POKEY " +
 							"AND RECEIPTLOT=?", new String[]{ RECEIPTLOT});
 			if (mRec.isEmpty()) throw new Exception("未找到批次检查记录");
 
-			LinkedHashMap<String, String> mPO = LegacyDBHelper.GetValueMap(context, conn,
+			HashMap<String,String> mPO = DBHelper.getRecord(context,
 					"SELECT A.SUPPLIER,B.ERPLOC FROM WMS_PO A,WMS_PO_DETAIL B WHERE  A.POKEY=B.POKEY AND A.POKEY=? AND A.STATUS<? AND POLINENUMBER=?"
 					, new String[]{POKEY, "9",POLINENUMBER});
 			if (mPO.isEmpty()) 
@@ -78,7 +76,7 @@ public class AddReceiptLotByPO extends LegacyBaseService
 			if (!Nz(mRec.get("POSUPPLIERCODE"),"").equals(Nz(mPO.get("SUPPLIER"),"")))  throw new Exception("当前PO与其它PO供应商不一致");
 			if (!Nz(mRec.get("ERPLOC"),"").equals(Nz(mPO.get("ERPLOC"),"")))  throw new Exception("当前PO与其它PO分布场所不一致");
 
-			LinkedHashMap<String,String> mPRERECEIPTCHECK=new LinkedHashMap<String,String>();
+			HashMap<String,String> mPRERECEIPTCHECK=new HashMap<String,String>();
 			mPRERECEIPTCHECK.put("WHSEID", "@user");
 			mPRERECEIPTCHECK.put("addwho", userid);
 			mPRERECEIPTCHECK.put("editwho", userid);
@@ -123,7 +121,7 @@ public class AddReceiptLotByPO extends LegacyBaseService
 			mPRERECEIPTCHECK.put("POSUPPLIERCODE", mRec.get("POSUPPLIERCODE"));
 
 			
-			LegacyDBHelper.ExecInsert(context, conn, "PRERECEIPTCHECK", mPRERECEIPTCHECK);
+			LegacyDBHelper.ExecInsert(context, "PRERECEIPTCHECK", mPRERECEIPTCHECK);
 			
 
 			Udtrn UDTRN=new Udtrn();
@@ -139,20 +137,20 @@ public class AddReceiptLotByPO extends LegacyBaseService
 		    UDTRN.TITLE03="物料代码";    UDTRN.CONTENT03=mRec.get("FROMSKU");
 		    UDTRN.TITLE04="物料描述";    UDTRN.CONTENT04=mRec.get("FROMSKUDESCR");
 		    UDTRN.TITLE05="厂家来源批次";    UDTRN.CONTENT05=mRec.get("FROMLOT");
-		    UDTRN.Insert(context, conn, userid);
+		    UDTRN.Insert(context, userid);
 
-		    try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+		    
 
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 
-			ArrayList<LinkedHashMap<String, String>> aChk = LegacyDBHelper.GetRecordMap(context, conn, "select a.FROMKEY,a.FROMLINENO," +
+			List<HashMap<String,String>> aChk = DBHelper.executeQuery(context, "select a.FROMKEY,a.FROMLINENO," +
 					"b.qty-ISNULL(b.receivedqty,0) as QTY" +
 					"  from prereceiptcheck a,WMS_PO_DETAIL b where a.fromkey=b.pokey and a.fromlineno=b.polinenumber " +
 					" and a.RECEIPTLOT=? order by a.serialkey", new String[]{RECEIPTLOT});
 			for(int i1=0;i1<aChk.size();i1++)
 			{
-				LinkedHashMap<String,String> mChk=aChk.get(i1);
+				HashMap<String,String> mChk=aChk.get(i1);
 				theOutDO.setAttribValue("FROMKEY"+Integer.toString(i1+1), mChk.get("FROMKEY")+"-"+mChk.get("FROMLINENO"));
 				theOutDO.setAttribValue("FROMQTY"+Integer.toString(i1+1), mChk.get("QTY"));
 			}
@@ -163,10 +161,7 @@ public class AddReceiptLotByPO extends LegacyBaseService
 		}
 		catch (Exception e)
 		{
-			try
-			{
-				context.releaseConnection(conn);
-			}	catch (Exception e1) {		}
+
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else

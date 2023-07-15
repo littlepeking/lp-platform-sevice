@@ -29,16 +29,16 @@ public class InternalCloseSO extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String> orderHashMap = Orders.findByOrderKey(context,conn,orderKey,true);
+            HashMap<String, String> orderHashMap = Orders.findByOrderKey(context,orderKey,true);
 
             if(OutboundUtils.isOrderCanBeCancelled(orderHashMap.get("STATUS"))){
                 //order状态是内部创建或者外部创建时，点击"内部取消"按钮，订单状态改成"内部取消"
@@ -54,7 +54,7 @@ public class InternalCloseSO extends LegacyBaseService {
                 UDTRN.FROMKEY3 = "";
                 UDTRN.TITLE01 = "订单号";
                 UDTRN.CONTENT01 = orderKey;
-                UDTRN.Insert(context, conn, userid);
+                UDTRN.Insert(context, userid);
 
     
             }else{
@@ -64,14 +64,14 @@ public class InternalCloseSO extends LegacyBaseService {
 
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException( e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 

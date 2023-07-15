@@ -11,11 +11,11 @@ import java.util.List;
 
 public class Orders {
 
-    public static HashMap<String, String> findByOrderKey(Context context, Connection conn, String orderKey, boolean checkExist) {
+    public static HashMap<String, String> findByOrderKey(Context context, String orderKey, boolean checkExist) {
 
         String SQL="select * from orders where orderkey = ?";
 
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{ orderKey},"订单");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{ orderKey},"订单");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到订单"+orderKey);
         return record;
     }
@@ -29,19 +29,19 @@ public class Orders {
         return record;
     }
 
-    public static List<HashMap<String,String>> findOrderDetailsByOrderKey(Context context, Connection conn, String orderKey, boolean checkExist) {
+    public static List<HashMap<String,String>> findOrderDetailsByOrderKey(Context context, String orderKey, boolean checkExist) {
 
         String SQL="select * from orderdetail where orderkey = ?";
-        List<HashMap<String,String>> list= DBHelper.executeQuery(context, conn, SQL, new Object[]{ orderKey});
+        List<HashMap<String,String>> list= DBHelper.executeQuery(context, SQL, new Object[]{ orderKey});
         if(checkExist && list.size() == 0) ExceptionHelper.throwRfFulfillLogicException("未找到订单号为"+orderKey+"的订单明细");
         return list;
 
     }
 
-    public static HashMap<String,String> findOrderDetailByKey(Context context, Connection conn, String orderKey,String orderLineNumber, boolean checkExist) {
+    public static HashMap<String,String> findOrderDetailByKey(Context context, String orderKey,String orderLineNumber, boolean checkExist) {
 
         String SQL="select * from orderdetail where orderkey = ? and orderlinenumber = ?";
-        HashMap<String,String> rec= DBHelper.getRecord(context, conn, SQL,
+        HashMap<String,String> rec= DBHelper.getRecord(context, SQL,
                 new Object[]{ orderKey , orderLineNumber},
                 "订单行"+orderKey+orderLineNumber,checkExist);
         return rec;

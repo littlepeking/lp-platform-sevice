@@ -34,23 +34,23 @@ public class CloseASN extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String allowAbnormalClose = serviceDataHolder.getInputDataAsMap().getString("ALLOWABNORMALCLOSE");
 
-            HashMap<String, String>  receiptInfo = Receipt.findByReceiptKey(context,conn,receiptKey,true);
+            HashMap<String, String>  receiptInfo = Receipt.findByReceiptKey(context,receiptKey,true);
 
             //鉴于使用场景很少暂时禁用异常关闭功能，以方便RF使用通用的关闭逻辑
             // if(receiptInfo.get("STATUS").equals("0")&& !("true").equalsIgnoreCase(allowAbnormalClose))
             // ExceptionHelper.throwRfFulfillLogicException("不允许正常关闭未收货的ASN单");
 
-            String notes = DBHelper.getValue(context,conn,"SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+            String notes = DBHelper.getValue(context,"SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignatureKey},String.class,"电子签名");
 
             ServiceHelper.executeService(context,"NSPRECEIPTCLOSE",
@@ -62,10 +62,10 @@ public class CloseASN extends LegacyBaseService {
                     )
             );
 
-            HashMap<String, String> receiptHashmap = Receipt.findByReceiptKey(context,conn,receiptKey,true);
+            HashMap<String, String> receiptHashmap = Receipt.findByReceiptKey(context,receiptKey,true);
 
             if(!UtilHelper.isEmpty(notes)) {
-                DBHelper.executeUpdate(context, conn, "UPDATE RECEIPT " +
+                DBHelper.executeUpdate(context, "UPDATE RECEIPT " +
                         "SET NOTES = ? " +
                         "WHERE RECEIPTKEY = ? ", new Object[]{
                         notes,
@@ -78,22 +78,22 @@ public class CloseASN extends LegacyBaseService {
             //CSS在接口处理是否回退采购单数量的逻辑，业务不做处理。
 
 
-            if(receiptInfo.get("TYPE").equals(CDSysSet.getPOReceiptType(context,conn))) {
+            if(receiptInfo.get("TYPE").equals(CDSysSet.getPOReceiptType(context))) {
                 //TODO:ASN支持不同SKU的多个指令行，暂不允许多个相同SKU的指令行在一个ASN单的情况。
 
                 //考虑有ASN收货存在指令行，去掉HAVING SUM(QTYEXPECTED-QTYRECEIVED)>0 子句，同时在收货过程中指令明细行的的预计收货数量会自动置为0，保证SUM(QTYEXPECTED-QTYRECEIVED)回滚的数量匹配。
                 //ORIGINALLINENUMBER IS NO NULL时为非指令行，忽略预期量
-                List<HashMap<String, String>> rollbackSkuQtyHashMap = DBHelper.executeQuery(context, conn,
+                List<HashMap<String, String>> rollbackSkuQtyHashMap = DBHelper.executeQuery(context,
                         "SELECT EXTERNRECEIPTKEY, SKU, SUM(CASE WHEN ORIGINALLINENUMBER IS NOT NULL THEN 0 ELSE QTYEXPECTED END - QTYRECEIVED) AS ROLLBACKQTY FROM RECEIPTDETAIL " +
                                 " WHERE RECEIPTKEY =? GROUP BY EXTERNRECEIPTKEY, SKU ", new Object[]{
                                 receiptKey
                         });
 
                 for (HashMap<String, String> rollbackSkuQty : rollbackSkuQtyHashMap) {
-                    String conversion = SKU.findById(context, conn, rollbackSkuQty.get("SKU"), true).get("SNAVGWGT");
-                    BigDecimal totalRollbackQty = ReceiptUtilHelper.stdQty2PoWgt(context,conn,conversion,new BigDecimal(rollbackSkuQty.get("ROLLBACKQTY")),rollbackSkuQty.get("SKU"));
+                    String conversion = SKU.findById(context, rollbackSkuQty.get("SKU"), true).get("SNAVGWGT");
+                    BigDecimal totalRollbackQty = ReceiptUtilHelper.stdQty2PoWgt(context,conversion,new BigDecimal(rollbackSkuQty.get("ROLLBACKQTY")),rollbackSkuQty.get("SKU"));
 
-                    List<HashMap<String, String>> preReceiptCheckList = DBHelper.executeQuery(context, conn,
+                    List<HashMap<String, String>> preReceiptCheckList = DBHelper.executeQuery(context,
                             "SELECT SERIALKEY,FROMKEY, FROMLINENO,POUSEDQTY FROM PRERECEIPTCHECK WHERE RECEIPTLOT = ? ORDER BY FROMKEY DESC, FROMLINENO DESC", new Object[]{
                                     rollbackSkuQty.get("EXTERNRECEIPTKEY")
                             });
@@ -106,7 +106,7 @@ public class CloseASN extends LegacyBaseService {
                             String newPOLineStatus = UtilHelper.decimalCompare(currentPOUsedQty,currentPORollbackQty)==0 ? "0": "5";
 
                             //回退WMS_PO_DETAIL表
-                            DBHelper.executeUpdate(context, conn,
+                            DBHelper.executeUpdate(context,
                                     "UPDATE WMS_PO_DETAIL SET RECEIVEDQTY = RECEIVEDQTY - ?, STATUS = ? WHERE  POKEY = ?  AND POLINENUMBER = ? ", new Object[]{
                                             currentPORollbackQty,
                                             newPOLineStatus,
@@ -115,7 +115,7 @@ public class CloseASN extends LegacyBaseService {
                                     });
 
                             //回退收货检查表
-                            DBHelper.executeUpdate(context, conn,
+                            DBHelper.executeUpdate(context,
                                     "UPDATE PRERECEIPTCHECK SET POUSEDQTY = POUSEDQTY - ? WHERE SERIALKEY = ? ", new Object[]{
                                            currentPORollbackQty,
                                             preReceiptCheckRec.get("SERIALKEY")
@@ -144,7 +144,7 @@ public class CloseASN extends LegacyBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="ASN单号";    UDTRN.CONTENT01=receiptKey;
             UDTRN.TITLE02="状态";    UDTRN.CONTENT02="11";
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
 
 
@@ -152,14 +152,14 @@ public class CloseASN extends LegacyBaseService {
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 }

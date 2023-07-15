@@ -71,7 +71,7 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 		for(String zone : searchZoneArray) {
 
 			List<HashMap<String,String>>  res = DBHelper.executeQuery(
-					context,null,
+					context,
 					" SELECT * FROM putawayzone WHERE putawayzone = ?",
 					Arrays.asList(zone)
 			);

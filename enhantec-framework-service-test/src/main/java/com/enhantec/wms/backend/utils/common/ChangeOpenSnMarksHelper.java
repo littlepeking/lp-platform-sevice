@@ -7,17 +7,17 @@ import java.sql.Connection;
 
 public class ChangeOpenSnMarksHelper {
 
- public static void changeOpenSnMarksBYLpn(Context context, Connection conn, String sku , String... ids) throws Exception {
+ public static void changeOpenSnMarksBYLpn(Context context, String sku , String... ids) throws Exception {
      String openSnMarks = "0";
-     if(SKU.isSerialControl(context,conn,sku)){
+     if(SKU.isSerialControl(context,sku)){
          for (String id:ids) {
              String getExistOpenSnLpn = "select COUNT(*) from idnotes i ,SERIALINVENTORY s ,SKU s2 " +
                      "where i.id =s.ID and s.NETWEIGHT < s2.SNAVGWGT and i.sku = s2.SKU and i.id=?";
-             String existOpenSnLpn = LegacyDBHelper.GetValue(context,conn, getExistOpenSnLpn,new String[]{id},"");
+             String existOpenSnLpn = DBHelper.getValue(context, getExistOpenSnLpn,new String[]{id},"");
              if (!UtilHelper.isEmpty(existOpenSnLpn)&&Integer.parseInt(existOpenSnLpn)>0){
                  openSnMarks="1";
              }
-             DBHelper.executeUpdate(context, conn,
+             DBHelper.executeUpdate(context,
                      "UPDATE  idnotes set  existopensn = ? where id = ?"
                      , new Object[]{
                              openSnMarks,

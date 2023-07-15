@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.*;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -35,7 +36,7 @@ public class ReceiptLotRefused  extends LegacyBaseService
 		
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
+
 
 		try
 		{
@@ -43,9 +44,9 @@ public class ReceiptLotRefused  extends LegacyBaseService
 		    String RECEIPTLOT= serviceDataHolder.getInputDataAsMap().getString("RECEIPTLOT");
 		    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-			String[] LOTS= LegacyDBHelper.GetValueList(context, conn
+			String[] LOTS = (String[]) DBHelper.getValueList(context
 					, "select STATUS from PRERECEIPTCHECK where RECEIPTLOT=?"
-					, new String[]{RECEIPTLOT});
+					, new String[]{RECEIPTLOT}).toArray();
 			if (LOTS==null)
 		        throw new FulfillLogicException("收货批次(%1)未找到",RECEIPTLOT);
 			if (!LOTS[0].equals("0"))
@@ -62,14 +63,14 @@ public class ReceiptLotRefused  extends LegacyBaseService
 //			if ((!PACKCHECK.equals("2"))&&(!PACKCHECK.equals("1"))) canRefused=true;
 //			if ((!WEIGHTCHECK.equals("2"))&&(!WEIGHTCHECK.equals("1"))) canRefused=true;
 			//if (!canRefused) throw new Exception("检查全都通过,不允许拒收");
-			LegacyDBHelper.ExecSql(context, conn
+			DBHelper.executeUpdate(context
 					, "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"9",userid,"@date",RECEIPTLOT});
 
 			
-			String RECEIPTKEY= LegacyDBHelper.GetValue(context, conn, "SELECT RECEIPTKEY FROM RECEIPT WHERE STATUS=? AND EXTERNRECEIPTKEY=? AND TYPE=?", new String[]{"0",RECEIPTLOT,"101"}, "");
+			String RECEIPTKEY= DBHelper.getValue(context, "SELECT RECEIPTKEY FROM RECEIPT WHERE STATUS=? AND EXTERNRECEIPTKEY=? AND TYPE=?", new String[]{"0",RECEIPTLOT,"101"}, "");
 			if (!LegecyUtilHelper.isNull(RECEIPTKEY))
 			{//关闭收货单
-				LegacyDBHelper.ExecSql(context, conn
+				DBHelper.executeUpdate(context
 						,"update RECEIPT set status=?,editwho=?,editdate=? where RECEIPTKEY=?"
 						,new String[]{"20",userid,"@date",RECEIPTKEY});
 			}
@@ -83,14 +84,14 @@ public class ReceiptLotRefused  extends LegacyBaseService
 		    UDTRN.FROMKEY2="";
 		    UDTRN.FROMKEY3="";
 		    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
-		    UDTRN.Insert(context, conn, userid);
+		    UDTRN.Insert(context, userid);
 			
-			//String STORERKEY=XtSql.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
+			//String STORERKEY=XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
 			//MailBeanByPreReceipt mail=new MailBeanByPreReceipt();
-			//mail.Mail(context,conn,userid,STORERKEY,RECEIPTLOT,"拒收","收货检查拒收通知",ESIGNATUREKEY);
+			//mail.Mail(context,userid,STORERKEY,RECEIPTLOT,"拒收","收货检查拒收通知",ESIGNATUREKEY);
 			
 			//------------------------------------------------------
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 			theOutDO.setAttribValue("RECEIPTLOT", RECEIPTLOT);

@@ -8,8 +8,8 @@ import java.util.HashMap;
 
 public class Zone {
 
-    public static HashMap<String, String> findById(Context context, Connection conn, String putawayzone, boolean checkExist) throws Exception {
-        HashMap<String,String> putawayzoneRecord= DBHelper.getRecord(context, conn
+    public static HashMap<String, String> findById(Context context, String putawayzone, boolean checkExist) throws Exception {
+        HashMap<String,String> putawayzoneRecord= DBHelper.getRecord(context
                 , "select * from putawayzone where id = ? " , new Object[]{putawayzone},"库区"+putawayzone+"不存在",checkExist);
 
         return putawayzoneRecord;

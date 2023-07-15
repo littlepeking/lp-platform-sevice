@@ -11,14 +11,14 @@ public class CDSignatureConf {
     /**
      * 全部接收签名配置
      */
-    public static Map<String,String> getReceiveAllSignatureConf(Context context, Connection connection){
-        return CodeLookup.getCodeLookupByKey(context,connection,"ESIGNATURE","RECEIVEALL");
+    public static Map<String,String> getReceiveAllSignatureConf(Context context){
+        return CodeLookup.getCodeLookupByKey(context,"ESIGNATURE","RECEIVEALL");
     }
 
     /**
      * 是否在全部接收时复核ASN
      */
-    public static boolean confirmAsnWhenReceiveAll(Context context,Connection connection){
-        return "Y".equalsIgnoreCase(getReceiveAllSignatureConf(context,connection).get("UDF2"));
+    public static boolean confirmAsnWhenReceiveAll(Context context){
+        return "Y".equalsIgnoreCase(getReceiveAllSignatureConf(context).get("UDF2"));
     }
 }

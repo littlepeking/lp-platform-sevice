@@ -34,20 +34,20 @@ public class CloseSO extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
-            String notes = DBHelper.getValue(context,conn,"SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+            String notes = DBHelper.getValue(context,"SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignatureKey},String.class,"电子签名");
 
-            HashMap<String, String>  orderInfo = Orders.findByOrderKey(context,conn,orderKey,true);
+            HashMap<String, String>  orderInfo = Orders.findByOrderKey(context,orderKey,true);
 
-            List<HashMap<String, String>>  pickDetailList = PickDetail.findByOrderKey(context,conn,orderKey,false);
+            List<HashMap<String, String>>  pickDetailList = PickDetail.findByOrderKey(context,orderKey,false);
 
             if(pickDetailList.stream().anyMatch(x-> "3".equals(x.get("STATUS")))) throw new Exception("存在处理中状态的拣货项，请完成或删除该拣货项后再关闭订单");
 
@@ -77,17 +77,17 @@ public class CloseSO extends LegacyBaseService {
             UDTRN.FROMKEY2="";
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="订单号";    UDTRN.CONTENT01=orderKey;
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException( e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 }

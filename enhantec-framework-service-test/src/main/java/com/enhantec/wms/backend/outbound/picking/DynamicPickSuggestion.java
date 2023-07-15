@@ -31,31 +31,31 @@ public class DynamicPickSuggestion extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = null;
+
 
         try {
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String orderLineNumber = serviceDataHolder.getInputDataAsMap().getString("ORDERLINENUMBER");
 
-            conn = context.getConnection();
 
 
-            HashMap<String,String> orderInfo = Orders.findByOrderKey(context,conn,orderKey,true);
-            HashMap<String,String> orderDetailInfo = Orders.findOrderDetailByKey(context,conn,orderKey, orderLineNumber,true);
-            HashMap<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey(context,conn,"ORDERTYPE",orderInfo.get("TYPE"));
+
+            HashMap<String,String> orderInfo = Orders.findByOrderKey(context,orderKey,true);
+            HashMap<String,String> orderDetailInfo = Orders.findOrderDetailByKey(context,orderKey, orderLineNumber,true);
+            HashMap<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey(context,"ORDERTYPE",orderInfo.get("TYPE"));
 
             String sku = orderDetailInfo.get("SKU");
 
-            boolean isSerialControl = SKU.isSerialControl(context,conn,sku);
+            boolean isSerialControl = SKU.isSerialControl(context,sku);
 
-            HashMap<String,String> skuInfo = SKU.findById(context,conn,sku,true);
+            HashMap<String,String> skuInfo = SKU.findById(context,sku,true);
 
-            String mainUOM = UOM.getStdUOM(context, conn, skuInfo.get("PACKKEY"));
+            String mainUOM = UOM.getStdUOM(context, skuInfo.get("PACKKEY"));
 
 
 
-            List<HashMap<String,String>> demandAllocationList = DemandAllocation.findByOrderLineNumber(context,conn, orderKey,orderLineNumber, false);
+            List<HashMap<String,String>> demandAllocationList = DemandAllocation.findByOrderLineNumber(context, orderKey,orderLineNumber, false);
 //
 //            if(demandAllocationList.size()==0){
 //                //ExceptionHelper.throwRfFulfillLogicException("当前订单分配的全部拣货任务已完成");
@@ -83,7 +83,7 @@ public class DynamicPickSuggestion extends LegacyBaseService {
                     "");
             querySqlSB.append(" AND l.LOC = c.LOC AND c.LOC<>'PICKTO' ");
 
-            HashMap<String,String> zoneInfo = CodeLookup.getCodeLookupByKey(context,conn, "SYSSET","PACKZONE");
+            HashMap<String,String> zoneInfo = CodeLookup.getCodeLookupByKey(context, "SYSSET","PACKZONE");
 
             if(!UtilHelper.isEmpty(zoneInfo.get("UDF1"))) {
                 //如果设置了分装区则过滤掉分装区的库位
@@ -119,13 +119,11 @@ public class DynamicPickSuggestion extends LegacyBaseService {
 
             querySqlSB.append(orderByClause);
 
-            List<HashMap<String, String>> list = DBHelper.executeQuery(context, conn, querySqlSB.toString(), new Object[]{});
+            List<HashMap<String, String>> list = DBHelper.executeQuery(context, querySqlSB.toString(), new Object[]{});
 
             if(list.size()==0) ExceptionHelper.throwRfFulfillLogicException("存在需求分配记录，但未找到可供拣货的容器，该问题可能由于在分配后库存状态发生变化导致。请在工作台删除需求分配记录后重新分配后再次尝试。");
 
             //添加建议关联的需求分配主信息
-
-            final Connection finalConn = conn;
 
             list.stream().forEach(x->{
                 x.put("DEMANDKEY",demandKey);
@@ -137,7 +135,7 @@ public class DynamicPickSuggestion extends LegacyBaseService {
                 x.put("QTYALLOCATED",daQtyAllocated);
                 //为零头库存增加唯一码信息
                 if(isSerialControl && UtilHelper.decimalStrCompare(x.get("LPNQTY"),"1")==0){
-                    List<HashMap<String,String>>  snList = SerialInventory.findByLpn(context,finalConn,x.get("ID"),true);
+                    List<HashMap<String,String>>  snList = SerialInventory.findByLpn(context,x.get("ID"),true);
                     if(snList.size()!=1) ExceptionHelper.throwRfFulfillLogicException("箱号"+x.get("ID")+"的库存数量为1，但对应的唯一码库存的数量为"+snList.size()+ "，请联系管理员");
                     x.put("SERIALNUMBER",snList.get(0).get("SERIALNUMBERLONG"));
                 }else {
@@ -155,7 +153,7 @@ public class DynamicPickSuggestion extends LegacyBaseService {
         } catch (Exception e) {
             ExceptionHelper.throwRfFulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
     }

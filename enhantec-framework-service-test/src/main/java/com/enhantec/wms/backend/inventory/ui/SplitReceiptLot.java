@@ -35,10 +35,10 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
         
         String userid = context.getUserID();
 
-        Connection conn = null;
+
         try
         {
-            conn = context.getConnection();
+
             String ids = processData.getInputDataAsMap().getString("IDS");
             String eSignatureKey = processData.getInputDataAsMap().getString("ESIGNATUREKEY");
             String toLottablemerge=processData.getInputDataAsMap().getString("TOLOT");
@@ -48,7 +48,7 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 
             String idStr = "'" + String.join("','",idArray)+ "'" ;
 
-            List<HashMap<String,String>> lottabl06List = DBHelper.executeQuery(context, conn, "SELECT DISTINCT la.LOTTABLE06 FROM IDNOTES  id, LOTATTRIBUTE la " +
+            List<HashMap<String,String>> lottabl06List = DBHelper.executeQuery(context, "SELECT DISTINCT la.LOTTABLE06 FROM IDNOTES  id, LOTATTRIBUTE la " +
                     " WHERE id.LOT = la.LOT AND ID IN ("+idStr+")", new Object[]{});
 
             if(lottabl06List.size()>1) ExceptionHelper.throwRfFulfillLogicException("请选择相同收货批次的容器进行批次拆分合并");
@@ -57,15 +57,15 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 
             String lottabl06ToBeSplit = lottabl06List.get(0).get("LOTTABLE06");
 
-            //String lottable06Splitted = IdGenerationHelper.generateID(context, conn, userid,lottabl06ToBeSplit + "S",2);
+            //String lottable06Splitted = IdGenerationHelper.generateID(context, userid,lottabl06ToBeSplit + "S",2);
             String lottable06Splitted = " ";//默认
             if (UtilHelper.isEmpty(toLottablemerge)) {
-                 lottable06Splitted = IdGenerationHelper.createSubReceiptLot(context, conn, lottabl06ToBeSplit, "S");
+                 lottable06Splitted = IdGenerationHelper.createSubReceiptLot(context, lottabl06ToBeSplit, "S");
 
                 //新增ELOTATTIBUTE批次记录
-                HashMap<String, String> elotHashMap = VLotAttribute.findElottableByLottable06(context, conn, lottabl06ToBeSplit, true);
+                HashMap<String, String> elotHashMap = VLotAttribute.findElottableByLottable06(context, lottabl06ToBeSplit, true);
 
-                LinkedHashMap<String, String> newELotHashMap = new LinkedHashMap<String, String>();
+                HashMap<String,String> newELotHashMap = new HashMap<String,String>();
                 newELotHashMap.put("STORERKEY", elotHashMap.get("STORERKEY"));
                 newELotHashMap.put("SKU", elotHashMap.get("SKU"));
                 newELotHashMap.put("ELOT", lottable06Splitted);
@@ -75,13 +75,13 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
                 }
                 newELotHashMap.put("ELOTTABLE15", lottabl06ToBeSplit);
 
-                LegacyDBHelper.ExecInsert(context, conn, "ENTERPRISE.ELOTATTRIBUTE", newELotHashMap);
-                doReceiptLotTransfer(context,conn, lottable06Splitted, idArray);
+                LegacyDBHelper.ExecInsert(context, "ENTERPRISE.ELOTATTRIBUTE", newELotHashMap);
+                doReceiptLotTransfer(context, lottable06Splitted, idArray);
 
             }else {
                 //合并
-                HashMap<String, String> elotHashMap = VLotAttribute.findElottableByLottable06(context, conn, lottabl06ToBeSplit, true);
-                HashMap<String, String> mergeelotHashMap = VLotAttribute.findElottableByLottable06(context, conn, toLottablemerge, true);
+                HashMap<String, String> elotHashMap = VLotAttribute.findElottableByLottable06(context, lottabl06ToBeSplit, true);
+                HashMap<String, String> mergeelotHashMap = VLotAttribute.findElottableByLottable06(context, toLottablemerge, true);
                 for (int i = 1; i <= 25; i++) {
                     String num = UtilHelper.addPrefixZeros4Number(i, 2);
                     String toElotpro=UtilHelper.isEmpty(mergeelotHashMap.get("ELOTTABLE" +num))?" ":mergeelotHashMap.get("ELOTTABLE" +num);
@@ -92,7 +92,7 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
                 if (!elotHashMap.get("SKU").equals(mergeelotHashMap.get("SKU" )))
                 throw new Exception("所选托盘批次内容与“至批号”物料不一致请选择物料一致的托盘");
 
-                doReceiptLotTransfer(context,conn, toLottablemerge, idArray);
+                doReceiptLotTransfer(context, toLottablemerge, idArray);
 
 
             }
@@ -108,9 +108,9 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
             UDTRN.TITLE01="原批次"; UDTRN.CONTENT01=lottabl06ToBeSplit;
             UDTRN.TITLE02="拆分批次"; UDTRN.CONTENT02=lottable06Splitted;
             UDTRN.TITLE03="合并批次"; UDTRN.CONTENT03=toLottablemerge;
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
             //--------------------------------------------------------------
-            try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
             ServiceDataMap theOutDO = new ServiceDataMap();
 
@@ -121,24 +121,20 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
         }
         catch (Exception e)
         {
-            try
-            {
-                context.releaseConnection(conn);
-            }	catch (Exception e1) {		}
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 
-    private void doReceiptLotTransfer(Context context, Connection conn, String  lottable06Splitted, String[] idArray) throws Exception {
+    private void doReceiptLotTransfer(Context context, String  lottable06Splitted, String[] idArray) throws Exception {
 
-        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName(context, conn, context.getUserID(),"EHTRANSFER",9);
+        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName(context, context.getUserID(),"EHTRANSFER",9);
 
-        String storerKey = String.valueOf(DBHelper.getValue(context, conn, "select UDF1 from Codelkup where ListName=? and Code=?",
+        String storerKey = String.valueOf(DBHelper.getValue(context, "select UDF1 from Codelkup where ListName=? and Code=?",
                             new Object[]{"SYSSET","STORERKEY"}, "默认货主"));
 
         String totalOpenQty = "0";
@@ -150,11 +146,11 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 
         for(String id : idArray) {
 
-            HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById(context, conn, id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
+            HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById(context, id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
 
             String newTransferDetailKey = UtilHelper.To_Char(new Integer(++maxTransferDetailKey), 5);
 
-            DBHelper.executeUpdate(context, conn,
+            DBHelper.executeUpdate(context,
                     "INSERT INTO TRANSFERDETAIL (" +
                     "TRANSFERKEY, TRANSFERLINENUMBER,FROMSTORERKEY,FROMSKU,FROMLOC,FROMLOT,FROMID,FROMQTY,FROMPACKKEY,FROMUOM," +
                     "LOTTABLE01,LOTTABLE02,LOTTABLE03,LOTTABLE04,LOTTABLE05,LOTTABLE06,LOTTABLE07,LOTTABLE08,LOTTABLE09,LOTTABLE10,LOTTABLE11,LOTTABLE12," +
@@ -182,7 +178,7 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
             transferDetailKeyHashMap.put(newTransferDetailKey,id);
         }
 
-            DBHelper.executeUpdate(context,conn," INSERT INTO TRANSFER (" +
+            DBHelper.executeUpdate(context," INSERT INTO TRANSFER (" +
                     "TRANSFERKEY," +
                     "FROMSTORERKEY," +
                     "TOSTORERKEY," +
@@ -215,12 +211,12 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
         //call native internal transfer service
         for(String tempTransferDetailKey: transferDetailKeyHashMap.keySet()) {
 
-            callTransferService(context, conn, newTransferKey, tempTransferDetailKey);
+            callTransferService(context, newTransferKey, tempTransferDetailKey);
 
             //更新IDNOTES的LOT
             String id =transferDetailKeyHashMap.get(tempTransferDetailKey);
-            HashMap<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById(context, conn, id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
-            DBHelper.executeUpdate(context,conn,"UPDATE IDNOTES SET LOT = ? WHERE ID = ? ",
+            HashMap<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById(context, id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
+            DBHelper.executeUpdate(context,"UPDATE IDNOTES SET LOT = ? WHERE ID = ? ",
                     new Object[]{idHashMapUpdated.get("LOT"),idHashMapUpdated.get("ID")});
 
 
@@ -230,7 +226,7 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 
     }
 
-    private void callTransferService(Context context, Connection conn, String newTransferKey, String tempTransferDetailKey) {
+    private void callTransferService(Context context, String newTransferKey, String tempTransferDetailKey) {
 //        EXEDataObject theTriggerDO = new EXEDataObject();
 //        theTriggerDO.setConstraintItem("transferkey"), newTransferKey));
 //        theTriggerDO.setConstraintItem("transferdetailkey"), tempTransferDetailKey));
@@ -239,7 +235,7 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 //        context.theSQLMgr.searchTriggerLibrary("TRANSFERDETAIL")).preUpdateFire(context);
 
         //todo
-        DBHelper.executeUpdate(context, conn, " UPDATE TRANSFERDETAIL SET STATUS = '9' WHERE TRANSFERKEY = ? AND TRANSFERLINENUMBER = ? ", new Object[]{
+        DBHelper.executeUpdate(context, " UPDATE TRANSFERDETAIL SET STATUS = '9' WHERE TRANSFERKEY = ? AND TRANSFERLINENUMBER = ? ", new Object[]{
                 newTransferKey,  tempTransferDetailKey
         });
 

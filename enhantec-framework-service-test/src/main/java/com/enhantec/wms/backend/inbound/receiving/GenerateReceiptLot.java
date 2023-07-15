@@ -30,15 +30,15 @@ public class GenerateReceiptLot extends LegacyBaseService {
     @Deprecated
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
 
-            HashMap<String, String> receiptHashmap = Receipt.findByReceiptKey(context,conn,receiptKey,true);
+            HashMap<String, String> receiptHashmap = Receipt.findByReceiptKey(context,receiptKey,true);
 
             if(!receiptHashmap.get("ISCONFIRMED").equals("0")) ExceptionHelper.throwRfFulfillLogicException("已确认或复核的单据不允许生成收货批次");
 
@@ -48,22 +48,22 @@ public class GenerateReceiptLot extends LegacyBaseService {
 
             //增加ASN类型的判断
             if(isNotPOReceiptType){
-                List<HashMap<String, String>> receiptGroupBySku = DBHelper.executeQuery(context, conn,
+                List<HashMap<String, String>> receiptGroupBySku = DBHelper.executeQuery(context,
                         "SELECT SKU,MAX(LOTTABLE06) AS LOTTABLE06 FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? GROUP BY SKU",
                         new Object[]{receiptKey});
                 for (HashMap<String, String> receiptDetail : receiptGroupBySku) {
-                    if(!SKU.isSerialControl(context,conn,receiptDetail.get("SKU"))){
+                    if(!SKU.isSerialControl(context,receiptDetail.get("SKU"))){
                         String lottable06 = receiptDetail.get("LOTTABLE06");
                         if(UtilHelper.isEmpty(lottable06)){
-                            lottable06 = IdGenerationHelper.createReceiptLot(context,conn,receiptDetail.get("SKU"));
+                            lottable06 = IdGenerationHelper.createReceiptLot(context,receiptDetail.get("SKU"));
                         }
-                        populateReceiptDetails(context,conn,receiptKey, lottable06,receiptDetail.get("SKU"));
+                        populateReceiptDetails(context,receiptKey, lottable06,receiptDetail.get("SKU"));
                     }
                 }
             }else{
-                HashMap<String,String> warehousePrefixConfig = CodeLookup.getCodeLookupByKey(context,conn,"SYSSET","WAREHOUSE");
+                HashMap<String,String> warehousePrefixConfig = CodeLookup.getCodeLookupByKey(context,"SYSSET","WAREHOUSE");
                 if(!exReceiptKey.startsWith(warehousePrefixConfig.get("UDF1"))) ExceptionHelper.throwRfFulfillLogicException("收货批号识别出错，正确的批号前缀应为"+warehousePrefixConfig.get("UDF1"));
-                populateReceiptDetails(context,conn,receiptKey, exReceiptKey,null);
+                populateReceiptDetails(context,receiptKey, exReceiptKey,null);
 
             }
 
@@ -71,24 +71,24 @@ public class GenerateReceiptLot extends LegacyBaseService {
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 
-    private void populateReceiptDetails(Context context, Connection conn,String receiptKey, String receiptLot,String sku) throws Exception {
+    private void populateReceiptDetails(Context context,String receiptKey, String receiptLot,String sku) throws Exception {
 
         List<HashMap<String, String>> receiptDetails;
         if(null == sku || UtilHelper.isEmpty(sku)) {
-            receiptDetails = Receipt.findReceiptDetails(context, conn, receiptKey, true);
+            receiptDetails = Receipt.findReceiptDetails(context, receiptKey, true);
         }else{
-            receiptDetails = DBHelper.executeQuery(context, conn,
+            receiptDetails = DBHelper.executeQuery(context,
                     "SELECT * FROM RECEIPTDETAIL WHERE SKU = ? AND RECEIPTKEY = ?",
                     new Object[]{sku, receiptKey});
         }
@@ -101,13 +101,13 @@ public class GenerateReceiptLot extends LegacyBaseService {
             barrel++;
             String tempLpn;
             if(UtilHelper.isEmpty(receiptDetail.get("TOID"))) {
-                tempLpn = IdGenerationHelper.generateLpn(context, conn, receiptLot);
+                tempLpn = IdGenerationHelper.generateLpn(context, receiptLot);
             }else{
                 tempLpn = receiptDetail.get("TOID");
             }
             String barrelNumber = String.valueOf(barrel);
             while(barrelNumber.length() < 3) barrelNumber = "0" + barrelNumber;
-            DBHelper.executeUpdate(context,conn,"UPDATE RECEIPTDETAIL " +
+            DBHelper.executeUpdate(context,"UPDATE RECEIPTDETAIL " +
                     "SET LOTTABLE06 = ? , BARRELNUMBER = ?, TOTALBARRELNUMBER = ?, TOID = ? " +
                     "WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ?", new Object[]{
                         receiptLot,

@@ -32,18 +32,18 @@ public class ExcuteChange extends LegacyBaseService {
     //此类借用更改项目号功能来实现生基更改物料代码功能
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String changekey = serviceDataHolder.getInputDataAsMap().getString("CHANGEKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
             String SQL = " select  e2.FROMELOT,e2.FROMSKU,e2.TOSKU,e2.PACKEY,e.STATUS,e2.changeline from ENCHGPROJECTCODE e , ENCHGPROJECTCODEDETAIL e2 " +
                     "          where e.CHANGEKEY = e2.CHANGEKEY AND e.CHANGEKEY = ?";
-            List<HashMap<String,String>> list = DBHelper.executeQuery(context, conn, SQL, new Object[]{
+            List<HashMap<String,String>> list = DBHelper.executeQuery(context, SQL, new Object[]{
                     changekey});
             //校验后生成新批次，调用TRANSFER传入变更信息
             for(HashMap<String,String> changeRecord:list){
@@ -52,12 +52,12 @@ public class ExcuteChange extends LegacyBaseService {
                 String fromSku=changeRecord.get("FROMSKU");
                 String toSku=changeRecord.get("TOSKU");
                 String fromLottable06=changeRecord.get("FROMELOT");
-                ChangeByLotHelper.checkSkuAttributeIsMatch(fromSku,toSku,context,conn);
-                InventoryValidationHelper.validateLotQty(context,conn,fromLottable06);
-               String toLottable06= IdGenerationHelper.createReceiptLot(context,conn,toSku);
+                ChangeByLotHelper.checkSkuAttributeIsMatch(fromSku,toSku,context);
+                InventoryValidationHelper.validateLotQty(context,fromLottable06);
+               String toLottable06= IdGenerationHelper.createReceiptLot(context,toSku);
                //插入新批次将旧批次批属性复制至新批次
-                HashMap<String,String> elotHashMap = VLotAttribute.findElottableByLottable06(context,conn,fromLottable06,true);
-                LinkedHashMap<String, String> newELotHashMap = new LinkedHashMap<String, String>();
+                HashMap<String,String> elotHashMap = VLotAttribute.findElottableByLottable06(context,fromLottable06,true);
+                HashMap<String,String> newELotHashMap = new HashMap<String,String>();
                 newELotHashMap.put("STORERKEY", elotHashMap.get("STORERKEY"));
                 newELotHashMap.put("SKU", toSku);
                 newELotHashMap.put("ELOT", toLottable06);
@@ -66,37 +66,37 @@ public class ExcuteChange extends LegacyBaseService {
                     newELotHashMap.put("ELOTTABLE" + num, UtilHelper.trim(elotHashMap.get("ELOTTABLE" + num)));
                 }
                 newELotHashMap.put("ELOTTABLE15", fromLottable06);
-                LegacyDBHelper.ExecInsert(context, conn, "ENTERPRISE.ELOTATTRIBUTE", newELotHashMap);
-                doTransfer(context,conn,fromLottable06,toSku,toLottable06);
-                LegacyDBHelper.ExecSql(context, conn, "UPDATE ENCHGPROJECTCODEDETAIL SET TOELOT = ? WHERE CHANGEKEY = ? and changeline = ?", new String[]{toLottable06,changekey,changeRecord.get("CHANGELINE")});
+                LegacyDBHelper.ExecInsert(context, "ENTERPRISE.ELOTATTRIBUTE", newELotHashMap);
+                doTransfer(context,fromLottable06,toSku,toLottable06);
+                DBHelper.executeUpdate(context, "UPDATE ENCHGPROJECTCODEDETAIL SET TOELOT = ? WHERE CHANGEKEY = ? and changeline = ?", new String[]{toLottable06,changekey,changeRecord.get("CHANGELINE")});
             }
 
 
 
 
-            LegacyDBHelper.ExecSql(context, conn, "UPDATE ENCHGPROJECTCODE SET STATUS = 5 WHERE CHANGEKEY = ?", new String[]{changekey});
-            LegacyDBHelper.ExecSql(context, conn, "UPDATE ENCHGPROJECTCODEDETAIL SET STATUS = 5 WHERE CHANGEKEY = ?", new String[]{changekey});
+            DBHelper.executeUpdate(context, "UPDATE ENCHGPROJECTCODE SET STATUS = 5 WHERE CHANGEKEY = ?", new String[]{changekey});
+            DBHelper.executeUpdate(context, "UPDATE ENCHGPROJECTCODEDETAIL SET STATUS = 5 WHERE CHANGEKEY = ?", new String[]{changekey});
 
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 
 
-    private void doTransfer(Context context, Connection conn, String fromLottable06,String toSku,String toLottable06) throws Exception {
+    private void doTransfer(Context context, String fromLottable06,String toSku,String toLottable06) throws Exception {
 
-        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName(context, conn, context.getUserID(),"EHTRANSFER",9);
+        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName(context, context.getUserID(),"EHTRANSFER",9);
 
-        String storerKey = String.valueOf(DBHelper.getValue(context, conn, "select UDF1 from Codelkup where ListName=? and Code=?",
+        String storerKey = String.valueOf(DBHelper.getValue(context, "select UDF1 from Codelkup where ListName=? and Code=?",
                 new Object[]{"SYSSET","STORERKEY"}, "默认货主"));
 
         String totalOpenQty = "0";
@@ -108,14 +108,14 @@ public class ExcuteChange extends LegacyBaseService {
         //查询lottable06下所有lpn
         String SQL = " select  d.id from v_lotattribute b, IDNOTES d , lotxlocxid l " +
                 "          where b.lot=d.lot AND l.id=d.id AND b.lottable06 = ? and l.QTY > 0";
-        List<HashMap<String,String>> idList = DBHelper.executeQuery(context, conn, SQL, new Object[]{
+        List<HashMap<String,String>> idList = DBHelper.executeQuery(context, SQL, new Object[]{
                 fromLottable06});
         for (HashMap<String,String> id :idList) {
-            HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById(context, conn, id.get("ID"), "容器" + id + "不存在或者已被分配或拣货，当前状态不允许转换");
+            HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById(context, id.get("ID"), "容器" + id + "不存在或者已被分配或拣货，当前状态不允许转换");
 
             String newTransferDetailKey = UtilHelper.To_Char(new Integer(++maxTransferDetailKey), 5);
 
-            DBHelper.executeUpdate(context, conn,
+            DBHelper.executeUpdate(context,
                     "INSERT INTO TRANSFERDETAIL (" +
                             "TRANSFERKEY, TRANSFERLINENUMBER,FROMSTORERKEY,FROMSKU,FROMLOC,FROMLOT,FROMID,FROMQTY,FROMPACKKEY,FROMUOM," +
                             "LOTTABLE01,LOTTABLE02,LOTTABLE03,LOTTABLE04,LOTTABLE05,LOTTABLE06,LOTTABLE07,LOTTABLE08,LOTTABLE09,LOTTABLE10,LOTTABLE11,LOTTABLE12," +
@@ -142,7 +142,7 @@ public class ExcuteChange extends LegacyBaseService {
 
             transferDetailKeyHashMap.put(newTransferDetailKey, id.get("ID"));
         }
-            DBHelper.executeUpdate(context, conn, " INSERT INTO TRANSFER (" +
+            DBHelper.executeUpdate(context, " INSERT INTO TRANSFER (" +
                     "TRANSFERKEY," +
                     "FROMSTORERKEY," +
                     "TOSTORERKEY," +
@@ -174,12 +174,12 @@ public class ExcuteChange extends LegacyBaseService {
             //call native internal transfer service
             for(String tempTransferDetailKey: transferDetailKeyHashMap.keySet()) {
 
-                callTransferService(context, conn, newTransferKey, tempTransferDetailKey);
+                callTransferService(context, newTransferKey, tempTransferDetailKey);
 
                 //更新IDNOTES
                 String idBeUpdate = transferDetailKeyHashMap.get(tempTransferDetailKey);
-                HashMap<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById(context, conn, idBeUpdate, "容器" + idBeUpdate + "不存在或者已被分配或拣货，当前状态不允许拆批次");
-                DBHelper.executeUpdate(context, conn, "UPDATE IDNOTES SET LOT = ?,SKU=? WHERE ID = ? ",
+                HashMap<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById(context, idBeUpdate, "容器" + idBeUpdate + "不存在或者已被分配或拣货，当前状态不允许拆批次");
+                DBHelper.executeUpdate(context, "UPDATE IDNOTES SET LOT = ?,SKU=? WHERE ID = ? ",
                         new Object[]{idHashMapUpdated.get("LOT"), toSku,idHashMapUpdated.get("ID")});
             }
 
@@ -189,7 +189,7 @@ public class ExcuteChange extends LegacyBaseService {
 
 
 
-    private void callTransferService(Context context, Connection conn, String newTransferKey, String tempTransferDetailKey) {
+    private void callTransferService(Context context, String newTransferKey, String tempTransferDetailKey) {
         EXEDataObject theTriggerDO = new EXEDataObject();
 //        theTriggerDO.setConstraintItem("transferkey"), newTransferKey));
 //        theTriggerDO.setConstraintItem("transferdetailkey"), tempTransferDetailKey));
@@ -197,7 +197,7 @@ public class ExcuteChange extends LegacyBaseService {
 //        context.theEXEDataObjectStack.push(theTriggerDO);
 //        context.theSQLMgr.searchTriggerLibrary("TRANSFERDETAIL")).preUpdateFire(context);
 //todo
-        DBHelper.executeUpdate(context, conn, " UPDATE TRANSFERDETAIL SET STATUS = '9' WHERE TRANSFERKEY = ? AND TRANSFERLINENUMBER = ? ", new Object[]{
+        DBHelper.executeUpdate(context, " UPDATE TRANSFERDETAIL SET STATUS = '9' WHERE TRANSFERKEY = ? AND TRANSFERLINENUMBER = ? ", new Object[]{
                 newTransferKey,  tempTransferDetailKey
         });
 

@@ -13,24 +13,24 @@ public class CDReceiptType {
     /**
      * 是否是有库存的退货
      * @param context
-     * @param connection
+
      * @param type
      * @return
      */
-    public static boolean isReturnTypeWithInventory(Context context, Connection connection, String type){
-        return "R3".equals(CodeLookup.getCodeLookupValue(context,connection,"RECEIPTYPE",type,"UDF5","收货类型"));
+    public static boolean isReturnTypeWithInventory(Context context, String type){
+        return "R3".equals(CodeLookup.getCodeLookupValue(context,"RECEIPTYPE",type,"UDF5","收货类型"));
     }
 
     /**
      * 是否是退货类型
      * @param context
-     * @param conn
+
      * @param type
      * @return
      */
-    public static boolean isReturnType(Context context, Connection conn, String type){
+    public static boolean isReturnType(Context context, String type){
         //CODELKUP表的UDF5中前缀为R的类型为退货类型
-        String receiptType =CodeLookup.getCodeLookupValue(context, conn, "RECEIPTYPE", type, "UDF5", "收货类型");
+        String receiptType =CodeLookup.getCodeLookupValue(context, "RECEIPTYPE", type, "UDF5", "收货类型");
         boolean isReturnType = !UtilHelper.isEmpty(receiptType) && receiptType.startsWith("R");
 
         return isReturnType;
@@ -40,9 +40,9 @@ public class CDReceiptType {
      * 是否自动收货
      * @return
      */
-    public static boolean isAutoReceiving(Context context, Connection connection, String receiptType){
+    public static boolean isAutoReceiving(Context context, String receiptType){
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "RECEIPTYPE", receiptType);
+        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptType);
         if("Y".equalsIgnoreCase(receiptTypeHashMap.get("UDF2"))){
             return true;
         }else {
@@ -54,18 +54,18 @@ public class CDReceiptType {
      * 是否自动收货
      * @return
      */
-    public static String getReceivingFuncType(Context context, Connection connection, String receiptType){
+    public static String getReceivingFuncType(Context context, String receiptType){
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "RECEIPTYPE", receiptType);
+        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptType);
         return receiptTypeHashMap.get("UDF5");
     }
 
 
 
 
-    public static boolean isBindAndAutoGenerateLpn(Context context, Connection connection, String sku, String receiptType) {
+    public static boolean isBindAndAutoGenerateLpn(Context context, String sku, String receiptType) {
 
-        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, connection, "RECEIPTYPE", receiptType);
+        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptType);
 
         if(!UtilHelper.isEmpty(codelkup.get("UDF3"))) {
 
@@ -75,7 +75,7 @@ public class CDReceiptType {
                 return false;
             }
         }else {
-            return SKU.isBindingLpn(context, connection, sku);
+            return SKU.isBindingLpn(context, sku);
         }
     }
 
@@ -85,11 +85,11 @@ public class CDReceiptType {
      * RECEIPTYPE UDF3
      * @return
      */
-    public static boolean isBindingNewLpn(Context context,Connection connection, String sku,String receiptType) {
+    public static boolean isBindingNewLpn(Context context,String sku,String receiptType) {
 
-        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, connection, "RECEIPTYPE", receiptType);
+        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptType);
 
-        if(SKU.isSerialControl(context, connection,sku) && !UtilHelper.isEmpty(codelkup.get("UDF3"))) {
+        if(SKU.isSerialControl(context,sku) && !UtilHelper.isEmpty(codelkup.get("UDF3"))) {
 
             if ("1".equals(codelkup.get("UDF3")) || "2".equals(codelkup.get("UDF3"))) {
                 return true;
@@ -97,15 +97,15 @@ public class CDReceiptType {
                 return false;
             }
         }else {
-            return SKU.isBindingLpn(context, connection, sku);
+            return SKU.isBindingLpn(context, sku);
         }
     }
 
 
     //是否允许超拣
-    public static boolean isAllowOverPick(Context context,Connection connection, String receiptType) throws Exception{
+    public static boolean isAllowOverPick(Context context,String receiptType) throws Exception{
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "RECEIPTYPE", receiptType);
+        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptType);
         if("Y".equalsIgnoreCase(receiptTypeHashMap.get("UDF4"))){
             return true;
         }else {
@@ -114,14 +114,14 @@ public class CDReceiptType {
     }
 
 
-    public static String getReturnLotGenerateType(Context context,Connection connection,String receiptType){
+    public static String getReturnLotGenerateType(Context context,String receiptType){
     /*
             UDF6= 本设置仅用于退货批次
             0: 退货的批次号直接使用原收货批次号
             1: 当容器开封时，退货的批次号为原批次号+R(A-Z)
             2: 退货的批次号直接从系统获取下一新的收货批次号，且Elottable07生产批号+R(A-Z)
      */
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "RECEIPTYPE", receiptType);
+        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptType);
         return receiptTypeHashMap.get("UDF6");
     }
 
@@ -132,8 +132,8 @@ public class CDReceiptType {
      * N不允许，default；允许
      * @return
      */
-    public static boolean enableExcessReceiving(Context context,Connection connection,String receiptType){
-        return !"N".equalsIgnoreCase(CodeLookup.getCodeLookupValue(context,connection,"RECEIPTYPE",receiptType,"UDF8","是否允许超收"));
+    public static boolean enableExcessReceiving(Context context,String receiptType){
+        return !"N".equalsIgnoreCase(CodeLookup.getCodeLookupValue(context,"RECEIPTYPE",receiptType,"UDF8","是否允许超收"));
     }
 
 

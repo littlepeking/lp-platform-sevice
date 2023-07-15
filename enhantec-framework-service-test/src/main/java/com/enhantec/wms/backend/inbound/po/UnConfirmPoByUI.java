@@ -33,22 +33,22 @@ public class UnConfirmPoByUI extends LegacyBaseService {
     public void execute(ServiceDataHolder serviceDataHolder) {
 
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String poKey = serviceDataHolder.getInputDataAsMap().getString("POKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String SQL="SELECT * FROM WMS_PO WHERE  POKEY = ?  ";
-            HashMap<String, String>  record = DBHelper.getRecord(context, conn, SQL, new Object[]{ poKey},"变更单");
+            HashMap<String, String>  record = DBHelper.getRecord(context, SQL, new Object[]{ poKey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"未找到");
             
-            String user = DBHelper.getValue(context, conn, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String user = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     esignatureKey
             }, String.class, "复核人");
-            DBHelper.executeUpdate(context, conn, "UPDATE WMS_PO SET CONFIRMSTATUS = ?,ISCONFIRMEDUSER1 ='',ISCONFIRMEDUSER2 = '' WHERE POKEY = ? ",
+            DBHelper.executeUpdate(context, "UPDATE WMS_PO SET CONFIRMSTATUS = ?,ISCONFIRMEDUSER1 ='',ISCONFIRMEDUSER2 = '' WHERE POKEY = ? ",
                     new Object[]{"0",poKey});
             Udtrn UDTRN = new Udtrn();
 
@@ -64,19 +64,19 @@ public class UnConfirmPoByUI extends LegacyBaseService {
             UDTRN.CONTENT01 = poKey;
             UDTRN.TITLE02 = "操作人";
             UDTRN.CONTENT02 = user;
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 }

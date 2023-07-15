@@ -34,7 +34,7 @@ public class ReturnWithASNAdd extends LegacyBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
-        Connection connection = context.getConnection();
+
 
         String lpn = serviceDataHolder.getInputDataAsMap().getString("LPN");//绑定的新LPN
         String originLpn = serviceDataHolder.getInputDataAsMap().getString("ORIGINLPN");//扫描的LPN
@@ -60,28 +60,28 @@ public class ReturnWithASNAdd extends LegacyBaseService {
             if (UtilHelper.isEmpty(tareWgt)) throw new Exception("未成功获取皮重数据");
             if (UtilHelper.isEmpty(netWgt)) throw new Exception("未成功获取净重数据");
 
-            HashMap<String, String> receiptHashMap = buildReceiptHeader(context,connection,receiptKey,receiptType);
+            HashMap<String, String> receiptHashMap = buildReceiptHeader(context,receiptKey,receiptType);
 
 
             if(!UtilHelper.isEmpty(originalReceiptLineNumber)) {
-                HashMap<String, String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById(context, connection, receiptKey, originalReceiptLineNumber, true);
+                HashMap<String, String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById(context, receiptKey, originalReceiptLineNumber, true);
                 if(!(new BigDecimal(originalReceiptDetailHashMap.get("QTYRECEIVED")).compareTo(new BigDecimal(0)) == 0))
                     ExceptionHelper.throwRfFulfillLogicException("收货指令行的已收货数量必须为0");
                 toLoc = originalReceiptDetailHashMap.get("TOLOC");
             }
             //退货入库在没有指令行的情况下，如果收货类型配置了默认收货库位，会使用配置的收货库位。
-            String toLocConf = CodeLookup.getCodeLookupByKey(context, connection, "RECEIPTYPE", receiptType).get("UDF9");
+            String toLocConf = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptType).get("UDF9");
             if(!UtilHelper.isEmpty(toLocConf)){
                 toLoc = toLocConf;
             }
-            HashMap<String, String> skuMap = SKU.findById(context, connection, sku, true);
+            HashMap<String, String> skuMap = SKU.findById(context, sku, true);
 
             String packKey = skuMap.get("PACKKEY");
 
             //插入收货行的应为STD UOM,但是RF传入的是UOM QTY,需要转换
-            BigDecimal grossWgtStdQty = UOM.UOMQty2StdQty(context ,connection,packKey, uom, new BigDecimal(grossWgt));
-            BigDecimal tareWgtStdQQty = UOM.UOMQty2StdQty(context ,connection,packKey, uom, new BigDecimal(tareWgt));
-            BigDecimal netWgtStdQQty = UOM.UOMQty2StdQty(context ,connection,packKey, uom, new BigDecimal(netWgt));
+            BigDecimal grossWgtStdQty = UOM.UOMQty2StdQty(context ,packKey, uom, new BigDecimal(grossWgt));
+            BigDecimal tareWgtStdQQty = UOM.UOMQty2StdQty(context ,packKey, uom, new BigDecimal(tareWgt));
+            BigDecimal netWgtStdQQty = UOM.UOMQty2StdQty(context ,packKey, uom, new BigDecimal(netWgt));
 
             ArrayList<String> snArray = new ArrayList<>();
             ArrayList<String> snWightArray = new ArrayList<>();
@@ -97,8 +97,8 @@ public class ReturnWithASNAdd extends LegacyBaseService {
                 }
             }
 
-            LinkedHashMap<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByReturnLpn(
-                    context,connection, receiptHashMap, originalReceiptLineNumber,sku,lpn,originLpn, toLoc,isOpened
+            HashMap<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByReturnLpn(
+                    context, receiptHashMap, originalReceiptLineNumber,sku,lpn,originLpn, toLoc,isOpened
                     ,netWgtStdQQty.toPlainString(),grossWgtStdQty.toPlainString(),tareWgtStdQQty.toPlainString(),uom,reGrossWgt, snArray.toArray(new String[snArray.size()]),snWightArray.toArray(new String[snWightArray.size()]), snUomArray.toArray(new String[snUomArray.size()]));
             /**
              * 唯一码控制的打印LPN和SN标签
@@ -112,23 +112,23 @@ public class ReturnWithASNAdd extends LegacyBaseService {
              *  适用于所有收发货和库存数量调整的逻辑。
              */
             boolean printLable = false;
-            if(SKU.isSerialControl(context,connection,sku)) {
-                if (CDReceiptType.isBindAndAutoGenerateLpn(context, connection, sku, receiptType)) {
+            if(SKU.isSerialControl(context,sku)) {
+                if (CDReceiptType.isBindAndAutoGenerateLpn(context, sku, receiptType)) {
                     PrintHelper.printLPNByReceiptLineNumber(
-                            context, connection,
+                            context,
                             insertedReceiptDetail.get("RECEIPTKEY"),
                             insertedReceiptDetail.get("RECEIPTLINENUMBER"),
                             Labels.LPN_UI,
                             printer, "1", "ASN退货标签");
                     printLable = true;
                 }
-                if(CDSysSet.snLabelWgt(context,connection)) {
+                if(CDSysSet.snLabelWgt(context)) {
                     for (int i = 0; i < snArray.size(); i++) {
                         String sn = snArray.get(i);
                         String newSnWeight = snWightArray.get(i);
-                        String oldSnWeight = SNHistory.findBySkuAndSN(context, connection, insertedReceiptDetail.get("SKU"), sn, true).get("SNWEIGHT");
+                        String oldSnWeight = SNHistory.findBySkuAndSN(context, insertedReceiptDetail.get("SKU"), sn, true).get("SNWEIGHT");
                         if(UtilHelper.decimalStrCompare(newSnWeight,oldSnWeight) != 0){
-                            PrintHelper.printSnByReceiptLineNumberAndSn(context, connection,
+                            PrintHelper.printSnByReceiptLineNumberAndSn(context,
                                     insertedReceiptDetail.get("RECEIPTKEY"),
                                     insertedReceiptDetail.get("RECEIPTLINENUMBER"),
                                     sn, Labels.SN_UI,
@@ -137,14 +137,14 @@ public class ReturnWithASNAdd extends LegacyBaseService {
                         }
                     }
                 }
-            } else if (CDSysSet.enableLabelWgt(context,connection)) {
-                HashMap<String, String> idNotesHistory = IDNotesHistory.findLastShippedRecordById(context, connection, insertedReceiptDetail.get("TOID"), true);
+            } else if (CDSysSet.enableLabelWgt(context)) {
+                HashMap<String, String> idNotesHistory = IDNotesHistory.findLastShippedRecordById(context, insertedReceiptDetail.get("TOID"), true);
                 String originalNetWgt = idNotesHistory.get("ORIGINALNETWGT");
                 String expectedNetWgt = insertedReceiptDetail.get("QTYEXPECTED");
 
                 if(UtilHelper.decimalStrCompare(originalNetWgt,expectedNetWgt) != 0){
                     PrintHelper.printLPNByReceiptLineNumber(
-                            context, connection,
+                            context,
                             insertedReceiptDetail.get("RECEIPTKEY"),
                             insertedReceiptDetail.get("RECEIPTLINENUMBER"),
                             Labels.LPN_UI,
@@ -154,8 +154,8 @@ public class ReturnWithASNAdd extends LegacyBaseService {
             }
 
 
-            if(CDReceiptType.isAutoReceiving(context,connection, receiptHashMap.get("TYPE"))) {
-                Receipt.execReceiptDetailReceiving(context, connection, serviceDataHolder, insertedReceiptDetail, grossWgt, tareWgt, netWgt);
+            if(CDReceiptType.isAutoReceiving(context, receiptHashMap.get("TYPE"))) {
+                Receipt.execReceiptDetailReceiving(context, serviceDataHolder, insertedReceiptDetail, grossWgt, tareWgt, netWgt);
             }
 
             Udtrn udtrn = new Udtrn();
@@ -171,7 +171,7 @@ public class ReturnWithASNAdd extends LegacyBaseService {
             udtrn.TITLE03="容器号/箱号"; udtrn.CONTENT03=lpn;
             udtrn.TITLE04="数量"; udtrn.CONTENT04=netWgt;
             udtrn.TITLE05="单位"; udtrn.CONTENT05=uom;
-            udtrn.Insert(context,connection,context.getUserID());
+            udtrn.Insert(context,context.getUserID());
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             //扫描单个唯一码情况，返回唯一码
@@ -189,8 +189,6 @@ public class ReturnWithASNAdd extends LegacyBaseService {
         }catch (Exception e){
             try
             {
-//                 context.theSQLMgr.transactionAbort();
-                context.releaseConnection(connection);
             }	catch (Exception e1) {		}
             if ( e instanceof FulfillLogicException) {
                 throw (FulfillLogicException)e;
@@ -205,7 +203,7 @@ public class ReturnWithASNAdd extends LegacyBaseService {
 
     }
 
-    private HashMap<String,String> buildReceiptHeader(Context context, Connection connection, String receiptKey, String receiptType) throws Exception {
+    private HashMap<String,String> buildReceiptHeader(Context context, String receiptKey, String receiptType) throws Exception {
 
         HashMap<String, String> receiptHashMap = null;
 
@@ -214,18 +212,18 @@ public class ReturnWithASNAdd extends LegacyBaseService {
         String userid = context.getUserID();
 
         if(UtilHelper.isEmpty(receiptKey)) {
-            receiptKey = LegacyDBHelper.GetNCounterBill(context, connection, "RECEIPT");
-            LinkedHashMap<String, String> newReceiptHashMap = new LinkedHashMap<String, String>();
+            receiptKey = LegacyDBHelper.GetNCounterBill(context, "RECEIPT");
+            HashMap<String,String> newReceiptHashMap = new HashMap<String,String>();
             newReceiptHashMap.put("ADDWHO", userid);
             newReceiptHashMap.put("EDITWHO", userid);
             newReceiptHashMap.put("RECEIPTKEY", receiptKey);
             //生成退货单号
-            exReceiptKey = IdGenerationHelper.generateID(context, connection, userid, "RET", 10);
+            exReceiptKey = IdGenerationHelper.generateID(context, userid, "RET", 10);
             newReceiptHashMap.put("EXTERNRECEIPTKEY", exReceiptKey);
             newReceiptHashMap.put("STATUS", "0");
             newReceiptHashMap.put("ALLOWAUTORECEIPT", "0");
             newReceiptHashMap.put("TYPE", receiptType);
-            if(CDReceiptType.isAutoReceiving(context,connection, receiptType)) {
+            if(CDReceiptType.isAutoReceiving(context, receiptType)) {
                 newReceiptHashMap.put("ISCONFIRMED", "2");
                 newReceiptHashMap.put("ISCONFIRMEDUSER", userid);
                 newReceiptHashMap.put("ISCONFIRMEDUSER2",userid);
@@ -234,14 +232,14 @@ public class ReturnWithASNAdd extends LegacyBaseService {
                 newReceiptHashMap.put("ISCONFIRMED", "0"); //完成收货信息采集后，进行签名后改为2。
             }
 
-            String STORERKEY = LegacyDBHelper.GetValue(context, connection, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "STORERKEY"}, "");
+            String STORERKEY = DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "STORERKEY"}, "");
             newReceiptHashMap.put("STORERKEY", STORERKEY);
-            LegacyDBHelper.ExecInsert(context, connection, "RECEIPT", newReceiptHashMap);
+            LegacyDBHelper.ExecInsert(context, "RECEIPT", newReceiptHashMap);
 
             receiptHashMap = newReceiptHashMap;
 
         }else {
-            receiptHashMap = Receipt.findByReceiptKey(context,connection,receiptKey,true);
+            receiptHashMap = Receipt.findByReceiptKey(context,receiptKey,true);
 
             //无ASN收货对于扫描直接收货的情况,收货后应该允许继续收货，因此去掉发运状态的限制，收货完成后关闭ASN后不允许继续收货
             if( //receipt.get("STATUS").equals("9") ||

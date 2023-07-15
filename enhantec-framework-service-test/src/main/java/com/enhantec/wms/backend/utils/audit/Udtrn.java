@@ -2,6 +2,7 @@ package com.enhantec.wms.backend.utils.audit;
 
 import com.enhantec.wms.backend.framework.Context;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.utils.common.LegecyUtilHelper;
 
@@ -459,15 +460,15 @@ UDTRN	EDITWHO	NVARCHAR2 (30)	Y	编辑人
         return SQL1 + ") " + SQL2 + ");";
     }
 
-    public String Insert(Context context, Connection conn, String User) throws Exception {
-        String SERIALKEY = Integer.toString(LegacyDBHelper.GetSeq(context, conn, "seq_UDTRN"));
-        return Insert(context, conn, SERIALKEY, User);
+    public String Insert(Context context, String User) throws Exception {
+        String SERIALKEY = Integer.toString(LegacyDBHelper.GetSeq(context, "seq_UDTRN"));
+        return Insert(context, SERIALKEY, User);
 
 
     }
 
 
-    public String Insert(Context context, Connection conn, String SERIALKEY, String User) throws Exception {
+    public String Insert(Context context, String SERIALKEY, String User) throws Exception {
 
 
         if (LegecyUtilHelper.isNull(FROMTYPE)) throw new Exception("{事务表.来源类型}不能为空");
@@ -832,7 +833,7 @@ UDTRN	EDITWHO	NVARCHAR2 (30)	Y	编辑人
             SQL2 += ",? ";
             Params.add(CONTENT30);
         }
-        LegacyDBHelper.ExecSql(context, conn, SQL1 + ") " + SQL2 + "); ", Params);
+        DBHelper.executeUpdate(context, SQL1 + ") " + SQL2 + "); ", Params.toArray());
 
         return SERIALKEY;
 

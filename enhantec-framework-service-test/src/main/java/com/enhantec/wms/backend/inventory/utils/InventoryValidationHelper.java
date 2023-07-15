@@ -14,13 +14,13 @@ import java.util.List;
 import static com.enhantec.wms.backend.utils.common.UtilHelper.getString;
 public class InventoryValidationHelper {
 
-    public static void validateLocMix(Context context, Connection connection, String fromId, String fromLoc, String toLoc) throws Exception {
+    public static void validateLocMix(Context context, String fromId, String fromLoc, String toLoc) throws Exception {
 
-        HashMap<String,String> locHashMap = Loc.findById(context, connection, toLoc,true);
+        HashMap<String,String> locHashMap = Loc.findById(context, toLoc,true);
 
         String toPutawayZone = locHashMap.get("PUTAWAYZONE");
 
-        List<HashMap<String,String>> mixedzones = CodeLookup.getCodeLookupList(context, connection, "MIXEDZONES");
+        List<HashMap<String,String>> mixedzones = CodeLookup.getCodeLookupList(context, "MIXEDZONES");
 
         if(mixedzones!=null){
             boolean isMixedZone = mixedzones.stream().filter(e->e.get("CODE").equals(toPutawayZone)).count()>0;
@@ -29,14 +29,14 @@ public class InventoryValidationHelper {
         }
 
         //校验物料在上架策略关联的上架库区中
-        HashMap<String,String> lotxLocxIdHashMap = LotxLocxId.findFullAvailInvById(context,connection,fromId,"未找到可用于上架的容器条码");
+        HashMap<String,String> lotxLocxIdHashMap = LotxLocxId.findFullAvailInvById(context,fromId,"未找到可用于上架的容器条码");
 
         if(lotxLocxIdHashMap.get("LOC").equals(toLoc)) ExceptionHelper.throwRfFulfillLogicException("当前容器提条码已在目标库位上，无需处理");
 
-        HashMap<String,String> skuHashMap = SKU.findById(context,connection,lotxLocxIdHashMap.get("SKU"),true);
+        HashMap<String,String> skuHashMap = SKU.findById(context,lotxLocxIdHashMap.get("SKU"),true);
         String putawayStrategyKey = skuHashMap.get("PUTAWAYSTRATEGYKEY");
 
-        List<HashMap<String,String>> zones = DBHelper.executeQuery(context,connection,
+        List<HashMap<String,String>> zones = DBHelper.executeQuery(context,
                 "SELECT DISTINCT ZONE FROM PUTAWAYSTRATEGYDETAIL P " +
                         " WHERE P.ZONE IS NOT NULL AND P.ZONE <>'' AND P.PUTAWAYSTRATEGYKEY = ? ",new Object[]{
                         putawayStrategyKey
@@ -47,7 +47,7 @@ public class InventoryValidationHelper {
                 put("ZONE",skuHashMap.get("PUTAWAYZONE"));
              }}) ;
 
-        HashMap<String,String> locInfo = Loc.findById(context,connection,toLoc,true);
+        HashMap<String,String> locInfo = Loc.findById(context,toLoc,true);
 
         if(!locInfo.get("PUTAWAYZONE").equals("DOCK") && !zones.stream().anyMatch(x->x.get("ZONE").equals(locInfo.get("PUTAWAYZONE"))))
             ExceptionHelper.throwRfFulfillLogicException("目标库位不在被允许的上架区列表中");
@@ -61,7 +61,7 @@ public class InventoryValidationHelper {
          */
 
         List<HashMap<String,String>> sourceRes = DBHelper.executeQuery(
-                context,connection,
+                context,
                 " SELECT s.sku, " +
                         "s.itemcharacteristic1, " +
                         "s.itemcharacteristic2, " +
@@ -77,7 +77,7 @@ public class InventoryValidationHelper {
 
 
         List<HashMap<String,String>> targetRes = DBHelper.executeQuery(
-                context, connection,
+                context,
                 " SELECT s.sku," +
                         "s.itemcharacteristic1, " +
                         "s.itemcharacteristic2, " +
@@ -111,10 +111,10 @@ public class InventoryValidationHelper {
 
 
     }
-    public static void validateLotQty(Context context, Connection connection, String lottable06){
+    public static void validateLotQty(Context context, String lottable06){
         String Sql="select QTYPICKED,QTYALLOCATED,QTYONHOLD  from LOT l ,V_LOTATTRIBUTE vl" +
                 " where l.LOT=vl.LOT and vl.lottable06=? ";
-        HashMap<String,String> record= DBHelper.getRecord(context, connection, Sql, new Object[]{  lottable06},"批次库存可用量");
+        HashMap<String,String> record= DBHelper.getRecord(context, Sql, new Object[]{  lottable06},"批次库存可用量");
         if(record == null) ExceptionHelper.throwRfFulfillLogicException("批次"+lottable06+"不存在");
         if (UtilHelper.decimalStrCompare(record.get("QTYPICKED"),"0")!=0){
             ExceptionHelper.throwRfFulfillLogicException("批次"+lottable06+"拣货量不为0，无法操作");

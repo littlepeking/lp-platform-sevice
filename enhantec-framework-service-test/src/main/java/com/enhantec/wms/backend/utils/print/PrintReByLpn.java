@@ -8,6 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class PrintReByLpn extends LegacyBaseService
@@ -40,7 +41,7 @@ public class PrintReByLpn extends LegacyBaseService
 		
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
+
 
 		try
 		{
@@ -54,14 +55,14 @@ public class PrintReByLpn extends LegacyBaseService
 //			if ((!LOCATION.equals("CJ"))&&(!LOCATION.equals("CK")))
 //				throw new Exception("参数错误");
 			
-			LinkedHashMap<String,String> mID= LegacyDBHelper.GetValueMap(context, conn, "select id.ID, id.SKU,l.LOTTABLE06,sku.DESCR,id.BARRELDESCR,sku.DESCR from IDNOTES id,SKU sku,v_lotattribute l where sku.sku = id.sku and id.lot=l.lot and id.ID=?", new String[] {LPN});
+			HashMap<String,String> mID= DBHelper.getRecord(context, "select id.ID, id.SKU,l.LOTTABLE06,sku.DESCR,id.BARRELDESCR,sku.DESCR from IDNOTES id,SKU sku,v_lotattribute l where sku.sku = id.sku and id.lot=l.lot and id.ID=?", new String[] {LPN});
 			if (mID.isEmpty()) throw new Exception("未找到桶信息");
 
-			DBHelper.getRecord(context, conn, "select PRINTERNAME from LABELPRINTER WHERE PRINTERNAME=?", new Object[]{PRINTER},"注册的打印机",true);
+			DBHelper.getRecord(context, "select PRINTERNAME from LABELPRINTER WHERE PRINTERNAME=?", new Object[]{PRINTER},"注册的打印机",true);
 
-			CodeLookup.getCodeLookupByKey(context,conn,"IDREPRINT",LABELTYPE);
+			CodeLookup.getCodeLookupByKey(context,"IDREPRINT",LABELTYPE);
 
-			PrintHelper.printLPNByIDNotes(context,conn,mID.get("ID"), LABELTYPE,PRINTER,"1","补打标签");
+			PrintHelper.printLPNByIDNotes(context,mID.get("ID"), LABELTYPE,PRINTER,"1","补打标签");
 
 
 
@@ -80,9 +81,9 @@ public class PrintReByLpn extends LegacyBaseService
 		    UDTRN.TITLE04="物料编号";    UDTRN.CONTENT04=mID.get("SKU");
 		    UDTRN.TITLE05="物料名称";    UDTRN.CONTENT05=mID.get("DESCR");
 		   
-		    UDTRN.Insert(context, conn, userid);
+		    UDTRN.Insert(context, userid);
 			
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
@@ -98,7 +99,7 @@ public class PrintReByLpn extends LegacyBaseService
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try{context.releaseConnection(conn);}  catch(Exception e){}
+			
 		}
 
 		

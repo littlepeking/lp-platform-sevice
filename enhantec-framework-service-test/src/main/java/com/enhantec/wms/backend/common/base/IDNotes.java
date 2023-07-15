@@ -22,19 +22,19 @@ import static com.enhantec.wms.backend.outbound.OutboundUtils.checkQtyIsAvailabl
 
 public class IDNotes {
 
-    public static void decreaseWgtByIdWithAvailQtyCheck(Context context, Connection conn, String id, String openQty, String errorName) throws Exception {
+    public static void decreaseWgtByIdWithAvailQtyCheck(Context context, String id, String openQty, String errorName) throws Exception {
 
-        checkQtyIsAvailableInIDNotes(context, conn, id, str2Decimal(openQty, errorName, false));
+        checkQtyIsAvailableInIDNotes(context, id, str2Decimal(openQty, errorName, false));
 
-        checkQtyIsAvailableInLotxLocxId(context, conn, id, str2Decimal(openQty, errorName, false), BigDecimal.ZERO);
+        checkQtyIsAvailableInLotxLocxId(context, id, str2Decimal(openQty, errorName, false), BigDecimal.ZERO);
 
-        decreaseWgtById(context, conn, new BigDecimal(openQty),  id);
+        decreaseWgtById(context, new BigDecimal(openQty),  id);
 
     }
 
-    public static HashMap<String,String> decreaseWgtById(Context context, Connection conn, BigDecimal netWgt, String id) throws Exception {
+    public static HashMap<String,String> decreaseWgtById(Context context, BigDecimal netWgt, String id) throws Exception {
 
-        HashMap<String,String> currentIDNotes = DBHelper.getRecordByConditions(context,conn,"IDNOTES", new HashMap<String,Object>(){{
+        HashMap<String,String> currentIDNotes = DBHelper.getRecordByConditions(context,"IDNOTES", new HashMap<String,Object>(){{
             put("ID",id);
         }},"容器标签数据");
 
@@ -57,18 +57,18 @@ public class IDNotes {
         params.add(context.getUserID());
         params.add( new Date(Calendar.getInstance().getTimeInMillis()));
         params.add(id);
-        DBHelper.executeUpdate(context,conn,"update IDNOTES SET ISOPENED = ?, " +
+        DBHelper.executeUpdate(context,"update IDNOTES SET ISOPENED = ?, " +
                 "grosswgt = grosswgt - ? , netwgt = netwgt - ?, " +
                 "grosswgtlabel = grosswgt - ? , netwgtlabel = netwgt - ?, "+
                 "EDITWHO = ?, EDITDATE = ? WHERE ID = ? ", params);
 
-        return IDNotes.findById(context, conn, id, true);
+        return IDNotes.findById(context, id, true);
     }
 
     //分装的情况下要更新原始重量，发运操作没有分拆容器所以不需要执行此方法
-    public static HashMap<String,String> syncOriginalWgtById(Context context, Connection conn, String id) throws Exception {
+    public static HashMap<String,String> syncOriginalWgtById(Context context, String id) throws Exception {
 
-        HashMap<String,String> currentIDNotes = DBHelper.getRecordByConditions(context,conn,"IDNOTES", new HashMap<String,Object>(){{
+        HashMap<String,String> currentIDNotes = DBHelper.getRecordByConditions(context,"IDNOTES", new HashMap<String,Object>(){{
             put("ID",id);
         }},"容器标签数据");
 
@@ -78,9 +78,9 @@ public class IDNotes {
         params.add(context.getUserID());
         params.add( new Date(Calendar.getInstance().getTimeInMillis()));
         params.add(id);
-        DBHelper.executeUpdate(context,conn,"UPDATE IDNOTES SET ORIGINALGROSSWGT = GROSSWGT , ORIGINALTAREWGT = TAREWGT,ORIGINALNETWGT = NETWGT, EDITWHO = ?, EDITDATE = ? WHERE ID = ? ", params);
+        DBHelper.executeUpdate(context,"UPDATE IDNOTES SET ORIGINALGROSSWGT = GROSSWGT , ORIGINALTAREWGT = TAREWGT,ORIGINALNETWGT = NETWGT, EDITWHO = ?, EDITDATE = ? WHERE ID = ? ", params);
 
-        return DBHelper.getRecordByConditions(context,conn,"IDNOTES", new HashMap<String,Object>(){{
+        return DBHelper.getRecordByConditions(context,"IDNOTES", new HashMap<String,Object>(){{
             put("ID",id);
         }},"容器标签数据");
     }
@@ -90,7 +90,7 @@ public class IDNotes {
      * 本方法只在拣货数量和原容器数量不相同，或者批次相同但目标箱号不相同的情况下使用。
      * 注意：批次管理物料的容器不允许指定目标容器条码分拆，因为后期无法溯源。
      * @param context
-     * @param conn
+
      * @param grossWgt
      * @param netWgt
      * @param tareWgt
@@ -104,26 +104,26 @@ public class IDNotes {
      * @return
      * @throws Exception
      */
-    public static String splitWgtById(Context context, Connection conn, BigDecimal grossWgt, BigDecimal netWgt, BigDecimal tareWgt, String grossWgtLabel, String netWgtLabel, String tareWgtLabel, String uomLabel,  String id, String toid, String orderKey, boolean isSplitLpn) throws Exception {
+    public static String splitWgtById(Context context, BigDecimal grossWgt, BigDecimal netWgt, BigDecimal tareWgt, String grossWgtLabel, String netWgtLabel, String tareWgtLabel, String uomLabel,  String id, String toid, String orderKey, boolean isSplitLpn) throws Exception {
 
-        HashMap<String,String> fromIDNotes = IDNotes.findById(context,conn, id,true);
+        HashMap<String,String> fromIDNotes = IDNotes.findById(context, id,true);
 
-        HashMap<String,String> decreasedFromIdNotes = decreaseWgtById(context,conn, netWgt, id);
-        syncOriginalWgtById(context,conn, id);
+        HashMap<String,String> decreasedFromIdNotes = decreaseWgtById(context, netWgt, id);
+        syncOriginalWgtById(context, id);
 
         String barrelNumber ="";
 
-        //String newLpn = IdGenerationHelper.createLpnFromExistingLpn(context,conn,id);
+        //String newLpn = IdGenerationHelper.createLpnFromExistingLpn(context,id);
         //增加逻辑，如果拆分后的至容器在库存中，则更新idnotes。
 
-        if(!UtilHelper.isEmpty(orderKey) && !SKU.isSerialControl(context,conn,fromIDNotes.get("SKU")) && !UtilHelper.isEmpty(toid)) {
+        if(!UtilHelper.isEmpty(orderKey) && !SKU.isSerialControl(context,fromIDNotes.get("SKU")) && !UtilHelper.isEmpty(toid)) {
             //批号管理的物料，因为需要通过子桶来溯源，必须通过系统自己生成子桶的标签，不允许移动部分桶的数量至另一个桶或者选择拣货的目的桶，只允许分拆，不然桶号就没法根据规则生成了。
             ExceptionHelper.throwRfFulfillLogicException("批次管理的物料不允许指定拣货至容器条码，只允许系统自动生成");
         }
 
         if(!UtilHelper.isEmpty(toid)) {
 
-            HashMap<String, String> toIdLotxLocxIdHashMap = LotxLocxId.findById(context, conn, toid, false);
+            HashMap<String, String> toIdLotxLocxIdHashMap = LotxLocxId.findById(context, toid, false);
 
             if (toIdLotxLocxIdHashMap != null) {
 
@@ -132,7 +132,7 @@ public class IDNotes {
                         ExceptionHelper.throwRfFulfillLogicException("该箱号存在可用库存，不能作为拣货至箱号");
                 }
 
-                HashMap<String, String> toIdNotes = IDNotes.findById(context, conn, toid, false);
+                HashMap<String, String> toIdNotes = IDNotes.findById(context, toid, false);
 
                 if (toIdNotes != null && !toIdNotes.get("LOT").equals(decreasedFromIdNotes.get("LOT"))) {
                     if(!UtilHelper.isEmpty(orderKey)) {
@@ -142,7 +142,7 @@ public class IDNotes {
                     }
                 }
 
-                LinkedHashMap<String, String> updateFields = new LinkedHashMap<>();
+                HashMap<String,String> updateFields = new LinkedHashMap<>();
                 updateFields.put("ORIGINALGROSSWGT", UtilHelper.decimalStrAdd(toIdNotes.get("ORIGINALGROSSWGT"), grossWgt));//原始毛重
                 updateFields.put("ORIGINALTAREWGT", UtilHelper.decimalStrAdd(toIdNotes.get("ORIGINALTAREWGT"), tareWgt));//原始皮重
                 updateFields.put("ORIGINALNETWGT", UtilHelper.decimalStrAdd(toIdNotes.get("ORIGINALNETWGT"), netWgt));//原始净重
@@ -154,21 +154,21 @@ public class IDNotes {
                 updateFields.put("NETWGTLABEL", UtilHelper.decimalStrAdd(toIdNotes.get("NETWGT"), netWgt));
 //                updateFields.put("UOMLABEL", "");
                 updateFields.put("ISOPENED", "1");
-                LinkedHashMap<String, String> whereFields = new LinkedHashMap<>();
+                HashMap<String,String> whereFields = new LinkedHashMap<>();
                 whereFields.put("ID", toid);
-                LegacyDBHelper.ExecUpdate(context, conn, "idnotes", updateFields, whereFields);
+                LegacyDBHelper.ExecUpdate(context, "idnotes", updateFields, whereFields);
                 if(UtilHelper.decimalStrCompare(decreasedFromIdNotes.get("NETWGT"),"0") == 0) {
-                    IDNotes.archiveIDNotes(context, conn, decreasedFromIdNotes);
+                    IDNotes.archiveIDNotes(context, decreasedFromIdNotes);
                 }
 
                 return toid;
             }else {
                 //检查箱号，容器条码的合法性
-                if(SKU.isSerialControl(context,conn,fromIDNotes.get("SKU"))){
-                    if(!IDNotes.isBoxId(context,conn,toid))
+                if(SKU.isSerialControl(context,fromIDNotes.get("SKU"))){
+                    if(!IDNotes.isBoxId(context,toid))
                         ExceptionHelper.throwRfFulfillLogicException("绑定的条码不符合唯一码管理物料的箱号规则");
                 }else{
-                    if(!IDNotes.isLpn(context,conn,toid)){
+                    if(!IDNotes.isLpn(context,toid)){
                         ExceptionHelper.throwRfFulfillLogicException("绑定的条码不符合批次管理物料的LPN规则");
                         if(fromIDNotes.get("NETWGT").equals(netWgt)){
                             barrelNumber = fromIDNotes.get("BARRELNUMBER");
@@ -188,44 +188,44 @@ public class IDNotes {
             //  订单号为空：移动
             if (!UtilHelper.isEmpty(orderKey)) {
 
-                HashMap<String,String> orderHashMap = Orders.findByOrderKey(context,conn,orderKey,true);
+                HashMap<String,String> orderHashMap = Orders.findByOrderKey(context,orderKey,true);
 
                 //批次号管理物料不会使用流水号作为LPN，因为无法追溯。这里也暂不关心是否自动生成LPN的配置，只要为空都自动生成。
-                if(!SKU.isSerialControl(context, conn, fromIDNotes.get("SKU"))) {
-                    toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context, conn, id);
-                    barrelNumber = IdGenerationHelper.getBarrelNumberFromLpn(context, conn, toid);
-                }else if(SKU.isSerialControl(context, conn, fromIDNotes.get("SKU")) && CDOrderType.isBindAndAutoGenerateLpn(context, conn, fromIDNotes.get("SKU"), orderHashMap.get("TYPE"))) {
-                    toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context, conn,id);
+                if(!SKU.isSerialControl(context, fromIDNotes.get("SKU"))) {
+                    toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context, id);
+                    barrelNumber = IdGenerationHelper.getBarrelNumberFromLpn(context, toid);
+                }else if(SKU.isSerialControl(context, fromIDNotes.get("SKU")) && CDOrderType.isBindAndAutoGenerateLpn(context, fromIDNotes.get("SKU"), orderHashMap.get("TYPE"))) {
+                    toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context,id);
                     barrelNumber = fromIDNotes.get("BARRELNUMBER");
-                } else if (SKU.isSerialControl(context, conn, fromIDNotes.get("SKU")) &&CDOrderType.isBindAndNOTAutoGenerateLpn(context, conn, fromIDNotes.get("SKU"), orderHashMap.get("TYPE"))) {
+                } else if (SKU.isSerialControl(context, fromIDNotes.get("SKU")) &&CDOrderType.isBindAndNOTAutoGenerateLpn(context, fromIDNotes.get("SKU"), orderHashMap.get("TYPE"))) {
                     ExceptionHelper.throwRfFulfillLogicException("拣货至箱号不允许为空");//该配置目前只支持任务拣货，暂不支持动态拣货和扫描LPN拣货，这两种拣货将设置改为'不需要绑定新箱号'。
                 } else {
                     //对于不绑定箱号的情况使用流水码箱号，因为用户不关心拆箱后的箱号。
                     //问题:在多个唯一码不绑定箱号拣货的情况下，多个sn会绑定到一个流水箱号的拣货明细上，考虑到灵活性今后可改为每个SN单独生成一个拣货明细。因为如果需要删除拣货明细，目前会删除该流水箱号下的所有SN。
                     //解决方案：目前前台对于不绑定箱号的情况，扫描唯一码会直接提交当前唯一码给后台进行拣货操作，此时ORDERTYPE UDF2应该选择3短拣后拣货明细自动拆分为两条,以保证当前任务剩下的待拣货数量可以持续完成。
                     //带来的问题：由于短拣配置是在订单类型级别配置，因此对于非唯一码管理的物料也必须是拆分任务的方式，需要在RF手工删除多余的任务，但这个问题对现场操作影响不大，暂不改为订单类型+是否唯一码进行短拣配置。
-                    toid = IdGenerationHelper.generateIDByKeyName(context, conn, context.getUserID(), "WMSBOX", 11);
+                    toid = IdGenerationHelper.generateIDByKeyName(context, context.getUserID(), "WMSBOX", 11);
                     barrelNumber = fromIDNotes.get("BARRELNUMBER");
                 }
             } else {
                 //移动操作加上SYSSET对是否拣货到箱号是否允许为空的配置校验，如允许则自动生成箱号，否则报错
                 //移动操作需要绑定箱号必为外部箱号，因为流水号不需要绑定。
-                if(SKU.isSerialControl(context, conn, fromIDNotes.get("SKU"))) {
+                if(SKU.isSerialControl(context, fromIDNotes.get("SKU"))) {
                     if(isSplitLpn) {
-                        if(CDSysSet.mustProvideToIdIfSplitSN(context,conn)){
+                        if(CDSysSet.mustProvideToIdIfSplitSN(context)){
                             ExceptionHelper.throwRfFulfillLogicException("唯一码管理的物料必须提供分拆至箱号");
                         }else {
                             //isSplitLpn标志仅用于判断移动或容器分拆操作的情况，ORDERKEY不为空则该标志位无效。
-                            toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context, conn,id);
+                            toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context,id);
                         }
                     }else {
                         //如果直接移动唯一码，则箱号使用流水码
-                        toid = IdGenerationHelper.generateIDByKeyName(context, conn, context.getUserID(), "WMSBOX", 10);
+                        toid = IdGenerationHelper.generateIDByKeyName(context, context.getUserID(), "WMSBOX", 10);
                     }
                     barrelNumber = fromIDNotes.get("BARRELNUMBER");//箱号暂时赋值为原箱号，因为对唯一码意义并不大
                 }else {//批次管理物料
-                    toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context, conn, id);
-                    barrelNumber = IdGenerationHelper.getBarrelNumberFromLpn(context, conn, toid);
+                    toid = IdGenerationHelper.createLpnOrBoxIdFromExistingLpn(context, id);
+                    barrelNumber = IdGenerationHelper.getBarrelNumberFromLpn(context, toid);
                 }
 
             }
@@ -234,7 +234,7 @@ public class IDNotes {
 
         //add New IDNotes
         String userid = context.getUserID();
-        LinkedHashMap<String, String> IDNOTES = new LinkedHashMap<String, String>();
+        HashMap<String,String> IDNOTES = new HashMap<String,String>();
         IDNOTES.put("AddWho", userid);
         IDNOTES.put("EditWho", userid);
         IDNOTES.put("STORERKEY", decreasedFromIdNotes.get("STORERKEY"));
@@ -262,16 +262,16 @@ public class IDNotes {
         IDNOTES.put("MEMO", decreasedFromIdNotes.get("MEMO"));//备注
         IDNOTES.put("FROMID",id);
 //        IDNOTES.put("FROMLOC",decreasedFromIdNotes.get("FROMLOC"));
-        LegacyDBHelper.ExecInsert(context, conn, "IDNOTES", IDNOTES);
+        LegacyDBHelper.ExecInsert(context, "IDNOTES", IDNOTES);
 
         if(UtilHelper.decimalStrCompare(decreasedFromIdNotes.get("NETWGT"),"0") == 0) {
-            IDNotes.archiveIDNotes(context, conn, decreasedFromIdNotes);
+            IDNotes.archiveIDNotes(context, decreasedFromIdNotes);
         }
 
         return toid;
     }
 
-    public static void update(Context context, Connection conn, String id, LinkedHashMap<String,String> updateFields) throws Exception {
+    public static void update(Context context, String id, HashMap<String,String> updateFields) throws Exception {
 
         if(UtilHelper.isEmpty(id)) throw new Exception("待更新的容器号不能为空");
 
@@ -279,15 +279,15 @@ public class IDNotes {
 
         updateFields.put("EditWho", userid);
 
-        LegacyDBHelper.ExecUpdate(context, conn, "IDNOTES",updateFields, new LinkedHashMap<String,String>(){{put("ID",id);}});
+        LegacyDBHelper.ExecUpdate(context, "IDNOTES",updateFields, new HashMap<String,String>(){{put("ID",id);}});
     }
 
-    public static HashMap<String,String> findAvailInvById(Context context, Connection conn,String id,boolean checkExist) throws DBResourceException {
+    public static HashMap<String,String> findAvailInvById(Context context,String id,boolean checkExist) throws DBResourceException {
 
 
         if(UtilHelper.isEmpty(id)) ExceptionHelper.throwRfFulfillLogicException("ID不能为空");
 
-        HashMap<String,String> record = DBHelper.getRecord(context,conn,"select * from idnotes where NETWGT > 0 AND id=?", new Object[]{id},"容器标签");
+        HashMap<String,String> record = DBHelper.getRecord(context,"select * from idnotes where NETWGT > 0 AND id=?", new Object[]{id},"容器标签");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到容器标签的库存");
 
         return record;
@@ -298,26 +298,26 @@ public class IDNotes {
 
     //目前IDNOTES表中的数据NETWGT都大于0，出现为0的自动移至历史数据。
     //TODO:移动拆分容器数量为0时，归档IDNOTES
-    public static HashMap<String,String> findById(Context context, Connection conn,String id,boolean checkExist) throws DBResourceException {
+    public static HashMap<String,String> findById(Context context,String id,boolean checkExist) throws DBResourceException {
 
 
         if(UtilHelper.isEmpty(id)) ExceptionHelper.throwRfFulfillLogicException("ID不能为空");
 
-        HashMap<String,String>  record = DBHelper.getRecord(context,conn,"select * from idnotes where id=?", new Object[]{id},"容器标签");
+        HashMap<String,String>  record = DBHelper.getRecord(context,"select * from idnotes where id=?", new Object[]{id},"容器标签");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("容器标签"+id+"不存在");
 
         return record;
 
     }
 
-    public static void delete(Context context, Connection conn,String id) throws DBResourceException {
+    public static void delete(Context context,String id) throws DBResourceException {
 
         if(UtilHelper.isEmpty(id)) ExceptionHelper.throwRfFulfillLogicException("ID不能为空");
 
-        String netWgt = findById(context,conn,id,true).get("NETWGT");
+        String netWgt = findById(context,id,true).get("NETWGT");
 
          if(UtilHelper.decimalStrCompare(netWgt,"0")!=0) ExceptionHelper.throwRfFulfillLogicException("容器标签数量不为零，不允许删除");
-         DBHelper.executeUpdate(context,conn,"delete from idnotes where id=? ", new Object[]{id});
+         DBHelper.executeUpdate(context,"delete from idnotes where id=? ", new Object[]{id});
 
     }
 
@@ -326,19 +326,19 @@ public class IDNotes {
      * @param id
      * @return 容器条码false/箱号true
      */
-    public static boolean isBoxId(Context context, Connection conn, String id) throws Exception {
-        List<String> enableWarehouses = System.getEnableWarehouses(context, conn);
+    public static boolean isBoxId(Context context, String id) throws Exception {
+        List<String> enableWarehouses = System.getEnableWarehouses(context);
         for (String enableWarehouse : enableWarehouses) {
-            String boxPrefix = CDSysSet.getBoxPrefix(context, conn,enableWarehouse).get("UDF1");
-            String lotPrefix = CDSysSet.getLotPrefix(context, conn,enableWarehouse).get("UDF1");
+            String boxPrefix = CDSysSet.getBoxPrefix(context,enableWarehouse).get("UDF1");
+            String lotPrefix = CDSysSet.getLotPrefix(context,enableWarehouse).get("UDF1");
             if(id.startsWith(boxPrefix+lotPrefix)){
                 return true;
             }
         }
         return false;
     }
-    public static boolean isLpnOrBoxId(Context context,Connection connection,String id)throws Exception{
-        return isLpn(context,connection,id) || isBoxId(context,connection,id);
+    public static boolean isLpnOrBoxId(Context context,String id)throws Exception{
+        return isLpn(context,id) || isBoxId(context,id);
     }
 
     /**
@@ -346,11 +346,11 @@ public class IDNotes {
      * @param id
      * @return 容器条码false/箱号true
      */
-    public static boolean isLpn(Context context, Connection conn, String id) throws Exception {
-        List<String> enableWarehouses = System.getEnableWarehouses(context, conn);
+    public static boolean isLpn(Context context, String id) throws Exception {
+        List<String> enableWarehouses = System.getEnableWarehouses(context);
         for (String enableWarehouse : enableWarehouses) {
-            String lpnPrefix = CDSysSet.getLpnPrefix(context, conn,enableWarehouse).get("UDF1");
-            String lotPrefix = CDSysSet.getLotPrefix(context, conn,enableWarehouse).get("UDF1");
+            String lpnPrefix = CDSysSet.getLpnPrefix(context,enableWarehouse).get("UDF1");
+            String lotPrefix = CDSysSet.getLotPrefix(context,enableWarehouse).get("UDF1");
             if(id.startsWith(lpnPrefix+lotPrefix)){
                 return true;
             }
@@ -358,21 +358,21 @@ public class IDNotes {
         return false;
     }
 
-//    public static HashMap<String,String> ship(Context context, Connection conn, String id) throws Exception {
+//    public static HashMap<String,String> ship(Context context, String id) throws Exception {
 //
-//        findById(context,conn,id,true);
+//        findById(context,id,true);
 //        List<Object> params = new ArrayList<>();
 //        params.add(id));
-//        DBHelper.executeUpdate(context,conn,"update IDNOTES SET grosswgt = tarewgt , netwgt = 0 WHERE ID = ? ", params);
-//        return DBHelper.getRecordByConditions(context,conn,"IDNOTES", new HashMap<String,Object>(){{
+//        DBHelper.executeUpdate(context,"update IDNOTES SET grosswgt = tarewgt , netwgt = 0 WHERE ID = ? ", params);
+//        return DBHelper.getRecordByConditions(context,"IDNOTES", new HashMap<String,Object>(){{
 //            put("ID",id));
 //        }});
 //
 //    }
 
 
-    public static void archiveIDNotes(Context context, Connection conn, HashMap<String, String> shippedIdNotesHashMap) throws Exception {
-        LinkedHashMap<String,String> idNotesHistory=new LinkedHashMap<>();
+    public static void archiveIDNotes(Context context, HashMap<String, String> shippedIdNotesHashMap) throws Exception {
+        HashMap<String,String> idNotesHistory=new LinkedHashMap<>();
         idNotesHistory.put("ADDWHO", context.getUserID());
         idNotesHistory.put("EDITWHO", context.getUserID());
         idNotesHistory.put("ADDDATE", "@date");
@@ -413,17 +413,17 @@ public class IDNotes {
         idNotesHistory.put("WHSEID", shippedIdNotesHashMap.get("WHSEID"));
         idNotesHistory.put("PRODLOTEXPECTED", shippedIdNotesHashMap.get("PRODLOTEXPECTED"));
 
-        LegacyDBHelper.ExecInsert(context, conn, "IDNOTESHISTORY", idNotesHistory);
-        IDNotes.delete(context, conn, shippedIdNotesHashMap.get("ID"));
+        LegacyDBHelper.ExecInsert(context, "IDNOTESHISTORY", idNotesHistory);
+        IDNotes.delete(context, shippedIdNotesHashMap.get("ID"));
 
-        boolean isSkuSerialControl = SKU.isSerialControl(context, conn,shippedIdNotesHashMap.get("SKU"));
+        boolean isSkuSerialControl = SKU.isSerialControl(context,shippedIdNotesHashMap.get("SKU"));
 
         if(isSkuSerialControl){
 
-            List<HashMap<String,String>> snList = SerialInventory.findByLpn(context,conn,shippedIdNotesHashMap.get("ID"),true);
+            List<HashMap<String,String>> snList = SerialInventory.findByLpn(context,shippedIdNotesHashMap.get("ID"),true);
 
             for(HashMap<String,String> sn :snList){
-                LinkedHashMap<String,String> snHistory=new LinkedHashMap<>();
+                HashMap<String,String> snHistory=new LinkedHashMap<>();
                 snHistory.put("IDSERIALKEY", shippedIdNotesHashMap.get("SERIALKEY"));
                 snHistory.put("ID", shippedIdNotesHashMap.get("ID"));
                 snHistory.put("SKU", shippedIdNotesHashMap.get("SKU"));
@@ -436,7 +436,7 @@ public class IDNotes {
                 snHistory.put("ADDDATE", "@date");
                 snHistory.put("EDITDATE", "@date");
                 snHistory.put("ADDMONTH", yyyyMMStr);
-                LegacyDBHelper.ExecInsert(context, conn, "SNHISTORY", snHistory);
+                LegacyDBHelper.ExecInsert(context, "SNHISTORY", snHistory);
             }
 
 
@@ -447,15 +447,15 @@ public class IDNotes {
     /**
      * 查询idnotes的所有批次及物料信息
      * @param context
-     * @param connection
+
      * @param id
      * @param checkExist
      * @return
      */
-    public static HashMap<String,String> findByIdWithLotInfo(Context context, Connection connection,String id,boolean checkExist){
+    public static HashMap<String,String> findByIdWithLotInfo(Context context,String id,boolean checkExist){
         String sql = "SELECT A.*,ELOT.*,s.*"+
                 " FROM IDNOTES A , V_LOTATTRIBUTE ELOT, SKU S WHERE A.LOT = ELOT.LOT AND A.SKU = S.SKU AND A.ID = ? ";
-        return DBHelper.getRecord(context,connection,sql,new Object[]{id},"容器条码",checkExist);
+        return DBHelper.getRecord(context,sql,new Object[]{id},"容器条码",checkExist);
     }
 
 }

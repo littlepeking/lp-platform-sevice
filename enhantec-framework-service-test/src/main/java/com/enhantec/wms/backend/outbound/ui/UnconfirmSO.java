@@ -28,16 +28,16 @@ public class UnconfirmSO extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String ORDERKEY = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  orderInfo =  Orders.findByOrderKey(context,conn,ORDERKEY,true);
+            HashMap<String, String>  orderInfo =  Orders.findByOrderKey(context,ORDERKEY,true);
 
             //00	空订单			不存在明细
             //02	外部创建			订单已导入系统
@@ -48,10 +48,10 @@ public class UnconfirmSO extends LegacyBaseService {
             //-1	未知
             if(orderInfo.get("STATUS").equals("95")) ExceptionHelper.throwRfFulfillLogicException("订单已发货完成，不允许取消确认");
 
-            // String isFromInterface = CodeLookup.getCodeLookupValue(context,conn,"RECEIPTYPE",orderInfo.get("TYPE"),"UDF4","收获类型");
+            // String isFromInterface = CodeLookup.getCodeLookupValue(context,"RECEIPTYPE",orderInfo.get("TYPE"),"UDF4","收获类型");
             //  if("Y".equalsIgnoreCase(isFromInterface)) ExceptionHelper.throwRfFulfillLogicException("接口发送的出库指令不允许取消确认");
 
-            DBHelper.executeUpdate(context, conn, "UPDATE ORDERS SET ISCONFIRMEDUSER ='', ISCONFIRMEDUSER2 = '', ISCONFIRMED = 0  WHERE ORDERKEY = ? ",
+            DBHelper.executeUpdate(context, "UPDATE ORDERS SET ISCONFIRMEDUSER ='', ISCONFIRMEDUSER2 = '', ISCONFIRMED = 0  WHERE ORDERKEY = ? ",
                     new Object[]{ ORDERKEY });
 
 
@@ -65,7 +65,7 @@ public class UnconfirmSO extends LegacyBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="出库单号";    UDTRN.CONTENT01=ORDERKEY;
             UDTRN.TITLE02="确认状态";    UDTRN.CONTENT02="N";
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
 
 
@@ -73,14 +73,14 @@ public class UnconfirmSO extends LegacyBaseService {
 
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException( e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 }

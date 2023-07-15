@@ -13,7 +13,7 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -44,7 +44,7 @@ public class QcSamplingPostOrder extends LegacyBaseService
 		
 		String userid = context.getUserID();
 		//context.theSQLMgr.transactionBegin();
-		Connection conn = context.getConnection();
+
 
 		try
 		{
@@ -56,25 +56,23 @@ public class QcSamplingPostOrder extends LegacyBaseService
 			String PRINTER= serviceDataHolder.getInputDataAsMap().getString( "PRINTER");
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
 			String NewPrg=null;
-			String[] Orders= LegacyDBHelper.GetValueList(context, conn
-					, "select Status,Notes, STORERKEY from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE});
-			if (LegecyUtilHelper.isNull(Orders[0])) throw new Exception("未找到在库取样单("+ORDERKEY+")");
-			if (Orders[0].compareTo("90")>=0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭,不能继续操作");
+			HashMap<String,String>  orderHashMap= DBHelper.getRecord(context, "select Status,Notes, STORERKEY from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE},"未找到在库取样单("+ORDERKEY+")");
 
-			String storerKey = Orders[2];
+			if (orderHashMap.get("Status").compareTo("90")>=0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭,不能继续操作");
 
-			String iPrint= LegacyDBHelper.GetValue(context, conn, "select count(1) from orderdetail where orderkey=? and openqty<>0", new String[]{ORDERKEY}, "0");
+			String storerKey = orderHashMap.get("STORERKEY");
+
+			String iPrint= DBHelper.getValue(context, "select count(1) from orderdetail where orderkey=? and openqty<>0", new String[]{ORDERKEY}, "0");
 			if (!iPrint.equals("0"))
 				if (LegecyUtilHelper.isNull(PRINTER))
 					 throw new Exception("有扣减数量,必须选择打印机");
 
-			String totalOriginalQty= LegacyDBHelper.GetValue(context, conn, "select SUM(CONVERT(decimal(11,5), SUSR1))  from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			String totalOriginalQty= DBHelper.getValue(context, "select SUM(CONVERT(decimal(11,5), SUSR1))  from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
 
 			if(UtilHelper.decimalStrCompare(KEEPQTY,
 					totalOriginalQty)>0) throw new Exception("留样量不允许大于取样量");
 
-			ArrayList<LinkedHashMap<String,String>> Details= LegacyDBHelper.GetRecordMap(context, conn
-					, "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
+			List<HashMap<String,String>> Details= DBHelper.executeQuery(context, "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
 							+ ",ORIGINALQTY,OPENQTY,SHIPPEDQTY,QTYPREALLOCATED,QTYALLOCATED,QTYPICKED,UOM,PACKKEY "
 							+ " from orderdetail where orderkey=? order by orderlinenumber", new String[]{ORDERKEY});
 			String[] IDS=new String[Details.size()];
@@ -86,7 +84,7 @@ public class QcSamplingPostOrder extends LegacyBaseService
 
 			for(int iDetail=0;iDetail<Details.size();iDetail++)
 			{
-				LinkedHashMap<String,String> mDetail=Details.get(iDetail);
+				HashMap<String,String> mDetail=Details.get(iDetail);
 //				String ORDERLINENUMBER=mDetail.get("ORDERLINENUMBER");
 //				String STORERKEY=mDetail.get("STORERKEY");
 				String SKU=mDetail.get("SKU");
@@ -95,13 +93,13 @@ public class QcSamplingPostOrder extends LegacyBaseService
 
 				qyTotalQty = qyTotalQty.add(new BigDecimal(mDetail.get("SUSR1")));
 
-				IDNotes.decreaseWgtByIdWithAvailQtyCheck(context,conn,ID,OPENQTY,"扣样量");
+				IDNotes.decreaseWgtByIdWithAvailQtyCheck(context,ID,OPENQTY,"扣样量");
 
 				IDS[iDetail]=ID;
 				SKUs[iDetail]=SKU;
 
 				if(samplePackInfo==null) {
-					samplePackInfo = DBHelper.getRecord(context, conn,
+					samplePackInfo = DBHelper.getRecord(context,
 							"select c.PACKKEY, c.PACKUOM3 UOM, s.SKU SKU, s.DESCR SKUDESCR " +
 									" from pack c, SKU s " +
 									" where c.PACKKEY = s.SUSR6 and s.STORERKEY = ? and s.sku = ? ",
@@ -109,20 +107,20 @@ public class QcSamplingPostOrder extends LegacyBaseService
 				}
 
 				//插入取样后剩余量标签
-				HashMap<String,String> leftIdNotesHashMap = IDNotes.findById(context,conn,ID,true);
+				HashMap<String,String> leftIdNotesHashMap = IDNotes.findById(context,ID,true);
 
 				//扣样后剩余量>0并且扣样量>0，打印剩余量标签
 				if(UtilHelper.decimalStrCompare(leftIdNotesHashMap.get("NETWGT"), "0")>0
-						&& UtilHelper.decimalStrCompare(OPENQTY, "0")>0 && CDSysSet.enableLabelWgt(context,conn)) {
-					PrintHelper.printLPNByIDNotes(context, conn, ID, Labels.LPN_UI_SY, PRINTER, "1", "取样单_剩余量标签");
+						&& UtilHelper.decimalStrCompare(OPENQTY, "0")>0 && CDSysSet.enableLabelWgt(context)) {
+					PrintHelper.printLPNByIDNotes(context, ID, Labels.LPN_UI_SY, PRINTER, "1", "取样单_剩余量标签");
 				}
 
 				//插入取样标签，一个无重量的取样标签
 
-				HashMap<String,String> existIDNotes = IDNotes.findById(context,conn,ID,true);
-				String qyLpn = IdGenerationHelper.generateLpn(context,conn, LOTTABLE06+"QY");
+				HashMap<String,String> existIDNotes = IDNotes.findById(context,ID,true);
+				String qyLpn = IdGenerationHelper.generateLpn(context, LOTTABLE06+"QY");
 				//取样出库单里的susr1记录了取样的取样标签的重量信息。
-				LinkedHashMap<String, String> qyIdnotes = new LinkedHashMap<>();
+				HashMap<String,String> qyIdnotes = new LinkedHashMap<>();
 				qyIdnotes.put("AddWho", userid);
 				qyIdnotes.put("EditWho", userid);
 				qyIdnotes.put("ID", qyLpn);//取样流水号
@@ -144,18 +142,18 @@ public class QcSamplingPostOrder extends LegacyBaseService
 				qyIdnotes.put("PROJECTCODE", existIDNotes.get("PROJECTCODE"));
 				qyIdnotes.put("ISOPENED", "0");
 				qyIdnotes.put("ORDERKEY", ORDERKEY);
-				LegacyDBHelper.ExecInsert(context, conn, "IDNOTES", qyIdnotes);
-				PrintHelper.printLPNByIDNotes(context, conn, qyLpn,Labels.LPN_SAMPLE, PRINTER, "1","取样单_取样标签");
+				LegacyDBHelper.ExecInsert(context, "IDNOTES", qyIdnotes);
+				PrintHelper.printLPNByIDNotes(context, qyLpn,Labels.LPN_SAMPLE, PRINTER, "1","取样单_取样标签");
 			}
 
 			//插入留样容器的IDNOTES，重量信息是传进来的KEEPQTY(留样重量)
-			HashMap<String, String> existIDNotes = IDNotes.findById(context, conn, IDS[0], true);
+			HashMap<String, String> existIDNotes = IDNotes.findById(context, IDS[0], true);
 
 			if(UtilHelper.decimalStrCompare(KEEPQTY, "0")>0) {
 
-				String lyLpn = IdGenerationHelper.generateLpn(context, conn, LOTTABLE06 + "LY");
+				String lyLpn = IdGenerationHelper.generateLpn(context, LOTTABLE06 + "LY");
 
-				LinkedHashMap<String, String> lyIDNOTES = new LinkedHashMap<String, String>();
+				HashMap<String,String> lyIDNOTES = new HashMap<String,String>();
 				lyIDNOTES.put("AddWho", userid);
 				lyIDNOTES.put("EditWho", userid);
 				lyIDNOTES.put("ID", lyLpn);//留样LPN
@@ -189,14 +187,14 @@ public class QcSamplingPostOrder extends LegacyBaseService
 				lyIDNOTES.put("PROJECTCODE", existIDNotes.get("PROJECTCODE"));
 				lyIDNOTES.put("ISOPENED", "0");
 				lyIDNOTES.put("ORDERKEY", ORDERKEY);
-				LegacyDBHelper.ExecInsert(context, conn, "IDNOTES", lyIDNOTES);
+				LegacyDBHelper.ExecInsert(context, "IDNOTES", lyIDNOTES);
 
 				//自动生成留样入库单
 
 				ServiceHelper.executeService(context, "EHReturnCreateAsn",
 						new ServiceDataHolder(new ServiceDataMap(new HashMap<String, Object>() {{
 							put("LPN", lyLpn);
-							put("RECTYPE", CDSysSet.getSampleReceiptType(context,conn));
+							put("RECTYPE", CDSysSet.getSampleReceiptType(context));
 							put("GROSSWGT", KEEPQTY);
 							put("TAREWGT", "0");
 							put("NETWGT", KEEPQTY);
@@ -207,10 +205,10 @@ public class QcSamplingPostOrder extends LegacyBaseService
 
 				);
 
-				PrintHelper.printLPNByIDNotes(context, conn, lyLpn, Labels.SAMPLE_LY, PRINTER, "1","取样单_留样标签");
+				PrintHelper.printLPNByIDNotes(context, lyLpn, Labels.SAMPLE_LY, PRINTER, "1","取样单_留样标签");
 
 				//更新留样容器号、留样量
-				DBHelper.executeUpdate(context, conn
+				DBHelper.executeUpdate(context
 						, "UPDATE orders SET TRADINGPARTNER = ? , SUSR4 = ? where orderkey = ? ", new Object[]{lyLpn ,KEEPQTY, ORDERKEY});
 
 			}
@@ -226,13 +224,13 @@ public class QcSamplingPostOrder extends LegacyBaseService
 				样品编号：ORDERS.SUSR3
 
 			 */
-			HashMap<String,String> sampleLpnPrefix = CodeLookup.getCodeLookupByKey(context,conn, "SYSSET","SAMPLEPRE");
+			HashMap<String,String> sampleLpnPrefix = CodeLookup.getCodeLookupByKey(context, "SYSSET","SAMPLEPRE");
 			String prefix = sampleLpnPrefix.get("UDF1");
-			String ypLpn = IdGenerationHelper.generateID(context,conn,userid,prefix,1);
+			String ypLpn = IdGenerationHelper.generateID(context,userid,prefix,1);
 
 
 			//插入样品标签，会插入一个无重量的样品标签
-			LinkedHashMap<String, String> ypIdnotes = new LinkedHashMap<String, String>();
+			HashMap<String,String> ypIdnotes = new HashMap<String,String>();
 			ypIdnotes.put("AddWho", userid);
 			ypIdnotes.put("EditWho", userid);
 			ypIdnotes.put("ID", ypLpn);//留样LPN
@@ -254,13 +252,13 @@ public class QcSamplingPostOrder extends LegacyBaseService
 			ypIdnotes.put("PROJECTCODE", existIDNotes.get("PROJECTCODE"));
 			ypIdnotes.put("ISOPENED", "0");
 			ypIdnotes.put("ORDERKEY", ORDERKEY);
-			LegacyDBHelper.ExecInsert(context, conn, "IDNOTES", ypIdnotes);
+			LegacyDBHelper.ExecInsert(context, "IDNOTES", ypIdnotes);
 
 			//更新样品标签流水号
-			DBHelper.executeUpdate(context, conn
+			DBHelper.executeUpdate(context
 					, "UPDATE orders SET SUSR3 = ? where orderkey = ? ", new Object[]{ ypLpn, ORDERKEY});
-			//PrintHelper.printSamplingLpnLabel(context, conn, ORDERKEY,Labels.SAMPLE_YP, PRINTER, "1","取样单_样品标签");
-			PrintHelper.printLPNByIDNotes(context, conn, ypLpn,Labels.SAMPLE_YP, PRINTER, "1","取样单_样品标签");
+			//PrintHelper.printSamplingLpnLabel(context, ORDERKEY,Labels.SAMPLE_YP, PRINTER, "1","取样单_样品标签");
+			PrintHelper.printLPNByIDNotes(context, ypLpn,Labels.SAMPLE_YP, PRINTER, "1","取样单_样品标签");
 
 
 			Udtrn UDTRN=new Udtrn();
@@ -273,18 +271,18 @@ public class QcSamplingPostOrder extends LegacyBaseService
 			UDTRN.FROMKEY3="";
 			UDTRN.TITLE01="取样批次";    UDTRN.CONTENT01=LOTTABLE06;
 			UDTRN.TITLE02="出库单号";    UDTRN.CONTENT02=ORDERKEY;
-			UDTRN.Insert(context, conn, userid);
+			UDTRN.Insert(context, userid);
 
 
 			//call system api to do allocate and ship here to avoid transaction rollback by other issues, like incorrect label sql etc...
 			// as the pickdetail record still there after system api rollback.
 			//最后掉用减少发运订单可能是因为，使用系统api发运后如果出现异常回滚，pickdetail依然存在，放在后面减小异常概率
-			OutboundUtils.allocateAndShip(context, conn, ORDERKEY,false);
+			OutboundUtils.allocateAndShip(context, ORDERKEY,false);
 			//更新取样时间
 			for (int iDetail = 0; iDetail < Details.size(); iDetail++) {
-				LinkedHashMap<String, String> mDetail = Details.get(iDetail);
+				HashMap<String,String> mDetail = Details.get(iDetail);
 				String id = mDetail.get("IDREQUIRED");
-				DBHelper.executeUpdate(context, conn,
+				DBHelper.executeUpdate(context,
 						"UPDATE IDNOTES SET INSPECTIONDATE = ? WHERE ID = ? ", new ArrayList<Object>() {
 							{   add(UtilHelper.getCurrentSqlDate());
 								add(id);
@@ -310,16 +308,11 @@ public class QcSamplingPostOrder extends LegacyBaseService
 		}
 		catch (Exception e)
 		{
-			try
-			{
-//				context.theSQLMgr.transactionAbort();
-			}	catch (Exception e1) {		}
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			context.releaseConnection(conn);
 		}
 		
 	}

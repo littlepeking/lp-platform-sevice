@@ -37,7 +37,7 @@ public class Move extends LegacyBaseService {
 	public void execute(ServiceDataHolder serviceDataHolder){
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
+
 
 	    boolean isMoveAction=false;
 
@@ -64,10 +64,10 @@ public class Move extends LegacyBaseService {
 
 			if(isMoveAction) {
 
-				HashMap<String, String> packZoneInfo = CodeLookup.getCodeLookupByKey(context, conn, "SYSSET", "PACKZONE");
+				HashMap<String, String> packZoneInfo = CodeLookup.getCodeLookupByKey(context, "SYSSET", "PACKZONE");
 
 				String locCountQuery = "SELECT count(1) TOTALNUM FROM LOC WHERE PUTAWAYZONE = ? AND LOC = ? ";
-				HashMap<String, String> countRecord = DBHelper.getRecord(context, conn, locCountQuery, new Object[]{
+				HashMap<String, String> countRecord = DBHelper.getRecord(context, locCountQuery, new Object[]{
 						packZoneInfo.get("UDF1"),
 						toLoc
 
@@ -83,15 +83,15 @@ public class Move extends LegacyBaseService {
 			String qtyToMove;
 			List<String> snList = new ArrayList<>();
 
-			if(SKU.isSerialControl(context,conn,sku) && !IDNotes.isBoxId(context,conn,fromId)){
+			if(SKU.isSerialControl(context,sku) && !IDNotes.isBoxId(context,fromId)){
 
-				lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(context,conn,sku,fromId);
+				lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(context,sku,fromId);
 				snList.add(fromId);
 				qtyToMove = "1";
 				if(UtilHelper.decimalStrCompare(lotxLocxIdHashMap.get("QTY"),"1")==0) {
 					toId = lotxLocxIdHashMap.get("ID");
 				}else {
-					if(!CDSysSet.isAllowMoveSN(context,conn)){
+					if(!CDSysSet.isAllowMoveSN(context)){
 						ExceptionHelper.throwRfFulfillLogicException("不允许直接移动唯一码，请扫描箱号");
 					}
 					else {
@@ -99,25 +99,25 @@ public class Move extends LegacyBaseService {
 					}
 				}
 
-			}else if(SKU.isSerialControl(context,conn,sku) && IDNotes.isBoxId(context,conn,fromId)){
+			}else if(SKU.isSerialControl(context,sku) && IDNotes.isBoxId(context,fromId)){
 
-				lotxLocxIdHashMap = LotxLocxId.findById(context, conn, fromId, true);
+				lotxLocxIdHashMap = LotxLocxId.findById(context, fromId, true);
 
-				List<HashMap<String,String>> snHashMapList =  SerialInventory.findByLpn(context,conn,fromId,true);
+				List<HashMap<String,String>> snHashMapList =  SerialInventory.findByLpn(context,fromId,true);
 				snList.addAll(snHashMapList.stream().map(x->x.get("SERIALNUMBER")).collect(Collectors.toList()));
 				qtyToMove = String.valueOf(snList.size());
 				toId =fromId;
 
 			}else {
-				lotxLocxIdHashMap = LotxLocxId.findById(context, conn, fromId, true);
+				lotxLocxIdHashMap = LotxLocxId.findById(context, fromId, true);
 				qtyToMove = lotxLocxIdHashMap.get("QTY");
 				toId =fromId;
 			}
 
 			if(UtilHelper.decimalStrCompare(lotxLocxIdHashMap.get("AVAILABLEQTY"),qtyToMove)<0)
 				ExceptionHelper.throwRfFulfillLogicException("容器不存在或者可供移动的数量不足");
-			InventoryHelper.checkLocQuantityLimit(context, conn,toLoc);
-			InventoryHelper.doMove(context, conn, opName, lotxLocxIdHashMap, snList ,toId, fromLoc, toLoc, "", "", "", "", "-1",false);
+			InventoryHelper.checkLocQuantityLimit(context,toLoc);
+			InventoryHelper.doMove(context, opName, lotxLocxIdHashMap, snList ,toId, fromLoc, toLoc, "", "", "", "", "-1",false);
 
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -133,9 +133,9 @@ public class Move extends LegacyBaseService {
 			UDTRN.TITLE03="目标库位";    UDTRN.CONTENT03=toLoc;
 			//UDTRN.TITLE04="数量";    UDTRN.CONTENT04=TOBEMOVEDQTY;
 
-			UDTRN.Insert(context, conn, userid);
+			UDTRN.Insert(context, userid);
 
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 			theOutDO.setAttribValue("OK", "1");
@@ -149,7 +149,7 @@ public class Move extends LegacyBaseService {
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 		}
 
 	}

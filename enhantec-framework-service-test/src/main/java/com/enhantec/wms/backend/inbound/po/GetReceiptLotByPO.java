@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -7,7 +8,8 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import java.sql.Connection;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class GetReceiptLotByPO extends LegacyBaseService
@@ -37,7 +39,7 @@ public class GetReceiptLotByPO extends LegacyBaseService
 
 		String userid = context.getUserID();
 
-		Connection conn  = context.getConnection();
+		
 
 		ServiceDataMap theOutDO = new ServiceDataMap();
 
@@ -45,9 +47,9 @@ public class GetReceiptLotByPO extends LegacyBaseService
 		{
 		    String ReceiptLot= serviceDataHolder.getInputDataAsMap().getString("ReceiptLot");
 
-			String STORERKEY= LegacyDBHelper.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+			String STORERKEY= DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
 
-			ArrayList<LinkedHashMap<String, String>> r1 = LegacyDBHelper.GetRecordMap(context, conn
+			List<HashMap<String,String>> r1 = DBHelper.executeQuery(context
 					, "select FROMKEY,FROMLINENO,STATUS,FROMSKU,FROMSKUDESCR,SKU,FROMLOT,SUPPLIERCODE,MANUFACTURERCODE,PROCESSINGMODE,UOM,QTY,TOTALBARREL,ELOTTABLE11,RETESTDATE,PACKCHECK,FILECHECK,TRANSCHECK,MANUFACTURERDATE,ELOTTABLE07,PACKCOUNTCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,supplieritem,qualifiedproducer,POSUPPLIERNAME,ISCOMMONPROJECT,PROJECTCODE from PRERECEIPTCHECK where RECEIPTLOT=? order by serialkey", new String[]{ ReceiptLot});
 			if (r1 == null) {
 				throw new FulfillLogicException("收货批次(%1)未找到", ReceiptLot);
@@ -55,14 +57,14 @@ public class GetReceiptLotByPO extends LegacyBaseService
 
 			for(int i1=0;i1<r1.size();i1++)
 			{
-				LinkedHashMap<String,String> m1=r1.get(i1);
+				HashMap<String,String> m1=r1.get(i1);
 				if (i1==0)
 				{
-					String SKUDESCR= LegacyDBHelper.GetValue(context, conn
+					String SKUDESCR= DBHelper.getValue(context
 							, "SELECT DESCR FROM SKU WHERE STORERKEY=? and SKU=?", new String[]{STORERKEY,m1.get("SKU")}, "");
 					theOutDO.setAttribValue("STATUS", m1.get("STATUS"));
 					theOutDO.setAttribValue("SKU", m1.get("SKU"));
-					String SKU_BUSR14= LegacyDBHelper.GetValue(context, conn, "select BUSR14 from SKU where SKU=?", new String[]{m1.get("SKU")}, "");
+					String SKU_BUSR14= DBHelper.getValue(context, "select BUSR14 from SKU where SKU=?", new String[]{m1.get("SKU")}, "");
 					theOutDO.setAttribValue("SKU_BUSR14", SKU_BUSR14);
 					theOutDO.setAttribValue("SKUDESCR", SKUDESCR);
 					theOutDO.setAttribValue("FROMLOT", m1.get("FROMLOT"));
@@ -96,7 +98,7 @@ public class GetReceiptLotByPO extends LegacyBaseService
 
 
 
-				LinkedHashMap<String,String> FROMQTY= LegacyDBHelper.GetValueMap(context, conn, "select A.qty-ISNULL(A.receivedqty,0) as QTY,B.supplierNAME,B.SUPPLIER,A.UOM " +
+				HashMap<String,String> FROMQTY= DBHelper.getRecord(context, "select A.qty-ISNULL(A.receivedqty,0) as QTY,B.supplierNAME,B.SUPPLIER,A.UOM " +
 								" FROM WMS_PO_DETAIL A,WMS_PO B WHERE A.POKEY=B.POKEY AND A.POKEY=? AND A.POLINENUMBER=?"
 						, new String[]{m1.get("FROMKEY"),m1.get("FROMLINENO")});
 				theOutDO.setAttribValue("FROMKEY"+Integer.toString(i1+1), m1.get("FROMKEY")+"-"+m1.get("FROMLINENO"));
@@ -108,7 +110,7 @@ public class GetReceiptLotByPO extends LegacyBaseService
 
 			}
 
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+			
 
 			serviceDataHolder.setReturnCode(1);
 			serviceDataHolder.setOutputData(theOutDO);
@@ -116,10 +118,7 @@ public class GetReceiptLotByPO extends LegacyBaseService
 		catch (Exception e)
 		{
 
-			try
-			{
-				context.releaseConnection(conn);
-			}	catch (Exception e1) {		}
+
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else

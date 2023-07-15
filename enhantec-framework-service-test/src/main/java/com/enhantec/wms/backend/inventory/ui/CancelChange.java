@@ -30,31 +30,31 @@ public class CancelChange extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String changekey = serviceDataHolder.getInputDataAsMap().getString("CHANGEKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String SQL="SELECT * FROM ENCHGPROJECTCODE WHERE  CHANGEKEY = ?  ";
-            HashMap<String, String> record = DBHelper.getRecord(context, conn, SQL, new Object[]{ changekey},"变更单");
+            HashMap<String, String> record = DBHelper.getRecord(context, SQL, new Object[]{ changekey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("变更单为"+changekey+"未找到");
             if ("5".equalsIgnoreCase(record.get("STATUS"))) throw new Exception("已经执行不可取消");
-            LegacyDBHelper.ExecSql(context, conn, "UPDATE ENCHGPROJECTCODE SET STATUS = 6 WHERE CHANGEKEY = ?", new String[]{changekey});
-            LegacyDBHelper.ExecSql(context, conn, "UPDATE ENCHGPROJECTCODEDETAIL SET STATUS = 6 WHERE CHANGEKEY = ?", new String[]{changekey});
+            DBHelper.executeUpdate(context, "UPDATE ENCHGPROJECTCODE SET STATUS = 6 WHERE CHANGEKEY = ?", new String[]{changekey});
+            DBHelper.executeUpdate(context, "UPDATE ENCHGPROJECTCODEDETAIL SET STATUS = 6 WHERE CHANGEKEY = ?", new String[]{changekey});
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 

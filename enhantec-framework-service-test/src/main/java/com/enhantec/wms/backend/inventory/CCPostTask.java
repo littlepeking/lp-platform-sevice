@@ -29,22 +29,22 @@ public class CCPostTask extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = null;
+
 
         try {
-             conn =  context.getConnection();
+             
 
             String taskDetailKey = serviceDataHolder.getInputDataAsMap().getString("taskdetailkey");
 
-            HashMap<String,String> taskDetailHashMap = TaskDetail.findById(context, conn,taskDetailKey,true);
+            HashMap<String,String> taskDetailHashMap = TaskDetail.findById(context,taskDetailKey,true);
 
             String storerKey =  taskDetailHashMap.get("STORERKEY");
             String sku =  taskDetailHashMap.get("SKU");
-            HashMap<String,String>  skuHashMap = SKU.findById(context, conn,sku,true);
+            HashMap<String,String>  skuHashMap = SKU.findById(context,sku,true);
             String lot =  taskDetailHashMap.get("LOT");
             String loc =  taskDetailHashMap.get("FROMLOC");
             String id =  taskDetailHashMap.get("FROMID");
-            HashMap<String,String> idNotesInfo = IDNotes.findById(context,conn,id,true);
+            HashMap<String,String> idNotesInfo = IDNotes.findById(context,id,true);
             String packKey =  idNotesInfo.get("PACKKEY");
             String uom =   serviceDataHolder.getInputDataAsMap().getString("uom");
             String qty =  serviceDataHolder.getInputDataAsMap().getString("ccqty");
@@ -85,17 +85,17 @@ public class CCPostTask extends LegacyBaseService {
             newDo.setAttribValue("qty",qty);
             ServiceHelper.executeService(context,"NSPRFTCC02", serviceDataHolder);
 
-            DBHelper.executeUpdate(context,conn,"update cc set status ='9' where cckey =? ",new Object[]{
+            DBHelper.executeUpdate(context,"update cc set status ='9' where cckey =? ",new Object[]{
                     ccKey
             });
-            DBHelper.executeUpdate(context,conn,"update ccdetail set status ='9' where cckey =? ",new Object[]{
+            DBHelper.executeUpdate(context,"update ccdetail set status ='9' where cckey =? ",new Object[]{
                     ccKey
             });
 
         }catch (Exception e) {
             ExceptionHelper.throwRfFulfillLogicException("发生错误:"+e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 

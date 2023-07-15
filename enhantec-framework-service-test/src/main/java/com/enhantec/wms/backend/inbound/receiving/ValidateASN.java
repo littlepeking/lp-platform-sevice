@@ -31,32 +31,32 @@ public class ValidateASN extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(context,conn,receiptKey,true);
+            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(context,receiptKey,true);
 
             if(UtilHelper.isEmpty(receiptInfo.get("EXTERNRECEIPTKEY"))) ExceptionHelper.throwRfFulfillLogicException("外部单号不允许为空");
 
-            ReceiptValidationHelper.validateASN(context, conn, receiptKey);
+            ReceiptValidationHelper.validateASN(context, receiptKey);
 
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 

@@ -10,6 +10,7 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class LpnCreateSODelete extends LegacyBaseService {
     public void execute(ServiceDataHolder serviceDataHolder) {
 //        EXEDataObjectprocessData.getInputDataMap() = (EXEDataObject)context.theEXEDataObjectStack.stackList.get(1);
         String userid = context.getUserID();
-        Connection connection = context.getConnection();
+
 
         try{
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderKey");
@@ -43,14 +44,13 @@ public class LpnCreateSODelete extends LegacyBaseService {
             String lpn = serviceDataHolder.getInputDataAsMap().getString("lpn");
             String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
 
-            String status = LegacyDBHelper.GetValue(context,connection,
-                    "select status from orders where orderKey = ?",
+            String status = DBHelper.getValue(context,"select status from orders where orderKey = ?",
                     new String[]{orderKey},"");
             if(LegecyUtilHelper.isNull(status)) throw new Exception("未找到发货订单"+orderKey);
 //            if(status.compareTo("09")>0) throw new Exception("发货订单"+orderKey+"已经关闭或发货，不能继续操作");
             if(status.equals("95")) throw new Exception("发货订单"+orderKey+"已经关闭或发货，不能继续操作");
 
-            HashMap<String,String> orderDetailInfo= DBHelper.getRecord(context, connection,
+            HashMap<String,String> orderDetailInfo= DBHelper.getRecord(context,
                     "SELECT IDREQUIRED, EXTERNLINENO,SKU,OPENQTY,SUSR2,SUSR3 FROM ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=? AND STATUS in ('02','04','06','09','55') ",
                     new Object[]{orderKey, orderLineNumber},"订单明细行",false);
             if (null == orderDetailInfo || orderDetailInfo.isEmpty()) throw new Exception("未找到出库单明细行或该明细行的状态已不允许删除");
@@ -59,7 +59,7 @@ public class LpnCreateSODelete extends LegacyBaseService {
              * 删除拣货明细
              */
             List<HashMap<String, String>> pickDetailList = PickDetail.findByOrderKeyAndOrderLineNumber(
-                    context, connection, orderKey,
+                    context, orderKey,
                     orderLineNumber, true);
 
             PreparedStatement qqPrepStmt;
@@ -73,19 +73,17 @@ public class LpnCreateSODelete extends LegacyBaseService {
 //            logger.info("Calling TrPickDetail.preUpdateFire()");
 //            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preDeleteFire(context);
 //            connection = context.getConnection();
-            qqPrepStmt = connection.prepareStatement(" DELETE FROM PICKDETAIL WHERE PickDetailKey = ?");
-            DBHelper.setValue(qqPrepStmt, 1, pickdetailkey);
-            qqPrepStmt.executeUpdate();
+            DBHelper.executeUpdate(context," DELETE FROM PICKDETAIL WHERE PickDetailKey = ?",
+                  new Object[]{pickdetailkey});
 //            context.theSQLMgr.searchTriggerLibrary("PickDetail")).postDeleteFire(context);
 
 
-            HashMap<String,String> idHashMap = IDNotes.findById(context,connection,orderDetailInfo.get("IDREQUIRED"), true);
+            HashMap<String,String> idHashMap = IDNotes.findById(context,orderDetailInfo.get("IDREQUIRED"), true);
 
-            DBHelper.executeUpdate(context, connection,"DELETE ORDERDETAIL WHERE ORDERKEY = ? and ORDERLINENUMBER=?",
+            DBHelper.executeUpdate(context,"DELETE ORDERDETAIL WHERE ORDERKEY = ? and ORDERLINENUMBER=?",
                     new Object[]{orderKey, orderLineNumber});
 
-            String linesCount = DBHelper.getValue(context, connection,
-                    "SELECT COUNT(1) FROM ORDERDETAIL WHERE ORDERKEY = ? ",
+            String linesCount = DBHelper.getValue(context,"SELECT COUNT(1) FROM ORDERDETAIL WHERE ORDERKEY = ? ",
                     new Object[]{orderKey},"订单行数").toString();
 
 
@@ -102,7 +100,7 @@ public class LpnCreateSODelete extends LegacyBaseService {
             udtrn.TITLE04="容器条码"; udtrn.CONTENT04=orderDetailInfo.get("IDREQUIRED");
             udtrn.TITLE05="唯一码"; udtrn.CONTENT05=idHashMap.get("SERIALNUMBER");
             udtrn.TITLE06 = "出库数量"; udtrn.CONTENT06=orderDetailInfo.get("OPENQTY");
-            udtrn.Insert(context,connection,userid);
+            udtrn.Insert(context,userid);
 
             EXEDataObject theOutDO = new EXEDataObject();
 //            theOutDO.clearDO();
@@ -115,10 +113,6 @@ public class LpnCreateSODelete extends LegacyBaseService {
 //            context.theEXEDataObjectStack.push(theOutDO);
 //
         }catch (Exception e){
-            try
-            {
-                context.releaseConnection(connection);
-            }	catch (Exception e1) {		}
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else

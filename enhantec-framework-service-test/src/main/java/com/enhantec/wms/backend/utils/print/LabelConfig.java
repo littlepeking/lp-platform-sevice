@@ -8,9 +8,9 @@ import java.sql.Connection;
 
 public class LabelConfig {
 
-    public  static String getLabelTemplatePrefix(Context context, Connection qqConnection, String labelName)throws Exception{
+    public  static String getLabelTemplatePrefix(Context context, String labelName)throws Exception{
 
-        String templatePrefix = DBHelper.getValue(context, qqConnection, " SELECT LABELDESCR FROM LabelConfig WHERE LabelName = ? ", new Object[]{labelName}, String.class, "标签配置" + labelName);
+        String templatePrefix = DBHelper.getValue(context, " SELECT LABELDESCR FROM LabelConfig WHERE LabelName = ? ", new Object[]{labelName}, String.class, "标签配置" + labelName);
 
         //如果没有配置则直接使用标签名称作为模板的前缀名称
         String result =  !UtilHelper.isEmpty(templatePrefix) ? templatePrefix : labelName;

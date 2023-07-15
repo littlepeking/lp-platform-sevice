@@ -38,7 +38,7 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 		
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
+
 
 		try
 		{
@@ -48,12 +48,12 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 		    String LPN= serviceDataHolder.getInputDataAsMap().getString("LPN");
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
 
-			HashMap<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN(context, conn, LPN, true);
-			HashMap<String, String> sku = SKU.findById(context, conn, lastReceiptDetailByLPN.get("SKU"), true);
+			HashMap<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN(context, LPN, true);
+			HashMap<String, String> sku = SKU.findById(context, lastReceiptDetailByLPN.get("SKU"), true);
 
-//			CodeLookup.getCodeLookupByKey(context,conn,"IDREPRINT",Labels.SN_UI_CD);
+//			CodeLookup.getCodeLookupByKey(context,"IDREPRINT",Labels.SN_UI_CD);
 
-			PrintHelper.rePrintSnByLPN(context,conn,LPN, Labels.SN_UI_CD,PRINTER,"1","补打标签");
+			PrintHelper.rePrintSnByLPN(context,LPN, Labels.SN_UI_CD,PRINTER,"1","补打标签");
 
 
 
@@ -71,9 +71,9 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 		    UDTRN.TITLE04="物料编号";    UDTRN.CONTENT04=lastReceiptDetailByLPN.get("SKU");
 		    UDTRN.TITLE05="物料名称";    UDTRN.CONTENT05=sku.get("DESCR");
 
-		    UDTRN.Insert(context, conn, userid);
+		    UDTRN.Insert(context, userid);
 			
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
@@ -90,7 +90,7 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try{context.releaseConnection(conn);}  catch(Exception e){}
+			
 		}
 
 		

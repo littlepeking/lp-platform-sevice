@@ -7,11 +7,11 @@ import java.sql.Connection;
 import java.util.HashMap;
 public class Itrn {
 
-    public static  HashMap<String,String> findByPickDetailKey(Context context, Connection conn, String pickDetailKey, boolean checkExist) throws FulfillLogicException {
+    public static  HashMap<String,String> findByPickDetailKey(Context context, String pickDetailKey, boolean checkExist) throws FulfillLogicException {
 
         if(UtilHelper.isEmpty(pickDetailKey)) ExceptionHelper.throwRfFulfillLogicException("拣货明细ID不能为空");
 
-        HashMap<String,String>  itrnRecord = DBHelper.getRecord(context,conn,"select * from ITRN where TRANTYPE ='MV' and SOURCETYPE ='PICKING' and SOURCEKEY = ?",
+        HashMap<String,String>  itrnRecord = DBHelper.getRecord(context,"select * from ITRN where TRANTYPE ='MV' and SOURCETYPE ='PICKING' and SOURCEKEY = ?",
                 new Object[]{pickDetailKey},"交易记录");
         if(checkExist && itrnRecord == null) ExceptionHelper.throwRfFulfillLogicException("交易记录不存在");
 

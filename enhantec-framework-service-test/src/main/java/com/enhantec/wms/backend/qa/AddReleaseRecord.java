@@ -38,7 +38,7 @@ public class AddReleaseRecord extends LegacyBaseService {
     {
 
         String userid = context.getUserID();  //当用户
-        Connection conn = context.getConnection();
+        
         try
         {
 
@@ -57,23 +57,22 @@ public class AddReleaseRecord extends LegacyBaseService {
             if (UtilHelper.isEmpty(lottable06)) ExceptionHelper.throwRfFulfillLogicException("所选生成放行单的批号不能为空");
 
             //放行单号
-            String releaseKey = LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter(context, conn, "QA_RELEASE"),10);  //获取新的请检单号
+            String releaseKey = LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter(context, "QA_RELEASE"),10);  //获取新的请检单号
 
-            String STORERKEY= LegacyDBHelper.GetValue(context, conn, "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
+            String STORERKEY= DBHelper.getValue(context, "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
 
 
-            HashMap<String,String> skuHashMap = SKU.findById(context,conn,mapJson.get("SKU"),true);
+            HashMap<String,String> skuHashMap = SKU.findById(context,mapJson.get("SKU"),true);
 
           //  String SUPPLIERNAME ="";
           /*  if(!UtilHelper.isEmpty(mapJson.get("ELOTTABLE08"))) {
 
-                SUPPLIERNAME = XtSql.GetValue(context, conn,
-                        "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{mapJson.get("ELOTTABLE08")}," ");
+                SUPPLIERNAME = XtSql.GetValue(context                        "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{mapJson.get("ELOTTABLE08")}," ");
 
             }*/
 
             //取库存的信息
-            HashMap<String,String> record= DBHelper.getRecord(context, conn, "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
+            HashMap<String,String> record= DBHelper.getRecord(context, "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
                         + " WHERE A.LOT=B.LOT AND QTY>0 AND B.LOTTABLE06=?", new Object[]{lottable06},"库存明细");
 
             String barrelNum = record.get("CNT"); //桶数
@@ -82,7 +81,7 @@ public class AddReleaseRecord extends LegacyBaseService {
 
 
             //创建请检单
-            LinkedHashMap<String,String> mRELEASE=new LinkedHashMap<String,String>();
+            HashMap<String,String> mRELEASE=new HashMap<String,String>();
             mRELEASE.put("ADDWHO", userid);  //创建人
             mRELEASE.put("EDITWHO", userid);  //更新人
 
@@ -125,17 +124,17 @@ public class AddReleaseRecord extends LegacyBaseService {
             mRELEASE.put("NOTES", mapJson.get("NOTES"));  // 物料类型
             mRELEASE.put("STATUS", "1");  // 放行状态
             //取放行检测内容项目
-            LegacyDBHelper.ExecInsert(context, conn, "RELEASE", mRELEASE);  //放行单写入数据库
+            LegacyDBHelper.ExecInsert(context, "RELEASE", mRELEASE);  //放行单写入数据库
 
             //更新库存批次对应的质量状态
-            DBHelper.executeUpdate(context, conn, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET ELOTTABLE13=ELOTTABLE13 + ?  WHERE ELOT=? "
+            DBHelper.executeUpdate(context, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET ELOTTABLE13=ELOTTABLE13 + ?  WHERE ELOT=? "
                     , new Object[]{mapJson.get("ISRETESTRELEASE"),lottable06});
          /*   //elottable21 记录首次放行质量状态
-            String elotTable21=DBHelper.getValue(context,conn,"select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
+            String elotTable21=DBHelper.getValue(context,"select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
                     lottable06)
             },"批属性");
             if (UtilHelper.isEmpty(elotTable21)){
-                DBHelper.executeUpdate(context, conn, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?,ELOTTABLE21=? WHERE ELOT=? "
+                DBHelper.executeUpdate(context, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?,ELOTTABLE21=? WHERE ELOT=? "
                         , new Object[]{userid),UtilHelper.getCurrentSqlDate(),mapJson.get("ELOTTABLE03")),lottable06)});
             }*/
 
@@ -156,7 +155,7 @@ public class AddReleaseRecord extends LegacyBaseService {
             udtrn.TITLE07="变更号";    udtrn.CONTENT07= mapJson.get("ELOTTABLE20");
             udtrn.TITLE08="生产批号";    udtrn.CONTENT08= mapJson.get("ELOTTABLE07");
             udtrn.TITLE09="物料批号/供应商批号";    udtrn.CONTENT09= mapJson.get("ELOTTABLE09");
-            AuditService.doAudit(context, conn,udtrn);
+            AuditService.doAudit(context,udtrn);
 
             //创建反馈对象
             ServiceDataMap theOutDO = new ServiceDataMap();
@@ -167,15 +166,13 @@ public class AddReleaseRecord extends LegacyBaseService {
 
         }
         catch (Exception e)
-        { //如果出错,先关闭数据库连接,再按系统要求转换成标准的错误类型抛出错误
-            try	{	context.releaseConnection(conn); 	}	catch (Exception e1)  {	e1.printStackTrace();	}  //关闭数据库连接
-
+        {
             if ( e instanceof FulfillLogicException )
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
 

@@ -96,7 +96,7 @@ public class MultiDataSourceConfig {
                             DataSourceProperty property = new DataSourceProperty();
                             property.setUsername(username);
                             property.setPassword(password);
-                            property.setUrl(String.format(orgUrlTemplate, connectionStringParams));
+                            property.setUrl(String.format(orgUrlTemplate,connectionStringParams));
                             property.setDriverClassName(driverClassName);
                             map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
                             log.info("Loaded mysql datasource for org {} ", orgId);

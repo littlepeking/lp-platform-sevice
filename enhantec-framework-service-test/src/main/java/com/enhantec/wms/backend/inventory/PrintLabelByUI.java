@@ -24,11 +24,11 @@ public class PrintLabelByUI extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = null;
+
 
         try {
 
-            conn =  context.getConnection();
+            
 
             String lpns = serviceDataHolder.getInputDataAsMap().getString("lpn");
             String labelName = serviceDataHolder.getInputDataAsMap().getString("labelName");
@@ -36,7 +36,7 @@ public class PrintLabelByUI extends LegacyBaseService {
             String copies = serviceDataHolder.getInputDataAsMap().getString("copies");
             String[] lpnArray=lpns.split(",");
             for (String lpn : lpnArray){
-                PrintHelper.printLPNByIDNotes(context, conn, lpn, Labels.LPN_UI_SY, printerName, copies, "物料标签");
+                PrintHelper.printLPNByIDNotes(context, lpn, Labels.LPN_UI_SY, printerName, copies, "物料标签");
             }
 
         }catch (Exception e) {

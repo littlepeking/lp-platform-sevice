@@ -33,11 +33,11 @@ public class ClusterPicking extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = context.getConnection();
+        
         String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderkey");
 
 
-        HashMap<String, String>  orderInfo = Orders.findByOrderKey(context,conn,orderKey,true);
+        HashMap<String, String>  orderInfo = Orders.findByOrderKey(context,orderKey,true);
 
         //if (!"2".equals(orderInfo.get("ISCONFIRMED"))) ExceptionHelper.throwRfFulfillLogicException("订单未复核不允许拣货");
 
@@ -50,7 +50,7 @@ public class ClusterPicking extends LegacyBaseService {
 
         HashMap outDO = null;
 
-        //Connection conn = context.getConnection();
+        //
         String sku =  outDO.get("sku").toString();
         String lot =  outDO.get("lot").toString();
         String fromId =  outDO.get("fromid").toString();
@@ -58,15 +58,15 @@ public class ClusterPicking extends LegacyBaseService {
 
 
 
-        HashMap<String,String> idNotesInfo = IDNotes.findById(context,conn,fromId,true);
+        HashMap<String,String> idNotesInfo = IDNotes.findById(context,fromId,true);
 
-        HashMap<String,String>  skuHashMap = SKU.findById(context, null,sku,true);
-        String  stdUom = UOM.getStdUOM(context, null,idNotesInfo.get("PACKKEY"));
-        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(context, null,lot,true);
-        HashMap<String,String>  idNotesHashMap = IDNotes.findById(context, null,fromId,true);
-        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(context, null,taskDetailKey,true);
-        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(context, null,fromId,true);
-        HashMap<String,String>  orderDetailHashMap = Orders.findOrderDetailByKey(context,conn,taskDetailHashMap.get("ORDERKEY"),taskDetailHashMap.get("ORDERLINENUMBER"), true);
+        HashMap<String,String>  skuHashMap = SKU.findById(context, sku,true);
+        String  stdUom = UOM.getStdUOM(context, idNotesInfo.get("PACKKEY"));
+        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(context, lot,true);
+        HashMap<String,String>  idNotesHashMap = IDNotes.findById(context, fromId,true);
+        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(context, taskDetailKey,true);
+        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(context, fromId,true);
+        HashMap<String,String>  orderDetailHashMap = Orders.findOrderDetailByKey(context,taskDetailHashMap.get("ORDERKEY"),taskDetailHashMap.get("ORDERLINENUMBER"), true);
 
         outDO.put("skudescr",skuHashMap.get("DESCR"));
         outDO.put("lottable06",lotHashMap.get("LOTTABLE06").toString());

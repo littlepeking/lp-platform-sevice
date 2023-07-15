@@ -27,7 +27,7 @@ public class AbnormalCloseASN extends LegacyBaseService {
     public void execute(ServiceDataHolder serviceDataHolder) {
 
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
@@ -36,7 +36,7 @@ public class AbnormalCloseASN extends LegacyBaseService {
           
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else

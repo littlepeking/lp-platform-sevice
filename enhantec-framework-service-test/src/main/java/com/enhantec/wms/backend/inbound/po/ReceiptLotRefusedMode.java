@@ -4,6 +4,7 @@ import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 
@@ -34,8 +35,6 @@ public class ReceiptLotRefusedMode  extends LegacyBaseService
 	{
 		String userid = context.getUserID();
 
-		Connection conn = null;
-		LegacyDBHelper r1=null;
 	    String RECEIPTLOT= serviceDataHolder.getInputDataAsMap().getString("RECEIPTLOT");
 	    String PROCESSINGMODE= serviceDataHolder.getInputDataAsMap().getString("PROCESSINGMODE");
 	    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
@@ -43,18 +42,15 @@ public class ReceiptLotRefusedMode  extends LegacyBaseService
 
 		try
 		{
-			conn = context.getConnection();
 
-			String[] LOTS= LegacyDBHelper.GetValueList(context, conn
+			String[] LOTS=(String[]) DBHelper.getValueList(context
 					, "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
-					, new String[]{RECEIPTLOT}, 2);
-			if (LOTS==null)
-		        throw new FulfillLogicException("收货批次(%1)未找到",RECEIPTLOT);
+					, new String[]{RECEIPTLOT}, String.format("收货批次(%1)未找到",RECEIPTLOT)).toArray();
 			if ((!LOTS[0].equals("9"))&&(!LOTS[0].equals("91")))
 		        throw new FulfillLogicException("当前状态不支持此操作");
 
 
-			LegacyDBHelper.ExecSql(context, conn
+			DBHelper.executeUpdate(context
 					, "update PRERECEIPTCHECK set STATUS=?,PROCESSINGMODE=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"91",PROCESSINGMODE,userid,"@date",RECEIPTLOT});
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -69,19 +65,11 @@ public class ReceiptLotRefusedMode  extends LegacyBaseService
 		    UDTRN.TITLE03="新状态";    UDTRN.CONTENT03="91";
 		    UDTRN.TITLE04="原处理方式";    UDTRN.CONTENT04=LOTS[1];
 		    UDTRN.TITLE05="新处理方式";    UDTRN.CONTENT05=PROCESSINGMODE;
-		    UDTRN.Insert(context, conn, userid);		
+		    UDTRN.Insert(context, userid);		
 		
 		}
 		catch (Exception e)
 		{
-			try
-			{
-				r1.Close();
-			}	catch (Exception e1) {		}
-			try
-			{
-				context.releaseConnection(conn);
-			}	catch (Exception e1) {		}
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else
@@ -90,7 +78,7 @@ public class ReceiptLotRefusedMode  extends LegacyBaseService
 		
 
 		//try	{	r1.Close();			}	catch (Exception e1) {		}
-		try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+		
 
 		ServiceDataMap theOutDO = new ServiceDataMap();
 		theOutDO.setAttribValue("RECEIPTLOT", RECEIPTLOT);

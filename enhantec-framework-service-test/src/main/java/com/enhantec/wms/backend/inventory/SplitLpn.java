@@ -34,7 +34,7 @@ public class SplitLpn extends LegacyBaseService {
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		String userid = context.getUserID();
-		Connection conn = context.getConnection();
+
 
 		try
 		{
@@ -56,25 +56,25 @@ public class SplitLpn extends LegacyBaseService {
 			List<String> snList = new ArrayList<>();
 
 			if(!UtilHelper.isEmpty(toId)) {
-				if (SKU.isSerialControl(context, conn, sku)){
-					if(!IDNotes.isBoxId(context,conn,toId))	ExceptionHelper.throwRfFulfillLogicException("扫描的分拆至箱号不符合系统箱号规则，请检查后再提交");
+				if (SKU.isSerialControl(context, sku)){
+					if(!IDNotes.isBoxId(context,toId))	ExceptionHelper.throwRfFulfillLogicException("扫描的分拆至箱号不符合系统箱号规则，请检查后再提交");
 				}else {
 //					ExceptionHelper.throwRfFulfillLogicException("按批次管理的物料不支持指定分拆至容器条码，系统会自动生成");
 				}
 			}
 
-			if(SKU.isSerialControl(context,conn,sku) && !IDNotes.isBoxId(context,conn,fromId)){
+			if(SKU.isSerialControl(context,sku) && !IDNotes.isBoxId(context,fromId)){
 
-				lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(context,conn,sku,fromId);
+				lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(context,sku,fromId);
 
 				snList.add(fromId);
 				qtyToSplit = "1";
 
-			}else if(SKU.isSerialControl(context,conn,sku) && IDNotes.isBoxId(context,conn,fromId)){
+			}else if(SKU.isSerialControl(context,sku) && IDNotes.isBoxId(context,fromId)){
 
 				ExceptionHelper.throwRfFulfillLogicException("暂不支持整箱号合并操作，请直接扫描唯一码");
 			}else {
-				lotxLocxIdHashMap = LotxLocxId.findById(context, conn, fromId, true);
+				lotxLocxIdHashMap = LotxLocxId.findById(context, fromId, true);
 				qtyToSplit = toBeMovedNetWgt;
 			}
 
@@ -85,11 +85,11 @@ public class SplitLpn extends LegacyBaseService {
 
 			String toLoc = lotxLocxIdHashMap.get("LOC");
 			if(!UtilHelper.isEmpty(toId)){
-				HashMap<String, String> toIdHashMap = LotxLocxId.findById(context, conn, toId, false);
+				HashMap<String, String> toIdHashMap = LotxLocxId.findById(context, toId, false);
 				if(toIdHashMap !=null) toLoc = toIdHashMap.get("LOC");
 			}
 
-			HashMap<String,String> result = InventoryHelper.doMove(context,conn,opName, lotxLocxIdHashMap, snList, toId, lotxLocxIdHashMap.get("LOC"), toLoc, toBeMovedNetWgt, toBeMovedGrossWgt, toBeMovedTareWgt, toBeMovedUOM, printer,true);
+			HashMap<String,String> result = InventoryHelper.doMove(context,opName, lotxLocxIdHashMap, snList, toId, lotxLocxIdHashMap.get("LOC"), toLoc, toBeMovedNetWgt, toBeMovedGrossWgt, toBeMovedTareWgt, toBeMovedUOM, printer,true);
 
 			toId = result.get("TOID");
 			String printLabel = result.get("PRINT");
@@ -108,10 +108,7 @@ public class SplitLpn extends LegacyBaseService {
 			UDTRN.TITLE04="目标库位";    UDTRN.CONTENT04=toLoc;
 			UDTRN.TITLE05="数量";    UDTRN.CONTENT05=qtyToSplit;
 
-			UDTRN.Insert(context, conn, userid);
-
-
-			try	{ context.releaseConnection(conn); }	catch (Exception e1) {		}
+			UDTRN.Insert(context, userid);
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 
@@ -124,13 +121,13 @@ public class SplitLpn extends LegacyBaseService {
 		}
 		catch (Exception e)
 		{
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 			if ( e instanceof FulfillLogicException)
 				throw (FulfillLogicException)e;
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 		}
 
 	}

@@ -31,7 +31,7 @@ public class PostRelease extends LegacyBaseService {
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		String userid = context.getUserID();  //当用户
-		Connection conn = context.getConnection();  //取数据库连接
+  //取数据库连接
 		try
 		{
 
@@ -49,7 +49,7 @@ public class PostRelease extends LegacyBaseService {
 					" FROMLOTTABLE05,FROMLOTTABLE11,ELOTTABLE02,LOTTABLE05, LOTTABLE11,INITIALRELEASE, PROCESSINGMODE,MANUFACTURERNAME" +
 					" , RELEASETYPE, NOTES,ELOTTABLE01,ELOTTABLE19,ELOTTABLE20,ELOTTABLE09,ELOTTABLE07,ELOTTABLE04"
 		    +" FROM RELEASE WHERE RELEASEKEY=?";
-		    HashMap<String,Object> mRelease= DBHelper.getRawRecord(context, conn, SqlRelease, new Object[]{RELEASEKEY},"放行单");
+		    HashMap<String,Object> mRelease= DBHelper.getRawRecord(context, SqlRelease, new Object[]{RELEASEKEY},"放行单");
 		    if (mRelease.isEmpty()) throw new Exception("系统中无此放行单");
 		    if (!mRelease.get("STATUS").equals("0")) throw new Exception("放行单已做后续处理,不能继续操作");  //检查放行表是否已处理
 
@@ -99,10 +99,10 @@ public class PostRelease extends LegacyBaseService {
 			udtrn.TITLE07="变更号";    udtrn.CONTENT07=ELOTTABLE20;
 			udtrn.TITLE08="生产批号";    udtrn.CONTENT08=ELOTTABLE07;
 			udtrn.TITLE09="物料批号/供应商批号";    udtrn.CONTENT09=ELOTTABLE09;
-			AuditService.doAudit(context, conn,udtrn);
+			AuditService.doAudit(context,udtrn);
 
 		    //取批次当前状态
-//			HashMap<String,Object> laRecord = LotAttribute.findByLottable06(context,conn,LOTTABLE06,true);
+//			HashMap<String,Object> laRecord = LotAttribute.findByLottable06(context,LOTTABLE06,true);
 //
 //		    String preQUALITYSTATUS=getString(laRecord.get("LOTTABLE03"));  //批次当前的质量状态
 //
@@ -112,12 +112,12 @@ public class PostRelease extends LegacyBaseService {
 //				throw new Exception("当前库存中的质量状态和放行质量状态不能相同");
 
 		    //更新放行表的状态为已处理
-		    LegacyDBHelper.ExecSql(context, conn, "UPDATE RELEASE SET EDITWHO=?,EDITDATE=?,RELEASEWHO=?,RELEASEDATE=?,STATUS=? WHERE RELEASEKEY=?"
+		    DBHelper.executeUpdate(context, "UPDATE RELEASE SET EDITWHO=?,EDITDATE=?,RELEASEWHO=?,RELEASEDATE=?,STATUS=? WHERE RELEASEKEY=?"
 				   , new String[]{userid,"@date",userid,"@date","1",RELEASEKEY});
 
 		    //更新库存批次对应的质量状态
 
-		    DBHelper.executeUpdate(context, conn, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?," +
+		    DBHelper.executeUpdate(context, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?," +
 							" ELOTTABLE02=? , ELOTTABLE03=? , ELOTTABLE05=? , ELOTTABLE11=?, ELOTTABLE13=ELOTTABLE13+?" +
 							",ELOTTABLE01=?,ELOTTABLE19=?,ELOTTABLE20=?,ELOTTABLE09=?,ELOTTABLE07=?,ELOTTABLE04=? WHERE ELOT=? "
 					   , new Object[]{userid, UtilHelper.getCurrentSqlDate(),ELOTTABLE02,QUALITYSTATUS, UtilHelper.convertTimestampToSqlDate(ELOTTABLE05),
@@ -129,16 +129,16 @@ public class PostRelease extends LegacyBaseService {
 							,LOTTABLE06
 		    			});
 		    /*//elottable21 记录首次放行质量状态
-			String elotTable21=DBHelper.getValue(context,conn,"select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
+			String elotTable21=DBHelper.getValue(context,"select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
 					LOTTABLE06)
 			},"批属性");
 			if (UtilHelper.isEmpty(elotTable21)){
-				DBHelper.executeUpdate(context, conn, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?,ELOTTABLE21=? WHERE ELOT=? "
+				DBHelper.executeUpdate(context, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?,ELOTTABLE21=? WHERE ELOT=? "
 						, new Object[]{userid),UtilHelper.getCurrentSqlDate(),QUALITYSTATUS),LOTTABLE06)});
 			}*/
 
 //		    //更新标签表对应的质量状态
-//			DBHelper.executeUpdate(context, conn, "UPDATE IDNOTES SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? , ELOTTABLE05=? , ELOTTABLE11=? WHERE LOTTABLE06=? "
+//			DBHelper.executeUpdate(context, "UPDATE IDNOTES SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? , ELOTTABLE05=? , ELOTTABLE11=? WHERE LOTTABLE06=? "
 //					, new Object[]{userid),UtilHelper.getCurrentSqlDate(),QUALITYSTATUS), convert2DateTimeNullable(ELOTTABLE05),convert2DateTimeNullable(ELOTTABLE11), LOTTABLE06)});
 
 
@@ -154,13 +154,13 @@ public class PostRelease extends LegacyBaseService {
 		    
 //		    if (!XtUtils.isNull(mRelease.get("RETESTDAYS")))  //RETESTDAYS	NVARCHAR2 (10)	N	复测天数（对应LOTTABLE05)
 //		    { //如果填写复测日期(文本字段),对复测日期进行处理
-//		    	int i1=XtSql.GetCount(context, conn, "select count(1) from dual where to_date('"+s2+"','MM/dd/yyyy')>sysdate", new String[] {});
+//		    	int i1=XtSql.GetCount(context, "select count(1) from dual where to_date('"+s2+"','MM/dd/yyyy')>sysdate", new String[] {});
 //		    	if (i1==0) throw new Exception("复测日期必须在今天之后");
 //		    }
 //
 //		    if (!XtUtils.isNull(mRelease.get("PERIODDAYS")))  //RETESTDAYS	NVARCHAR2 (10)	N	复测天数（对应LOTTABLE05)
 //		    {//如果填写有效日期(文本字段),对复测日期进行处理
-//		    	int i1=XtSql.GetCount(context, conn, "select count(1) from dual where to_date('"+s2+"','MM/dd/yyyy')>sysdate", new String[] {});
+//		    	int i1=XtSql.GetCount(context, "select count(1) from dual where to_date('"+s2+"','MM/dd/yyyy')>sysdate", new String[] {});
 //		    	if (i1==0) throw new Exception("有效日期必须在今天之后");
 //		    }
 
@@ -172,15 +172,13 @@ public class PostRelease extends LegacyBaseService {
 
 		}
 		catch (Exception e)
-		{//如果出错,先关闭数据库连接,再按系统要求转换成标准的错误类型抛出错误
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {	e1.printStackTrace();	}
-			
+		{
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 		}
 
 

@@ -25,7 +25,7 @@ public class Labels {
 
 
 
-    public static List<HashMap<String, String>> getLpnPrintDefaultData(Context context, Connection qqConnection , String receiptKey, String receiptLinenumber) {
+    public static List<HashMap<String, String>> getLpnPrintDefaultData(Context context, String receiptKey, String receiptLinenumber) {
         ArrayList<Object> params = new ArrayList<>();
         String theSQLStmt= "";
 
@@ -63,7 +63,7 @@ public class Labels {
             params.add(receiptLinenumber);
         }
         theSQLStmt.concat(" ORDER BY rd.BARRELNUMBER ");
-        List<HashMap<String,String>> data = DBHelper.executeQuery(context, qqConnection, theSQLStmt, params);
+        List<HashMap<String,String>> data = DBHelper.executeQuery(context, theSQLStmt, params);
         return data;
     }
 }

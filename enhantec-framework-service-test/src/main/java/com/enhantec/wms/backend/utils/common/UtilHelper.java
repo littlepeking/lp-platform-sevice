@@ -281,6 +281,18 @@ public class UtilHelper {
 
     }
 
+    public static java.sql.Date getCurrentSqlDate11(){
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR_OF_DAY, 11);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+
+       return new java.sql.Date(c.getTimeInMillis());
+    }
+
+
 
     public static Date convertStringToSqlDate(String timestamp) {
         return convertTimestampToSqlDate(new Timestamp(Long.valueOf(timestamp)));

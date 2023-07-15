@@ -11,9 +11,9 @@ import java.util.List;
 public class IDNotesHistory {
 
 
-    public static HashMap<String, String> findLastShippedRecordById(Context context, Connection conn, String lpn, boolean checkExist) {
+    public static HashMap<String, String> findLastShippedRecordById(Context context, String lpn, boolean checkExist) {
 
-        HashMap<String,String> lpnHisInfo= DBHelper.getRecord(context, conn,
+        HashMap<String,String> lpnHisInfo= DBHelper.getRecord(context,
                 " SELECT TOP 1 " + Const.commonSkuFieldsWithAlias+
                         ",ID.SERIALKEY, ID.ID, ID.BARRELNUMBER, ID.TOTALBARREL, ID.BARRELDESCR BARRELDESCR, ID.PACKKEY, ID.UOM," +
                         "ID.ORIGINALGROSSWGT, ID.ORIGINALTAREWGT, ID.ORIGINALNETWGT,ID.REGROSSWGT,ID.PROJECTCODE,ID.ORDERKEY, " +
@@ -26,11 +26,11 @@ public class IDNotesHistory {
     }
 
 
-    public static List<HashMap<String,String>> findLastShippedSNsById(Context context, Connection conn, String lpn, boolean checkExist) throws FulfillLogicException {
+    public static List<HashMap<String,String>> findLastShippedSNsById(Context context, String lpn, boolean checkExist) throws FulfillLogicException {
 
         if(UtilHelper.isEmpty(lpn)) ExceptionHelper.throwRfFulfillLogicException("箱号不能为空");
-        HashMap<String,String>  idLastHisRecord = IDNotesHistory.findLastShippedRecordById(context,conn,lpn, true);
-        List<HashMap<String,String>>  snList = DBHelper.executeQuery(context,conn,"SELECT * FROM SNHISTORY where IDSERIALKEY = ? ", new Object[]{idLastHisRecord.get("SERIALKEY")});
+        HashMap<String,String>  idLastHisRecord = IDNotesHistory.findLastShippedRecordById(context,lpn, true);
+        List<HashMap<String,String>>  snList = DBHelper.executeQuery(context,"SELECT * FROM SNHISTORY where IDSERIALKEY = ? ", new Object[]{idLastHisRecord.get("SERIALKEY")});
         if(checkExist && snList.size() == 0) ExceptionHelper.throwRfFulfillLogicException("未找到箱号"+lpn+"下的唯一码历史库存");
 
         return snList;

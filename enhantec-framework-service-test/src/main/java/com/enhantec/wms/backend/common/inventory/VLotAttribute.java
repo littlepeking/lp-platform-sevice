@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class VLotAttribute {
 
 
-    public static HashMap<String, String> getEnterpriseReceiptLotInfo(Context context, Connection conn, String elot) {
+    public static HashMap<String, String> getEnterpriseReceiptLotInfo(Context context, String elot) {
         // LOTTABLE01, LOTTABLE10 未使用
         //LOTTABLE04 收货日期, LOTTABLE12 成品生产日期 在相同收货批次下存在不同的值，忽略
         //ELOTTABLE07规格、ELOTTABLE08供应商代码、ELOTTABLE09供应商批次 允许有多条，因为可能出现入库后录入错误导致调整出库又入库的情况，
@@ -33,11 +33,11 @@ public class VLotAttribute {
                 " from enterprise.elotattribute " +
                 " where elot = ?";
 
-        return DBHelper.getRecord(context, conn, SQL, new Object[]{ elot},"收货批次",false);
+        return DBHelper.getRecord(context, SQL, new Object[]{ elot},"收货批次",false);
 
     }
 
-    public static HashMap<String, Object> findByLot(Context context, Connection conn, String lot, boolean checkExist) {
+    public static HashMap<String, Object> findByLot(Context context, String lot, boolean checkExist) {
         // LOTTABLE01, LOTTABLE09, LOTTABLE10 未使用
         //LOTTABLE04 收货日期, LOTTABLE12 成品生产日期 在相同收货批次下存在不同的值，忽略
 
@@ -58,12 +58,12 @@ public class VLotAttribute {
                 + " from v_lotattribute "
                 + " where lot = ?";
 
-        HashMap<String,Object> record= DBHelper.getRawRecord(context, conn, SQL, new Object[]{ lot},"批属性");
+        HashMap<String,Object> record= DBHelper.getRawRecord(context, SQL, new Object[]{ lot},"批属性");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到WMS批次"+lot);
         return record;
     }
 
-    public static HashMap<String, String> findElottableByLottable06(Context context, Connection conn, String lottable06, boolean checkExist) {
+    public static HashMap<String, String> findElottableByLottable06(Context context, String lottable06, boolean checkExist) {
         String SQL="select " +
                 "SKU," +
                 "STORERKEY," +
@@ -95,7 +95,7 @@ public class VLotAttribute {
                 + " from v_elotattribute "
                 + " where ELOT = ?";
 
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{ lottable06},"Elottable批属性");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{ lottable06},"Elottable批属性");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到收货批次"+lottable06);
         return record;
     }

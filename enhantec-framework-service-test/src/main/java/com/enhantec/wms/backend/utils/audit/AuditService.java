@@ -30,7 +30,7 @@ public class AuditService extends LegacyBaseService {
         String userid = context.getUserID();
         String eSignatureKey=null;
 
-        Connection conn = context.getConnection();
+        
         try
         {
             String USERNAME =processData.getInputDataMap().getString( "USERNAME");
@@ -40,12 +40,12 @@ public class AuditService extends LegacyBaseService {
             // todo implement
             UDTRN uDTRN = new UDTRN();
 
-            doAudit(context,conn,USERNAME,PASSWORD,REASON,NOTES,uDTRN);
+            doAudit(context,USERNAME,PASSWORD,REASON,NOTES,uDTRN);
 
         }
         catch (Exception e)
         {
-            try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
@@ -53,7 +53,7 @@ public class AuditService extends LegacyBaseService {
                 throw new FulfillLogicException( e.getMessage());
         }
 
-        try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+
 
         EXEDataObject theOutDO = new EXEDataObject();
         theOutDO.clearDO();
@@ -69,15 +69,15 @@ public class AuditService extends LegacyBaseService {
 
     }
 
-    public static void doAudit(Context context, Connection conn, Udtrn uDTRN) throws Exception {
+    public static void doAudit(Context context, Udtrn uDTRN) throws Exception {
         //Add audit record
         String userid = context.getUserID();
-        uDTRN.Insert(context, conn, userid);
+        uDTRN.Insert(context, userid);
 
     }
 
     @Deprecated
-    public static void doAudit(Context context, Connection conn, String username, String password, String reason, String notes, Udtrn uDTRN) throws Exception {
+    public static void doAudit(Context context, String username, String password, String reason, String notes, Udtrn uDTRN) throws Exception {
 
         //Do esignature
         //String userid = context.getUserID();
@@ -85,12 +85,12 @@ public class AuditService extends LegacyBaseService {
             //john 根据复核功能需要，取消当前用户限制
 //            if(!userid.toUpperCase().equals(username.toUpperCase()))
 //                ExceptionHelper.throwRfFulfillLogicException("签名用户不是当前用户");
-//            conn = context.getConnection();
-            uDTRN.EsignatureKey = ESignatureService.doSignature(context, conn, username,password, reason, notes);
+//
+            uDTRN.EsignatureKey = ESignatureService.doSignature(context, username,password, reason, notes);
         }
 
         //Add audit record
-        uDTRN.Insert(context, conn, username);
+        uDTRN.Insert(context, username);
 
     }
 

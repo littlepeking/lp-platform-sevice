@@ -35,8 +35,6 @@ public class PrintByPreTask extends LegacyBaseService
 		
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
-
 	    String USER= serviceDataHolder.getInputDataAsMap().getString( "USER");
 	    String PRINTER= serviceDataHolder.getInputDataAsMap().getString( "PRINTER");
 		String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
@@ -44,12 +42,12 @@ public class PrintByPreTask extends LegacyBaseService
 		{
 			if (PRINTER.equals("0")) throw new Exception("不能选择缓存打印机");
 
-			int i0= Integer.valueOf(DBHelper.getValue(context, conn, "select count(1) from LABELPRINTER where PRINTERNAME=?",
+			int i0= Integer.valueOf(DBHelper.getValue(context, "select count(1) from LABELPRINTER where PRINTERNAME=?",
 					new Object[]{PRINTER},"打印机配置").toString());
 
 			if (i0==0)  throw new Exception("系统未注册您选择的打印机");
 
-			String paperSpec = CodeLookup.getCodeLookupValue(context,conn,"PRINTER",PRINTER,"UDF5","打印配置");
+			String paperSpec = CodeLookup.getCodeLookupValue(context,"PRINTER",PRINTER,"UDF5","打印配置");
 
 			String labelSuffix = "";
 			if(!UtilHelper.isEmpty(paperSpec)) {
@@ -59,12 +57,12 @@ public class PrintByPreTask extends LegacyBaseService
 				//labelSuffix += "_DEFAULT";
 			}
 
-			List<HashMap<String,String>> TASKS=DBHelper.executeQuery(context, conn
+			List<HashMap<String,String>> TASKS=DBHelper.executeQuery(context
 					, "select TASKID from PRINT_TASK where PRINTWHO=? and PRINTSTATUS=? ORDER BY TASKID"
 					, new Object[]{USER, "-1"});
 			if (TASKS.size()==0) throw new Exception("未找到打印任务");
 
-			DBHelper.executeUpdate(context, conn, "update PRINT_TASK set PRINTER=?, REPORTNAME = CONCAT(REPORTNAME, ?),  PRINTSTATUS=?,EDITWHO=?,EDITDATE=? WHERE PRINTSTATUS=? and PRINTWHO=?"
+			DBHelper.executeUpdate(context, "update PRINT_TASK set PRINTER=?, REPORTNAME = CONCAT(REPORTNAME, ?),  PRINTSTATUS=?,EDITWHO=?,EDITDATE=? WHERE PRINTSTATUS=? and PRINTWHO=?"
 					, new Object[]{PRINTER,labelSuffix, "0",userid,UtilHelper.getCurrentSqlDate(),"-1",USER});
 
 		}
@@ -75,11 +73,11 @@ public class PrintByPreTask extends LegacyBaseService
 			else
 		        throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try{context.releaseConnection(conn);}  catch(Exception e2){}
+
 		}
 
 		ServiceDataMap theOutDO = new ServiceDataMap();
-		theOutDO.setAttribValue("TOTAL", "0");
+		theOutDO.setAttribValue("TOTAL", "0");/**/
 		serviceDataHolder.setReturnCode(1);
 		serviceDataHolder.setOutputData(theOutDO);
 

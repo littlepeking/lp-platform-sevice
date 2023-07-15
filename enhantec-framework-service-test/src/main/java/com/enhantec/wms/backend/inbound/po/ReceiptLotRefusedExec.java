@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -34,7 +35,7 @@ public class ReceiptLotRefusedExec  extends LegacyBaseService
 		
 		String userid = context.getUserID();
 
-		Connection conn = context.getConnection();
+
 		//XtSql r1=null;
 
 		try
@@ -43,17 +44,13 @@ public class ReceiptLotRefusedExec  extends LegacyBaseService
 		    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-			String[] LOTS= LegacyDBHelper.GetValueList(context, conn
-					, "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
-					, new String[]{RECEIPTLOT}, 2);
-			if (LOTS==null)
-		        throw new FulfillLogicException("收货批次(%1)未找到",RECEIPTLOT);
-			if (!LOTS[0].equals("91"))
+			String lot = DBHelper.getValue(context, "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
+					, new String[]{RECEIPTLOT},String.format("收货批次(%1)未找到",RECEIPTLOT));
+			if (!lot.equals("91"))
 		        throw new FulfillLogicException("当前状态不支持此操作");
 
 
-			LegacyDBHelper.ExecSql(context, conn
-					, "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=?,REFUSEEXECWHO=?,REFUSEEXECDATE=? where RECEIPTLOT=?"
+			DBHelper.executeUpdate(context, "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=?,REFUSEEXECWHO=?,REFUSEEXECDATE=? where RECEIPTLOT=?"
 					,  new String[]{"92",userid,"@date",userid,"@date",RECEIPTLOT});
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -64,16 +61,16 @@ public class ReceiptLotRefusedExec  extends LegacyBaseService
 		    UDTRN.FROMKEY2="";
 		    UDTRN.FROMKEY3="";
 		    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
-		    UDTRN.TITLE02="处理方式";    UDTRN.CONTENT02=LOTS[1];
-		    UDTRN.TITLE03="处理方式名称";    UDTRN.CONTENT03= LegacyDBHelper.GetValue(context, conn, "select description from codelkup where listname=? and code=?", new String[]{"PROCEMODE",LOTS[1]}, "") ;
-		    UDTRN.Insert(context, conn, userid);			
+		    UDTRN.TITLE02="处理方式";    UDTRN.CONTENT02=lot;
+		    UDTRN.TITLE03="处理方式名称";    UDTRN.CONTENT03= DBHelper.getValue(context, "select description from codelkup where listname=? and code=?", new String[]{"PROCEMODE",lot}, "") ;
+		    UDTRN.Insert(context, userid);			
 			
-			//String STORERKEY=XtSql.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
+			//String STORERKEY=XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
 			//MailBeanByPreReceipt mail=new MailBeanByPreReceipt();
-			//mail.Mail(context,conn,userid,STORERKEY,RECEIPTLOT,"退供应商","收货检查退供应商通知",ESIGNATUREKEY);
+			//mail.Mail(context,userid,STORERKEY,RECEIPTLOT,"退供应商","收货检查退供应商通知",ESIGNATUREKEY);
 			
 			//--------------------------------
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {		}
+			
 			ServiceDataMap theOutDO = new ServiceDataMap();
 			theOutDO.setAttribValue("RECEIPTLOT", RECEIPTLOT);
 			theOutDO.setAttribValue("STATUS", "92");
@@ -85,10 +82,7 @@ public class ReceiptLotRefusedExec  extends LegacyBaseService
 		}
 		catch (Exception e)
 		{
-			try
-			{
-				context.releaseConnection(conn);
-			}	catch (Exception e1) {		}
+
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else

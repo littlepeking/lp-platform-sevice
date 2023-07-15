@@ -39,19 +39,19 @@ public class PreRepackaging extends LegacyBaseService {
     {
         String userid = context.getUserID();
 
-        Connection conn = null;
+
 
 
         try
         {
-            conn = context.getConnection();
+
             final String type = serviceDataHolder.getInputDataAsMap().getString("TYPE");
             final String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             final String orderLineNumber = serviceDataHolder.getInputDataAsMap().getString("ORDERLINENUMBER");
             final String fromId= serviceDataHolder.getInputDataAsMap().getString("FROMID");
             final String packLoc= serviceDataHolder.getInputDataAsMap().getString("PACKLOC");
 
-            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(context,conn,orderKey,orderLineNumber);
+            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(context,orderKey,orderLineNumber);
             if(isInRepackProcess) ExceptionHelper.throwRfFulfillLogicException("分装进行中，不允许备货");
 
             String opName = null;
@@ -74,9 +74,9 @@ public class PreRepackaging extends LegacyBaseService {
             if (UtilHelper.isEmpty(fromId)) throw new Exception("备货容器条码不能为空");
             if (UtilHelper.isEmpty(packLoc)) throw new Exception("分装间不能为空");
 
-            HashMap<String,String> lotxlocxidHashMap = LotxLocxId.findAvailInvById(context,conn,fromId,true,true);
+            HashMap<String,String> lotxlocxidHashMap = LotxLocxId.findAvailInvById(context,fromId,true,true);
 
-            HashMap<String,String> orderLineHashMap = Orders.findOrderDetailByKey(context,conn,orderKey,orderLineNumber,true);
+            HashMap<String,String> orderLineHashMap = Orders.findOrderDetailByKey(context,orderKey,orderLineNumber,true);
 
             String currentPackLoc = orderLineHashMap.get("SUSR3");
 
@@ -85,7 +85,7 @@ public class PreRepackaging extends LegacyBaseService {
                 if(!orderLineHashMap.get("SKU").equals(lotxlocxidHashMap.get("SKU")))
                     throw new Exception("备货物料"+lotxlocxidHashMap.get("SKU")+"和订单行物料"+orderLineHashMap.get("SKU")+"不符");
 
-                HashMap<String,String> skuHashMap = SKU.findById(context,conn,orderLineHashMap.get("SKU"),true);
+                HashMap<String,String> skuHashMap = SKU.findById(context,orderLineHashMap.get("SKU"),true);
 
                 if(!skuHashMap.get("PACKKEY").equals(lotxlocxidHashMap.get("LOTTABLE01")))
                     throw new Exception("当前备货物料的包装为"+lotxlocxidHashMap.get("LOTTABLE01")+",而非正常包装"+skuHashMap.get("PACKKEY")+"，请选择其他容器备货");
@@ -94,20 +94,19 @@ public class PreRepackaging extends LegacyBaseService {
 
                     //检查分装间是否已被占用
                     String SQL="SELECT * FROM ORDERDETAIL OD WHERE OD.STATUS <> '95' AND OD.SUSR3 = ? ";
-                    HashMap<String,String> rec= DBHelper.getRecord(context, conn, SQL, new Object[]{ packLoc},"",false);
+                    HashMap<String,String> rec= DBHelper.getRecord(context, SQL, new Object[]{ packLoc},"",false);
 
                     if(rec!=null) throw new Exception("分装间"+packLoc+"已被订单号:"+rec.get("ORDERKEY")+" 行号:"+rec.get("ORDERLINENUMBER")+" 使用");
 
 
                     //在备货开始前不允许有剩余库存遗留在分装库位。必须将分装剩余库存移出后才允许开始为下一订单行进行备货。
-                    String locSkuIDCount = DBHelper.getValue(context,conn,
-                            "SELECT COUNT(1) FROM LOTXLOCXID WHERE QTY>0 AND LOC = ? ",
+                    String locSkuIDCount = DBHelper.getValue(context, "SELECT COUNT(1) FROM LOTXLOCXID WHERE QTY>0 AND LOC = ? ",
                             new Object[]{   packLoc},    String.class,null);
 
                     if(!locSkuIDCount.equals("0")) throw new Exception("分装间"+packLoc+"存在非当前订单行的剩余物料遗留在分装间，请将其移出后再进行分装");
 
 
-                    DBHelper.executeUpdate(context, conn,
+                    DBHelper.executeUpdate(context,
                             "UPDATE ORDERDETAIL SET SUSR3 = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ", new Object[]{
                                     packLoc, orderKey, orderLineNumber
                             });
@@ -121,7 +120,7 @@ public class PreRepackaging extends LegacyBaseService {
 
 
 
-                DBHelper.executeUpdate(context, conn,
+                DBHelper.executeUpdate(context,
                         "UPDATE IDNOTES SET LOCBEFOREPACK = ? WHERE ID = ? ", new Object[]{
                                 lotxlocxidHashMap.get("LOC"), fromId
                         });
@@ -143,7 +142,7 @@ public class PreRepackaging extends LegacyBaseService {
                 if(lotxlocxidHashMap == null || !lotxlocxidHashMap.get("LOC").equals(currentPackLoc))
                     throw new Exception("分装间"+currentPackLoc+"未找到备货容器"+fromId);
 
-                HashMap<String,String> idnotesHashMap = IDNotes.findById(context,conn,fromId,true);
+                HashMap<String,String> idnotesHashMap = IDNotes.findById(context,fromId,true);
                 if(UtilHelper.isEmpty(idnotesHashMap.get("LOCBEFOREPACK"))) throw new Exception("未找到容器备货前的存储库位，请使用移动功能将该容器移出分装间");
 
 
@@ -159,8 +158,7 @@ public class PreRepackaging extends LegacyBaseService {
                         new ServiceDataHolder(new ServiceDataMap(moveParamsHashMap)));
 
                 //检查是否分装间已没有备货容器，如果没有自动释放占用的分装间
-                String locSkuIDCount = DBHelper.getValue(context,conn,
-                        "SELECT COUNT(1) FROM LOTXLOCXID WHERE LOC = ? AND SKU = ? AND QTY>0",
+                String locSkuIDCount = DBHelper.getValue(context, "SELECT COUNT(1) FROM LOTXLOCXID WHERE LOC = ? AND SKU = ? AND QTY>0",
                         new Object[]{
                                 currentPackLoc,
                                 orderLineHashMap.get("SKU")},
@@ -168,7 +166,7 @@ public class PreRepackaging extends LegacyBaseService {
 
                 if(locSkuIDCount.equals("0")){
 
-                    DBHelper.executeUpdate(context, conn,
+                    DBHelper.executeUpdate(context,
                             "UPDATE ORDERDETAIL SET SUSR3 = null WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ", new Object[]{
                                    orderKey, orderLineNumber
                             });
@@ -181,13 +179,13 @@ public class PreRepackaging extends LegacyBaseService {
         }
         catch (Exception e)
         {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
     }

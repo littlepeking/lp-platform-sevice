@@ -35,18 +35,18 @@ public class CCGetTask extends LegacyBaseService {
         serviceDataHolder.getInputDataAsMap().setAttribValue("lasttask","CC");
         serviceDataHolder.getInputDataAsMap().setAttribValue("taskoverride","CC");
         ServiceDataMap outDO = (ServiceDataMap) ServiceHelper.executeService(context,"NSPRFTM01", serviceDataHolder);
-        //Connection conn = context.getConnection();
+        //
         String sku =  outDO.getString("sku");
         String lot =  outDO.getString("lot");
         String fromId =  outDO.getString("fromid");
         String taskDetailKey =  outDO.getString("taskdetailkey");
 
-        HashMap<String,String> skuHashMap = SKU.findById(context, null,sku,true);
-        String  stdUom = UOM.getStdUOM(context, null,skuHashMap.get("PACKKEY"));
-        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(context, null,lot,true);
-        HashMap<String,String>  idNotesHashMap = IDNotes.findById(context, null,fromId,true);
-        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(context, null,taskDetailKey,true);
-        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(context, null,fromId,true);
+        HashMap<String,String> skuHashMap = SKU.findById(context,sku,true);
+        String  stdUom = UOM.getStdUOM(context,skuHashMap.get("PACKKEY"));
+        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(context,lot,true);
+        HashMap<String,String>  idNotesHashMap = IDNotes.findById(context,fromId,true);
+        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(context,taskDetailKey,true);
+        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(context,fromId,true);
 
         outDO.setAttribValue("skudescr",skuHashMap.get("DESCR"));
         outDO.setAttribValue("lottable06",lotHashMap.get("LOTTABLE06").toString());

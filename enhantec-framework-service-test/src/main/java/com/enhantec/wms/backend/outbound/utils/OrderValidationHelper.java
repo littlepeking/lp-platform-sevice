@@ -21,50 +21,50 @@ import java.util.stream.Collectors;
 
 public class OrderValidationHelper {
 
-    public static void checkIdQualityStatusMatchOrderType(Context context, Connection qqConnection, String orderKey, HashMap<String,String> lotxLocxIdInfo) {
+    public static void checkIdQualityStatusMatchOrderType(Context context, String orderKey, HashMap<String,String> lotxLocxIdInfo) {
 
 
-        HashMap<String, String> orderHashMap = Orders.findByOrderKey(context, qqConnection, orderKey, true);
+        HashMap<String, String> orderHashMap = Orders.findByOrderKey(context, orderKey, true);
 
 
-        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, qqConnection, "ORDERTYPE", orderHashMap.get("TYPE"));
+        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderHashMap.get("TYPE"));
 
         if (!UtilHelper.isEmpty(orderTypeEntry.get("UDF5"))) {
 
             String[] orderTypeStatuses = orderTypeEntry.get("UDF5").split(",");
 
             String orderTypeStatusesString = Arrays.stream(orderTypeStatuses).map(e ->
-                    CodeLookup.getCodeLookupValue(context, qqConnection, "MQSTATUS", e, "DESCRIPTION", "质量状态")
+                    CodeLookup.getCodeLookupValue(context, "MQSTATUS", e, "DESCRIPTION", "质量状态")
             ).collect(Collectors.joining(" 或 "));
 
             if (!UtilHelper.isEmpty(lotxLocxIdInfo.get("ELOTTABLE03")) && !Arrays.stream(orderTypeStatuses).anyMatch(e-> e.trim().equals(lotxLocxIdInfo.get("ELOTTABLE03")))) {
-                String statusTranslated = CodeLookup.getCodeLookupValue(context, qqConnection, "MQSTATUS", lotxLocxIdInfo.get("ELOTTABLE03"), "DESCRIPTION", "质量状态");
+                String statusTranslated = CodeLookup.getCodeLookupValue(context, "MQSTATUS", lotxLocxIdInfo.get("ELOTTABLE03"), "DESCRIPTION", "质量状态");
                 ExceptionHelper.throwRfFulfillLogicException("订单类型" + orderTypeEntry.get("DESCRIPTION") + "只允许分配质量状态为 " + orderTypeStatusesString + " 的物料，但容器条码"
                         + lotxLocxIdInfo.get("ID")+"的质量状态为"+statusTranslated);
             }
         }
     }
 
-    public static void checkOrderTypeAndQualityStatusMatch4Alloc(Context context, Connection qqConnection, String orderKey) throws Exception{
+    public static void checkOrderTypeAndQualityStatusMatch4Alloc(Context context, String orderKey) throws Exception{
 
         if (UtilHelper.isEmpty(orderKey)) ExceptionHelper.throwRfFulfillLogicException("待分配的订单号不能为空");
 
-        HashMap<String, String> order = Orders.findByOrderKey(context, qqConnection, orderKey, true);
+        HashMap<String, String> order = Orders.findByOrderKey(context, orderKey, true);
 
-        List<HashMap<String, String>> orderDetails = Orders.findOrderDetailsByOrderKey(context, qqConnection, orderKey, true);
+        List<HashMap<String, String>> orderDetails = Orders.findOrderDetailsByOrderKey(context, orderKey, true);
 
 
         for(HashMap<String, String> orderDetail: orderDetails) {
 
-            checkOrderQualityStatus(context, qqConnection, order, orderDetail);
+            checkOrderQualityStatus(context, order, orderDetail);
 
-            checkOrderSerialNumber(context, qqConnection, orderDetail);
+            checkOrderSerialNumber(context, orderDetail);
 
         }
     }
 
-    private static void checkOrderQualityStatus(Context context, Connection qqConnection, HashMap<String, String> order, HashMap<String, String> orderDetail) {
-        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, qqConnection, "ORDERTYPE", order.get("TYPE"));
+    private static void checkOrderQualityStatus(Context context, HashMap<String, String> order, HashMap<String, String> orderDetail) {
+        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", order.get("TYPE"));
 
         if (!UtilHelper.isEmpty(orderTypeEntry.get("UDF5"))) {
 
@@ -72,20 +72,20 @@ public class OrderValidationHelper {
             String[] statuses = orderTypeEntry.get("UDF5").split(",");
 
             String statusesStr = Arrays.stream(statuses).map(e ->
-                    CodeLookup.getCodeLookupValue(context, qqConnection, "MQSTATUS", e, "DESCRIPTION", "质量状态")
+                    CodeLookup.getCodeLookupValue(context, "MQSTATUS", e, "DESCRIPTION", "质量状态")
             ).collect(Collectors.joining(" 或 "));
 
 
             if (!UtilHelper.isEmpty(orderDetail.get("ELOTTABLE03")) && !Arrays.stream(statuses).anyMatch(e-> e.trim().equals(orderDetail.get("ELOTTABLE03")))) {
-                String statusTranslated = CodeLookup.getCodeLookupValue(context, qqConnection, "MQSTATUS", orderDetail.get("ELOTTABLE03"), "DESCRIPTION", "质量状态");
+                String statusTranslated = CodeLookup.getCodeLookupValue(context, "MQSTATUS", orderDetail.get("ELOTTABLE03"), "DESCRIPTION", "质量状态");
                 ExceptionHelper.throwRfFulfillLogicException("订单类型" + orderTypeEntry.get("DESCRIPTION") + "只允许分配质量状态为 " + statusesStr + " 的物料，但订单行"
                         + orderDetail.get("ORDERLINENUMBER")+"的质量状态为"+statusTranslated);
             }
         }
     }
 
-    private static void checkOrderSerialNumber(Context context, Connection qqConnection, HashMap<String, String> orderDetail) throws Exception {
-        if(SKU.isSerialControl(context, qqConnection, orderDetail.get("SKU")) ){
+    private static void checkOrderSerialNumber(Context context, HashMap<String, String> orderDetail) throws Exception {
+        if(SKU.isSerialControl(context, orderDetail.get("SKU")) ){
 
             if(UtilHelper.isEmpty(orderDetail.get("SERAILNUMBER"))) {
                 if (!UtilHelper.isInteger(orderDetail.get("OPENQTY")))
@@ -97,22 +97,22 @@ public class OrderValidationHelper {
         }
     }
 //
-//    public static void checkOrderTypeAndQualityStatusMatch4Ship(Context context, Connection qqConnection, String orderKey) throws Exception{
+//    public static void checkOrderTypeAndQualityStatusMatch4Ship(Context context, String orderKey) throws Exception{
 //
 //        if (UtilHelper.isEmpty(orderKey)) ExceptionHelper.throwRfFulfillLogicException("待分配的订单号不能为空");
 //
-//        HashMap<String, String> order = Orders.findByOrderKey(context, qqConnection, orderKey, true);
+//        HashMap<String, String> order = Orders.findByOrderKey(context, orderKey, true);
 //
-//        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, qqConnection, "ORDERTYPE", order.get("TYPE"));
+//        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", order.get("TYPE"));
 //
 //        if (!UtilHelper.isEmpty(orderTypeEntry.get("UDF5"))) {
 //
-//            List<HashMap<String, String>> pickDetails = PickDetail.findByOrderKey(context, qqConnection, orderKey, false);
+//            List<HashMap<String, String>> pickDetails = PickDetail.findByOrderKey(context, orderKey, false);
 //
 //            if(pickDetails.size()!=0) {
 //                for (HashMap<String, String> pickDetail : pickDetails) {
 //                    if(!pickDetail.get("STATUS").equals("9")) {
-//                        HashMap<String, Object> la = VLotAttribute.findByLot(context, qqConnection, pickDetail.get("LOT"), true);
+//                        HashMap<String, Object> la = VLotAttribute.findByLot(context, pickDetail.get("LOT"), true);
 //
 //                        if (!UtilHelper.equals(String.valueOf(la.get("ELOTTABLE03")), orderTypeEntry.get("UDF5")))
 //                            ExceptionHelper.throwRfFulfillLogicException("订单类型" + orderTypeEntry.get("DESCRIPTION") + "只允许发运质量状态为" + orderTypeEntry.get("UDF5") + "的物料");
@@ -122,21 +122,21 @@ public class OrderValidationHelper {
 //        }
 //    }
 
-    public static void checkOrderTypeAndQualityStatusByPickDetailKey(Context context, Connection qqConnection, String pickDetailKey) throws Exception{
+    public static void checkOrderTypeAndQualityStatusByPickDetailKey(Context context, String pickDetailKey) throws Exception{
 
         if (UtilHelper.isEmpty(pickDetailKey)) ExceptionHelper.throwRfFulfillLogicException("拣货明细号不能为空");
 
-        HashMap<String, String> pickDetail = PickDetail.findByPickDetailKey(context, qqConnection, pickDetailKey, true);
+        HashMap<String, String> pickDetail = PickDetail.findByPickDetailKey(context, pickDetailKey, true);
 
         String orderKey = pickDetail.get("ORDERKEY");
 
-        HashMap<String, String> order = Orders.findByOrderKey(context, qqConnection, orderKey, true);
+        HashMap<String, String> order = Orders.findByOrderKey(context, orderKey, true);
 
-        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, qqConnection, "ORDERTYPE", order.get("TYPE"));
+        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", order.get("TYPE"));
 
         if (!UtilHelper.isEmpty(orderTypeEntry.get("UDF5"))) {
 
-            HashMap<String, Object> la = VLotAttribute.findByLot(context, qqConnection, pickDetail.get("LOT"),true);
+            HashMap<String, Object> la = VLotAttribute.findByLot(context, pickDetail.get("LOT"),true);
 //
 //                if (!UtilHelper.equals(String.valueOf(la.get("ELOTTABLE03")), orderTypeEntry.get("UDF5")))
 //                    ExceptionHelper.throwRfFulfillLogicException("订单类型" + orderTypeEntry.get("DESCRIPTION") + "只允许发运质量状态为" + orderTypeEntry.get("UDF5") + "的物料");
@@ -144,11 +144,11 @@ public class OrderValidationHelper {
             String[] statuses = orderTypeEntry.get("UDF5").split(",");
 
             String statusesStr = Arrays.stream(statuses).map(e ->
-                    CodeLookup.getCodeLookupValue(context, qqConnection, "MQSTATUS", e, "DESCRIPTION", "质量状态")
+                    CodeLookup.getCodeLookupValue(context, "MQSTATUS", e, "DESCRIPTION", "质量状态")
             ).collect(Collectors.joining(" 或 "));
 
             if (!Arrays.stream(statuses).anyMatch(e-> e.trim().equals(la.get("ELOTTABLE03")))) {
-                String statusTranslated = CodeLookup.getCodeLookupValue(context, qqConnection, "MQSTATUS", la.get("ELOTTABLE03").toString(), "DESCRIPTION", "质量状态");
+                String statusTranslated = CodeLookup.getCodeLookupValue(context, "MQSTATUS", la.get("ELOTTABLE03").toString(), "DESCRIPTION", "质量状态");
                 ExceptionHelper.throwRfFulfillLogicException(
                         "订单类型" + orderTypeEntry.get("DESCRIPTION") + "只允许发运质量状态为 " + statusesStr + " 的物料，" +
                         "但当前待发运的货品质量状态为"+statusTranslated);
@@ -157,20 +157,20 @@ public class OrderValidationHelper {
     }
 
 
-    public static void checkOrderTypeAndQualityStatusByLPN(Context context, Connection qqConnection, String orderType, String lpn) throws Exception{
+    public static void checkOrderTypeAndQualityStatusByLPN(Context context, String orderType, String lpn) throws Exception{
 
         if (UtilHelper.isEmpty(lpn)) ExceptionHelper.throwRfFulfillLogicException("容器条码不能为空");
 
-        HashMap<String, String> lotxLocxIdInfo = LotxLocxId.findById(context, qqConnection, lpn, true);
+        HashMap<String, String> lotxLocxIdInfo = LotxLocxId.findById(context, lpn, true);
 
-        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, qqConnection, "ORDERTYPE", orderType);
+        HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
 
         if (!UtilHelper.isEmpty(orderTypeEntry.get("UDF5"))) {
 
             String[] statuses = orderTypeEntry.get("UDF5").split(",");
 
             String statusesStr = Arrays.stream(statuses).map(e ->
-                    CodeLookup.getCodeLookupValue(context, qqConnection, "MQSTATUS", e, "DESCRIPTION", "质量状态")
+                    CodeLookup.getCodeLookupValue(context, "MQSTATUS", e, "DESCRIPTION", "质量状态")
             ).collect(Collectors.joining(" 或 "));
 
             if (!Arrays.stream(statuses).anyMatch(e-> e.trim().equals(lotxLocxIdInfo.get("ELOTTABLE03")))) {
@@ -225,21 +225,21 @@ public class OrderValidationHelper {
 
     public static boolean isRepackOrderType(Context context, String orderKey) {
 
-        Connection conn = context.getConnection();
+        
 
-        String repackOrderType = DBHelper.getValue(context,conn, "select udf1 from codelkup where listname='SYSSET' and code='REPACKORDT'"
+        String repackOrderType = DBHelper.getValue(context, "select udf1 from codelkup where listname='SYSSET' and code='REPACKORDT'"
         ,new Object[]{},"分装出库单类型代码未设置").toString();
 
-        String orderType = DBHelper.getValue(context,conn, "select TYPE from ORDERS where ORDERKEY = ? "
+        String orderType = DBHelper.getValue(context, "select TYPE from ORDERS where ORDERKEY = ? "
                 ,new Object[]{orderKey},"订单类型").toString();
 
         return orderType.equals(repackOrderType);
 
     }
 
-        public static void validateFieldsBeforeShip(Context context, Connection conn , String orderKey ){
-            HashMap<String, String> order = Orders.findByOrderKey(context, conn, orderKey, true);
-        String mustInputWidget=CodeLookup.getCodeLookupValue(context,conn,"ORDERTYPE",order.get("TYPE"),"UDF10","必输字段");
+        public static void validateFieldsBeforeShip(Context context, String orderKey ){
+            HashMap<String, String> order = Orders.findByOrderKey(context, orderKey, true);
+        String mustInputWidget=CodeLookup.getCodeLookupValue(context,"ORDERTYPE",order.get("TYPE"),"UDF10","必输字段");
         if (!UtilHelper.isEmpty(mustInputWidget)){
             String[] mustInputWidgetArray;
             if (mustInputWidget.indexOf(":")>0){
@@ -265,28 +265,28 @@ public class OrderValidationHelper {
         }
 
     }
-    public static void validateReturnPo(Context context, Connection conn , String orderKey ) throws Exception {
-        HashMap<String, String> orderInfo = Orders.findByOrderKey(context, conn, orderKey, true);
+    public static void validateReturnPo(Context context, String orderKey ) throws Exception {
+        HashMap<String, String> orderInfo = Orders.findByOrderKey(context, orderKey, true);
         //生基采购退货
         String buyerPo=orderInfo.get("BUYERPO");
         String buyerPoLine=orderInfo.get("BUYERPOLINE");
         String returnReceiptkey=orderInfo.get("RETURNRECEIPTKEY");
         //因一个采购退货出库单对应一个采购入库 一个采购入库只会有一个批次
         String SQL="select DISTINCT lottable06 from orderdetail where orderkey = ?";
-        List<HashMap<String,String>> list= DBHelper.executeQuery(context, conn, SQL, new Object[]{ orderKey});
+        List<HashMap<String,String>> list= DBHelper.executeQuery(context, SQL, new Object[]{ orderKey});
         if (list.size()>1) throw new Exception("出库单明细内指定入厂批次不唯一，无法出库");
         String lottable06= list.get(0).get("LOTTABLE06");
         String checkPo="select p.FROMKEY from RECEIPT r ,PRERECEIPTCHECK p where r.EXTERNRECEIPTKEY=p.RECEIPTLOT and r.receiptkey =? and p.FROMKEY = ? and p.FROMLINENO = ? ";
-        HashMap<String,String> checkPorecord= DBHelper.getRecord(context, conn, checkPo, new Object[]{ returnReceiptkey,buyerPo,buyerPoLine},"订单");
+        HashMap<String,String> checkPorecord= DBHelper.getRecord(context, checkPo, new Object[]{ returnReceiptkey,buyerPo,buyerPoLine},"订单");
         if (checkPorecord == null)throw new Exception("录入的采购单号与入库单号不匹配");
         String checkreceipt="select receiptkey from RECEIPT r  where r.EXTERNRECEIPTKEY=? and r.receiptkey =? ";
-        HashMap<String,String> checkreceiptrecord= DBHelper.getRecord(context, conn, checkreceipt, new Object[]{ lottable06,returnReceiptkey},"订单");
+        HashMap<String,String> checkreceiptrecord= DBHelper.getRecord(context, checkreceipt, new Object[]{ lottable06,returnReceiptkey},"订单");
         if (checkreceiptrecord == null)throw new Exception("录入的入厂批次与入库单号不匹配");
         String checkReceiptSku="select SKU from orderdetail where orderkey = ? and SKU  in (select DISTINCT SKU from RECEIPTDETAIL where receiptkey = ?)";
-        List<HashMap<String,String>> checkReceiptSkuList = DBHelper.executeQuery(context,conn,checkReceiptSku,new Object[]{orderKey,returnReceiptkey});
+        List<HashMap<String,String>> checkReceiptSkuList = DBHelper.executeQuery(context,checkReceiptSku,new Object[]{orderKey,returnReceiptkey});
         if (checkReceiptSkuList.isEmpty()) throw new Exception("录入的物料与入库单物料不匹配");
         String checkLotWgt="select * from whlot l  where l.lot=? and l.Qty < (select cast(SUM(OPENQTY) as float) AS QTY from ORDERDETAIL where orderkey = ? group by ORDERKEY) ";
-        HashMap<String,String> checkLotWgtRecord= DBHelper.getRecord(context, conn, checkLotWgt, new Object[]{ lottable06,orderKey},"订单");
+        HashMap<String,String> checkLotWgtRecord= DBHelper.getRecord(context, checkLotWgt, new Object[]{ lottable06,orderKey},"订单");
         if (checkLotWgtRecord != null)throw new Exception("录入的数量不允许超过批次库存量");
 
     }

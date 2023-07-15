@@ -19,14 +19,14 @@ public class IDGenerationService extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = null;
+
 
         try {
             String keyName = serviceDataHolder.getInputDataAsMap().getString("KEYNAME");
             String keylength = serviceDataHolder.getInputDataAsMap().getString("KEYLENGTH");
-            conn = context.getConnection();
+
             String userid = context.getUserID();
-            String key = IdGenerationHelper.generateIDByKeyName(context, conn, userid, keyName, Integer.parseInt(keylength));
+            String key = IdGenerationHelper.generateIDByKeyName(context, userid, keyName, Integer.parseInt(keylength));
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             theOutDO.setAttribValue("Key", key);
@@ -42,7 +42,7 @@ public class IDGenerationService extends LegacyBaseService {
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try{context.releaseConnection(conn);}  catch(Exception e2){}
+            
         }
 
     }

@@ -41,61 +41,61 @@ public class LpnCreateSOShip extends LegacyBaseService {
         String userId = context.getUserID();
         String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
         String printer = serviceDataHolder.getInputDataAsMap().getString("PRINTER");
-        Connection connection = context.getConnection();
+
         String esignatuerKey = "";
         try{
-            HashMap<String, String> orderInfo = Orders.findByOrderKey(context, connection, orderKey, true);
+            HashMap<String, String> orderInfo = Orders.findByOrderKey(context, orderKey, true);
             if(LegecyUtilHelper.isNull(orderInfo)) throw new Exception("找不到发货订单："+orderKey);
             if(orderInfo.get("STATUS").equals("95")){
                 ExceptionHelper.throwRfFulfillLogicException("不能发运重复订单");
             }
 
-            ArrayList<LinkedHashMap<String, String>> orderDetails = LegacyDBHelper.GetRecordMap(context, connection,
+            List<HashMap<String,String>> orderDetails = DBHelper.executeQuery(context,
                     "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS " +
                             ",ORIGINALQTY,OPENQTY,GROSSWGTEXPECTED,TAREWGTEXPECTED, SHIPPEDQTY,QTYPREALLOCATED,QTYALLOCATED,QTYPICKED,UOM,PACKKEY " +
                             "from orderdetail where orderkey=? and STATUS <>'95' order by orderlinenumber",
                     new String[]{orderKey});
-            for (LinkedHashMap<String, String> odHashMap : orderDetails) {
+            for (HashMap<String,String> odHashMap : orderDetails) {
                 String id = odHashMap.get("IDREQUIRED");
                 String netWgt = odHashMap.get("ORIGINALQTY");
                 String grossWgt = odHashMap.get("GROSSWGTEXPECTED");
                 String tareWgt = odHashMap.get("TAREWGTEXPECTED");
                 String uom = odHashMap.get("UOM");
 
-                //String stdUom = UOM.getStdUOM(context, connection, odHashMap.get("PACKKEY"));
+                //String stdUom = UOM.getStdUOM(context, odHashMap.get("PACKKEY"));
 
                 BigDecimal stdGrossWgtDecimal = UtilHelper.str2Decimal(grossWgt,"毛重",false);
                 BigDecimal stdNetWgtDecimal = UtilHelper.str2Decimal(netWgt,"净重",false);
                 BigDecimal stdTareWgtDecimal = UtilHelper.str2Decimal(tareWgt,"皮重",false);
 
-                OutboundUtils.checkQtyIsAvailableInIDNotes(context,connection,id,
+                OutboundUtils.checkQtyIsAvailableInIDNotes(context,id,
                         UtilHelper.str2Decimal(netWgt,"出库量",false));
-                OutboundUtils.checkQtyIsAvailableInLotxLocxId(context,connection,id,
+                OutboundUtils.checkQtyIsAvailableInLotxLocxId(context,id,
                         UtilHelper.str2Decimal(netWgt,"出库量",false), BigDecimal.ZERO);
 
                 String idToBeShipped =  null;
 
-                HashMap<String,String> originalIdHashMap = LotxLocxId.getAvailInvById(context,connection,id);
+                HashMap<String,String> originalIdHashMap = LotxLocxId.getAvailInvById(context,id);
 
                 //容器数量>拣货量并且拣货量>0，打印剩余量标签
                 if(UtilHelper.decimalStrCompare(originalIdHashMap.get("QTY"), netWgt)>0
                         && UtilHelper.decimalStrCompare(netWgt, "0")>0) {
-                    PrintHelper.printLPNByIDNotes(context,connection,id, Labels.LPN_UI_SY, printer, "1", "拣货剩余量标签");
+                    PrintHelper.printLPNByIDNotes(context,id, Labels.LPN_UI_SY, printer, "1", "拣货剩余量标签");
 
                     //插入拣货到容器的IDNOTES信息
-                    idToBeShipped = IDNotes.splitWgtById(context, connection, stdGrossWgtDecimal, stdNetWgtDecimal, stdTareWgtDecimal, grossWgt, netWgt, tareWgt, uom, id, "", orderKey,false);
+                    idToBeShipped = IDNotes.splitWgtById(context, stdGrossWgtDecimal, stdNetWgtDecimal, stdTareWgtDecimal, grossWgt, netWgt, tareWgt, uom, id, "", orderKey,false);
 
-                    LinkedHashMap<String, String> fieldsToBeUpdate = new LinkedHashMap<String, String>();
+                    HashMap<String,String> fieldsToBeUpdate = new HashMap<String,String>();
                     fieldsToBeUpdate.put("LASTSHIPPEDLOC", originalIdHashMap.get("LOC")); //该ID最后一次的拣货自库位
 //                    fieldsToBeUpdate.put("LASTLOC", originalIdHashMap.get("LOC")); //该ID的上一个库位
                     fieldsToBeUpdate.put("LASTID", originalIdHashMap.get("ID")); //该ID的上一个ID
 
-                    IDNotes.update(context, connection, idToBeShipped , fieldsToBeUpdate);
+                    IDNotes.update(context, idToBeShipped , fieldsToBeUpdate);
 
-                    if(IDNotes.isLpnOrBoxId(context,connection,idToBeShipped)) {
-                        List<String> notPrintLpnLabelOrderTypes = CDSysSet.getNotPrintLpnLabelOrderTypes(context, connection);
+                    if(IDNotes.isLpnOrBoxId(context,idToBeShipped)) {
+                        List<String> notPrintLpnLabelOrderTypes = CDSysSet.getNotPrintLpnLabelOrderTypes(context);
                         if(null == notPrintLpnLabelOrderTypes || !notPrintLpnLabelOrderTypes.contains(orderInfo.get("TYPE"))) {
-                            PrintHelper.printLPNByIDNotes(context, connection, idToBeShipped, Labels.LPN, printer, "1", "非整桶拣货标签");
+                            PrintHelper.printLPNByIDNotes(context, idToBeShipped, Labels.LPN, printer, "1", "非整桶拣货标签");
                         }
                     }
 
@@ -103,7 +103,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
 
                     idToBeShipped = id;
 
-                    LinkedHashMap<String, String> fieldsToBeUpdate = new LinkedHashMap<String, String>();
+                    HashMap<String,String> fieldsToBeUpdate = new HashMap<String,String>();
 
                     fieldsToBeUpdate.put("GROSSWGTLABEL", grossWgt);//原毛重标签量
                     fieldsToBeUpdate.put("TAREWGTLABEL", tareWgt);//原皮重标签量
@@ -112,12 +112,12 @@ public class LpnCreateSOShip extends LegacyBaseService {
                     fieldsToBeUpdate.put("LASTSHIPPEDLOC", originalIdHashMap.get("LOC")); //该ID最后一次的拣货自库位
 //                    fieldsToBeUpdate.put("LASTLOC", originalIdHashMap.get("LOC")); //该ID的上一个库位
                     fieldsToBeUpdate.put("LASTID", originalIdHashMap.get("ID")); //该ID的上一个ID
-                    IDNotes.update(context, connection, idToBeShipped, fieldsToBeUpdate);
+                    IDNotes.update(context, idToBeShipped, fieldsToBeUpdate);
                 }
 
                 //对分拆出的容器扣IDNOTES库存
                 final String idToBeShippedF = idToBeShipped;
-                DBHelper.executeUpdate(context,connection,
+                DBHelper.executeUpdate(context,
                         "UPDATE IDNOTES SET GROSSWGT = GROSSWGT-?, NETWGT = NETWGT-?,  EDITWHO = ?, EDITDATE = ? WHERE ID = ? ",
                         new ArrayList<Object>(){{
                             add(netWgt);
@@ -127,8 +127,8 @@ public class LpnCreateSOShip extends LegacyBaseService {
                             add(idToBeShippedF);
                         }});
                 //:TODO:校验发运的IDNOTES库存余额应为0并移至历史表，否则报错
-                HashMap<String,String> shippedIdNotesHashMap = IDNotes.findById(context,connection,id,true);
-                IDNotes.archiveIDNotes(context, connection, shippedIdNotesHashMap);
+                HashMap<String,String> shippedIdNotesHashMap = IDNotes.findById(context,id,true);
+                IDNotes.archiveIDNotes(context, shippedIdNotesHashMap);
 
 
             }
@@ -136,7 +136,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
             //扣系统库存
             allocateAndShip(context,orderKey);
 
-            String status = DBHelper.getValue(context, connection
+            String status = DBHelper.getValue(context
                     , "select status from orders where orderkey = ? ", new Object[]{orderKey},String.class,"订单");
 
             if(!"95".equals(status)) ExceptionHelper.throwRfFulfillLogicException("出库失败，请检查库存是否可用!");
@@ -151,14 +151,9 @@ public class LpnCreateSOShip extends LegacyBaseService {
             UDTRN.FROMKEY2="";
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="出库单号";    UDTRN.CONTENT01=orderKey;
-            UDTRN.Insert(context, connection, userId);
+            UDTRN.Insert(context, userId);
 
         }catch (Exception e){
-            try
-            {
-//                context.theSQLMgr.transactionAbort();
-                context.releaseConnection(connection);
-            }	catch (Exception e1) {		}
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else

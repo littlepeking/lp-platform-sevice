@@ -22,30 +22,24 @@ public class GenerateCCReportID extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Connection conn = null;
+
 
         try {
-            conn = context.getConnection();
 
-            String reportKey = IdGenerationHelper.generateID(context, conn, "CCREPORTKEY", "", 10);
 
-            DBHelper.executeUpdate(context, conn, "update cc set REPORTKEY = ? where REPORTKEY is null ", new Object[]{
+            String reportKey = IdGenerationHelper.generateID(context, "CCREPORTKEY", "", 10);
+
+            DBHelper.executeUpdate(context, "update cc set REPORTKEY = ? where REPORTKEY is null ", new Object[]{
                     reportKey});
 
         } catch (Exception e) {
-
-            try {
-                context.releaseConnection(conn);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
 
             if (e instanceof FulfillLogicException)
                 throw (FulfillLogicException) e;
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
 

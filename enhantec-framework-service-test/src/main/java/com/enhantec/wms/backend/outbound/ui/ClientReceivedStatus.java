@@ -31,23 +31,23 @@ public class ClientReceivedStatus extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
         String userid = context.getUserID();
-        Connection conn = null;
+
 
         try {
 
-            conn = context.getConnection();
+
 
             String ORDERKEY = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey(context, conn, ORDERKEY, true);
+            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey(context, ORDERKEY, true);
             String status=ORDERSInfo.get("STATUS");
             if (!"95".equals(status)){
                 ExceptionHelper.throwRfFulfillLogicException("当前状态不能进行此操作");
             }
 
-            DBHelper.executeUpdate(context, conn, "UPDATE ORDERS SET ClientReceivedStatus = ?  WHERE ORDERKEY = ? ",
+            DBHelper.executeUpdate(context, "UPDATE ORDERS SET ClientReceivedStatus = ?  WHERE ORDERKEY = ? ",
                             new Object[]{"1", ORDERKEY });
 
             Udtrn UDTRN=new Udtrn();
@@ -64,18 +64,18 @@ public class ClientReceivedStatus extends LegacyBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="出库订单号";    UDTRN.CONTENT01=ORDERKEY;
             UDTRN.TITLE02="是否签收";    UDTRN.CONTENT02="是";
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
 
         }catch (Exception e){
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
 
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
     }
 }

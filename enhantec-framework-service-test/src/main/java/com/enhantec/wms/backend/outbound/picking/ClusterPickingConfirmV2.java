@@ -40,7 +40,7 @@ public class ClusterPickingConfirmV2  {
 //        String esignaturekey =processData.getInputDataMap().getString("esignaturekey");
 //        String printer =processData.getInputDataMap().getString("printer");
 //
-//        Connection conn = null;
+//
 //
 //        try {
 //
@@ -60,31 +60,31 @@ public class ClusterPickingConfirmV2  {
 //            }
 //
 //            //context.theSQLMgr.transactionBegin();
-//            conn = context.getConnection();
+//
 //
 //
 //            if (UtilHelper.isEmpty(taskdetailkey)) ExceptionHelper.throwRfFulfillLogicException("拣货任务号不允许为空");
 //
-//            HashMap<String, String> taskDetailRecord = getTaskInfo(context, taskdetailkey, conn);
+//            HashMap<String, String> taskDetailRecord = getTaskInfo(context, taskdetailkey,);
 //
 //            String orderKey = taskDetailRecord.get("ORDERKEY");
 //            String orderLineNumber = taskDetailRecord.get("ORDERLINENUMBER");
 //            String pickdetailKey = taskDetailRecord.get("PICKDETAILKEY");
 //            String orderType = taskDetailRecord.get("TYPE");
 //
-//            HashMap<String,String>  fromIdHashMap = LotxLocxId.findById(context,conn,taskDetailRecord.get("FROMID"),true);
+//            HashMap<String,String>  fromIdHashMap = LotxLocxId.findById(context,taskDetailRecord.get("FROMID"),true);
 //
 //             BigDecimal taskQty = new BigDecimal(taskDetailRecord.get("QTY"));
 //             BigDecimal lpnQty = new BigDecimal(fromIdHashMap.get("QTY"));
 //             BigDecimal availQty = new BigDecimal(fromIdHashMap.get("AVAILABLEQTY"));
 //
-//             String stdUom = UOM.getStdUOM(context, conn, fromIdHashMap.get("PACKKEY"));
+//             String stdUom = UOM.getStdUOM(context, fromIdHashMap.get("PACKKEY"));
 //
-//             BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty(context, conn, fromIdHashMap.get("PACKKEY"), uom, grossWgtDecimal);
-//             BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty(context, conn, fromIdHashMap.get("PACKKEY"), uom, tareWgtDecimal);
-//             BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty(context, conn, fromIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
+//             BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty(context, fromIdHashMap.get("PACKKEY"), uom, grossWgtDecimal);
+//             BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty(context, fromIdHashMap.get("PACKKEY"), uom, tareWgtDecimal);
+//             BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty(context, fromIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
 //
-//             if(!CDOrderType.isAllowOverPick(context,conn,orderType) && UtilHelper.decimalCompare(stdQtyTobePicked,taskQty)>0)
+//             if(!CDOrderType.isAllowOverPick(context,orderType) && UtilHelper.decimalCompare(stdQtyTobePicked,taskQty)>0)
 //                 ExceptionHelper.throwRfFulfillLogicException("不允许超额拣货");
 //
 //             ///对于固体物料，如果存在非整桶拣货的情况，拆分拣货明细后再做拣货。
@@ -93,27 +93,27 @@ public class ClusterPickingConfirmV2  {
 //             //超拣短拣判断的是拣货量是否等于任务量，是否整托盘是看拣货量是否等于当前的LPN量
 //
 //             boolean isShortPick = stdQtyTobePicked.compareTo(taskQty) < 0;
-//             if (CDOrderType.isSplitTaskAfterShortPick(context,conn,orderType) && isShortPick) {
+//             if (CDOrderType.isSplitTaskAfterShortPick(context,orderType) && isShortPick) {
 //                 //如果触发固体拣货的短拣，即当拣货量小于任务量，系统自动重置当前任务量为实际拣货量(避免后面再次触发正常流程的短拣逻辑)，同时分拆当前拣货明细和任务
 //                 taskQty = stdQtyTobePicked;
 //                 splitPickDetailAndTask(context, taskdetailkey, stdQtyTobePicked);
 //                 //reload task detail as task already changed.
-//                 taskDetailRecord = getTaskInfo(context, taskdetailkey, conn);
+//                 taskDetailRecord = getTaskInfo(context, taskdetailkey,);
 //
 //             }
 //
-//             HashMap<String,String> result = PickUtil.doRandomPick(context, conn, orderKey,orderLineNumber, fromIdHashMap,toId, grossWgt, tareWgt, netWgt, uom,taskQty, snList,esignaturekey,printer);
+//             HashMap<String,String> result = PickUtil.doRandomPick(context, orderKey,orderLineNumber, fromIdHashMap,toId, grossWgt, tareWgt, netWgt, uom,taskQty, snList,esignaturekey,printer);
 //
 //             toId = result.get("TOID");
 //             String printLabel = result.get("PRINT");
 //
 //             String reasonCode = PickUtil.getPickReason(taskQty, stdQtyTobePicked);
 //
-//             if(CDOrderType.isReduceOrderQtyAfterShortPick(context,conn,orderType)) {
+//             if(CDOrderType.isReduceOrderQtyAfterShortPick(context,orderType)) {
 //
 //                 if ("SHORT".equals(reasonCode)) {
 //
-//                     DBHelper.executeUpdate(context, conn, "UPDATE ORDERDETAIL SET OpenQty = OpenQty - ?, EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
+//                     DBHelper.executeUpdate(context, "UPDATE ORDERDETAIL SET OpenQty = OpenQty - ?, EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
 //                             , new Object[]{
 //                                     taskQty.subtract(stdQtyTobePicked).toPlainString()),
 //                                     userid),
@@ -122,11 +122,11 @@ public class ClusterPickingConfirmV2  {
 //                                     orderLineNumber}
 //                     );
 //
-//                     OutboundHelper.GetOrderDetailStatusOutputParam orderDetailStatusParam = getOrderDetailStatus(context, conn, orderKey, orderLineNumber), null, null);
+//                     OutboundHelper.GetOrderDetailStatusOutputParam orderDetailStatusParam = getOrderDetailStatus(context, orderKey, orderLineNumber), null, null);
 //                     String newOrderDetailStatus = orderDetailStatusParam.pNewStatus;
 //
 //
-//                     DBHelper.executeUpdate(context, conn, "UPDATE ORDERDETAIL SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
+//                     DBHelper.executeUpdate(context, "UPDATE ORDERDETAIL SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
 //                             , new Object[]{
 //                                     newOrderDetailStatus),
 //                                     userid),
@@ -135,10 +135,10 @@ public class ClusterPickingConfirmV2  {
 //                                     orderLineNumber}
 //                     );
 //
-//                     OutboundHelper.GetOrderStatusOutputParam orderStatusParam = getOrderStatus(context, conn, orderKey, null, null, null);
+//                     OutboundHelper.GetOrderStatusOutputParam orderStatusParam = getOrderStatus(context, orderKey, null, null, null);
 //                     String newOrderStatus = orderStatusParam.pNewStatus;
 //
-//                     DBHelper.executeUpdate(context, conn, "UPDATE ORDERS SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? "
+//                     DBHelper.executeUpdate(context, "UPDATE ORDERS SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? "
 //                             , new Object[]{
 //                                     newOrderStatus),
 //                                     userid),
@@ -177,15 +177,15 @@ public class ClusterPickingConfirmV2  {
 //             UDTRN.CONTENT07 = stdQtyTobePicked.toPlainString();
 //
 //
-//             //conn = context.getConnection();
-//             UDTRN.Insert(context, conn, context.getUserID());
+//             //
+//             UDTRN.Insert(context, context.getUserID());
 //             ((SsaWrappedConnection) conn).getConnection().commit();
 //
 //
 //
 //            EXEDataObject outDO = (EXEDataObject) context.theEXEDataObjectStack.stackList.get(1);
 //
-//            HashMap<String, String> taskDetailHashMap = TaskDetail.findById(context, conn, taskdetailkey, true);
+//            HashMap<String, String> taskDetailHashMap = TaskDetail.findById(context, taskdetailkey, true);
 //            outDO.setAttribValue("status", taskDetailHashMap.get("STATUS"));
 //            outDO.setAttribValue("PRINTLABEL",printLabel);
 //
@@ -205,7 +205,7 @@ public class ClusterPickingConfirmV2  {
 //                            FulfillException.D_PARAM_SETUP_PPARAM6,FulfillException.D_PARAM_SETUP_PPARAM7,FulfillException.D_PARAM_SETUP_PPARAM8,FulfillException.D_PARAM_SETUP_PPARAM9);
 //
 //        }finally {
-//            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+//            
 //        }
 //
 //      
@@ -223,13 +223,13 @@ public class ClusterPickingConfirmV2  {
 //            context.theSQLMgr.transBeginIndependent();
 //            //******************
 //            // MUST GET CONNECTION AFTER transBeginIndependent, OTHTERWISE THE TRANSACTION WILL NOT DO REAL COMMIT AFTER transCommitIndependent()
-//            qqConnection = context.getConnection();
+//            
 //            //*****************
 //
-//            HashMap<String, String> originalTaskDetailInfo = TaskDetail.findById(context, qqConnection, taskdetailkey, true);
-//            HashMap<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey(context, qqConnection, originalTaskDetailInfo.get("PICKDETAILKEY"), true);
+//            HashMap<String, String> originalTaskDetailInfo = TaskDetail.findById(context, taskdetailkey, true);
+//            HashMap<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey(context, originalTaskDetailInfo.get("PICKDETAILKEY"), true);
 //
-//            DBHelper.executeUpdate(context, qqConnection, "UPDATE PICKDETAIL SET QTY = ? , UOMQTY = ? WHERE PICKDETAILKEY = ?",
+//            DBHelper.executeUpdate(context, "UPDATE PICKDETAIL SET QTY = ? , UOMQTY = ? WHERE PICKDETAILKEY = ?",
 //                    new Object[]{
 //                            //CANNOT use decimalData as qty will become 0 if it is very small like 0.001
 //                            stdQtyTobePicked.toPlainString()),
@@ -237,14 +237,14 @@ public class ClusterPickingConfirmV2  {
 //                            originalTaskDetailInfo.get("PICKDETAILKEY"))
 //                    });
 //
-//            DBHelper.executeUpdate(context, qqConnection, "UPDATE TASKDETAIL SET QTY = ? , UOMQTY = ? WHERE TASKDETAILKEY = ?",
+//            DBHelper.executeUpdate(context, "UPDATE TASKDETAIL SET QTY = ? , UOMQTY = ? WHERE TASKDETAILKEY = ?",
 //                    new Object[]{
 //                            stdQtyTobePicked.toPlainString()),
 //                            stdQtyTobePicked.toPlainString()),
 //                            taskdetailkey)
 //                    });
 //
-//            qqPrepStmt = qqConnection.prepareStatement(" INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status, wavekey) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,? )");
+//            qqPrepStmt = DBHelper.executeUpdate(" INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status, wavekey) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,? )");
 //
 //            BigDecimal taskQty = new BigDecimal(originalTaskDetailInfo.get("QTY"));
 //            BigDecimal qtyDiff = taskQty.subtract(stdQtyTobePicked);
@@ -253,7 +253,7 @@ public class ClusterPickingConfirmV2  {
 //            String pickDetailKey = KeyGen.getKey("PICKDETAILKEY", 10, context).getValue();
 //            String caseId = KeyGen.getKey("CARTONID", 10, context).getValue();
 //
-//            DBHelper.setValue(qqPrepStmt, 1, pickDetailKey);
+//            new Object[]{ pickDetailKey);
 //            DBHelper.setValue(qqPrepStmt, 2, caseId);
 //            DBHelper.setValue(qqPrepStmt, 3, " ");
 //            DBHelper.setValue(qqPrepStmt, 4, originalPickDetailInfo.get("ORDERKEY"));
@@ -291,9 +291,9 @@ public class ClusterPickingConfirmV2  {
 //            qqPrepStmt.executeUpdate();
 //
 //
-//            qqPrepStmt = qqConnection.prepareStatement(" INSERT INTO TASKDETAIL ( TaskDetailKey, TaskType, StorerKey, Sku, Lot, UOM, UOMQTY, Qty, FromLoc, LogicalFromLoc, FromID, ToLoc, ToId, SourceType, SourceKey, WaveKey, CaseId, OrderKey, OrderLineNumber, PickDetailKey, PickMethod, AddWho, EditWho, Door, Route, Stop, Putawayzone,STATUS,USERKEY,REASONKEY,STARTTIME,ENDTIME, PICKCONTPLACEMENT ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,? )");
+//            qqPrepStmt = DBHelper.executeUpdate(" INSERT INTO TASKDETAIL ( TaskDetailKey, TaskType, StorerKey, Sku, Lot, UOM, UOMQTY, Qty, FromLoc, LogicalFromLoc, FromID, ToLoc, ToId, SourceType, SourceKey, WaveKey, CaseId, OrderKey, OrderLineNumber, PickDetailKey, PickMethod, AddWho, EditWho, Door, Route, Stop, Putawayzone,STATUS,USERKEY,REASONKEY,STARTTIME,ENDTIME, PICKCONTPLACEMENT ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,? )");
 //            String newTaskDetailKey = KeyGen.getKey("TASKDETAILKEY", 10, context).getValue();
-//            DBHelper.setValue(qqPrepStmt, 1, newTaskDetailKey);
+//            new Object[]{ newTaskDetailKey);
 //            DBHelper.setValue(qqPrepStmt, 2, "PK");
 //            DBHelper.setValue(qqPrepStmt, 3, originalTaskDetailInfo.get("STORERKEY"));
 //            DBHelper.setValue(qqPrepStmt, 4, originalTaskDetailInfo.get("SKU"));
@@ -346,8 +346,8 @@ public class ClusterPickingConfirmV2  {
 //    }
 //
 //
-//    private HashMap<String, String> getTaskInfo(Context context, String taskdetailkey, Connection conn) {
-//        return DBHelper.getRecord(context, conn,
+//    private HashMap<String, String> getTaskInfo(Context context, String taskdetailkey,) {
+//        return DBHelper.getRecord(context,
 //                "SELECT O.TYPE, TD.STATUS, TD.LOT,TD.QTY,TD.SKU,TD.STORERKEY,TD.FROMLOC,TD.FROMID,TD.TOID,TD.TOLOC,TD.CASEID,TD.UOM,P.CARTONGROUP ,P.CARTONTYPE ,P.PACKKEY, P.ORDERKEY,P.ORDERLINENUMBER, P.PICKDETAILKEY " +
 //                        " FROM TASKDETAIL TD, PICKDETAIL P,ORDERS O " +
 //                        " WHERE TD.PICKDETAILKEY = P.PICKDETAILKEY AND O.ORDERKEY = TD.ORDERKEY AND TASKDETAILKEY = ? ",
@@ -355,7 +355,7 @@ public class ClusterPickingConfirmV2  {
 //    }
 //
 //
-//    public OutboundHelper.GetOrderDetailStatusOutputParam getOrderDetailStatus(Context context, Connection qqConnection, String pOrderkey, TextData pOrderLineNumber, String pNewStatus, String pDetailHistoryFlag) {
+//    public OutboundHelper.GetOrderDetailStatusOutputParam getOrderDetailStatus(Context context, String pOrderkey, TextData pOrderLineNumber, String pNewStatus, String pDetailHistoryFlag) {
 //        OutboundHelper.GetOrderDetailStatusOutputParam var296;
 //        try {
 //            DBSession pSession =  context;
@@ -393,8 +393,8 @@ public class ClusterPickingConfirmV2  {
 //            int ordloaded = 0;
 //
 //            try {
-//                qqPrepStmt = qqConnection.prepareStatement(" SELECT a.status, b.locationtype, a.dropid, a.wavekey FROM PICKDETAIL a, LOC b WHERE b.Loc = a.Loc AND a.OrderKey = ? AND a.OrderLineNumber = ?");
-//                DBHelper.setValue(qqPrepStmt, 1, pOrderkey);
+//                qqPrepStmt = DBHelper.executeUpdate(" SELECT a.status, b.locationtype, a.dropid, a.wavekey FROM PICKDETAIL a, LOC b WHERE b.Loc = a.Loc AND a.OrderKey = ? AND a.OrderLineNumber = ?");
+//                new Object[]{ pOrderkey);
 //                DBHelper.setValue(qqPrepStmt, 2, pOrderLineNumber);
 //
 //                for(qqResultSet = qqPrepStmt.executeQuery(); qqResultSet.next(); ++qqRowCount) {
@@ -443,7 +443,7 @@ public class ClusterPickingConfirmV2  {
 //            ResultSet qqResultSet5 = null;
 //
 //            try {
-//                qqPrepStmt5 = qqConnection.prepareStatement(" SELECT SUM ( CASE WHEN b.status = '0' AND a.wavekey <> ' ' THEN 1 ELSE 0 END ) RELEASED, SUM ( CASE WHEN b.status >= '2' AND b.status <= '3' THEN 1 ELSE 0 END ) INPICKING FROM DEMANDALLOCATION a, TASKDETAIL b WHERE b.Sourcekey = a.DemandKey AND b.SourceType = 'DP' AND b.status = '0' AND a.OrderKey = ? AND a.OrderLineNumber = ?");
+//                qqPrepStmt5 = DBHelper.executeUpdate(" SELECT SUM ( CASE WHEN b.status = '0' AND a.wavekey <> ' ' THEN 1 ELSE 0 END ) RELEASED, SUM ( CASE WHEN b.status >= '2' AND b.status <= '3' THEN 1 ELSE 0 END ) INPICKING FROM DEMANDALLOCATION a, TASKDETAIL b WHERE b.Sourcekey = a.DemandKey AND b.SourceType = 'DP' AND b.status = '0' AND a.OrderKey = ? AND a.OrderLineNumber = ?");
 //                DBHelper.setValue(qqPrepStmt5, 1, pOrderkey);
 //                DBHelper.setValue(qqPrepStmt5, 2, pOrderLineNumber);
 //                qqResultSet5 = qqPrepStmt5.executeQuery();
@@ -465,7 +465,7 @@ public class ClusterPickingConfirmV2  {
 //            ResultSet qqResultSet1 = null;
 //
 //            try {
-//                qqPrepStmt1 = qqConnection.prepareStatement(" SELECT SHIPPEDQTY, OPENQTY, QTYPREALLOCATED, QTYALLOCATED, QTYPICKED, ISSUBSTITUTE, WPReleased, STATUS FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?");
+//                qqPrepStmt1 = DBHelper.executeUpdate(" SELECT SHIPPEDQTY, OPENQTY, QTYPREALLOCATED, QTYALLOCATED, QTYPICKED, ISSUBSTITUTE, WPReleased, STATUS FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?");
 //                DBHelper.setValue(qqPrepStmt1, 1, pOrderkey);
 //                DBHelper.setValue(qqPrepStmt1, 2, pOrderLineNumber);
 //                qqResultSet1 = qqPrepStmt1.executeQuery();
@@ -607,7 +607,7 @@ public class ClusterPickingConfirmV2  {
 //
 //            int var287;
 //            try {
-//                qqPrepStmt2 = qqConnection.prepareStatement(" SELECT Status, Storerkey, SKU FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?");
+//                qqPrepStmt2 = DBHelper.executeUpdate(" SELECT Status, Storerkey, SKU FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?");
 //                DBHelper.setValue(qqPrepStmt2, 1, pOrderkey);
 //                DBHelper.setValue(qqPrepStmt2, 2, pOrderLineNumber);
 //                qqResultSet2 = qqPrepStmt2.executeQuery();
@@ -631,7 +631,7 @@ public class ClusterPickingConfirmV2  {
 //            ResultSet qqResultSet3 = null;
 //
 //            try {
-//                qqPrepStmt3 = qqConnection.prepareStatement(" SELECT MAX ( Code ) FROM Orderstatussetup WHERE Orderflag = '1' AND Detailflag = '1' AND Enabled = '1' AND Code <= ?");
+//                qqPrepStmt3 = DBHelper.executeUpdate(" SELECT MAX ( Code ) FROM Orderstatussetup WHERE Orderflag = '1' AND Detailflag = '1' AND Enabled = '1' AND Code <= ?");
 //                DBHelper.setValue(qqPrepStmt3, 1, pNewStatus);
 //                qqResultSet3 = qqPrepStmt3.executeQuery();
 //                if (qqResultSet3.next()) {
@@ -660,7 +660,7 @@ public class ClusterPickingConfirmV2  {
 //                ResultSet qqResultSet6 = null;
 //
 //                try {
-//                    qqPrepStmt6 = qqConnection.prepareStatement(" SELECT SUM(qtypicked) FROM Packoutdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ?");
+//                    qqPrepStmt6 = DBHelper.executeUpdate(" SELECT SUM(qtypicked) FROM Packoutdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ?");
 //                    DBHelper.setValue(qqPrepStmt6, 1, pOrderkey);
 //                    DBHelper.setValue(qqPrepStmt6, 2, storerkey);
 //                    DBHelper.setValue(qqPrepStmt6, 3, sku);
@@ -684,7 +684,7 @@ public class ClusterPickingConfirmV2  {
 //                    ResultSet qqResultSet7 = null;
 //
 //                    try {
-//                        qqPrepStmt7 = qqConnection.prepareStatement(" SELECT sum(Openqty+SHIPPEDQTY) FROM Orderdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ? ");
+//                        qqPrepStmt7 = DBHelper.executeUpdate(" SELECT sum(Openqty+SHIPPEDQTY) FROM Orderdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ? ");
 //                        DBHelper.setValue(qqPrepStmt7, 1, pOrderkey);
 //                        DBHelper.setValue(qqPrepStmt7, 2, storerkey);
 //                        DBHelper.setValue(qqPrepStmt7, 3, sku);
@@ -713,7 +713,7 @@ public class ClusterPickingConfirmV2  {
 //            ResultSet qqResultSet4 = null;
 //
 //            try {
-//                qqPrepStmt4 = qqConnection.prepareStatement(" SELECT DetailHistoryFlag FROM ORDERSTATUSSETUP WHERE Code = ?");
+//                qqPrepStmt4 = DBHelper.executeUpdate(" SELECT DetailHistoryFlag FROM ORDERSTATUSSETUP WHERE Code = ?");
 //                DBHelper.setValue(qqPrepStmt4, 1, pNewStatus);
 //                qqResultSet4 = qqPrepStmt4.executeQuery();
 //                if (qqResultSet4.next()) {
@@ -735,7 +735,7 @@ public class ClusterPickingConfirmV2  {
 //                String isOrderRequireClose = null;
 //
 //                try {
-//                    qqPrepStmt2 = qqConnection.prepareStatement(" SELECT REQUIREORDERCLOSE  FROM ORDERS WHERE OrderKey = ? ");
+//                    qqPrepStmt2 = DBHelper.executeUpdate(" SELECT REQUIREORDERCLOSE  FROM ORDERS WHERE OrderKey = ? ");
 //                    qqPrepStmt2.setString(1, pOrderkey);
 //                    qqResultSet2 = qqPrepStmt2.executeQuery();
 //                    if (qqResultSet2.next()) {
@@ -766,7 +766,7 @@ public class ClusterPickingConfirmV2  {
 //        return var296;
 //    }
 //
-//    public OutboundHelper.GetOrderStatusOutputParam getOrderStatus(Context context,Connection qqConnection, String pOrderkey, String pStatus, String pNewStatus, String pLogHistory) {
+//    public OutboundHelper.GetOrderStatusOutputParam getOrderStatus(Context context,String pOrderkey, String pStatus, String pNewStatus, String pLogHistory) {
 //        OutboundHelper.GetOrderStatusOutputParam var108;
 //        try {
 //            DBSession pSession = context;
@@ -783,8 +783,8 @@ public class ClusterPickingConfirmV2  {
 //            ResultSet qqResultSet = null;
 //
 //            try {
-//                qqPrepStmt = qqConnection.prepareStatement(" SELECT COUNT ( * ), MAX ( Status ), MIN ( Status ) FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' and ( openqty>0 or shippedqty>0 or qtypreallocated>0 or qtyallocated>0 or qtypicked>0 )");
-//                DBHelper.setValue(qqPrepStmt, 1, pOrderkey);
+//                qqPrepStmt = DBHelper.executeUpdate(" SELECT COUNT ( * ), MAX ( Status ), MIN ( Status ) FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' and ( openqty>0 or shippedqty>0 or qtypreallocated>0 or qtyallocated>0 or qtypicked>0 )");
+//                new Object[]{ pOrderkey);
 //                qqResultSet = qqPrepStmt.executeQuery();
 //                if (qqResultSet.next()) {
 //                    orderDetailCount = DBHelper.getValue(qqResultSet, 1, orderDetailCount);
@@ -846,19 +846,19 @@ public class ClusterPickingConfirmV2  {
 //                maxOrderDetailStatus = "52";
 //            } else if (maxStatus != null && maxStatus.equals("15") && minStatus != null && minStatus.compareToIgnoreCase("15") <= 0) {
 //                maxOrderDetailStatus = "52";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("52") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("55") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("55") < 0 && this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "27")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("52") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("55") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("55") < 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "27")) {
 //                maxOrderDetailStatus = "92";
 //            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("52") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("55") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("55") < 0) {
 //                maxOrderDetailStatus = "52";
 //            } else if (maxStatus != null && maxStatus.equals("29") && minStatus != null && minStatus.equals("29")) {
 //                maxOrderDetailStatus = "29";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("27") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "92") || this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "27") || this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "16"))) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("27") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(context,pOrderkey, "92") || this.doesOrderDetailStatusExists(context,pOrderkey, "27") || this.doesOrderDetailStatusExists(context,pOrderkey, "16"))) {
 //                maxOrderDetailStatus = "92";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("25") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "52") || this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "25") || this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "15"))) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("25") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(context,pOrderkey, "52") || this.doesOrderDetailStatusExists(context,pOrderkey, "25") || this.doesOrderDetailStatusExists(context,pOrderkey, "15"))) {
 //                maxOrderDetailStatus = "52";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "16")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "16")) {
 //                maxOrderDetailStatus = "92";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "15")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "15")) {
 //                maxOrderDetailStatus = "52";
 //            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0) {
 //                maxOrderDetailStatus = "22";
@@ -876,7 +876,7 @@ public class ClusterPickingConfirmV2  {
 //                maxOrderDetailStatus = "11";
 //            } else if (maxStatus != null && maxStatus.equals("11") && minStatus != null && minStatus.equals("11")) {
 //                maxOrderDetailStatus = "11";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("09") <= 0 && this.doesOrderDetailStatusExists(context,qqConnection, pOrderkey, "06")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("09") <= 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "06")) {
 //                maxOrderDetailStatus = "06";
 //            } else if (maxStatus != null && maxStatus.equals("08") && minStatus != null && minStatus.equals("08")) {
 //                maxOrderDetailStatus = "08";
@@ -899,8 +899,8 @@ public class ClusterPickingConfirmV2  {
 //                String zeroQtyMinStatus = null;
 //
 //                try {
-//                    qqPrepStmt = qqConnection.prepareStatement(" SELECT COUNT ( * ), MIN ( Status ) FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' ");
-//                    DBHelper.setValue(qqPrepStmt, 1, pOrderkey);
+//                    qqPrepStmt = DBHelper.executeUpdate(" SELECT COUNT ( * ), MIN ( Status ) FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' ");
+//                    new Object[]{ pOrderkey);
 //                    qqResultSet = qqPrepStmt.executeQuery();
 //                    if (qqResultSet.next()) {
 //                        ordDtZeroQtyCount = DBHelper.getValue(qqResultSet, 1, ordDtZeroQtyCount);
@@ -926,7 +926,7 @@ public class ClusterPickingConfirmV2  {
 //                qqResultSet1 = null;
 //
 //                try {
-//                    qqPrepStmt1 = qqConnection.prepareStatement(" SELECT Status FROM Orders WHERE OrderKey = ?");
+//                    qqPrepStmt1 = DBHelper.executeUpdate(" SELECT Status FROM Orders WHERE OrderKey = ?");
 //                    DBHelper.setValue(qqPrepStmt1, 1, pOrderkey);
 //                    qqResultSet1 = qqPrepStmt1.executeQuery();
 //                    if (qqResultSet1.next()) {
@@ -947,7 +947,7 @@ public class ClusterPickingConfirmV2  {
 //                ResultSet qqResultSet2 = null;
 //
 //                try {
-//                    qqPrepStmt2 = qqConnection.prepareStatement(" SELECT MAX ( Code ) FROM Orderstatussetup WHERE Orderflag = '1' AND Headerflag = '1' AND Enabled = '1' AND Code <= ?");
+//                    qqPrepStmt2 = DBHelper.executeUpdate(" SELECT MAX ( Code ) FROM Orderstatussetup WHERE Orderflag = '1' AND Headerflag = '1' AND Enabled = '1' AND Code <= ?");
 //                    DBHelper.setValue(qqPrepStmt2, 1, maxOrderDetailStatus);
 //                    qqResultSet2 = qqPrepStmt2.executeQuery();
 //                    if (qqResultSet2.next()) {
@@ -980,7 +980,7 @@ public class ClusterPickingConfirmV2  {
 //            qqResultSet1 = null;
 //
 //            try {
-//                qqPrepStmt1 = qqConnection.prepareStatement(" SELECT Headerhistoryflag FROM ORDERSTATUSSETUP WHERE Code = ?");
+//                qqPrepStmt1 = DBHelper.executeUpdate(" SELECT Headerhistoryflag FROM ORDERSTATUSSETUP WHERE Code = ?");
 //                DBHelper.setValue(qqPrepStmt1, 1, pNewStatus);
 //                qqResultSet1 = qqPrepStmt1.executeQuery();
 //                if (qqResultSet1.next()) {
@@ -1008,7 +1008,7 @@ public class ClusterPickingConfirmV2  {
 //    }
 //
 //
-//    public boolean doesOrderDetailStatusExists(Context context,Connection qqConnection, String orderKey, String statusKey) {
+//    public boolean doesOrderDetailStatusExists(Context context,String orderKey, String statusKey) {
 //        boolean var20;
 //        try {
 //            DBSession pSession =  context;
@@ -1019,7 +1019,7 @@ public class ClusterPickingConfirmV2  {
 //            boolean doesOrderDetailStatusExists = false;
 //
 //            try {
-//                qqPrepStmt = qqConnection.prepareStatement("Select *  From ORDERDETAIL Where OrderKey = ? AND STATUS = ?");
+//                qqPrepStmt = DBHelper.executeUpdate("Select *  From ORDERDETAIL Where OrderKey = ? AND STATUS = ?");
 //                qqPrepStmt.setString(1, orderKey);
 //                qqPrepStmt.setString(2, statusKey);
 //                qqResultSet = qqPrepStmt.executeQuery();

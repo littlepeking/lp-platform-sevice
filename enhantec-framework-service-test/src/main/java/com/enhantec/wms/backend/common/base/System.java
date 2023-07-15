@@ -8,8 +8,8 @@ import java.util.List;
 
 public class System {
 
-    public static List<String> getEnableWarehouses(Context context, Connection connection){
+    public static List<String> getEnableWarehouses(Context context){
         String sql = "SELECT db_logid FROM SCPRD.wmsadmin.pl_db pd WHERE pd.db_logid LIKE 'wmwhse%' AND isActive  = '1'";
-        return DBHelper.getValueList(context, connection, sql, new Object[]{}, "");
+        return DBHelper.getValueList(context, sql, new Object[]{}, "");
     }
 }

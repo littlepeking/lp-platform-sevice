@@ -25,16 +25,16 @@ public class LotxLocxId {
                     + ",b.ELOTTABLE13,b.ELOTTABLE14,b.ELOTTABLE15,b.ELOTTABLE16,b.ELOTTABLE17,b.ELOTTABLE18,b.ELOTTABLE19,b.ELOTTABLE20,b.ELOTTABLE21"
                     + ",D.NETWGT, D.GROSSWGT,D.TAREWGT,D.ORIGINALNETWGT,D.ORIGINALGROSSWGT, D.ORIGINALTAREWGT, D.PACKKEY,D.UOM, D.BARRELDESCR ,D.TOTALBARREL, D.PROJECTCODE , D.LASTSHIPPEDLOC,D.ISOPENED,D.RETURNTIMES,D.BARRELNUMBER,D.TOTALBARREL, " +Const.commonSkuFieldsWithAlias;
 
-    public static HashMap<String, String> findAvailInvByLocId(Context context, Connection conn, String FROMLOC, String FROMID, boolean useHold, boolean checkExist) {
+    public static HashMap<String, String> findAvailInvByLocId(Context context, String FROMLOC, String FROMID, boolean useHold, boolean checkExist) {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d, SKU s "
                 + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED > 0 AND A.LOC= ? and a.id = d.id and a.id = ? ";
         if(!useHold) SQL += " AND A.STATUS <> 'HOLD'";
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{ FROMLOC, FROMID},"库存明细");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{ FROMLOC, FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到可用库存");
 
-        int holdRecords = Integer.parseInt(DBHelper.getValue(context,conn,"SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
+        int holdRecords = Integer.parseInt(DBHelper.getValue(context,"SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
                 new Object[]{record.get("LOT"), FROMLOC, FROMID},
                 "").toString());
 
@@ -43,23 +43,23 @@ public class LotxLocxId {
         return record;
     }
 
-    public static HashMap<String, String> findFullAvailInvById(Context context, Connection conn, String FROMLOC, String FROMID, String errMsg) {
+    public static HashMap<String, String> findFullAvailInvById(Context context, String FROMLOC, String FROMID, String errMsg) {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d, SKU s "
                 + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED = A.QTY AND A.LOC= ? and a.id = d.id and a.id = ? ";
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{ FROMLOC, FROMID},"库存明细");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{ FROMLOC, FROMID},"库存明细");
         if(record == null) ExceptionHelper.throwRfFulfillLogicException(errMsg);
 
         return record;
     }
 
-    public static HashMap<String, String> findFullAvailInvById(Context context, Connection conn, String FROMID, String errMsg) {
+    public static HashMap<String, String> findFullAvailInvById(Context context, String FROMID, String errMsg) {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d, SKU s "
                 + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED = A.QTY and a.id = d.id and a.id = ? ";
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{  FROMID},"库存明细");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{  FROMID},"库存明细");
         if(record == null) ExceptionHelper.throwRfFulfillLogicException(errMsg);
 
         return record;
@@ -67,16 +67,16 @@ public class LotxLocxId {
 
 
 
-    public static HashMap<String, String> findAvailInvById(Context context, Connection conn, String FROMID, boolean useHold, boolean checkExist) {
+    public static HashMap<String, String> findAvailInvById(Context context, String FROMID, boolean useHold, boolean checkExist) {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d , SKU s "
                 + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED > 0 AND a.id = d.id and a.id = ? ";
         if(!useHold) SQL += " AND A.STATUS <> 'HOLD'";
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{ FROMID},"库存明细");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{ FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到ID为"+FROMID+"的可用库存");
 
-        int holdRecords = Integer.parseInt(DBHelper.getValue(context,conn,"SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
+        int holdRecords = Integer.parseInt(DBHelper.getValue(context,"SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
                 new Object[]{record.get("LOT"),record.get("LOC"), FROMID},
                 "").toString());
 
@@ -85,22 +85,22 @@ public class LotxLocxId {
         return record;
     }
 
-    public static HashMap<String, String> findById(Context context, Connection conn, String FROMID, boolean checkExist) {
+    public static HashMap<String, String> findById(Context context, String FROMID, boolean checkExist) {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d , SKU s "
                 + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and a.id = d.id and a.id = ? ";
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{ FROMID},"库存明细");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{ FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到容器条码"+FROMID);
         return record;
 
     }
 
 
-    public static HashMap<String,String> findBySkuAndSerialNum(Context context, Connection conn, String sku, String serialNum) {
+    public static HashMap<String,String> findBySkuAndSerialNum(Context context, String sku, String serialNum) {
 
 
-        HashMap<String,String> record = DBHelper.getRecord(context,conn, "SELECT C.STORERKEY,C.LOT,C.LOC,C.QTY, C.QTYALLOCATED,C.QTYPICKED, C.ID," + Const.commonSkuFieldsWithAlias +
+        HashMap<String,String> record = DBHelper.getRecord(context, "SELECT C.STORERKEY,C.LOT,C.LOC,C.QTY, C.QTYALLOCATED,C.QTYPICKED, C.ID," + Const.commonSkuFieldsWithAlias +
                         ",A.GROSSWGT,A.TAREWGT,A.NETWGT,ELOT.ELOTTABLE03 QUALITYSTATUS, " +
                         "  C.QTY-QTYALLOCATED-QTYPICKED AVAILABLEQTY, "+ CommonLottableFields +", A.BARRELDESCR,A.PACKKEY,A.UOM " +
                         " FROM SERIALINVENTORY SI , IDNOTES A , LOTXLOCXID C,V_LOTATTRIBUTE ELOT ,SKU S " +
@@ -117,12 +117,12 @@ public class LotxLocxId {
     /**
      * 目前仅用于收货后回填IDNOTES.LOT
      * @param context
-     * @param conn
+
      * @param FROMID
      * @param checkExist
      * @return
      */
-    public static HashMap<String, String> findWithoutCheckIDNotes(Context context, Connection conn, String FROMID, boolean checkExist) {
+    public static HashMap<String, String> findWithoutCheckIDNotes(Context context, String FROMID, boolean checkExist) {
 
         String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
                 + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
@@ -134,7 +134,7 @@ public class LotxLocxId {
                 + ",b.LOTTABLE01 PACKKEY"
                 + " from  lotxlocxid a,v_lotattribute b "
                 + " where a.lot=b.lot and a.qty>0 and a.id = ? ";
-        HashMap<String,String> record= DBHelper.getRecord(context, conn, SQL, new Object[]{ FROMID},"库存明细");
+        HashMap<String,String> record= DBHelper.getRecord(context, SQL, new Object[]{ FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到容器条码"+FROMID);
         return record;
     }
@@ -143,27 +143,27 @@ public class LotxLocxId {
     /**
      * 查找待发运明细
      * @param context
-     * @param conn
+
      * @param parentId
      * @return
      * @throws Exception
      */
-    public static List<HashMap<String,String>> findPickedIdsByParentId(Context context, Connection conn, String parentId) throws Exception {
+    public static List<HashMap<String,String>> findPickedIdsByParentId(Context context, String parentId) throws Exception {
 
 
-        List<HashMap<String,String>> orderHashMap = DBHelper.executeQuery(context,conn,
+        List<HashMap<String,String>> orderHashMap = DBHelper.executeQuery(context,
                 "select DISTINCT O.ORDERKEY, O.TYPE, O.STATUS from IDNOTES A,PICKDETAIL P, ORDERS O " +
                         "WHERE A.ID = P.ID and P.ORDERKEY = O.ORDERKEY and P.STATUS in ('0','5') and A.PARENTID = ?  "
                 , new Object[]{parentId});
         if(orderHashMap.size()>1) throw new Exception("不允许扫描箱号"+parentId+"，因为该箱号下库存已分配给了多个订单，请扫描唯一码出库");
 
-        List<HashMap<String,String>> availInvHashMaps = DBHelper.executeQuery(context,conn,
+        List<HashMap<String,String>> availInvHashMaps = DBHelper.executeQuery(context,
                 "select 1 from IDNOTES A, LOTXLOCXID L " +
                         "WHERE A.ID = L.ID and L.QTYPICKED <>L.QTY and A.PARENTID = ? "
                 , new Object[]{parentId});
         if(availInvHashMaps.size()>0) throw new Exception("不允许扫描箱号"+parentId+"，因为该箱号下仍有未拣货的库存，请扫描唯一码");
 
-        List<HashMap<String,String>> boxPickDetailHashMaps =  DBHelper.executeQuery(context,conn,
+        List<HashMap<String,String>> boxPickDetailHashMaps =  DBHelper.executeQuery(context,
                 "select P.ID, P.ORDERKEY, P.PICKDETAILKEY, P.QTY, P.STATUS from IDNOTES A,PICKDETAIL P " +
                         "WHERE A.ID = P.ID and P.STATUS <>'9' and A.PARENTID = ? "
                 , new Object[]{parentId});
@@ -189,9 +189,9 @@ public class LotxLocxId {
     /**
      * TODO:合并至FIND BY ID
      */
-    public static HashMap<String,String> getAvailInvById(Context context, Connection conn, String id) throws Exception {
+    public static HashMap<String,String> getAvailInvById(Context context, String id) throws Exception {
 
-        HashMap<String,String> idHashMap = DBHelper.getRecord(context,conn,
+        HashMap<String,String> idHashMap = DBHelper.getRecord(context,
                 "select C.STORERKEY,C.LOT,C.LOC,C.QTY, C.QTYALLOCATED,C.QTYPICKED, C.ID," + Const.commonSkuFieldsWithAlias +
                         ",A.GROSSWGT,A.TAREWGT,A.NETWGT,ELOT.ELOTTABLE03 QUALITYSTATUS, " +
                         " C.QTY-QTYALLOCATED-QTYPICKED AVAILABLEQTY, "+ CommonLottableFields+", A.BARRELDESCR,A.PACKKEY, A.UOM " +
@@ -203,12 +203,12 @@ public class LotxLocxId {
         return idHashMap;
     }
 
-    public static HashMap<String,String> getUnreceivedRDById(Context context, Connection conn, String id) throws Exception {
+    public static HashMap<String,String> getUnreceivedRDById(Context context, String id) throws Exception {
 
-        HashMap<String,String> record = IDNotes.findAvailInvById(context,conn,id,false);
+        HashMap<String,String> record = IDNotes.findAvailInvById(context,id,false);
         if(record!=null) throw new Exception("库存已在系统中存在，不允许重复收货");
 
-        HashMap<String,String> idHashMap = DBHelper.getRecord(context,conn,
+        HashMap<String,String> idHashMap = DBHelper.getRecord(context,
                 " SELECT A.TOID ID," + Const.commonSkuFieldsWithAlias + "," +
                         " A.PACKKEY, A.UOM," +
                         "A.GROSSWGTEXPECTED ORIGINALGROSSWGT, A.TAREWGTEXPECTED ORIGINALTAREWGT, A.QTYEXPECTED ORIGINALNETWGT, " +

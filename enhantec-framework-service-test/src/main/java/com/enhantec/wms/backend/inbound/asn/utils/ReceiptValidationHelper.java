@@ -25,14 +25,14 @@ public class ReceiptValidationHelper {
     /**
      * 收货单校验（本校验只校验单据，不校验库存。考虑性能优化，库存校验只在收货时进行）
      * @param context
-     * @param conn
+
      * @param receiptKey
      * @throws Exception
      */
-    public static void validateASN(Context context, Connection conn, String receiptKey) throws Exception {
+    public static void validateASN(Context context, String receiptKey) throws Exception {
 
-        HashMap<String, String> receiptInfo =  Receipt.findByReceiptKey(context, conn, receiptKey,true);
-        List<HashMap<String, String>> receiptDetails =  Receipt.findReceiptDetails(context, conn, receiptKey,true);
+        HashMap<String, String> receiptInfo =  Receipt.findByReceiptKey(context, receiptKey,true);
+        List<HashMap<String, String>> receiptDetails =  Receipt.findReceiptDetails(context, receiptKey,true);
 
         HashSet<String> existingLpnHashSet = new HashSet<>();
         HashMap<String,String> receiptLotHashMap = new HashMap<>();
@@ -47,11 +47,11 @@ public class ReceiptValidationHelper {
 
         String receivedDate = null;
 
-        checkMustInputWidget(context,conn,receiptInfo);
+        checkMustInputWidget(context,receiptInfo);
 
         for(HashMap<String,String> receiptDetail :receiptDetails){
 
-            HashMap<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey(context,conn,"RECEIPTYPE",receiptInfo.get("TYPE"));
+            HashMap<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey(context,"RECEIPTYPE",receiptInfo.get("TYPE"));
 
             if(UtilHelper.isEmpty(receiptDetail.get("TOID"))) {
 
@@ -68,7 +68,7 @@ public class ReceiptValidationHelper {
                 /**
                  * 如果配置了不允许超收，收货行的预期量+实收量必须<=指令行的预期量
                  */
-                if(!CDReceiptType.enableExcessReceiving(context,conn,receiptInfo.get("TYPE"))){
+                if(!CDReceiptType.enableExcessReceiving(context,receiptInfo.get("TYPE"))){
                     String originalQtyExpected = receiptDetail.get("QTYEXPECTED");
                     BigDecimal qtyExpectedAndReceived = new BigDecimal("0");
                     for (HashMap<String, String> detail : receiptDetails) {
@@ -89,7 +89,7 @@ public class ReceiptValidationHelper {
                         ExceptionHelper.throwRfFulfillLogicException("收货单中存在重复的容器条码" + receiptDetail.get("TOID"));
                     else {
                         //这里不对整单校验库存，在收货中进行校验，否则收货时会报错。
-//                    HashMap<String,String> record= LotxLocxId.findById(context, conn,receiptDetail.get("TOID"),false);
+//                    HashMap<String,String> record= LotxLocxId.findById(context,receiptDetail.get("TOID"),false);
 //                    if(record!=null)  ExceptionHelper.throwRfFulfillLogicException("库存中已在重复的容器条码"+receiptDetail.get("TOID"));
                         existingLpnHashSet.add(receiptDetail.get("TOID"));
                     }
@@ -126,9 +126,9 @@ public class ReceiptValidationHelper {
                 ExceptionHelper.throwRfFulfillLogicException("收货行"+receiptDetail.get("RECEIPTLINENUMBER")+"的物料代码不允许为空");
 
             //check BUSR4 物料类型
-            List<HashMap<String,String>> skuLotConfList = CodeLookup.getCodeLookupList(context, conn,"SKULOTCONF");
+            List<HashMap<String,String>> skuLotConfList = CodeLookup.getCodeLookupList(context,"SKULOTCONF");
 
-            HashMap<String,String> skuHashMap = SKU.findById(context, conn,receiptDetail.get("SKU"),true);
+            HashMap<String,String> skuHashMap = SKU.findById(context,receiptDetail.get("SKU"),true);
 
             if(skuLotConfList!=null && skuLotConfList.size()>0) {
 
@@ -219,18 +219,18 @@ public class ReceiptValidationHelper {
         }
     }
 
-    public static void checkSerialNumberExistInInv(Context context, Connection conn, HashMap<String, String> receiptDetail) throws Exception {
+    public static void checkSerialNumberExistInInv(Context context, HashMap<String, String> receiptDetail) throws Exception {
 
-        if(SKU.isSerialControl(context, conn, receiptDetail.get("SKU")) ){
+        if(SKU.isSerialControl(context, receiptDetail.get("SKU")) ){
 
             //校验物料+唯一码在库存中不存在。
 
-            List<HashMap<String,String>> snList = LotxId.findDetailsByReceiptLineAndLpn(context, conn, receiptDetail.get("RECEIPTKEY"),receiptDetail.get("RECEIPTLINENUMBER"),receiptDetail.get("TOID"),true);
+            List<HashMap<String,String>> snList = LotxId.findDetailsByReceiptLineAndLpn(context, receiptDetail.get("RECEIPTKEY"),receiptDetail.get("RECEIPTLINENUMBER"),receiptDetail.get("TOID"),true);
 
             for(HashMap<String,String> snInfo : snList) {
 
                 String sn = snInfo.get("SERIALNUMBERLONG");
-                HashMap<String, String> snHashMap = SerialInventory.findBySkuAndSN(context, conn, receiptDetail.get("SKU"), sn, false);
+                HashMap<String, String> snHashMap = SerialInventory.findBySkuAndSN(context, receiptDetail.get("SKU"), sn, false);
                 if (snHashMap != null) ExceptionHelper.throwRfFulfillLogicException("箱号"+receiptDetail.get("TOID")+"中的唯一码" + sn + "在库存中已存在，不允许重复收货");
 
             }
@@ -260,8 +260,8 @@ public class ReceiptValidationHelper {
 
 
     }
-    public static void checkMustInputWidget(Context context,Connection conn,HashMap<String, String> receiptInfo ){
-        String mustInputWidget=CodeLookup.getCodeLookupValue(context,conn,"RECEIPTYPE",receiptInfo.get("TYPE"),"UDF10","必输字段");
+    public static void checkMustInputWidget(Context context,HashMap<String, String> receiptInfo ){
+        String mustInputWidget=CodeLookup.getCodeLookupValue(context,"RECEIPTYPE",receiptInfo.get("TYPE"),"UDF10","必输字段");
         if (!UtilHelper.isEmpty(mustInputWidget)){
             String[] mustInputWidgetArray;
             if (mustInputWidget.indexOf(":")>0){
@@ -286,8 +286,8 @@ public class ReceiptValidationHelper {
             }
     }   }
 
-    public static void checkASNReceiptCheckStatus(Context context,Connection conn,HashMap<String, String> receiptInfo){
-        String isCheck=CodeLookup.getCodeLookupValue(context,conn,"RECEIPTYPE",receiptInfo.get("TYPE"),"EXT_UDF_STR6","必输字段");
+    public static void checkASNReceiptCheckStatus(Context context,HashMap<String, String> receiptInfo){
+        String isCheck=CodeLookup.getCodeLookupValue(context,"RECEIPTYPE",receiptInfo.get("TYPE"),"EXT_UDF_STR6","必输字段");
         if ("Y".equalsIgnoreCase(isCheck) &&!"3".equalsIgnoreCase(receiptInfo.get("RECEIPTCHECKSTATUS")))
             ExceptionHelper.throwRfFulfillLogicException("收货单未检查请检查后操作");
 

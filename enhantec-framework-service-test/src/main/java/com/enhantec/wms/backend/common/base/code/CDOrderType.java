@@ -10,9 +10,9 @@ import java.util.HashMap;
 
 public class CDOrderType {
 
-    public static boolean isRepackOrderType(Context context, Connection connection, String orderType){
+    public static boolean isRepackOrderType(Context context, String orderType){
 
-        HashMap<String, String> codeHashMap = CodeLookup.getCodeLookupByKey(context, connection, "ORDERTYPE", orderType);
+        HashMap<String, String> codeHashMap = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
 
         return  "Y".equalsIgnoreCase(codeHashMap.get("UDF8"));
 
@@ -26,9 +26,9 @@ public class CDOrderType {
 
     }
 
-    public static boolean ignoreProjectCodeWhenAlloc(Context context, Connection connection, String orderType){
+    public static boolean ignoreProjectCodeWhenAlloc(Context context, String orderType){
 
-        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey(context, connection, "ORDERTYPE", orderType);
+        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
 
         return "Y".equalsIgnoreCase(codeHashMap.get("UDF9"));
 
@@ -37,13 +37,13 @@ public class CDOrderType {
     /**
      * 是否自动生成箱号
      * @param context
-     * @param connection
+
      * @param orderType
      * @return
      */
-    public static boolean isBindAndAutoGenerateLpn(Context context, Connection connection, String sku, String orderType){
+    public static boolean isBindAndAutoGenerateLpn(Context context, String sku, String orderType){
 
-        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, connection, "ORDERTYPE", orderType);
+        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
 
         if(!UtilHelper.isEmpty(codelkup.get("UDF3"))) {
 
@@ -53,13 +53,13 @@ public class CDOrderType {
                 return false;
             }
         }else {
-            return SKU.isBindingLpn(context, connection, sku);
+            return SKU.isBindingLpn(context, sku);
         }
     }
 
-    public static boolean isBindAndNOTAutoGenerateLpn(Context context, Connection connection, String sku, String orderType){
+    public static boolean isBindAndNOTAutoGenerateLpn(Context context, String sku, String orderType){
 
-        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, connection, "ORDERTYPE", orderType);
+        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
 
         if(!UtilHelper.isEmpty(codelkup.get("UDF3"))) {
 
@@ -69,7 +69,7 @@ public class CDOrderType {
                 return false;
             }
         }else {
-            return SKU.isBindingLpn(context, connection, sku);
+            return SKU.isBindingLpn(context, sku);
         }
     }
 
@@ -79,9 +79,9 @@ public class CDOrderType {
      * 是否绑定箱号：目前仅支持扫描唯一码绑定至箱号。扫描容器条码和箱号不允许绑定
      * @return
      */
-    public static boolean isBindingNewLpn(Context context,Connection connection, String sku, String orderType){
+    public static boolean isBindingNewLpn(Context context,String sku, String orderType){
 
-        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, connection, "ORDERTYPE", orderType);
+        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
 
         if(!UtilHelper.isEmpty(codelkup.get("UDF3"))) {
 
@@ -91,14 +91,14 @@ public class CDOrderType {
                 return false;
             }
         }else {
-            return SKU.isBindingLpn(context, connection, sku);
+            return SKU.isBindingLpn(context, sku);
         }
     }
 
 
-    public static boolean isKeepOrderQtyAfterShortPick(Context context,Connection connection,String orderType){
+    public static boolean isKeepOrderQtyAfterShortPick(Context context,String orderType){
 
-        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "ORDERTYPE", orderType);
+        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
         if("1".equals(orderTypeHashMap.get("UDF2"))){
             return true;
         }else {
@@ -108,9 +108,9 @@ public class CDOrderType {
 
 
 
-    public static boolean isReduceOrderQtyAfterShortPick(Context context,Connection connection,String orderType){
+    public static boolean isReduceOrderQtyAfterShortPick(Context context,String orderType){
 
-        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "ORDERTYPE", orderType);
+        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
         if("2".equals(orderTypeHashMap.get("UDF2"))){
             return true;
         }else {
@@ -119,9 +119,9 @@ public class CDOrderType {
     }
 
 
-    public static boolean isSplitTaskAfterShortPick(Context context,Connection connection,String orderType){
+    public static boolean isSplitTaskAfterShortPick(Context context,String orderType){
 
-        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "ORDERTYPE", orderType);
+        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
         if("3".equals(orderTypeHashMap.get("UDF2"))){
             return true;
         }else {
@@ -129,9 +129,9 @@ public class CDOrderType {
         }
     }
 
-    public static boolean isAllowOverPick(Context context,Connection connection,String orderType){
+    public static boolean isAllowOverPick(Context context,String orderType){
 
-        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context,connection, "ORDERTYPE", orderType);
+        HashMap<String,String> orderTypeHashMap = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderType);
         if("Y".equalsIgnoreCase(orderTypeHashMap.get("UDF4"))){
             return true;
         }else {

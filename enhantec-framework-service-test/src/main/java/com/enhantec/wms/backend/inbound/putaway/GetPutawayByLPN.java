@@ -51,7 +51,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 			INOTES.BARRELDESCR 桶号
 			 */
 		String userid = context.getUserID();
-		Connection conn = context.getConnection();
+
 		try
 		{
 		    String lpn= serviceDataHolder.getInputDataAsMap().getString("LPN");
@@ -60,7 +60,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 //		    String sql="SELECT A.STORERKEY,A.SKU,C.DESCR,C.COMMODITYCLASS STORAGECONDITIONS, C.PACKKEY, C.BUSR8,P.PACKUOM3 UOM, I.BARRELDESCR , A.LOC,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.LOT,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.ELOTTABLE03,B.ELOTTABLE02,B.LOTTABLE01 "
 //		    		+ "FROM LOTXLOCXID A,V_LOTATTRIBUTE B,SKU C,PACK P,IDNOTES I WHERE A.LOT=B.LOT AND A.STORERKEY=C.STORERKEY AND A.SKU=C.SKU AND C.PACKKEY = P.PACKKEY"
 //		    		+ " AND A.ID=? AND A.ID =I.ID AND A.QTY>0";
-//		    LinkedHashMap<String,String> lpnInfo=XtSql.GetValueMap(context, conn, sql, new String[]{lpn});
+//		    HashMap<String,String> lpnInfo=XtSql.GetValueMap(context, sql, new String[]{lpn});
 //		    if (lpnInfo.isEmpty()) throw new Exception("当前容器在库存帐面已无数量");
 //			String qtyAllocated=lpnInfo.get("QTYALLOCATED");
 //			String qtyPicked=lpnInfo.get("QTYPICKED");
@@ -70,7 +70,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 //				throw new Exception("当前容器已被拣货,不允许移动");
 
 			//获取箱或容器可用库存信息
-			HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById(context,conn,lpn,"未找到可用于上架的容器条码");
+			HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById(context,lpn,"未找到可用于上架的容器条码");
 
 			String storerKey=idHashMap.get("STORERKEY");
 			String sku=idHashMap.get("SKU");
@@ -91,13 +91,11 @@ public class GetPutawayByLPN extends LegacyBaseService {
 			String packKey=idHashMap.get("PACKKEY");
 
 
-			String toBePutawayCount = LegacyDBHelper.GetValue(context, conn
-					, "SELECT COUNT(1) FROM LOTXLOCXID A,LOC C WHERE A.LOC=C.LOC AND A.QTY>0 AND C.PUTAWAYZONE='DOCK' AND A.LOT=?", new String[]{lot}, "0");
-			String allPutawayCount = LegacyDBHelper.GetValue(context, conn
-					, "SELECT COUNT(1) FROM LOTXLOCXID A WHERE A.QTY>0 AND A.LOT=?", new String[]{lot}, "0");
+			String toBePutawayCount = DBHelper.getValue(context					, "SELECT COUNT(1) FROM LOTXLOCXID A,LOC C WHERE A.LOC=C.LOC AND A.QTY>0 AND C.PUTAWAYZONE='DOCK' AND A.LOT=?", new String[]{lot}, "0");
+			String allPutawayCount = DBHelper.getValue(context					, "SELECT COUNT(1) FROM LOTXLOCXID A WHERE A.QTY>0 AND A.LOT=?", new String[]{lot}, "0");
 			String totalText = toBePutawayCount + " / " + allPutawayCount;
 
-//			String[] IDs = XtSql.GetValueList(context, conn, "select GROSSWGT,TAREWGT,NETWGT from IDNOTES where ID=?", new String[]{lpn});
+//			String[] IDs = XtSql.GetValueList(context, "select GROSSWGT,TAREWGT,NETWGT from IDNOTES where ID=?", new String[]{lpn});
 //			String weight = "";
 //			if (IDs != null) {
 //				weight = trimZerosAndToStr(XtUtils.Nz(idHashMap.get("GROSSWGT"), "0")) + XtUtils.Nz(uom, "")
@@ -106,7 +104,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 //			}
 
 			String weight;
-			if(CDSysSet.enableLabelWgt(context,conn)) {
+			if(CDSysSet.enableLabelWgt(context)) {
 				weight = trimZerosAndToStr(LegecyUtilHelper.Nz(idHashMap.get("GROSSWGT"), "0")) + LegecyUtilHelper.Nz(uom, "")
 						+ " / " + trimZerosAndToStr(LegecyUtilHelper.Nz(idHashMap.get("TAREWGT"), "0")) + LegecyUtilHelper.Nz(uom, "")
 						+ " / " + trimZerosAndToStr(LegecyUtilHelper.Nz(idHashMap.get("NETWGT"), "0")) + LegecyUtilHelper.Nz(uom, "");
@@ -122,8 +120,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 			String TOZONELIST1 = "";
 
 			if ("Y".equals(isMultizones)) {
-				String count = (String) DBHelper.getValue(context, conn
-						, "SELECT COUNT(1) FROM LOC WHERE PUTAWAYZONE='DOCK' AND LOC=?", new Object[]{fromLoc}, "0");
+				String count = (String) DBHelper.getValue(context						, "SELECT COUNT(1) FROM LOC WHERE PUTAWAYZONE='DOCK' AND LOC=?", new Object[]{fromLoc}, "0");
 				if (count.equals("0")) throw new Exception("未找到库房 " + fromLoc + "，请确认该库房隶属于待上架区（DOCK）");
 
 				//项目料不做上架建议
@@ -132,7 +129,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 
 					List<String> searchZoneArray = null;
 					//Get SKU configured multiple zone list
-					String zones = LegacyDBHelper.GetValue(context, conn, "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
+					String zones = DBHelper.getValue(context, "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
 							, new String[]{storerKey, sku}, "");
 
 					if (UtilHelper.isEmpty(zones)) {
@@ -197,7 +194,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 							TOZONELIST1 += ",";
 						}
 						TOZONELIST += candidateZoneList.get(i);
-						TOZONELIST1 += LegacyDBHelper.GetValue(context, conn, "SELECT DESCR FROM PUTAWAYZONE WHERE PUTAWAYZONE=?", new String[]{candidateZoneList.get(i)}, candidateZoneList.get(i));
+						TOZONELIST1 += DBHelper.getValue(context, "SELECT DESCR FROM PUTAWAYZONE WHERE PUTAWAYZONE=?", new String[]{candidateZoneList.get(i)}, candidateZoneList.get(i));
 					}
 
 				}
@@ -222,7 +219,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 
 
 		    //--------------------------------------------------------------------------
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 
@@ -259,7 +256,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 		}
 		catch (Exception e)
 		{
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+			
 			if ( e instanceof FulfillLogicException )
 				throw (FulfillLogicException)e;
 			else

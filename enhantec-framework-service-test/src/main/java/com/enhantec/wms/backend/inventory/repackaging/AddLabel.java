@@ -44,12 +44,12 @@ public class AddLabel extends LegacyBaseService {
     {
         String userid = context.getUserID();
 
-        Connection conn = null;
+
 
 
         try
         {
-            conn = context.getConnection();
+
             final String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             final String orderLineNumber = serviceDataHolder.getInputDataAsMap().getString("ORDERLINENUMBER");
             final String lottable06= serviceDataHolder.getInputDataAsMap().getString("LOTTABLE06");
@@ -66,7 +66,7 @@ public class AddLabel extends LegacyBaseService {
             if (UtilHelper.isEmpty(uom)) throw new Exception("单位不能为空");
 
 
-            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(context,conn,orderKey,orderLineNumber);
+            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(context,orderKey,orderLineNumber);
             if(isInRepackProcess) ExceptionHelper.throwRfFulfillLogicException("分装进行中，不允许进行修改");
 
 
@@ -77,12 +77,12 @@ public class AddLabel extends LegacyBaseService {
                 ExceptionHelper.throwRfFulfillLogicException("输入的毛皮净重不匹配");
             }
 
-            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,conn,orderKey,orderLineNumber,true);
-            HashMap<String,String>  skuHashMap = SKU.findById(context,conn,orderDetailHashMap.get("SKU"),true);
+            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,orderKey,orderLineNumber,true);
+            HashMap<String,String>  skuHashMap = SKU.findById(context,orderDetailHashMap.get("SKU"),true);
 
-            BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty(context, conn, skuHashMap.get("PACKKEY"), uom, grossWgtDecimal);
-            BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty(context, conn, skuHashMap.get("PACKKEY"), uom, tareWgtDecimal);
-            BigDecimal stdNetWgtDecimal = UOM.UOMQty2StdQty(context, conn, skuHashMap.get("PACKKEY"), uom, netWgtDecimal);
+            BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty(context, skuHashMap.get("PACKKEY"), uom, grossWgtDecimal);
+            BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty(context, skuHashMap.get("PACKKEY"), uom, tareWgtDecimal);
+            BigDecimal stdNetWgtDecimal = UOM.UOMQty2StdQty(context, skuHashMap.get("PACKKEY"), uom, netWgtDecimal);
 
 
             String currentRepackReceiptKey = orderDetailHashMap.get("SUSR1");//当前分装入库单号
@@ -90,21 +90,21 @@ public class AddLabel extends LegacyBaseService {
 
             if(UtilHelper.isEmpty(currentPackLoc)) ExceptionHelper.throwRfFulfillLogicException("数据异常，找不到订单行关联的分装间");
 
-            String storerKey= LegacyDBHelper.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
-            String repackReceiptType= LegacyDBHelper.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKRECT"}, "");
-            // String repackOrderType= XtSql.GetValue(context, conn, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKORDT"}, "");
+            String storerKey= DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+            String repackReceiptType= DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKRECT"}, "");
+            // String repackOrderType= XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKORDT"}, "");
             if(UtilHelper.isEmpty(repackReceiptType)) ExceptionHelper.throwRfFulfillLogicException("分装入库单类型代码未设置");
 
             if(UtilHelper.isEmpty(currentRepackReceiptKey)){
 
-                currentRepackReceiptKey= LegacyDBHelper.GetNCounterBill(context, conn, "RECEIPT");
+                currentRepackReceiptKey= LegacyDBHelper.GetNCounterBill(context, "RECEIPT");
 
-                LinkedHashMap<String,String> RECEIPT=new LinkedHashMap<String,String>();
+                HashMap<String,String> RECEIPT=new HashMap<String,String>();
                 RECEIPT.put("ADDWHO", userid);
                 RECEIPT.put("EDITWHO", userid);
                 RECEIPT.put("RECEIPTKEY", currentRepackReceiptKey);
                 //生成分装单号
-                String repackExternReceiptKey = IdGenerationHelper.generateID(context, conn, userid,orderKey+"F",2);
+                String repackExternReceiptKey = IdGenerationHelper.generateID(context, userid,orderKey+"F",2);
                 RECEIPT.put("EXTERNRECEIPTKEY", repackExternReceiptKey);
                 RECEIPT.put("STATUS", "0");
                 RECEIPT.put("ALLOWAUTORECEIPT", "0");
@@ -114,20 +114,20 @@ public class AddLabel extends LegacyBaseService {
                 RECEIPT.put("SUSR2", lottable06);//当前ASN的分装批次号
                 RECEIPT.put("SUSR3", currentPackLoc);//分装间
                 RECEIPT.put("SUSR4", orderKey+orderLineNumber);//分装单关联的领料出库订单号+行号
-                LegacyDBHelper.ExecInsert(context, conn, "RECEIPT", RECEIPT);
+                LegacyDBHelper.ExecInsert(context, "RECEIPT", RECEIPT);
 
-                DBHelper.executeUpdate(context,conn,"UPDATE ORDERDETAIL SET SUSR1 = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
+                DBHelper.executeUpdate(context,"UPDATE ORDERDETAIL SET SUSR1 = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
                      currentRepackReceiptKey,  orderKey ,  orderLineNumber });
 
             }else{
-                HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(context,conn,currentRepackReceiptKey,true);
+                HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(context,currentRepackReceiptKey,true);
                 //RECEIPT.SUSR2 当前进行的分装批次号
                 if(!UtilHelper.equals(receiptHashMap.get("SUSR2"),lottable06)) ExceptionHelper.throwRfFulfillLogicException("当前分装进行中的批次为"+receiptHashMap.get("SUSR2")+"，请先完成该批次分装");
 
             }
 
             //分装入库单行号
-            Object preReceiptLineNumberObj = DBHelper.getValue(context,conn,"SELECT MAX(RECEIPTLINENUMBER) FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
+            Object preReceiptLineNumberObj = DBHelper.getValue(context,"SELECT MAX(RECEIPTLINENUMBER) FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
                 new Object[]{currentRepackReceiptKey},"");
 
             int receiptLineNumberInt = preReceiptLineNumberObj == null ? 1 : Integer.parseInt(preReceiptLineNumberObj.toString())+1;
@@ -151,7 +151,7 @@ public class AddLabel extends LegacyBaseService {
 				E批属性12	原材料-取样日期/成品-生产日期
 			*/
 
-            HashMap<String,String> lpnInfo=DBHelper.getRecord(context, conn,
+            HashMap<String,String> lpnInfo=DBHelper.getRecord(context,
                     " SELECT TOP 1 s.SKU, s.DESCR SKUDESCR,s.PACKKEY, s.COMMODITYCLASS STORAGECONDITIONS,id.TAREWGT,id.ISOPENED, " +
                             "id.BARRELNUMBER, id.TOTALBARREL, id.barreldescr BARRELDESCR, " +
                             "id.ORIGINALGROSSWGT, id.ORIGINALTAREWGT, id.ORIGINALNETWGT, id.PROJECTCODE, " +
@@ -174,7 +174,7 @@ public class AddLabel extends LegacyBaseService {
 
             String suppilerName = " ";
             if(!UtilHelper.isEmpty(lpnInfo.get("ELOTTABLE08"))) {
-                HashMap<String, String> supplierInfo = DBHelper.getRecord(context, conn,
+                HashMap<String, String> supplierInfo = DBHelper.getRecord(context,
                         "SELECT * FROM STORER WHERE TYPE = '5' AND STORERKEY = ? "
                         , new Object[]{lpnInfo.get("ELOTTABLE08")},"供应商信息");
                 if (supplierInfo == null) throw new Exception("未找到供应商" + lpnInfo.get("ELOTTABLE08") + "");
@@ -184,9 +184,9 @@ public class AddLabel extends LegacyBaseService {
             }
 
             //分装条码自动生成，生成规则：批号+F+001，分装物料批次号+F+3位流水。
-            String newLpn = IdGenerationHelper.generateLpn(context,conn, lottable06+"F");
+            String newLpn = IdGenerationHelper.generateLpn(context, lottable06+"F");
 
-            LinkedHashMap<String,String> receiptDetail=new LinkedHashMap<String,String>();
+            HashMap<String,String> receiptDetail=new HashMap<String,String>();
             receiptDetail.put("STORERKEY", storerKey);
             receiptDetail.put("SKU", lpnInfo.get("SKU"));
             receiptDetail.put("RECEIPTKEY", currentRepackReceiptKey);
@@ -228,11 +228,11 @@ public class AddLabel extends LegacyBaseService {
             receiptDetail.put("ELOTTABLE11", lpnInfo.get("ELOTTABLE11"));
             receiptDetail.put("ELOTTABLE12", lpnInfo.get("ELOTTABLE12"));
 
-            LegacyDBHelper.ExecInsert(context, conn, "RECEIPTDETAIL", receiptDetail);
+            LegacyDBHelper.ExecInsert(context, "RECEIPTDETAIL", receiptDetail);
 
             //打印分装标签
             PrintHelper.printLPNByReceiptLineNumber(
-                        context, conn,
+                        context,
                         receiptDetail.get("RECEIPTKEY"),
                         receiptDetail.get("RECEIPTLINENUMBER"),
                         Labels.LPN_REPACK,
@@ -266,7 +266,7 @@ public class AddLabel extends LegacyBaseService {
             UDTRN.TITLE07="皮重/数量";    UDTRN.CONTENT07=tareWgt;
 
 
-            UDTRN.Insert(context, conn, userid);
+            UDTRN.Insert(context, userid);
 
 
             ServiceDataMap theOutDO = new ServiceDataMap();
@@ -278,13 +278,13 @@ public class AddLabel extends LegacyBaseService {
         }
         catch (Exception e)
         {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
             if ( e instanceof FulfillLogicException)
                 throw (FulfillLogicException)e;
             else
                 throw new FulfillLogicException(e.getMessage());
         }finally {
-            try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
+            
         }
 
     }

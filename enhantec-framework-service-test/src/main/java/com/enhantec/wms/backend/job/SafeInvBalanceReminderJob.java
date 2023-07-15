@@ -27,15 +27,15 @@ public class SafeInvBalanceReminderJob extends LegacyBaseService {
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		String userid = context.getUserID();  //当用户
-		Connection conn = context.getConnection();  //取数据库连接
+  //取数据库连接
 		try
 		{
-			DBHelper.executeUpdate(context, conn,
+			DBHelper.executeUpdate(context,
 					"DELETE FROM REMINDER WHERE REMINDERTYPE = ? "
 					, new Object[]{
 							Const.SKU_SAFE_INV_BALANCE_TYPE
 					});
-			List<HashMap<String,String>> list =  DBHelper.executeQuery(context, conn,
+			List<HashMap<String,String>> list =  DBHelper.executeQuery(context,
 					"select s.AVAIL_QTY ,s2.TOTALAVAILABLE,s.SKU from SKU s ,( select sum((QTY-QTYPICKED-QTYALLOCATED-QTYONHOLD)) as TOTALAVAILABLE,l.SKU from LOT l ,V_LOTATTRIBUTE vl" +
 							" where l.LOT=vl.LOT  GROUP BY l.SKU ) s2 " +
 							" where s2.sku = s.SKU  and s.AVAIL_QTY >(s2.TOTALAVAILABLE - s.AVAIL_QTY)  ",
@@ -44,7 +44,7 @@ public class SafeInvBalanceReminderJob extends LegacyBaseService {
 			if(list.size()>0) {
 				for (HashMap<String,String> temp : list) {
 
-					DBHelper.executeUpdate(context, conn,
+					DBHelper.executeUpdate(context,
 							"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 							, new Object[]{
 									Const.SKU_SAFE_INV_BALANCE_TYPE,
@@ -62,15 +62,12 @@ public class SafeInvBalanceReminderJob extends LegacyBaseService {
 
 		}
 		catch (Exception e)
-		{//如果出错,先关闭数据库连接,再按系统要求转换成标准的错误类型抛出错误
-			try	{	context.releaseConnection(conn); 	}	catch (Exception e1) {	e1.printStackTrace();	}
-
+		{
 			if ( e instanceof FulfillLogicException)
 				throw (FulfillLogicException)e;
 			else
 				throw new FulfillLogicException(e.getMessage());
 		}finally {
-			try	{	context.releaseConnection(conn); }	catch (Exception e1) {		}
 		}
 
 
