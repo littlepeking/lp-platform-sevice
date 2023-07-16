@@ -32,19 +32,4 @@ public class Context {
     public JdbcTemplate getJdbcTemplate(){
         return jdbcTemplate;
     }
-
-
-    //public Connection getConnection() {
-//        return  null;
-//    }
-
-    public void releaseStatement(Statement statement) {
-    }
-
-    public void releaseResultSet(ResultSet resultSet) {
-    }
-
-    public void releaseConnection(Connection connection) {
-    }
-
 }

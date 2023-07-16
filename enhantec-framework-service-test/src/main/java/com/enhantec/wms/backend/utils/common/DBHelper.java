@@ -555,15 +555,6 @@ public class DBHelper {
         return list;
     }
 
-    public static void release(Context context, Statement statement){
-        try { if(statement!=null ) context.releaseStatement(statement);  } catch (Exception e) {}
-    }
-
-
-    public static void releaseNativeConnection(Connection connection){
-        try { if(connection!=null )  connection.close();  } catch (Exception e) {}
-    }
-
 
     public static Object getValue(ResultSet qqResultSet, int i) {
        throw new RuntimeException("not implement");
