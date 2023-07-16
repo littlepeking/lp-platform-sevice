@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.enhantec.framework.common.utils.DSConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,15 +44,15 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class MultiDataSourceConfig {
-    @Value("${spring.datasource.dynamic.datasource.admin.driver-class-name}")
+    @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
-    @Value("${spring.datasource.dynamic.datasource.admin.url}")
+    @Value("${spring.datasource.url}")
     private String url;
-    @Value("${spring.datasource.dynamic.datasource.admin.orgUrlTemplate}")
+    @Value("${spring.datasource.orgUrlTemplate}")
     private String orgUrlTemplate;
-    @Value("${spring.datasource.dynamic.datasource.admin.username}")
+    @Value("${spring.datasource.username}")
     private String username;
-    @Value("${spring.datasource.dynamic.datasource.admin.password}")
+    @Value("${spring.datasource.password}")
     private String password;
 
     public static String DATA_SOURCE_ORG_PREFIX = "ORG__";
@@ -63,34 +64,50 @@ public class MultiDataSourceConfig {
             @Override
             protected Map<String, DataSourceProperty> executeStmt(Statement statement)
                     throws SQLException {
+
                 Map<String, DataSourceProperty> map = new HashMap<>();
 
+                //Add admin datasource
+                DataSourceProperty propertyAdmin = new DataSourceProperty();
+                propertyAdmin.setUsername(username);
+                propertyAdmin.setPassword(password);
+                propertyAdmin.setUrl(url);
+                propertyAdmin.setDriverClassName(driverClassName);
+                map.put(DSConstants.DS_ADMIN, propertyAdmin);
+                log.info("Loaded SQLServer datasource for admin");
+                ////////
+
+                //Add ORG datasources
                 ResultSet rs = statement.executeQuery("select * from EH_ORGANIZATION");
+                if(driverClassName.contains("sqlserver")){
 
-                while (rs.next()) {
-                    String connectionStringParams = rs.getString("CONNECTION_STRING_PARAMS");
-                    if(driverClassName.contains("sqlserver")){
-                        if(connectionStringParams !=null) {
-                            String[] paramsArray = connectionStringParams.split(";;;");
+                        while (rs.next()) {
+                            String connectionStringParams = rs.getString("CONNECTION_STRING_PARAMS");
 
-                            if(paramsArray.length!=2)
-                                throw new RuntimeException("Database connection string parameters is incorrect: SQLServer need 2 parameters, string format should be: username;;;password. Parameter value is: "+connectionStringParams);
+                            if (connectionStringParams != null) {
+                                String[] paramsArray = connectionStringParams.split(";;;");
 
-                            String orgId = rs.getString("ID");
-                            DataSourceProperty property = new DataSourceProperty();
-                            property.setUsername(paramsArray[0]);
-                            property.setPassword(paramsArray[1]);
+                                if (paramsArray.length != 2)
+                                    throw new RuntimeException("Database connection string parameters is incorrect: SQLServer need 2 parameters, string format should be: username;;;password. Parameter value is: " + connectionStringParams);
 
-                            if(StringUtils.isEmpty(orgUrlTemplate)){
-                                orgUrlTemplate = url;
+                                String orgId = rs.getString("ID");
+                                DataSourceProperty property = new DataSourceProperty();
+                                property.setUsername(paramsArray[0]);
+                                property.setPassword(paramsArray[1]);
+
+                                if (StringUtils.isEmpty(orgUrlTemplate)) {
+                                    orgUrlTemplate = url;
+                                }
+
+                                property.setUrl(orgUrlTemplate);
+                                property.setDriverClassName(driverClassName);
+                                map.put(DATA_SOURCE_ORG_PREFIX + orgId, property);
+                                log.info("Loaded SQLServer datasource for org {} ", orgId);
                             }
-
-                            property.setUrl(orgUrlTemplate);
-                            property.setDriverClassName(driverClassName);
-                            map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
-                            log.info("Loaded SQLServer datasource for org {} ", orgId);
                         }
-                    }else if(driverClassName.contains("mysql")){
+                }else if(driverClassName.contains("mysql")){
+                        String connectionStringParams = rs.getString("CONNECTION_STRING_PARAMS");
+                        while (rs.next()) {
                         if(connectionStringParams !=null) {
                             String orgId = rs.getString("ID");
                             DataSourceProperty property = new DataSourceProperty();
