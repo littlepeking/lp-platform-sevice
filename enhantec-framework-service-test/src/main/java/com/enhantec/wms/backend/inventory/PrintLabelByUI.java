@@ -6,7 +6,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  --注册方法
@@ -36,7 +36,7 @@ public class PrintLabelByUI extends LegacyBaseService {
             String copies = serviceDataHolder.getInputDataAsMap().getString("copies");
             String[] lpnArray=lpns.split(",");
             for (String lpn : lpnArray){
-                PrintHelper.printLPNByIDNotes(context, lpn, Labels.LPN_UI_SY, printerName, copies, "物料标签");
+                PrintHelper.printLPNByIDNotes( lpn, Labels.LPN_UI_SY, printerName, copies, "物料标签");
             }
 
         }catch (Exception e) {

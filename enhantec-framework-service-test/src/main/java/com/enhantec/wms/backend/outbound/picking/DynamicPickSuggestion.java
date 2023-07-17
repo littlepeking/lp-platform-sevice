@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -41,21 +41,21 @@ public class DynamicPickSuggestion extends LegacyBaseService {
 
 
 
-            HashMap<String,String> orderInfo = Orders.findByOrderKey(context,orderKey,true);
-            HashMap<String,String> orderDetailInfo = Orders.findOrderDetailByKey(context,orderKey, orderLineNumber,true);
-            HashMap<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey(context,"ORDERTYPE",orderInfo.get("TYPE"));
+            HashMap<String,String> orderInfo = Orders.findByOrderKey(orderKey,true);
+            HashMap<String,String> orderDetailInfo = Orders.findOrderDetailByKey(orderKey, orderLineNumber,true);
+            HashMap<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey("ORDERTYPE",orderInfo.get("TYPE"));
 
             String sku = orderDetailInfo.get("SKU");
 
-            boolean isSerialControl = SKU.isSerialControl(context,sku);
+            boolean isSerialControl = SKU.isSerialControl(sku);
 
-            HashMap<String,String> skuInfo = SKU.findById(context,sku,true);
+            HashMap<String,String> skuInfo = SKU.findById(sku,true);
 
-            String mainUOM = UOM.getStdUOM(context, skuInfo.get("PACKKEY"));
+            String mainUOM = UOM.getStdUOM( skuInfo.get("PACKKEY"));
 
 
 
-            List<HashMap<String,String>> demandAllocationList = DemandAllocation.findByOrderLineNumber(context, orderKey,orderLineNumber, false);
+            List<HashMap<String,String>> demandAllocationList = DemandAllocation.findByOrderLineNumber( orderKey,orderLineNumber, false);
 //
 //            if(demandAllocationList.size()==0){
 //                //ExceptionHelper.throwRfFulfillLogicException("当前订单分配的全部拣货任务已完成");
@@ -83,7 +83,7 @@ public class DynamicPickSuggestion extends LegacyBaseService {
                     "");
             querySqlSB.append(" AND l.LOC = c.LOC AND c.LOC<>'PICKTO' ");
 
-            HashMap<String,String> zoneInfo = CodeLookup.getCodeLookupByKey(context, "SYSSET","PACKZONE");
+            HashMap<String,String> zoneInfo = CodeLookup.getCodeLookupByKey( "SYSSET","PACKZONE");
 
             if(!UtilHelper.isEmpty(zoneInfo.get("UDF1"))) {
                 //如果设置了分装区则过滤掉分装区的库位
@@ -119,7 +119,7 @@ public class DynamicPickSuggestion extends LegacyBaseService {
 
             querySqlSB.append(orderByClause);
 
-            List<HashMap<String, String>> list = DBHelper.executeQuery(context, querySqlSB.toString(), new Object[]{});
+            List<HashMap<String, String>> list = DBHelper.executeQuery( querySqlSB.toString(), new Object[]{});
 
             if(list.size()==0) ExceptionHelper.throwRfFulfillLogicException("存在需求分配记录，但未找到可供拣货的容器，该问题可能由于在分配后库存状态发生变化导致。请在工作台删除需求分配记录后重新分配后再次尝试。");
 
@@ -135,7 +135,7 @@ public class DynamicPickSuggestion extends LegacyBaseService {
                 x.put("QTYALLOCATED",daQtyAllocated);
                 //为零头库存增加唯一码信息
                 if(isSerialControl && UtilHelper.decimalStrCompare(x.get("LPNQTY"),"1")==0){
-                    List<HashMap<String,String>>  snList = SerialInventory.findByLpn(context,x.get("ID"),true);
+                    List<HashMap<String,String>>  snList = SerialInventory.findByLpn(x.get("ID"),true);
                     if(snList.size()!=1) ExceptionHelper.throwRfFulfillLogicException("箱号"+x.get("ID")+"的库存数量为1，但对应的唯一码库存的数量为"+snList.size()+ "，请联系管理员");
                     x.put("SERIALNUMBER",snList.get(0).get("SERIALNUMBERLONG"));
                 }else {

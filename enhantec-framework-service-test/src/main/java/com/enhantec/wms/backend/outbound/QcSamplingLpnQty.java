@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -41,10 +41,10 @@ public class QcSamplingLpnQty extends LegacyBaseService
 		//public RrDateTime currentDate;
 		//this.currentDate = UtilHelper.getCurrentDate();
 
-//		context = (Context)processData.getInputDataMap();
+//		context = ()processData.getInputDataMap();
 //		EXEDataObjectprocessData.getInputDataMap() = (EXEDataObject)context.theEXEDataObjectStack.stackList.get(1);1
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -68,28 +68,28 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			
 			String orderlinenumber=null;
 
-			//String STORERKEY=XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
+			//String STORERKEY=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
 
-			String Status= DBHelper.getValue(context					, "select Status from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE}, "");
+			String Status= DBHelper.getValue( "select Status from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE}, "");
 			if (LegecyUtilHelper.isNull(Status)) throw new Exception("未找到在库取样单("+ORDERKEY+")");
 			if (Status.compareTo("90")>=0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭,不能继续操作");
 
 
-			HashMap<String,String> odMap= DBHelper.getRecord(context, "SELECT OPENQTY, UOM "
+			HashMap<String,String> odMap= DBHelper.getRecord( "SELECT OPENQTY, UOM "
 							+ " FROM ORDERDETAIL WHERE ORDERKEY=? AND IDREQUIRED=?"
 					, new String[] {ORDERKEY,LPN},"");
 
 			if(!odMap.isEmpty()) ExceptionHelper.throwRfFulfillLogicException("该容器条码已存在于本取样单中，请删除后再添加");
 
-			HashMap<String,String> mKC = LotxLocxId.findAvailInvByLocId(context, LOC, LPN, false,true);
+			HashMap<String,String> mKC = LotxLocxId.findAvailInvByLocId( LOC, LPN, false,true);
 			if(!LOTTABLE06.equals(mKC.get("LOTTABLE06"))) throw new Exception("容器条码和取样批次不匹配");
 
 			String packKey=mKC.get("PACKKEY");
 			
-			//String PUTAWAYZONE=XtSql.GetValue(context, "select PUTAWAYZONE from loc where loc=?", new String[]{LOC}, "");
+			//String PUTAWAYZONE=XtSql.GetValue( "select PUTAWAYZONE from loc where loc=?", new String[]{LOC}, "");
 			//if (PUTAWAYZONE.equals("DOCK")) throw new Exception("不允许在收货库位取样,请先上架");
 			
-//			HashMap<String,String> mIDNOTES=XtSql.GetValueMap(context, "SELECT PACKKEY,UOM,BARRELDESCR FROM IDNOTES WHERE ID=?", new String[]{LPN});
+//			HashMap<String,String> mIDNOTES=XtSql.GetValueMap( "SELECT PACKKEY,UOM,BARRELDESCR FROM IDNOTES WHERE ID=?", new String[]{LPN});
 //			if (mIDNOTES.isEmpty()) throw new Exception("未找到桶信息");
 			
 			String STORERKEY=mKC.get("STORERKEY");
@@ -101,15 +101,15 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			//if (bOpenQty.compareTo(bOriginalQty)>0) throw new Exception("扣样量不允许大于取样量");
 
 			//保留此句，为了今后兼容取样时的扣样计量单位不是主单位的情况
-			BigDecimal baseUomOpenQty= UOM.UOMQty2StdQty(context, packKey, uom,bOpenQty);
+			BigDecimal baseUomOpenQty= UOM.UOMQty2StdQty( packKey, uom,bOpenQty);
 
 			if (baseUomOpenQty.compareTo(availableQty)>0) throw new Exception("扣样量不允许大于可用库存");
-			orderlinenumber= DBHelper.getValue(context, "select max(orderlinenumber) from orderdetail where orderkey=?"
+			orderlinenumber= DBHelper.getValue( "select max(orderlinenumber) from orderdetail where orderkey=?"
 					,new String[]{ORDERKEY}, "0");
 			orderlinenumber=Integer.toString(Integer.parseInt(orderlinenumber)+1);
 			while (orderlinenumber.length()<5) orderlinenumber="0"+orderlinenumber;
 
-			HashMap<String, String> orderInfo = Orders.findByOrderKey(context,ORDERKEY,true);
+			HashMap<String, String> orderInfo = Orders.findByOrderKey(ORDERKEY,true);
 			
 			HashMap<String,String> OrderDetail=new HashMap<String,String>();
 			OrderDetail.put("ADDWHO", userid);
@@ -141,7 +141,7 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			//OrderDetail.put("SUSR3", "取样库位:"+LOC);
 			//OrderDetail.put("NEWALLOCATIONSTRATEGY", "STD");
 			
-			LegacyDBHelper.ExecInsert(context, "orderdetail", OrderDetail);
+			LegacyDBHelper.ExecInsert( "orderdetail", OrderDetail);
 			
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -161,13 +161,13 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			UDTRN.TITLE08="扣样量";    UDTRN.CONTENT08=openQty;
 			UDTRN.TITLE09="扣样计量单位";    UDTRN.CONTENT09=uom;
 		    UDTRN.TITLE10="库位";    UDTRN.CONTENT10=LOC;
-		    UDTRN.Insert(context, userid);
+		    UDTRN.Insert( userid);
 			
 				
 			//----------------
-            //String CountLpn1=XtSql.GetValue(context, "select count(1) from (select distinct IDREQUIRED from ORDERDETAIL where orderkey=?) a",new String[]{ORDERKEY},"");
+            //String CountLpn1=XtSql.GetValue( "select count(1) from (select distinct IDREQUIRED from ORDERDETAIL where orderkey=?) a",new String[]{ORDERKEY},"");
 			//            TOTAL1="取样容器("+CountLpn1+")";
-//			List<HashMap<String,String>> mapList =XtSql.GetRecordMap(context, "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY});
+//			List<HashMap<String,String>> mapList =XtSql.GetRecordMap( "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY});
 //
 //			Function<HashMap<String,String>, BigDecimal> calcORIGINALQTY = e-> {
 //				try {
@@ -190,8 +190,8 @@ public class QcSamplingLpnQty extends LegacyBaseService
 //				TOTAL2 = String.valueOf(mapList.stream().map(calcOPENQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //			}
 
-			TOTAL1= DBHelper.getValue(context, "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
-			TOTAL3= DBHelper.getValue(context, "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL1= DBHelper.getValue( "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL3= DBHelper.getValue( "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 			theOutDO.setAttribValue("TOTAL1", TOTAL1);//取样量合计

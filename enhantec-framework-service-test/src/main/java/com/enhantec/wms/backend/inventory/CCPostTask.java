@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 /**
@@ -36,15 +36,15 @@ public class CCPostTask extends LegacyBaseService {
 
             String taskDetailKey = serviceDataHolder.getInputDataAsMap().getString("taskdetailkey");
 
-            HashMap<String,String> taskDetailHashMap = TaskDetail.findById(context,taskDetailKey,true);
+            HashMap<String,String> taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
 
             String storerKey =  taskDetailHashMap.get("STORERKEY");
             String sku =  taskDetailHashMap.get("SKU");
-            HashMap<String,String>  skuHashMap = SKU.findById(context,sku,true);
+            HashMap<String,String>  skuHashMap = SKU.findById(sku,true);
             String lot =  taskDetailHashMap.get("LOT");
             String loc =  taskDetailHashMap.get("FROMLOC");
             String id =  taskDetailHashMap.get("FROMID");
-            HashMap<String,String> idNotesInfo = IDNotes.findById(context,id,true);
+            HashMap<String,String> idNotesInfo = IDNotes.findById(id,true);
             String packKey =  idNotesInfo.get("PACKKEY");
             String uom =   serviceDataHolder.getInputDataAsMap().getString("uom");
             String qty =  serviceDataHolder.getInputDataAsMap().getString("ccqty");
@@ -61,7 +61,7 @@ public class CCPostTask extends LegacyBaseService {
             serviceDataHolder.getInputDataAsMap().setAttribValue("uom",uom);
             serviceDataHolder.getInputDataAsMap().setAttribValue("qty",qty);
 
-            ServiceHelper.executeService(context, "NSPRFTCC01", serviceDataHolder);
+            ServiceHelper.executeService( "NSPRFTCC01", serviceDataHolder);
 //            Task.setAppContext("RFRETURNCONTEXT",null);
 
             //sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,ttm,
@@ -83,12 +83,12 @@ public class CCPostTask extends LegacyBaseService {
             newDo.setAttribValue("packKey",packKey);
             newDo.setAttribValue("uom",uom);
             newDo.setAttribValue("qty",qty);
-            ServiceHelper.executeService(context,"NSPRFTCC02", serviceDataHolder);
+            ServiceHelper.executeService("NSPRFTCC02", serviceDataHolder);
 
-            DBHelper.executeUpdate(context,"update cc set status ='9' where cckey =? ",new Object[]{
+            DBHelper.executeUpdate("update cc set status ='9' where cckey =? ",new Object[]{
                     ccKey
             });
-            DBHelper.executeUpdate(context,"update ccdetail set status ='9' where cckey =? ",new Object[]{
+            DBHelper.executeUpdate("update ccdetail set status ='9' where cckey =? ",new Object[]{
                     ccKey
             });
 

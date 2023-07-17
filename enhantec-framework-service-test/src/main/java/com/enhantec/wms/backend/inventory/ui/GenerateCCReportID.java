@@ -7,7 +7,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  * --注册方法
@@ -27,9 +27,9 @@ public class GenerateCCReportID extends LegacyBaseService {
         try {
 
 
-            String reportKey = IdGenerationHelper.generateID(context, "CCREPORTKEY", "", 10);
+            String reportKey = IdGenerationHelper.generateID( "CCREPORTKEY", "", 10);
 
-            DBHelper.executeUpdate(context, "update cc set REPORTKEY = ? where REPORTKEY is null ", new Object[]{
+            DBHelper.executeUpdate( "update cc set REPORTKEY = ? where REPORTKEY is null ", new Object[]{
                     reportKey});
 
         } catch (Exception e) {

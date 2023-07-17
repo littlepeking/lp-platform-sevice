@@ -1,16 +1,16 @@
 package com.enhantec.wms.backend.common.base;
 
 import com.enhantec.wms.backend.common.Const;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class SNHistory {
 
-    public static HashMap<String, String> findBySkuAndSN(Context context, String sku, String serialNumber, boolean checkExist) {
+    public static HashMap<String, String> findBySkuAndSN( String sku, String serialNumber, boolean checkExist) {
 
-        HashMap<String,String> lpnHisInfo= DBHelper.getRecord(context,
+        HashMap<String,String> lpnHisInfo= DBHelper.getRecord(
                 " SELECT TOP 1 " + Const.commonSkuFieldsWithAlias+
                         ",ID.ID, ID.BARRELNUMBER, ID.TOTALBARREL, ID.BARRELDESCR BARRELDESCR, ID.PACKKEY, ID.UOM," +
                         "ID.ORIGINALGROSSWGT, ID.ORIGINALTAREWGT, ID.ORIGINALNETWGT,ID.REGROSSWGT,ID.PROJECTCODE, " +
@@ -24,12 +24,12 @@ public class SNHistory {
     }
 
 //
-//    public static void deleteBySkuAndLpn(Context context, String sku, String lpn) throws FulfillLogicException {
+//    public static void deleteBySkuAndLpn( String sku, String lpn) throws FulfillLogicException {
 //
 //        if(UtilHelper.isEmpty(sku)) ExceptionHelper.throwRfFulfillLogicException("物料代码不能为空");
 //        if(UtilHelper.isEmpty(lpn)) ExceptionHelper.throwRfFulfillLogicException("箱号不能为空");
 //
-//        DBHelper.executeUpdate(context,"DELETE FROM SerialInventoryHistory where sku = ? and id = ?", new Object[]{sku),lpn});
+//        DBHelper.executeUpdate("DELETE FROM SerialInventoryHistory where sku = ? and id = ?", new Object[]{sku),lpn});
 //
 //    }
 

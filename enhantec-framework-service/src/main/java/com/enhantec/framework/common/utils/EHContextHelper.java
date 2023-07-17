@@ -21,6 +21,7 @@ package com.enhantec.framework.common.utils;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.config.EHRequestContextHolder;
+import com.enhantec.framework.config.MultiDataSourceConfig;
 import com.enhantec.framework.security.common.model.EHRole;
 import com.enhantec.framework.security.common.model.EHUser;
 import com.enhantec.framework.security.common.service.EHUserDetailsService;
@@ -81,6 +82,17 @@ public class EHContextHelper {
         return getBean(EHRequestContextHolder.class).getOrgId();
 
     }
+
+    public static String getCurrentDataSource() {
+        EHRequestContextHolder requestContextHolder = EHContextHelper.getBean(EHRequestContextHolder.class);
+        return requestContextHolder.getDataSource();
+    }
+
+
+    public static String getDataSource(String orgId){
+        return MultiDataSourceConfig.DATA_SOURCE_ORG_PREFIX+ orgId;
+    }
+
 
     public static String getLanguageCode(){
 

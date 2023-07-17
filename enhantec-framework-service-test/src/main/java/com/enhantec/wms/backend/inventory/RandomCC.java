@@ -9,7 +9,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  --注册方法
@@ -25,7 +25,7 @@ public class RandomCC extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        String storerKey= DBHelper.getValue(context,"SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?",new Object[]{
+        String storerKey= DBHelper.getValue("SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?",new Object[]{
                 "SYSSET","STORERKEY"},"");
 
         try {
@@ -33,8 +33,8 @@ public class RandomCC extends LegacyBaseService {
             String rfccKey = serviceDataHolder.getInputDataAsMap().getString("CCKEY");
             if ("".equals(rfccKey)) {
                 try {
-                    String cckey = IdGenerationHelper.generateID(context, "", "M", 9);
-                    DBHelper.executeUpdate(context, "insert into CC(whseid,cckey,storerkey,SKU,LOC,ADDWHO,EDITWHO,status)\n" +
+                    String cckey = IdGenerationHelper.generateID( "", "M", 9);
+                    DBHelper.executeUpdate( "insert into CC(whseid,cckey,storerkey,SKU,LOC,ADDWHO,EDITWHO,status)\n" +
                             "           values(?,?,?,?,?,?,?,'9')", new Object[]{serviceDataHolder.getInputDataAsMap().getString("whseid"),
                             cckey,
                             storerKey,
@@ -48,13 +48,13 @@ public class RandomCC extends LegacyBaseService {
                 }
             } else if ("1".equals(serviceDataHolder.getInputDataAsMap().getString("EXISTIN"))) {
                 try {
-                    String ccdetilkey = IdGenerationHelper.generateID(context, "", "MD", 8);
+                    String ccdetilkey = IdGenerationHelper.generateID( "", "MD", 8);
                     String packkey = serviceDataHolder.getInputDataAsMap().getString("PACKKEY");
                     String uom = serviceDataHolder.getInputDataAsMap().getString("UOM");
-                    BigDecimal CCQTY = UOM.UOMQty2StdQty(context, packkey, uom, new BigDecimal(serviceDataHolder.getInputDataAsMap().getString("CCQTY")));
+                    BigDecimal CCQTY = UOM.UOMQty2StdQty( packkey, uom, new BigDecimal(serviceDataHolder.getInputDataAsMap().getString("CCQTY")));
                     BigDecimal Qty = CCQTY.subtract(new BigDecimal((serviceDataHolder.getInputDataAsMap().getString("NETWGT"))));
                     //LPN,LOC,BARRELDESCR,SKU,LOT,NETWGT,NOTES,CCKEY,WHSEID,STORERKEY,CCQTY,EXISTIN,PACKKEY,,UOM
-                    DBHelper.executeUpdate(context, "insert into CCDETAIL " +
+                    DBHelper.executeUpdate( "insert into CCDETAIL " +
                             "(WHSEID,CCKEY,CCDETAILKEY,STORERKEY,SKU,LOT,LOC,ID,QTY,SYSQTY,ADJQTY,ADDWHO,EDITWHO,status)\n" +
                             "          values(?,?,?,?,?,?,?,?,?,?,?,?,?,'9')", new Object[]{serviceDataHolder.getInputDataAsMap().getString("WHSEID"),
                             serviceDataHolder.getInputDataAsMap().getString("CCKEY"),
@@ -74,10 +74,10 @@ public class RandomCC extends LegacyBaseService {
                 }
             } else if ("0".equals(serviceDataHolder.getInputDataAsMap().getString("EXISTIN"))) {
                 try {
-                    String ccdetilkey = IdGenerationHelper.generateID(context, "", "MD", 8);
+                    String ccdetilkey = IdGenerationHelper.generateID( "", "MD", 8);
                     BigDecimal Qty = new BigDecimal(serviceDataHolder.getInputDataAsMap().getString("CCQTY")).subtract(new BigDecimal(serviceDataHolder.getInputDataAsMap().getString("NETWGT")));
                     //LPN,LOC,BARRELDESCR,SKU,LOT,NETWGT,NOTES,CCKEY,WHSEID,STORERKEY,CCQTY,EXISTIN
-                    DBHelper.executeUpdate(context, "insert into CCDETAIL " +
+                    DBHelper.executeUpdate( "insert into CCDETAIL " +
                             "(WHSEID,CCKEY,CCDETAILKEY,ID,QTY,SYSQTY,ADJQTY,ADDWHO,EDITWHO,status,NOTES)\n" +
                             "     values(?,?,?,?,?,?,?,?,?,'9',?)", new Object[]{
                             serviceDataHolder.getInputDataAsMap().getString("WHSEID"),

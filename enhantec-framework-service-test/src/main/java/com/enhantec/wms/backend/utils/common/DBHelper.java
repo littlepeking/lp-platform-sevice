@@ -1,10 +1,13 @@
 package com.enhantec.wms.backend.utils.common;
 
-import com.enhantec.wms.backend.framework.Context;
-import com.enhantec.wms.backend.framework.UserInfo;
+import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.framework.config.EHRequestContextHolder;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.web.context.ContextLoader;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -30,15 +33,15 @@ public class DBHelper {
 //    }
 
 
-    public static <T> T getValue(Context context, String sql, Object[] params, Class<T> type, String errorName) throws DBResourceException {
+    public static <T> T getValue( String sql, Object[] params, Class<T> type, String errorName) throws DBResourceException {
 
-        return getValue(context,sql,params, type, errorName,true);
+        return getValue(sql,params, type, errorName,true);
 
     }
 
-    public static <T> T getValue(Context context,String sql, Object[] params, Class<T> type, String errorName,boolean checkExist) throws DBResourceException{
+    public static <T> T getValue(String sql, Object[] params, Class<T> type, String errorName,boolean checkExist) throws DBResourceException{
 
-        String val = getValue(context,sql,params, errorName,checkExist);
+        String val = getValue(sql,params, errorName,checkExist);
 
         if(val == null ) {
             return null;
@@ -51,9 +54,9 @@ public class DBHelper {
         return null;
     }
 
-    public static String getValue(Context context,String sql, Object[] params) throws DBResourceException{
+    public static String getValue(String sql, Object[] params) throws DBResourceException{
 
-        HashMap<String,String> record = getRecord(context,sql,params);
+        HashMap<String,String> record = getRecord(sql,params);
 
         if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
 
@@ -61,9 +64,9 @@ public class DBHelper {
 
     }
 
-    public static String getValue(Context context,String sql, Object[] params,String errorName) throws DBResourceException{
+    public static String getValue(String sql, Object[] params,String errorName) throws DBResourceException{
 
-        HashMap<String,String> record = getRecord(context,sql,params, errorName,true);
+        HashMap<String,String> record = getRecord(sql,params, errorName,true);
 
         if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
 
@@ -71,9 +74,9 @@ public class DBHelper {
 
     }
 
-    public static String getValue(Context context,String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
+    public static String getValue(String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
 
-        HashMap<String,String> record = getRecord(context,sql,params, errorName,checkExist);
+        HashMap<String,String> record = getRecord(sql,params, errorName,checkExist);
         if(null == record) return null;
 
         if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
@@ -83,31 +86,9 @@ public class DBHelper {
     }
 
 
-    public static String getValue(UserInfo userInfo, String sql, Object[] params, String errorName, boolean checkExist) throws DBResourceException{
+    public static Object getRawValue(String sql, Object[] params) throws DBResourceException{
 
-        HashMap<String,String> record = getRecord(userInfo,sql,params, errorName,checkExist);
-
-        if(null == record) return null;
-
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
-
-        return (String) record.values().toArray()[0];
-
-    }
-
-    public static String getValue(UserInfo userInfo, String sql, Object[] params,String errorName) throws DBResourceException{
-
-        HashMap<String,String> record = getRecord(userInfo,sql,params, errorName,true);
-
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
-
-        return record.values().stream().findFirst().get();
-
-    }
-
-    public static Object getRawValue(Context context,String sql, Object[] params) throws DBResourceException{
-
-        HashMap record = getRawRecord(context,sql,params, "");
+        HashMap record = getRawRecord(sql,params, "");
         if(null == record) return null;
 
         if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
@@ -117,9 +98,9 @@ public class DBHelper {
     }
 
 
-    public static Object getRawValue(Context context,String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
+    public static Object getRawValue(String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
 
-        HashMap record = getRawRecord(context,sql,params, errorName);
+        HashMap record = getRawRecord(sql,params, errorName);
         if(null == record) return null;
 
         if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
@@ -131,16 +112,16 @@ public class DBHelper {
 
     /**
      * 返回一列多行的数据。
-     * @param context
+
      * @param sql
      * @param params
      * @param errorName
      * @return
      * @throws DBResourceException
      */
-    public static List getValueList(Context context, String sql,Object[] params,String errorName)throws DBResourceException{
+    public static List getValueList( String sql,Object[] params,String errorName)throws DBResourceException{
         List result = new ArrayList();
-        List<HashMap<String, String>> list = executeQuery(context, sql, params);
+        List<HashMap<String, String>> list = executeQuery( sql, params);
         for (HashMap<String, String> map : list) {
             if(map.size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询"+errorName+"结果为一列，当前为"+map.size()+"列");
             result.add(map.values().toArray()[0]);
@@ -153,9 +134,9 @@ public class DBHelper {
      *  only used for refector legacy code which without error msg.
      */
     @Deprecated
-    public static List getValueList(Context context, String sql,Object[] params)throws DBResourceException{
+    public static List getValueList( String sql,Object[] params)throws DBResourceException{
         List result = new ArrayList();
-        List<HashMap<String, String>> list = executeQuery(context, sql, params);
+        List<HashMap<String, String>> list = executeQuery( sql, params);
         for (HashMap<String, String> map : list) {
             if(map.size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+map.size()+"列");
             result.add(map.values().toArray()[0]);
@@ -163,11 +144,11 @@ public class DBHelper {
         return result;
     }
 
-    public static HashMap<String,String> getRecordByConditions(Context context,String tableName, HashMap<String,Object> conditionParams,String errorName) throws DBResourceException{
+    public static HashMap<String,String> getRecordByConditions(String tableName, HashMap<String,Object> conditionParams,String errorName) throws DBResourceException{
 
         if(conditionParams == null || conditionParams.size()==0) ExceptionHelper.throwRfFulfillLogicException("查询条件不能为空");
 
-        List<HashMap<String,String>>  list = executeQuery(context, tableName,conditionParams);
+        List<HashMap<String,String>>  list = executeQuery( tableName,conditionParams);
 
         if(list.size()==0)  return null;
         if(list.size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'数据为一行，当前为"+list.size()+"行");
@@ -181,9 +162,9 @@ public class DBHelper {
      *  only used for refector legacy code which without error msg.
      */
     @Deprecated
-    public static HashMap<String,String> getRecord(Context context,String sql, Object[] params) throws DBResourceException{
+    public static HashMap<String,String> getRecord(String sql, Object[] params) throws DBResourceException{
 
-        List<HashMap<String,String>> list = executeQuery(context,sql, Arrays.asList(params));
+        List<HashMap<String,String>> list = executeQuery(sql, Arrays.asList(params));
 
         if(list.size()==0) return null;
         if(list.size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询的数据为一行，当前为"+list.size()+"行");
@@ -193,16 +174,16 @@ public class DBHelper {
 
     /**
      *  return null if record cannot found
-     * @param context
+
      * @param sql
      * @param params
      * @param errorName
      * @return
      * @throws DBResourceException
      */
-    public static HashMap<String,String> getRecord(Context context,String sql, Object[] params,String errorName) throws DBResourceException{
+    public static HashMap<String,String> getRecord(String sql, Object[] params,String errorName) throws DBResourceException{
 
-        List<HashMap<String,String>> list = executeQuery(context,sql, Arrays.asList(params));
+        List<HashMap<String,String>> list = executeQuery(sql, Arrays.asList(params));
 
         if(list.size()==0) return null;
         if(list.size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'的数据为一行，当前为"+list.size()+"行");
@@ -210,23 +191,9 @@ public class DBHelper {
 
     }
 
-    public static HashMap<String,String> getRecord(Context context,String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
+    public static HashMap<String,String> getRecord(String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
 
-        List<HashMap<String,String>> list = executeQuery(context,sql, Arrays.asList(params));
-
-        if(list.size()==0){
-            if(checkExist) ExceptionHelper.throwRfFulfillLogicException("未找到"+errorName);
-            else return null;
-        }
-
-        if(list.size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'的数据为一行，当前为"+list.size()+"行");
-        return list.get(0);
-
-    }
-
-    public static HashMap<String,String> getRecord(UserInfo userInfo, String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
-
-        List<HashMap<String,String>> list = executeQuery(userInfo,sql, Arrays.asList(params));
+        List<HashMap<String,String>> list = executeQuery(sql, Arrays.asList(params));
 
         if(list.size()==0){
             if(checkExist) ExceptionHelper.throwRfFulfillLogicException("未找到"+errorName);
@@ -237,22 +204,20 @@ public class DBHelper {
         return list.get(0);
 
     }
-
-
 
     /**
      *  only used for refactor legacy code which without error msg.
      */
     @Deprecated
-    public static HashMap<String,Object> getRawRecord(Context context,String sql, Object[] params) throws DBResourceException{
+    public static HashMap<String,Object> getRawRecord(String sql, Object[] params) throws DBResourceException{
 
-       return getRawRecord(context,sql,params,"");
+       return getRawRecord(sql,params,"");
 
     }
 
-    public static HashMap<String,Object> getRawRecord(Context context,String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
+    public static HashMap<String,Object> getRawRecord(String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
 
-        List<HashMap<String,Object>> list = executeQueryRawData(context,sql, Arrays.asList(params));
+        List<HashMap<String,Object>> list = executeQueryRawData(sql, Arrays.asList(params));
 
         if(list.size()==0){
             if(checkExist) ExceptionHelper.throwRfFulfillLogicException("未找到"+errorName);
@@ -265,19 +230,19 @@ public class DBHelper {
     }
 
 
-    public static HashMap<String,Object> getRawRecord(Context context,String sql, Object[] params,String errorName) throws DBResourceException{
+    public static HashMap<String,Object> getRawRecord(String sql, Object[] params,String errorName) throws DBResourceException{
 
-       return getRawRecord(context,sql,params,errorName, true);
-
-    }
-
-    public static List<HashMap<String,String>> executeQuery(Context context, String sql, Object[] params) throws DBResourceException{
-
-        return executeQuery(context,sql, Arrays.asList(params));
+       return getRawRecord(sql,params,errorName, true);
 
     }
 
-    public static List<HashMap<String,String>> executeQuery(Context context, String tableName, HashMap<String,Object> conditionParams) throws DBResourceException{
+    public static List<HashMap<String,String>> executeQuery( String sql, Object[] params) throws DBResourceException{
+
+        return executeQuery(sql, Arrays.asList(params));
+
+    }
+
+    public static List<HashMap<String,String>> executeQuery( String tableName, HashMap<String,Object> conditionParams) throws DBResourceException{
 
         if(conditionParams == null || conditionParams.size()==0) ExceptionHelper.throwRfFulfillLogicException("查询条件不能为空");
 
@@ -285,11 +250,11 @@ public class DBHelper {
         conditionParams.entrySet().stream().forEach(entry->whereClauseSB.append(entry.getKey() + " = ? and "));
         String whereClause = whereClauseSB.substring(0, whereClauseSB.length() - 4);
 
-        return executeQuery(context,"select * from "+tableName+" where "+ whereClause, conditionParams.values());
+        return executeQuery("select * from "+tableName+" where "+ whereClause, conditionParams.values());
 
     }
 
-//    public static List<HashMap<String,String>> executeQuery(Context context, String sql, Collection<Object> params) throws DBResourceException{
+//    public static List<HashMap<String,String>> executeQuery( String sql, Collection<Object> params) throws DBResourceException{
 //
 //        PreparedStatement qqPrepStmt1 = null;
 //        ResultSet qqResultSet1 = null;
@@ -312,49 +277,46 @@ public class DBHelper {
 //            SQLException e1=new SQLException(qqSQLException.getMessage());
 //            throw new DBResourceException(e1);
 //        } finally {
-//            DBHelper.release(context, qqResultSet1,qqPrepStmt1,connection);
+//            DBHelper.release( qqResultSet1,qqPrepStmt1,connection);
 //        }
 //
 //    }
-    
 
-    public static List<HashMap<String, String>> executeQuery(Context context, String sql, Collection<Object> params) {
-        return  context.getJdbcTemplate().query(sql, new PreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement preparedStatement) throws SQLException {
-                int index = 1;
-                for (Object param : params) {
-                    preparedStatement.setObject(index, param);
-                    index++;
-                }
+
+    private static List<HashMap<String, String>> convertList(List<HashMap<String, Object>> originalList) {
+        List<HashMap<String, String>> convertedList = new ArrayList<>();
+
+        // Iterate over each element in the original list
+        for (HashMap<String, Object> originalMap : originalList) {
+            // Create a new HashMap to store the converted values
+            HashMap<String, String> convertedMap = new HashMap<>();
+
+            // Iterate over each entry in the original HashMap
+            for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                // Convert the value from Object to String
+                String convertedValue = value ==null? null : value.toString();
+
+                // Add the converted key-value pair to the converted HashMap
+                convertedMap.put(key, convertedValue);
             }
-        }, new ResultSetExtractor<List<HashMap<String, String>>>() {
-            @Override
-            public List<HashMap<String, String>> extractData(ResultSet rs) throws SQLException {
-                List<HashMap<String, String>> rows = new ArrayList<>();
-                while (rs.next()) {
-                    HashMap<String, String> row = new HashMap<>();
-                    int columnCount = rs.getMetaData().getColumnCount();
-                    for (int i = 1; i <= columnCount; i++) {
-                        String columnName = rs.getMetaData().getColumnLabel(i);
-                        String columnValue = rs.getString(i);
-                        row.put(columnName, columnValue);
-                    }
-                    rows.add(row);
-                }
-                return rows;
-            }
-        });
+
+            // Add the converted HashMap to the converted list
+            convertedList.add(convertedMap);
+        }
+
+        return convertedList;
     }
 
+    public static List<HashMap<String, String>> executeQuery( String sql, Collection<Object> params) {
 
-    public static List<HashMap<String,String>> executeQuery(UserInfo userInfo, String sql, Collection<Object> params){
-
-        return  executeQuery(userInfo.context,sql,params);
-
+        List<HashMap<String, Object>> res = executeQueryRawData(EHContextHelper.getCurrentDataSource(),sql,params);
+        return convertList(res);
     }
 
-//    public static List<HashMap<String,Object>> executeQueryRawData(Context context, String sql, Collection<Object> params){
+//    public static List<HashMap<String,Object>> executeQueryRawData( String sql, Collection<Object> params){
 //
 //        PreparedStatement qqPrepStmt1 = null;
 //        ResultSet qqResultSet1 = null;
@@ -378,39 +340,13 @@ public class DBHelper {
 //            SQLException e1=new SQLException(qqSQLException.getMessage());
 //            throw new DBResourceException(e1);
 //        } finally {
-//            DBHelper.release(context, qqResultSet1,qqPrepStmt1,connection);
+//            DBHelper.release( qqResultSet1,qqPrepStmt1,connection);
 //        }
 //    }
 
-    public static List<HashMap<String, Object>> executeQueryRawData(Context context, String sql, Collection<Object> params) {
-        return context.getJdbcTemplate().query(sql, new PreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement preparedStatement) throws SQLException {
-                int index = 1;
-                for (Object param : params) {
-                    preparedStatement.setObject(index, param);
-                    index++;
-                }
-            }
-        }, new RowMapper<HashMap<String, Object>>() {
-            @Override
-            public HashMap<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                HashMap<String, Object> row = new HashMap<>();
-                ResultSetMetaData metaData = rs.getMetaData();
-                int columnCount = metaData.getColumnCount();
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = metaData.getColumnLabel(i);
-                    Object columnValue = rs.getObject(i);
-                    row.put(columnName, columnValue);
-                }
-                return row;
-            }
-        });
-    }
-
     //未完成，待实现
     @Deprecated
-    public static void executeUpdate(Context context, String tableName, HashMap<String,Object> updateParams,  HashMap<String,Object> whereParams) throws DBResourceException{
+    public static void executeUpdate( String tableName, HashMap<String,Object> updateParams,  HashMap<String,Object> whereParams) throws DBResourceException{
 
         if(updateParams==null || updateParams.size()==0) ExceptionHelper.throwRfFulfillLogicException("更新失败：表名或更新字段列表不允许为空");
         if(whereParams==null || whereParams.size()==0) ExceptionHelper.throwRfFulfillLogicException("更新失败：WHERE条件字段类表不允许为空");
@@ -426,11 +362,11 @@ public class DBHelper {
         List<Object> params = Stream.concat(updateParams.values().stream(), whereParams.values().stream())
                 .collect(Collectors.toList());
 
-        executeUpdate(context,sqlStringBuffer.toString(),params);
+        executeUpdate(sqlStringBuffer.toString(),params);
 
     }
 //
-//    public static void executeUpdate(Context context, String sql, List<Object> params) throws DBResourceException{
+//    public static void executeUpdate( String sql, List<Object> params) throws DBResourceException{
 //
 //        PreparedStatement qqPrepStmt1 = null;
 //        ResultSet qqResultSet1 = null;
@@ -452,7 +388,7 @@ public class DBHelper {
 //            SQLException e1=new SQLException(qqSQLException.getMessage());
 //            throw new DBResourceException(e1);
 //        } finally {
-//            DBHelper.release(context, qqResultSet1,qqPrepStmt1,connection);
+//            DBHelper.release( qqResultSet1,qqPrepStmt1,connection);
 ////            context.releaseStatement(qqPrepStmt1);
 ////            context.releaseResultSet(qqResultSet1);
 ////            context.releaseConnection(connection);
@@ -461,25 +397,82 @@ public class DBHelper {
 //
 //    }
 
-    public static void executeUpdate(Context context, String sql, List<Object> params) {
-        context.getJdbcTemplate().update(sql, new PreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement preparedStatement) throws SQLException {
-                int index = 1;
-                for (Object param : params) {
-                    preparedStatement.setObject(index, param);
-                    index++;
-                }
-            }
-        });
+    public static void executeUpdate( String sql, List<Object> params) {
+
+        executeUpdate(EHContextHelper.getCurrentDataSource(),sql, params);
     }
 
-    public static void executeUpdate(Context context, String sql, Object[] params) throws DBResourceException {
 
-        List<Object> paramList =  Arrays.asList(params);
-        executeUpdate(context,sql,paramList);
+
+    public static void executeUpdate( String sql, Object[] params) throws DBResourceException {
+
+        List<Object> paramList = Arrays.asList(params);
+        executeUpdate(sql,paramList);
 
     }
+
+    public static HashMap<String, Object> selectOne(String dataSourceKey, String statement, Map<String, Object> params) {
+        try{
+            SqlSessionTemplate sqlSessionTemplate = getSqlSessionTemplate();
+            sqlSessionTemplate.getConnection().setSchema(dataSourceKey);
+            return sqlSessionTemplate.selectOne(statement, params);
+        }catch (SQLException e){
+            throw new DBResourceException(e.getNextException());
+        }
+    }
+
+    public static List<HashMap<String, Object>> executeQueryRawData(String statement, List<Object> params) {
+      return executeQueryRawData(EHContextHelper.getCurrentDataSource(),statement,params);
+    }
+
+
+    public static List<HashMap<String, Object>> executeQueryRawData(String dataSourceKey, String statement, Collection<Object> params) {
+        try {
+            SqlSessionTemplate sqlSessionTemplate = getSqlSessionTemplate();
+            sqlSessionTemplate.getConnection().setSchema(dataSourceKey);
+            return sqlSessionTemplate.selectList(statement, params);
+        }catch (SQLException e){
+            throw new DBResourceException(e.getNextException());
+        }
+    }
+
+    public static List<HashMap<String, Object>> selectList(String dataSourceKey, String statement, Map<String, Object> params) {
+        try{
+            SqlSessionTemplate sqlSessionTemplate = getSqlSessionTemplate();
+            sqlSessionTemplate.getConnection().setSchema(dataSourceKey);
+            return sqlSessionTemplate.selectList(statement, params);
+        }catch (SQLException e){
+            throw new DBResourceException(e.getNextException());
+        }
+    }
+
+    public static int executeUpdate(String dataSourceKey, String statement, List<Object> params) {
+
+        try {
+            SqlSessionTemplate sqlSessionTemplate = getSqlSessionTemplate();
+            sqlSessionTemplate.getConnection().setSchema(dataSourceKey);
+            return sqlSessionTemplate.update(statement, params);
+        }catch (SQLException e){
+            throw new DBResourceException(e.getNextException());
+        }
+
+    }
+
+    public static int executeUpdate(String dataSourceKey, String statement, Map<String, Object> params) throws SQLException {
+        try{
+            SqlSessionTemplate sqlSessionTemplate = getSqlSessionTemplate();
+            sqlSessionTemplate.getConnection().setSchema(dataSourceKey);
+            return sqlSessionTemplate.update(statement, params);
+        }catch (SQLException e){
+            throw new DBResourceException(e.getNextException());
+        }
+    }
+
+    private static SqlSessionTemplate getSqlSessionTemplate() {
+        ApplicationContext applicationContext = ContextLoader.getCurrentWebApplicationContext();
+        return applicationContext.getBean(SqlSessionTemplate.class);
+    }
+
 
     public static void setValue(PreparedStatement sqlStatement, int position, Object value) {
 

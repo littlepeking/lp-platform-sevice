@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.outbound.ship;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
@@ -10,7 +11,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class CloseSO extends LegacyBaseService {
     }
 
     public void execute(ServiceDataHolder serviceDataHolder) {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -42,12 +43,12 @@ public class CloseSO extends LegacyBaseService {
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
-            String notes = DBHelper.getValue(context,"SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+            String notes = DBHelper.getValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignatureKey},String.class,"电子签名");
 
-            HashMap<String, String>  orderInfo = Orders.findByOrderKey(context,orderKey,true);
+            HashMap<String, String>  orderInfo = Orders.findByOrderKey(orderKey,true);
 
-            List<HashMap<String, String>>  pickDetailList = PickDetail.findByOrderKey(context,orderKey,false);
+            List<HashMap<String, String>>  pickDetailList = PickDetail.findByOrderKey(orderKey,false);
 
             if(pickDetailList.stream().anyMatch(x-> "3".equals(x.get("STATUS")))) throw new Exception("存在处理中状态的拣货项，请完成或删除该拣货项后再关闭订单");
 
@@ -66,7 +67,7 @@ public class CloseSO extends LegacyBaseService {
 
             serviceDataHolder4CloseOrder.setInputData(dataMap);
 
-            ServiceHelper.executeService(context,"NSPCLOSEORDER", serviceDataHolder4CloseOrder);
+            ServiceHelper.executeService("NSPCLOSEORDER", serviceDataHolder4CloseOrder);
 
             Udtrn UDTRN=new Udtrn();
             UDTRN.EsignatureKey=esignatureKey;
@@ -77,7 +78,7 @@ public class CloseSO extends LegacyBaseService {
             UDTRN.FROMKEY2="";
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="订单号";    UDTRN.CONTENT01=orderKey;
-            UDTRN.Insert(context, userid);
+            UDTRN.Insert( userid);
 
         }catch (Exception e){
             

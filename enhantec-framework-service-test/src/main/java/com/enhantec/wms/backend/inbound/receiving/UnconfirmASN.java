@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class UnconfirmASN extends LegacyBaseService {
@@ -31,7 +31,7 @@ public class UnconfirmASN extends LegacyBaseService {
     }
 
     public void execute(ServiceDataHolder serviceDataHolder) {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -41,15 +41,15 @@ public class UnconfirmASN extends LegacyBaseService {
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(context,receiptKey,true);
+            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
 
             if(!receiptInfo.get("STATUS").equals("0")) ExceptionHelper.throwRfFulfillLogicException("非新建状态的ASN不允许取消确认");
 
-            String isFromInterface = CodeLookup.getCodeLookupValue(context,"RECEIPTYPE",receiptInfo.get("TYPE"),"UDF4","收货类型");
+            String isFromInterface = CodeLookup.getCodeLookupValue("RECEIPTYPE",receiptInfo.get("TYPE"),"UDF4","收货类型");
 
             if("Y".equalsIgnoreCase(isFromInterface)) ExceptionHelper.throwRfFulfillLogicException("接口发送的收货指令不允许取消确认");
 
-            DBHelper.executeUpdate(context, "UPDATE RECEIPT SET ISCONFIRMEDUSER ='', ISCONFIRMEDUSER2 = '', ISCONFIRMED = 0  WHERE RECEIPTKEY = ? ",
+            DBHelper.executeUpdate( "UPDATE RECEIPT SET ISCONFIRMEDUSER ='', ISCONFIRMEDUSER2 = '', ISCONFIRMED = 0  WHERE RECEIPTKEY = ? ",
                     new Object[]{ receiptKey });
 
 
@@ -63,7 +63,7 @@ public class UnconfirmASN extends LegacyBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="ASN单号";    UDTRN.CONTENT01=receiptKey;
             UDTRN.TITLE02="确认状态";    UDTRN.CONTENT02="N";
-            UDTRN.Insert(context, userid);
+            UDTRN.Insert( userid);
 
 
 

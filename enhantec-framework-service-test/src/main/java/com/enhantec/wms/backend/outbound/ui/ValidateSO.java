@@ -7,7 +7,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class ValidateSO extends LegacyBaseService {
@@ -27,7 +27,7 @@ public class ValidateSO extends LegacyBaseService {
     }
 
     public void execute(ServiceDataHolder serviceDataHolder) {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -37,14 +37,14 @@ public class ValidateSO extends LegacyBaseService {
             String ORDERKEY = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String> orderInfo =  Orders.findByOrderKey(context,ORDERKEY,true);
+            HashMap<String, String> orderInfo =  Orders.findByOrderKey(ORDERKEY,true);
 
             //john -- check if order type and quality status is match
-            OrderValidationHelper.checkOrderTypeAndQualityStatusMatch4Alloc(context,ORDERKEY);
-            OrderValidationHelper.validateFieldsBeforeShip(context,ORDERKEY);
-            HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey(context, "ORDERTYPE", orderInfo.get("TYPE"));
+            OrderValidationHelper.checkOrderTypeAndQualityStatusMatch4Alloc(ORDERKEY);
+            OrderValidationHelper.validateFieldsBeforeShip(ORDERKEY);
+            HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));
             if ("Y".equalsIgnoreCase(orderTypeEntry.get("EXT_UDF_STR4"))) {
-                OrderValidationHelper.validateReturnPo(context, ORDERKEY);
+                OrderValidationHelper.validateReturnPo( ORDERKEY);
             }
 
 

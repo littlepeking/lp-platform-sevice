@@ -1,8 +1,8 @@
 package com.enhantec.wms.backend.framework;
 
-public abstract class LegacyBaseService {
+import com.enhantec.framework.common.utils.EHContextHelper;
 
-    public Context context;
+public abstract class LegacyBaseService {
 
     public abstract void execute(ServiceDataHolder serviceDataHolder);
 

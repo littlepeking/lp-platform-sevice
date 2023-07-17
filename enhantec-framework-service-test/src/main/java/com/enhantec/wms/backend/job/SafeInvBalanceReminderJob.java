@@ -1,12 +1,13 @@
 package com.enhantec.wms.backend.job;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,16 +27,16 @@ public class SafeInvBalanceReminderJob extends LegacyBaseService {
 
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
-		String userid = context.getUserID();  //当用户
+		String userid = EHContextHelper.getUser().getUsername();  //当用户
   //取数据库连接
 		try
 		{
-			DBHelper.executeUpdate(context,
+			DBHelper.executeUpdate(
 					"DELETE FROM REMINDER WHERE REMINDERTYPE = ? "
 					, new Object[]{
 							Const.SKU_SAFE_INV_BALANCE_TYPE
 					});
-			List<HashMap<String,String>> list =  DBHelper.executeQuery(context,
+			List<HashMap<String,String>> list =  DBHelper.executeQuery(
 					"select s.AVAIL_QTY ,s2.TOTALAVAILABLE,s.SKU from SKU s ,( select sum((QTY-QTYPICKED-QTYALLOCATED-QTYONHOLD)) as TOTALAVAILABLE,l.SKU from LOT l ,V_LOTATTRIBUTE vl" +
 							" where l.LOT=vl.LOT  GROUP BY l.SKU ) s2 " +
 							" where s2.sku = s.SKU  and s.AVAIL_QTY >(s2.TOTALAVAILABLE - s.AVAIL_QTY)  ",
@@ -44,7 +45,7 @@ public class SafeInvBalanceReminderJob extends LegacyBaseService {
 			if(list.size()>0) {
 				for (HashMap<String,String> temp : list) {
 
-					DBHelper.executeUpdate(context,
+					DBHelper.executeUpdate(
 							"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"
 							, new Object[]{
 									Const.SKU_SAFE_INV_BALANCE_TYPE,

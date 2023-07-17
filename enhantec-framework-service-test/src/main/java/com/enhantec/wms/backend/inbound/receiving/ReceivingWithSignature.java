@@ -12,7 +12,7 @@ import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inbound.asn.utils.ReceiptValidationHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
@@ -20,7 +20,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,7 +53,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 //        context.theSQLMgr.transactionBegin();
         
         try {
@@ -69,12 +69,12 @@ public class ReceivingWithSignature extends LegacyBaseService {
             String ESIGNATUREKEY = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
             try {
-                ReceiptValidationHelper.validateASN(context,RECEIPTKEY);
+                ReceiptValidationHelper.validateASN(RECEIPTKEY);
 
-                HashMap<String, String> receiptDetailInfo =  Receipt.findReceiptDetailByLPN(context, RECEIPTKEY,LPN,true);
+                HashMap<String, String> receiptDetailInfo =  Receipt.findReceiptDetailByLPN( RECEIPTKEY,LPN,true);
                 //检查待收货行的是否唯一码已存在于库存
-                ReceiptValidationHelper.checkSerialNumberExistInInv(context,receiptDetailInfo);
-                InventoryHelper.checkLocQuantityLimit(context,LOC);
+                ReceiptValidationHelper.checkSerialNumberExistInInv(receiptDetailInfo);
+                InventoryHelper.checkLocQuantityLimit(LOC);
             }catch (Exception e){
                 ExceptionHelper.throwRfFulfillLogicException(
                         "当前收货单数据校验失败，请检查收货单信息是否正确，错误信息：\n"+
@@ -106,14 +106,14 @@ public class ReceivingWithSignature extends LegacyBaseService {
         boolean eachReceivingall = "PL".equals(ESIGNATUREKEY);/*Receivingtype区分是否批量收入；*/
         if (eachReceivingall) ESIGNATUREKEY = "";
 
-        HashMap<String, String> receiptInfo = Receipt.findByReceiptKey(context, RECEIPTKEY, true);
+        HashMap<String, String> receiptInfo = Receipt.findByReceiptKey( RECEIPTKEY, true);
         //执行前对数据的校验
         //入库收货检查 生基
-        ReceiptValidationHelper.checkASNReceiptCheckStatus(context,receiptInfo);
-        this.CheckIfReceiptConfirmed(context,receiptInfo);
-        this.CheckReceivingLocExists(context,LOC);
+        ReceiptValidationHelper.checkASNReceiptCheckStatus(receiptInfo);
+        this.CheckIfReceiptConfirmed(receiptInfo);
+        this.CheckReceivingLocExists(LOC);
 
-        this.checkIdNotes(context,LPN,receiptInfo,LOC);
+        this.checkIdNotes(LPN,receiptInfo,LOC);
 
         /*MASK  12/26/2020 11:00:00*/
         //查询带有lpn，且状态为未收货，预期量>0的收货明细行
@@ -125,25 +125,24 @@ public class ReceivingWithSignature extends LegacyBaseService {
                         + ",SUSR11,SUSR12,SUSR13,SUSR14,SUSR15"
                         + ",SUSR16,SUSR17,SUSR18,SUSR19,SUSR20,BARRELNUMBER,TOTALBARRELNUMBER,MEMO,LASTSHIPPEDLOC,PRODLOTEXPECTED "
                         + " FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND TOID=? AND QTYEXPECTED>0 AND STATUS='0' ORDER BY STATUS DESC";
-        HashMap<String, String> receiptDetailInfo = DBHelper.getRecord(context, sql,
+        HashMap<String, String> receiptDetailInfo = DBHelper.getRecord( sql,
                 new Object[]{RECEIPTKEY, LPN}, "待收货明细行", true);
 
         //更新Elottable信息。
-        this.processELottableInfo(context,receiptDetailInfo);
+        this.processELottableInfo(receiptDetailInfo);
 
-        String stdUom = UOM.getStdUOM(context, receiptDetailInfo.get("PACKKEY"));
-        String cntLastLpn = DBHelper.getValue(context
-                , "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND TOID<>? AND QTYEXPECTED>0 AND STATUS=?"
+        String stdUom = UOM.getStdUOM( receiptDetailInfo.get("PACKKEY"));
+        String cntLastLpn = DBHelper.getValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND TOID<>? AND QTYEXPECTED>0 AND STATUS=?"
                 , new String[]{RECEIPTKEY, LPN, "0"}, "0");
         //转换单位。
-        GROSSWGTRECEIVED = UOM.UOMQty2StdQty(context, receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
+        GROSSWGTRECEIVED = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
                 UtilHelper.isEmpty(GROSSWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(GROSSWGTRECEIVED)).toPlainString();
-        TAREWGTRECEIVED = UOM.UOMQty2StdQty(context, receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
+        TAREWGTRECEIVED = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
                 UtilHelper.isEmpty(TAREWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(TAREWGTRECEIVED)).toPlainString();
-        NETWGTRECEIVED = UOM.UOMQty2StdQty(context, receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
+        NETWGTRECEIVED = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
                 UtilHelper.isEmpty(NETWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(NETWGTRECEIVED)).toPlainString();
 
-        DBHelper.executeUpdate(context, "update receiptdetail set lottable01 = ? where receiptkey=? and toid=?",
+        DBHelper.executeUpdate( "update receiptdetail set lottable01 = ? where receiptkey=? and toid=?",
                 new String[]{receiptDetailInfo.get("PACKKEY"), RECEIPTKEY, LPN});
 
         //调用系统API进行收货操作.
@@ -153,37 +152,37 @@ public class ReceivingWithSignature extends LegacyBaseService {
 
 
         //判断lpn内是否有开封唯一码 有 则标记
-        ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(context,receiptDetailInfo.get("SKU"),LPN);
-        DBHelper.executeUpdate(context, "update receiptdetail set STATUS = 9, GROSSWGTRECEIVED=? , TAREWGTRECEIVED = ?,REGROSSWGT =? where receiptkey=? and toid=?", new String[]{GROSSWGTRECEIVED, TAREWGTRECEIVED, REGROSSWGT, RECEIPTKEY, LPN});
+        ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(receiptDetailInfo.get("SKU"),LPN);
+        DBHelper.executeUpdate( "update receiptdetail set STATUS = 9, GROSSWGTRECEIVED=? , TAREWGTRECEIVED = ?,REGROSSWGT =? where receiptkey=? and toid=?", new String[]{GROSSWGTRECEIVED, TAREWGTRECEIVED, REGROSSWGT, RECEIPTKEY, LPN});
 
-        String receivingFuncType = CDReceiptType.getReceivingFuncType(context,receiptInfo.get("TYPE"));
+        String receivingFuncType = CDReceiptType.getReceivingFuncType(receiptInfo.get("TYPE"));
         //有汇总指令的ASN收货要更新ASN状态并更新当前行的预期量为0
         if(Const.RECEIPT_RF_TYPE_WITH_ASN.equalsIgnoreCase(receivingFuncType)
                 || Const.RECEIPT_RF_TYPE_RETURN_WITH_ASN.equalsIgnoreCase(receivingFuncType)) {
 
             //收货完成，把预期量改成0
-            DBHelper.executeUpdate(context,
+            DBHelper.executeUpdate(
                     "UPDATE RECEIPTDETAIL SET QTYEXPECTED = 0 WHERE TOID = ? AND RECEIPTKEY = ?",
                     new Object[]{LPN, RECEIPTKEY});
             //处理收货单汇总行状态和单头状态.
-            Receipt.processReceiptStatus(context, RECEIPTKEY);
+            Receipt.processReceiptStatus( RECEIPTKEY);
         }else {
             //根据是否是最后一箱，来更新订单状态。
             if (cntLastLpn.equals("0")) {
-                DBHelper.executeUpdate(context, "update receipt set STATUS = 9 where receiptkey=? ", new String[]{RECEIPTKEY});
+                DBHelper.executeUpdate( "update receipt set STATUS = 9 where receiptkey=? ", new String[]{RECEIPTKEY});
             }
         }
 
-        String sku = DBHelper.getValue(context, "select sku from receiptdetail where receiptkey=? and toid=?", new Object[]{RECEIPTKEY, LPN});
-        String cnt = DBHelper.getValue(context                , "select count(1) as C1 from receiptdetail where receiptkey=? and sku=?  AND TOID IS NOT NULL AND TOID <>'' "
+        String sku = DBHelper.getValue( "select sku from receiptdetail where receiptkey=? and toid=?", new Object[]{RECEIPTKEY, LPN});
+        String cnt = DBHelper.getValue( "select count(1) as C1 from receiptdetail where receiptkey=? and sku=?  AND TOID IS NOT NULL AND TOID <>'' "
                 , new String[]{RECEIPTKEY, sku}, "");
-        String cnt1 = DBHelper.getValue(context                , "select count(1) as C1 from receiptdetail where receiptkey=? and sku=? AND TOID IS NOT NULL AND TOID <>'' and status>0"
+        String cnt1 = DBHelper.getValue( "select count(1) as C1 from receiptdetail where receiptkey=? and sku=? AND TOID IS NOT NULL AND TOID <>'' and status>0"
                 , new String[]{RECEIPTKEY, sku}, "");
         String TOTAL = cnt1 + " / " + cnt;
         String RECALL = "N";
         if (cnt1.equals(cnt)) RECALL = "Y";
         //填写记录日志
-        this.addUDTRN(context,userid,ESIGNATUREKEY,RECEIPTKEY,LPN,LOC,NETWGTRECEIVED,receiptDetailInfo);
+        this.addUDTRN(userid,ESIGNATUREKEY,RECEIPTKEY,LPN,LOC,NETWGTRECEIVED,receiptDetailInfo);
 
 
         HashMap<String, String> result = new HashMap<>();
@@ -194,7 +193,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
 
     }
 
-    private void addUDTRN(Context context,String userid,String ESIGNATUREKEY,String RECEIPTKEY,String LPN,String LOC,String NETWGTRECEIVED,HashMap<String,String> receiptDetailInfo)throws Exception{
+    private void addUDTRN(String userid,String ESIGNATUREKEY,String RECEIPTKEY,String LPN,String LOC,String NETWGTRECEIVED,HashMap<String,String> receiptDetailInfo)throws Exception{
 
         Udtrn UDTRN = new Udtrn();
         if(!UtilHelper.isEmpty(ESIGNATUREKEY)){
@@ -244,7 +243,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
         UDTRN.CONTENT17 = LegecyUtilHelper.Nz(receiptDetailInfo.get("ELOTTABLE12"), "");
         UDTRN.TITLE18 = "存货类型";
         UDTRN.CONTENT18 = LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE02"), "");
-        UDTRN.Insert(context, userid);
+        UDTRN.Insert( userid);
     }
 
 
@@ -327,10 +326,10 @@ public class ReceivingWithSignature extends LegacyBaseService {
      */
     private void populateIdNotes(String LPN, String userid, String GROSSWGTRECEIVED, String TAREWGTRECEIVED, String NETWGTRECEIVED, String REGROSSWGT, String stdUom, HashMap<String,String> receiptDetailInfo)throws Exception{
         /*IDNOTES需要记录所属的WMS LOT*/
-        String receivedLot = LotxLocxId.findWithoutCheckIDNotes(context, LPN, true).get("LOT");
+        String receivedLot = LotxLocxId.findWithoutCheckIDNotes( LPN, true).get("LOT");
 
         /*查找IDNOTES是否存在*/
-        HashMap<String,String> idnotesRecord = IDNotes.findById(context, LPN, false);
+        HashMap<String,String> idnotesRecord = IDNotes.findById( LPN, false);
 
         if (idnotesRecord != null) {
             //ExceptionHelper.throwRfFulfillLogicException("库存中已有收货标签"+LPN+"的库存，收货失败");
@@ -343,7 +342,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
             updateFields.put("ORIGINALGROSSWGT", UtilHelper.decimalStrAdd(idnotesRecord.get("ORIGINALGROSSWGT"),GROSSWGTRECEIVED));/*毛重*/
             updateFields.put("ORIGINALTAREWGT", UtilHelper.decimalStrAdd(idnotesRecord.get("ORIGINALTAREWGT"),TAREWGTRECEIVED));/*皮重*/
             updateFields.put("ORIGINALNETWGT", UtilHelper.decimalStrAdd(idnotesRecord.get("ORIGINALNETWGT"),NETWGTRECEIVED));/*净重*/
-            IDNotes.update(context,LPN,updateFields);
+            IDNotes.update(LPN,updateFields);
         }else {
             //为零记录已归档至归档表，所有收货或者退货记录均需重新插入IDNOTES表
             HashMap<String,String> IDNOTES = new HashMap<String,String>();
@@ -372,7 +371,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
             IDNOTES.put("ORIGINRECEIPTLINENUMBER", receiptDetailInfo.get("RECEIPTLINENUMBER"));/*原始收货单行号*/
 
             IDNOTES.put("LOT", receivedLot);
-            String projectCode = UtilHelper.isEmpty(receiptDetailInfo.get("SUSR6")) ? CDSysSet.getDefaultProjectCode(context) : receiptDetailInfo.get("SUSR6").trim();
+            String projectCode = UtilHelper.isEmpty(receiptDetailInfo.get("SUSR6")) ? CDSysSet.getDefaultProjectCode() : receiptDetailInfo.get("SUSR6").trim();
             IDNOTES.put("PROJECTCODE", projectCode);
             IDNOTES.put("PROJECTID", receiptDetailInfo.get("SUSR12"));
             IDNOTES.put("ISOPENED", UtilHelper.isEmpty(receiptDetailInfo.get("SUSR7")) ? "0" : receiptDetailInfo.get("SUSR7"));
@@ -383,7 +382,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
             IDNOTES.put("LASTID",receiptDetailInfo.get("LASTID"));//上一次的所在容器
             IDNOTES.put("PRODLOTEXPECTED",receiptDetailInfo.get("PRODLOTEXPECTED"));//原领料出库目标生产批次
 
-            LegacyDBHelper.ExecInsert(context, "IDNOTES", IDNOTES);
+            LegacyDBHelper.ExecInsert( "IDNOTES", IDNOTES);
         }
 
     }
@@ -393,7 +392,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
      *  1. 校验库位是否存在。
      *  2. 校验收货单是否复核。
      */
-    private void CheckIfReceiptConfirmed(Context context,HashMap<String,String> receiptInfo) throws Exception{
+    private void CheckIfReceiptConfirmed(HashMap<String,String> receiptInfo) throws Exception{
 
         //检验收货单状态，是否复核
         if (!receiptInfo.get("ISCONFIRMED").equals("2"))
@@ -403,24 +402,24 @@ public class ReceivingWithSignature extends LegacyBaseService {
 
     }
 
-    private void CheckReceivingLocExists(Context context,String loc) throws Exception{
+    private void CheckReceivingLocExists(String loc) throws Exception{
         //查询库位在系统中是否存在
-        HashMap<String,String> locRecord = DBHelper.getRecord(context, "select LOCATIONHANDLING,STATUS from LOC where LOC=?", new String[]{loc},"",false);
+        HashMap<String,String> locRecord = DBHelper.getRecord( "select LOCATIONHANDLING,STATUS from LOC where LOC=?", new String[]{loc},"",false);
         if (locRecord == null)
             throw new Exception("收货库位在系统中不存在");
     }
 
     /**
      *  校验库存是否存在，及收货方式是否是退货入库,如果是退货入库暂不进行后台历史数据的核对校验，以提高收货性能。
-     * @param context
+
      * @param lpn
      * @param receiptInfo
      */
-    private void checkIdNotes(Context context, String lpn, HashMap<String,String> receiptInfo,String loc){
-//        HashMap<String, String> idnotesRecord = IDNotes.findById(context, lpn, false);
-        HashMap<String, String> idnotesRecord = LotxLocxId.findById(context, lpn, false);
+    private void checkIdNotes( String lpn, HashMap<String,String> receiptInfo,String loc){
+//        HashMap<String, String> idnotesRecord = IDNotes.findById( lpn, false);
+        HashMap<String, String> idnotesRecord = LotxLocxId.findById( lpn, false);
         if (idnotesRecord != null) {
-            if(CDReceiptType.isReturnTypeWithInventory(context,receiptInfo.get("TYPE"))){
+            if(CDReceiptType.isReturnTypeWithInventory(receiptInfo.get("TYPE"))){
                 if(!idnotesRecord.get("LOC").equals(loc)){
                     ExceptionHelper.throwRfFulfillLogicException("增量收货只允许收货到库存所在库位:"+idnotesRecord.get("LOC"));
                 }
@@ -440,14 +439,14 @@ public class ReceivingWithSignature extends LegacyBaseService {
 
     /**
      * 根据收货批次，处理ELottable的信息，增加或校验
-     * @param context
+
 
      * @param receiptDetailInfo
      * @throws Exception
      */
-    private void processELottableInfo(Context context,HashMap<String,String> receiptDetailInfo) throws Exception {
+    private void processELottableInfo(HashMap<String,String> receiptDetailInfo) throws Exception {
         //根据收货批号获取该批次Elottable的信息。
-        HashMap<String, String> receiptLotInfo = VLotAttribute.getEnterpriseReceiptLotInfo(context, receiptDetailInfo.get("LOTTABLE06"));
+        HashMap<String, String> receiptLotInfo = VLotAttribute.getEnterpriseReceiptLotInfo( receiptDetailInfo.get("LOTTABLE06"));
 
         if (receiptLotInfo != null) {
             //如果收货批次相同，但是物料代码不同，提示批次被占用。
@@ -456,9 +455,9 @@ public class ReceivingWithSignature extends LegacyBaseService {
                         "收货批次" + receiptDetailInfo.get("LOTTABLE06") + "已被物料" + receiptLotInfo.get("SKU") + "使用，不允许重复使用"
                 );
 
-            List<HashMap<String,String>> skuLotConfList = CodeLookup.getCodeLookupList(context,"SKULOTCONF");
+            List<HashMap<String,String>> skuLotConfList = CodeLookup.getCodeLookupList("SKULOTCONF");
 
-            HashMap<String,String> skuHashMap = SKU.findById(context,receiptDetailInfo.get("SKU"),true);
+            HashMap<String,String> skuHashMap = SKU.findById(receiptDetailInfo.get("SKU"),true);
 
             if(skuLotConfList!=null && skuLotConfList.size()>0) {
                 //BUSR4 物料类型
@@ -481,7 +480,7 @@ public class ReceivingWithSignature extends LegacyBaseService {
                 eLot.put("ELOTTABLE" + num, UtilHelper.trim(receiptDetailInfo.get("ELOTTABLE" + num)));
             }
             //更新保税状态、账册号、产地信息
-            HashMap<String, String> receiptHashMap = DBHelper.getRecord(context, "select ELOTTABLE01,ELOTTABLE02,TYPE,ELOTTABLE22,ELOTTABLE23,ELOTTABLE24,ELOTTABLE18 " +
+            HashMap<String, String> receiptHashMap = DBHelper.getRecord( "select ELOTTABLE01,ELOTTABLE02,TYPE,ELOTTABLE22,ELOTTABLE23,ELOTTABLE24,ELOTTABLE18 " +
                             "from RECEIPT where RECEIPTKEY=? ",
                     new Object[]{receiptDetailInfo.get("RECEIPTKEY")}, "收货单", true);
             //退货沿用原保税状态和产地信息。第一次收货，行上如为空，则取收货单头上的信息。
@@ -495,10 +494,10 @@ public class ReceivingWithSignature extends LegacyBaseService {
 
             String qualityStatus ="";
             //根据配置获取质量状态
-            if(receiptHashMap.get("TYPE").equalsIgnoreCase(CDSysSet.getPOReceiptType(context))){
+            if(receiptHashMap.get("TYPE").equalsIgnoreCase(CDSysSet.getPOReceiptType())){
                  qualityStatus = receiptDetailInfo.get("ELOTTABLE03");
             }else {
-                 qualityStatus = CDQualityStatus.findByReceiptType(context,receiptHashMap.get("TYPE"),receiptDetailInfo.get("SKU"),receiptDetailInfo.get("ELOTTABLE03"));
+                 qualityStatus = CDQualityStatus.findByReceiptType(receiptHashMap.get("TYPE"),receiptDetailInfo.get("SKU"),receiptDetailInfo.get("ELOTTABLE03"));
             }
             eLot.put("ELOTTABLE03",qualityStatus);
 
@@ -508,13 +507,13 @@ public class ReceivingWithSignature extends LegacyBaseService {
             //后期可以考虑将动态拣货字段抽象成灵活的配置。
 
             //ELOTTABLE09在CS用于供应商批号，这里暂不做自动赋值。如果动态拣货，需要按照供应商批号动态拣货，或者考虑把供应商批号移至ELOTTABLE07.
-            //boolean isSkuSerialControl = SKU.isSerialControl(context,receiptDetailInfo.get("SKU"));
+            //boolean isSkuSerialControl = SKU.isSerialControl(receiptDetailInfo.get("SKU"));
             //            if(!isSkuSerialControl){
             //                eLot.put("ELOTTABLE09", UtilHelper.trim(receiptDetailInfo.get("LOTTABLE06")));
             //            }
 
             eLot.put("ELOTTABLE13", "0");/*复测次数默认设为0*/
-            LegacyDBHelper.ExecInsert(context, "ENTERPRISE.ELOTATTRIBUTE", eLot);
+            LegacyDBHelper.ExecInsert( "ENTERPRISE.ELOTATTRIBUTE", eLot);
         }
     }
 

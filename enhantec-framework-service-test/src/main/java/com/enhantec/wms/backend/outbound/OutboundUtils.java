@@ -1,7 +1,7 @@
 package com.enhantec.wms.backend.outbound;
 
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
@@ -16,8 +16,8 @@ import java.util.List;
 
 public class OutboundUtils {
 
-    public static void checkQtyIsAvailableInLotxLocxId(Context context, String ID, BigDecimal qty, BigDecimal allocatedQty) {
-        HashMap<String, String> lotxLocxIdHashMap =  LotxLocxId.findById(context, ID,true);
+    public static void checkQtyIsAvailableInLotxLocxId( String ID, BigDecimal qty, BigDecimal allocatedQty) {
+        HashMap<String, String> lotxLocxIdHashMap =  LotxLocxId.findById( ID,true);
 
         BigDecimal availQty = new BigDecimal(lotxLocxIdHashMap.get("AVAILABLEQTY"));
 
@@ -26,8 +26,8 @@ public class OutboundUtils {
             ExceptionHelper.throwRfFulfillLogicException(ID+"的拣货数量"+ UtilHelper.trimZerosAndToStr(qty)+"大于最大可拣货量"+UtilHelper.trimZerosAndToStr(availQty));
     }
 
-    public static void checkQtyIsAvailableInIDNotes(Context context, String ID, BigDecimal qty) {
-        HashMap<String, String> idNotesHashMap = IDNotes.findById(context, ID,true);
+    public static void checkQtyIsAvailableInIDNotes( String ID, BigDecimal qty) {
+        HashMap<String, String> idNotesHashMap = IDNotes.findById( ID,true);
 
         BigDecimal idNotesQty = new BigDecimal(idNotesHashMap.get("NETWGT"));
 
@@ -35,16 +35,15 @@ public class OutboundUtils {
     }
 
 
-    public static void allocateAndShip(Context context, String orderKey) throws Exception {
-        allocateAndShip(context,orderKey,true);
+    public static void allocateAndShip( String orderKey) throws Exception {
+        allocateAndShip(orderKey,true);
     }
-    public static void allocateAndShip(Context context, String orderKey, boolean shipWithIDNotes) throws Exception {
+    public static void allocateAndShip( String orderKey, boolean shipWithIDNotes) throws Exception {
         //Start allocation & ship
         if(shipWithIDNotes) {
 
             //同步减少IDNOTES的库存
-            List<HashMap<String,String>> Details = DBHelper.executeQuery(context
-                    , "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
+            List<HashMap<String,String>> Details = DBHelper.executeQuery( "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
                             + ",ORIGINALQTY,OPENQTY,SHIPPEDQTY,QTYPREALLOCATED,QTYALLOCATED,QTYPICKED,UOM,PACKKEY "
                             + " from orderdetail where orderkey=? order by orderlinenumber", new String[]{orderKey});
 
@@ -54,7 +53,7 @@ public class OutboundUtils {
                 String id = mDetail.get("IDREQUIRED");
                 String openQty = mDetail.get("ORIGINALQTY");
 
-                IDNotes.decreaseWgtByIdWithAvailQtyCheck(context, id, openQty, "分装数量");
+                IDNotes.decreaseWgtByIdWithAvailQtyCheck( id, openQty, "分装数量");
             }
         }
 
@@ -78,11 +77,10 @@ public class OutboundUtils {
         //todo
 //        context.theEXEDataObjectStack.push(shipDO);
 //        Process shipProcess = context.searchObjectLibrary("NSPMASSSHIPORDERS"));
-//        shipProcess.execute(context);
+//        shipProcess.execute();
 //        context.theEXEDataObjectStack.pop();
 
-        String status = DBHelper.getValue(context
-                , "select status from orders where orderkey = ? ", new Object[]{orderKey}, String.class, "订单");
+        String status = DBHelper.getValue( "select status from orders where orderkey = ? ", new Object[]{orderKey}, String.class, "订单");
 
         if (!"95".equals(status))
             ExceptionHelper.throwRfFulfillLogicException("订单" + orderKey + "发运失败，请确认可用库存量大于订单量");
@@ -111,16 +109,16 @@ public class OutboundUtils {
 
     /**
      * 修改订单行状态为 98: '外部取消' / 99: "内部取消"
-     * @param context
+
      * @param orderkey
      * @return
      */
-    public static void cancelOrder(Context context, String orderkey, boolean isExternalCancel){
+    public static void cancelOrder( String orderkey, boolean isExternalCancel){
 
         String status = isExternalCancel ? "98":"99";
 
-        DBHelper.executeUpdate(context,"UPDATE ORDERDETAIL SET STATUS = ? WHERE ORDERKEY = ? ",new Object[]{ status,orderkey});
-        DBHelper.executeUpdate(context,"UPDATE ORDERS SET STATUS = ? WHERE ORDERKEY = ?",new Object[]{ status,orderkey});
+        DBHelper.executeUpdate("UPDATE ORDERDETAIL SET STATUS = ? WHERE ORDERKEY = ? ",new Object[]{ status,orderkey});
+        DBHelper.executeUpdate("UPDATE ORDERS SET STATUS = ? WHERE ORDERKEY = ?",new Object[]{ status,orderkey});
 
     }
 

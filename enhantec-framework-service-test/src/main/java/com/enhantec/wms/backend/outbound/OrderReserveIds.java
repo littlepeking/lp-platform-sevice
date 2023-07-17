@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 
 /**
@@ -36,7 +36,7 @@ public class OrderReserveIds extends LegacyBaseService {
 
 
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
         try
         {
 
@@ -47,7 +47,7 @@ public class OrderReserveIds extends LegacyBaseService {
 
             String idStr = "'" + String.join("','",idArray)+ "'" ;
 
-            DBHelper.executeUpdate(context, "UPDATE IDNOTES SET PROJECTCODE = ? WHERE ID IN ("+idStr+")", new String[]{projectId});
+            DBHelper.executeUpdate( "UPDATE IDNOTES SET PROJECTCODE = ? WHERE ID IN ("+idStr+")", new String[]{projectId});
 
             Udtrn UDTRN=new Udtrn();
             //UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -56,7 +56,7 @@ public class OrderReserveIds extends LegacyBaseService {
             UDTRN.FROMKEY=projectId;
             UDTRN.TITLE01="项目号"; UDTRN.CONTENT01=projectId;
             UDTRN.TITLE02="容器条码列表"; UDTRN.CONTENT01=ids;
-            UDTRN.Insert(context, userid);
+            UDTRN.Insert( userid);
             //--------------------------------------------------------------
 
 

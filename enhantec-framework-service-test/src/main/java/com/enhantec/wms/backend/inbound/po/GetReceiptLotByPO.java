@@ -7,7 +7,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.List;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,7 +37,7 @@ public class GetReceiptLotByPO extends LegacyBaseService
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 		
 
@@ -47,10 +47,9 @@ public class GetReceiptLotByPO extends LegacyBaseService
 		{
 		    String ReceiptLot= serviceDataHolder.getInputDataAsMap().getString("ReceiptLot");
 
-			String STORERKEY= DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+			String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
 
-			List<HashMap<String,String>> r1 = DBHelper.executeQuery(context
-					, "select FROMKEY,FROMLINENO,STATUS,FROMSKU,FROMSKUDESCR,SKU,FROMLOT,SUPPLIERCODE,MANUFACTURERCODE,PROCESSINGMODE,UOM,QTY,TOTALBARREL,ELOTTABLE11,RETESTDATE,PACKCHECK,FILECHECK,TRANSCHECK,MANUFACTURERDATE,ELOTTABLE07,PACKCOUNTCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,supplieritem,qualifiedproducer,POSUPPLIERNAME,ISCOMMONPROJECT,PROJECTCODE from PRERECEIPTCHECK where RECEIPTLOT=? order by serialkey", new String[]{ ReceiptLot});
+			List<HashMap<String,String>> r1 = DBHelper.executeQuery( "select FROMKEY,FROMLINENO,STATUS,FROMSKU,FROMSKUDESCR,SKU,FROMLOT,SUPPLIERCODE,MANUFACTURERCODE,PROCESSINGMODE,UOM,QTY,TOTALBARREL,ELOTTABLE11,RETESTDATE,PACKCHECK,FILECHECK,TRANSCHECK,MANUFACTURERDATE,ELOTTABLE07,PACKCOUNTCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,supplieritem,qualifiedproducer,POSUPPLIERNAME,ISCOMMONPROJECT,PROJECTCODE from PRERECEIPTCHECK where RECEIPTLOT=? order by serialkey", new String[]{ ReceiptLot});
 			if (r1 == null) {
 				throw new FulfillLogicException("收货批次(%1)未找到", ReceiptLot);
 			}
@@ -60,11 +59,10 @@ public class GetReceiptLotByPO extends LegacyBaseService
 				HashMap<String,String> m1=r1.get(i1);
 				if (i1==0)
 				{
-					String SKUDESCR= DBHelper.getValue(context
-							, "SELECT DESCR FROM SKU WHERE STORERKEY=? and SKU=?", new String[]{STORERKEY,m1.get("SKU")}, "");
+					String SKUDESCR= DBHelper.getValue( "SELECT DESCR FROM SKU WHERE STORERKEY=? and SKU=?", new String[]{STORERKEY,m1.get("SKU")}, "");
 					theOutDO.setAttribValue("STATUS", m1.get("STATUS"));
 					theOutDO.setAttribValue("SKU", m1.get("SKU"));
-					String SKU_BUSR14= DBHelper.getValue(context, "select BUSR14 from SKU where SKU=?", new String[]{m1.get("SKU")}, "");
+					String SKU_BUSR14= DBHelper.getValue( "select BUSR14 from SKU where SKU=?", new String[]{m1.get("SKU")}, "");
 					theOutDO.setAttribValue("SKU_BUSR14", SKU_BUSR14);
 					theOutDO.setAttribValue("SKUDESCR", SKUDESCR);
 					theOutDO.setAttribValue("FROMLOT", m1.get("FROMLOT"));
@@ -98,7 +96,7 @@ public class GetReceiptLotByPO extends LegacyBaseService
 
 
 
-				HashMap<String,String> FROMQTY= DBHelper.getRecord(context, "select A.qty-ISNULL(A.receivedqty,0) as QTY,B.supplierNAME,B.SUPPLIER,A.UOM " +
+				HashMap<String,String> FROMQTY= DBHelper.getRecord( "select A.qty-ISNULL(A.receivedqty,0) as QTY,B.supplierNAME,B.SUPPLIER,A.UOM " +
 								" FROM WMS_PO_DETAIL A,WMS_PO B WHERE A.POKEY=B.POKEY AND A.POKEY=? AND A.POLINENUMBER=?"
 						, new String[]{m1.get("FROMKEY"),m1.get("FROMLINENO")});
 				theOutDO.setAttribValue("FROMKEY"+Integer.toString(i1+1), m1.get("FROMKEY")+"-"+m1.get("FROMLINENO"));

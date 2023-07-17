@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.outbound.picking;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -42,13 +42,13 @@ public class ResetPendingTasks extends LegacyBaseService {
              * 所以这里需要更新跳过时间到期的任务，更新当前用户正在操作且没有进行跳过的任务。
              * 在TASKMANAGERSKIPTASKS表中且未到期的任务状态不能进行变更，否则会造成重复拣货或者任务状态不对的bug
              */
-            DBHelper.executeUpdate(context,
+            DBHelper.executeUpdate(
                         "UPDATE TASKDETAIL SET status = '0', userkey = ' ', ReleaseDate = NULL " +
                                 "WHERE TaskDetailKey IN ( SELECT TaskDetailKey FROM TASKMANAGERSKIPTASKS WHERE ReleaseDate <= ? ) " +
                                 "or (userkey = ? and status = '3' AND TaskDetailKey NOT IN ( SELECT TaskDetailKey FROM TASKMANAGERSKIPTASKS WHERE ReleaseDate > ? )) ",
-                Arrays.asList(currentDateTime,context.getUserID(),currentDateTime ));
+                Arrays.asList(currentDateTime,EHContextHelper.getUser().getUsername(),currentDateTime ));
 
-            DBHelper.executeUpdate(context," DELETE FROM TASKMANAGERSKIPTASKS WHERE ReleaseDate <= ?", Arrays.asList(currentDateTime));
+            DBHelper.executeUpdate(" DELETE FROM TASKMANAGERSKIPTASKS WHERE ReleaseDate <= ?", Arrays.asList(currentDateTime));
 
     }
 

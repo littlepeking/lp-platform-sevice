@@ -3,13 +3,13 @@ package com.enhantec.wms.backend.inbound.asn.utils;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,16 +18,16 @@ public class ReceiptUtilHelper {
 
     /**
      * 根据订单退货类型的配置更新批次号
-     * @param context
+
 
      * @param RECEIPTYPE
      * @param receiptDetails 待计算收货批次的收货明细
      * @param returnLotHashMap //当前RECEIPT的新老收货批次对应关系
      * @throws Exception
      */
-    public static void updateReturnReceiptlot(Context context, String RECEIPTYPE, List<HashMap<String, String>> receiptDetails, HashMap<String, String> returnLotHashMap) throws Exception {
+    public static void updateReturnReceiptlot( String RECEIPTYPE, List<HashMap<String, String>> receiptDetails, HashMap<String, String> returnLotHashMap) throws Exception {
 
-        HashMap<String,String>  receiptTypeInfo = CodeLookup.getCodeLookupByKey(context,"RECEIPTYPE", RECEIPTYPE);
+        HashMap<String,String>  receiptTypeInfo = CodeLookup.getCodeLookupByKey("RECEIPTYPE", RECEIPTYPE);
 
         //0: 退货的批次号直接使用原收货批次号
         //1: 当容器开封时，退货的批次号为原批次号+R(A-Z)
@@ -51,13 +51,12 @@ public class ReceiptUtilHelper {
                             //          rd.get("LOTTABLE06") + "R",
                             //          2);
 
-                            newRetLot = IdGenerationHelper.createSubReceiptLot(
-                                    context, rd.get("LOTTABLE06"), "R");
+                            newRetLot = IdGenerationHelper.createSubReceiptLot( rd.get("LOTTABLE06"), "R");
                             returnLotHashMap.put(rd.get("LOTTABLE06"), newRetLot);
 
                         }
 
-                        DBHelper.executeUpdate(context, "UPDATE RECEIPTDETAIL SET LOTTABLE06 = ? WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER  = ? ",
+                        DBHelper.executeUpdate( "UPDATE RECEIPTDETAIL SET LOTTABLE06 = ? WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER  = ? ",
                                 new Object[]{newRetLot, rd.get("RECEIPTKEY"), rd.get("RECEIPTLINENUMBER")});
                     }
                 }
@@ -73,7 +72,7 @@ public class ReceiptUtilHelper {
                 String newRetLot = returnLotHashMap.get(rd.get("LOTTABLE06"));
 
                 if (newRetLot == null) {
-                    newRetLot = IdGenerationHelper.createReceiptLot(context, rd.get("SKU"));
+                    newRetLot = IdGenerationHelper.createReceiptLot( rd.get("SKU"));
                     returnLotHashMap.put(rd.get("LOTTABLE06"), newRetLot);
 
                 }
@@ -88,13 +87,12 @@ public class ReceiptUtilHelper {
                     //          rd.get("LOTTABLE06") + "R",
                     //          2);
 
-                    newELottable07 = IdGenerationHelper.createSubReceiptLot(
-                            context, rd.get("ELOTTABLE07"), "R");
+                    newELottable07 = IdGenerationHelper.createSubReceiptLot( rd.get("ELOTTABLE07"), "R");
                     elottable07HashMap.put(rd.get("ELOTTABLE07"), newELottable07);
 
                 }
 
-                DBHelper.executeUpdate(context,
+                DBHelper.executeUpdate(
                         "UPDATE RECEIPTDETAIL SET LOTTABLE06 = ? , ELOTTABLE07 = ? WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER  = ? ",
                         new Object[]{
                                 newRetLot,
@@ -105,16 +103,16 @@ public class ReceiptUtilHelper {
             }
         }
     }
-    public static BigDecimal stdQty2PoWgt(Context context, String avgSNwgt, BigDecimal LpnQty, String sku) throws Exception {
-        if (SKU.isSerialControl(context,sku)&& CDSysSet.enableSNwgt(context)){
+    public static BigDecimal stdQty2PoWgt( String avgSNwgt, BigDecimal LpnQty, String sku) throws Exception {
+        if (SKU.isSerialControl(sku)&& CDSysSet.enableSNwgt()){
             if (UtilHelper.isEmpty(avgSNwgt))throw new Exception("物料未配置唯一码平均重量");
             return LpnQty.multiply(new BigDecimal(avgSNwgt));
         }
         return LpnQty;
     }
-    public static BigDecimal poWgt2StdQty(Context context, String poWgt, String sku) throws Exception {
-        if (SKU.isSerialControl(context,sku)&&CDSysSet.enableSNwgt(context)) {
-            String conversion = SKU.findById(context, sku, true).get("SNAVGWGT");
+    public static BigDecimal poWgt2StdQty( String poWgt, String sku) throws Exception {
+        if (SKU.isSerialControl(sku)&&CDSysSet.enableSNwgt()) {
+            String conversion = SKU.findById( sku, true).get("SNAVGWGT");
             if (UtilHelper.isEmpty(conversion)) throw new Exception("物料未配置唯一码平均重量");
             BigDecimal oldQTY = new BigDecimal(poWgt);
             BigDecimal conversionBigDecimal = new BigDecimal(conversion);

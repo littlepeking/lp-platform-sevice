@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.putaway;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -11,7 +12,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class PutawayByLPN extends LegacyBaseService {
@@ -32,10 +33,7 @@ public class PutawayByLPN extends LegacyBaseService {
 
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
-		String userid = context.getUserID();
-
-		Connection conn = null;
-	    
+		String userid = EHContextHelper.getUser().getUsername();
 
 		try
 		{
@@ -51,9 +49,9 @@ public class PutawayByLPN extends LegacyBaseService {
 		    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 			//确保LPN没有被分配和拣货才允许移动。
-			HashMap<String, String> idHashMapWithLot = LotxLocxId.findFullAvailInvById(context, fromloc, fromid,"容器不存在或者已被分配或拣货，不允许上架");
-			InventoryValidationHelper.validateLocMix(context, fromid ,fromloc , toloc);
-			InventoryHelper.checkLocQuantityLimit(context,toloc);
+			HashMap<String, String> idHashMapWithLot = LotxLocxId.findFullAvailInvById( fromloc, fromid,"容器不存在或者已被分配或拣货，不允许上架");
+			InventoryValidationHelper.validateLocMix( fromid ,fromloc , toloc);
+			InventoryHelper.checkLocQuantityLimit(toloc);
 //	todo		super.execute(pObject);
 
 			Udtrn UDTRN=new Udtrn();
@@ -68,12 +66,11 @@ public class PutawayByLPN extends LegacyBaseService {
 		    UDTRN.TITLE02="SKU";    UDTRN.CONTENT02=sku;
 		    UDTRN.TITLE03="来源库位";    UDTRN.CONTENT03=toloc;
 		    UDTRN.TITLE04="目标库位";    UDTRN.CONTENT04=finaltoloc;
-		    UDTRN.Insert(context, userid);
+		    UDTRN.Insert( userid);
 
-		    String TOTAL1= DBHelper.getValue(context
-    		, "SELECT COUNT(1) FROM LOTXLOCXID A,LOC C WHERE A.LOC=C.LOC AND A.QTY>0 AND C.PUTAWAYZONE='DOCK' AND A.LOT=?", new String[]{idHashMapWithLot.get("LOT")}, "0");
-    		String TOTAL2= DBHelper.getValue(context
-    		, "SELECT COUNT(1) FROM LOTXLOCXID A WHERE A.LOT=? AND A.QTY>0", new String[]{idHashMapWithLot.get("LOT")}, "0");
+		    String TOTAL1= DBHelper.getValue( "SELECT COUNT(1) FROM LOTXLOCXID A,LOC C WHERE A.LOC=C.LOC AND A.QTY>0 AND C.PUTAWAYZONE='DOCK' AND A.LOT=?", new String[]{idHashMapWithLot.get("LOT")}, "0");
+    		String TOTAL2= DBHelper.getValue(
+    		 "SELECT COUNT(1) FROM LOTXLOCXID A WHERE A.LOT=? AND A.QTY>0", new String[]{idHashMapWithLot.get("LOT")}, "0");
 		    String TOTAL=TOTAL1+" / "+TOTAL2;
 		    
 			

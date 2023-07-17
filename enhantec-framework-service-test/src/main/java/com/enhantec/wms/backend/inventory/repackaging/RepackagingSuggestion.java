@@ -12,7 +12,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class RepackagingSuggestion extends LegacyBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
-        Connection conn =null;
+        
 
         try {
 
@@ -38,16 +38,16 @@ public class RepackagingSuggestion extends LegacyBaseService {
 
  
 
-            HashMap<String,String> zoneInfo = CodeLookup.getCodeLookupByKey(context, "SYSSET","PACKZONE");
+            HashMap<String,String> zoneInfo = CodeLookup.getCodeLookupByKey( "SYSSET","PACKZONE");
             if(UtilHelper.isEmpty(zoneInfo.get("UDF1"))) ExceptionHelper.throwRfFulfillLogicException("仓库分装区配置未进行设置");
-            //List<HashMap<String,String>> packLocs = Loc.findByZone(context,zoneInfo.get("UDF1"),false);
-            HashMap<String,String> orderInfo = Orders.findByOrderKey(context,orderKey,true);
-            HashMap<String,String> orderDetailInfo = Orders.findOrderDetailByKey(context,orderKey, orderLineNumber,true);
-            HashMap<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey(context,"ORDERTYPE",orderInfo.get("TYPE"));
+            //List<HashMap<String,String>> packLocs = Loc.findByZone(zoneInfo.get("UDF1"),false);
+            HashMap<String,String> orderInfo = Orders.findByOrderKey(orderKey,true);
+            HashMap<String,String> orderDetailInfo = Orders.findOrderDetailByKey(orderKey, orderLineNumber,true);
+            HashMap<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey("ORDERTYPE",orderInfo.get("TYPE"));
 
-            HashMap<String,String> skuInfo = SKU.findById(context,orderDetailInfo.get("SKU"),true);
+            HashMap<String,String> skuInfo = SKU.findById(orderDetailInfo.get("SKU"),true);
 
-            String mainUOM = UOM.getStdUOM(context, skuInfo.get("PACKKEY"));
+            String mainUOM = UOM.getStdUOM( skuInfo.get("PACKKEY"));
 
             StringBuffer querySqlSB = new StringBuffer();
 
@@ -60,10 +60,10 @@ public class RepackagingSuggestion extends LegacyBaseService {
 
             querySqlSB.append(" AND l.SKU = '" + skuInfo.get("SKU") +"' ");
 
-            String defaultProjectCode = CDSysSet.getDefaultProjectCode(context);
+            String defaultProjectCode = CDSysSet.getDefaultProjectCode();
 
             //取样单和留样出库单不看项目号（这段暂时保留，但是分装的订单类型不应该是取样单或留样出库单，应该用不到）
-            if(!orderInfo.get("TYPE").equals(CDSysSet.getSampleOrderType(context)) && !"Y".equalsIgnoreCase((orderTypeInfo.get("UDF6")))) {
+            if(!orderInfo.get("TYPE").equals(CDSysSet.getSampleOrderType()) && !"Y".equalsIgnoreCase((orderTypeInfo.get("UDF6")))) {
                 String projectCode = orderInfo.get("NOTES");
                 if (!UtilHelper.isEmpty(projectCode)) {
                     //有项目号库存使用项目号库存，找不到则使用公共项目号库存
@@ -135,7 +135,7 @@ public class RepackagingSuggestion extends LegacyBaseService {
 
             querySqlSB.append(orderByClause);
 
-            List<HashMap<String, String>> list = DBHelper.executeQuery(context, querySqlSB.toString(), new Object[]{});
+            List<HashMap<String, String>> list = DBHelper.executeQuery( querySqlSB.toString(), new Object[]{});
 
             serviceDataHolder.setReturnCode(1);
             serviceDataHolder.setOutputData(list);

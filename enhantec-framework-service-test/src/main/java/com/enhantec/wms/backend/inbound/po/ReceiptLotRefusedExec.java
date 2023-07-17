@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 public class ReceiptLotRefusedExec  extends LegacyBaseService
 {
@@ -33,7 +33,7 @@ public class ReceiptLotRefusedExec  extends LegacyBaseService
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 		//XtSql r1=null;
@@ -44,13 +44,13 @@ public class ReceiptLotRefusedExec  extends LegacyBaseService
 		    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-			String lot = DBHelper.getValue(context, "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
+			String lot = DBHelper.getValue( "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
 					, new String[]{RECEIPTLOT},String.format("收货批次(%1)未找到",RECEIPTLOT));
 			if (!lot.equals("91"))
 		        throw new FulfillLogicException("当前状态不支持此操作");
 
 
-			DBHelper.executeUpdate(context, "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=?,REFUSEEXECWHO=?,REFUSEEXECDATE=? where RECEIPTLOT=?"
+			DBHelper.executeUpdate( "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=?,REFUSEEXECWHO=?,REFUSEEXECDATE=? where RECEIPTLOT=?"
 					,  new String[]{"92",userid,"@date",userid,"@date",RECEIPTLOT});
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -62,12 +62,12 @@ public class ReceiptLotRefusedExec  extends LegacyBaseService
 		    UDTRN.FROMKEY3="";
 		    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
 		    UDTRN.TITLE02="处理方式";    UDTRN.CONTENT02=lot;
-		    UDTRN.TITLE03="处理方式名称";    UDTRN.CONTENT03= DBHelper.getValue(context, "select description from codelkup where listname=? and code=?", new String[]{"PROCEMODE",lot}, "") ;
-		    UDTRN.Insert(context, userid);			
+		    UDTRN.TITLE03="处理方式名称";    UDTRN.CONTENT03= DBHelper.getValue( "select description from codelkup where listname=? and code=?", new String[]{"PROCEMODE",lot}, "") ;
+		    UDTRN.Insert( userid);
 			
-			//String STORERKEY=XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
+			//String STORERKEY=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
 			//MailBeanByPreReceipt mail=new MailBeanByPreReceipt();
-			//mail.Mail(context,userid,STORERKEY,RECEIPTLOT,"退供应商","收货检查退供应商通知",ESIGNATUREKEY);
+			//mail.Mail(userid,STORERKEY,RECEIPTLOT,"退供应商","收货检查退供应商通知",ESIGNATUREKEY);
 			
 			//--------------------------------
 			

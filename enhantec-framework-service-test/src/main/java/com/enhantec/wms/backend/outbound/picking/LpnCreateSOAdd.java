@@ -8,13 +8,13 @@ import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,7 +51,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         String esignatureKey = serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
         String projectId = serviceDataHolder.getInputDataAsMap().getString("PROJECTID");
 
-        String userId = context.getUserID();
+        String userId = EHContextHelper.getUser().getUsername();
         
 
         HashMap<String,String> lotxLocxIdHashMap;
@@ -59,39 +59,39 @@ public class LpnCreateSOAdd extends LegacyBaseService {
 
         try{
 
-            if(SKU.isSerialControl(context,sku) && !IDNotes.isBoxId(context,lpnOrSN)){
+            if(SKU.isSerialControl(sku) && !IDNotes.isBoxId(lpnOrSN)){
 
-                lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(context,sku,lpnOrSN);
+                lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(sku,lpnOrSN);
                 sn =lpnOrSN;
 
             }else {
-                lotxLocxIdHashMap = LotxLocxId.findById(context, lpnOrSN, true);
+                lotxLocxIdHashMap = LotxLocxId.findById( lpnOrSN, true);
                 sn = "";
             }
 
             if(UtilHelper.equals(lotxLocxIdHashMap.get("LOC"),"PICKTO")) ExceptionHelper.throwRfFulfillLogicException("货品目前已位于发货月台PICKTO库位,请移至存储库位后再进行拣货");
-            OrderValidationHelper.checkOrderTypeAndQualityStatusByLPN(context,orderType,lotxLocxIdHashMap.get("ID"));
-            //checkLpnExistInSO(context, lotxLocxIdHashMap.get("ID"));
+            OrderValidationHelper.checkOrderTypeAndQualityStatusByLPN(orderType,lotxLocxIdHashMap.get("ID"));
+            //checkLpnExistInSO( lotxLocxIdHashMap.get("ID"));
 
             String packKey = lotxLocxIdHashMap.get("LOTTABLE01");
             BigDecimal netWgtBigDecimal =new BigDecimal(netWgt);
             BigDecimal grossWgtBigDecimal =new BigDecimal(grossWgt);
             BigDecimal tareWgtBigDecimal =new BigDecimal(tareWgt);
-            BigDecimal baseUomNetWgtBigDecimal= UOM.UOMQty2StdQty(context, packKey, uom,netWgtBigDecimal);
-            BigDecimal baseUomGrossWgtBigDecimal= UOM.UOMQty2StdQty(context, packKey, uom,grossWgtBigDecimal);
-            BigDecimal baseUomTareWgtBigDecimal= UOM.UOMQty2StdQty(context, packKey, uom,tareWgtBigDecimal);
+            BigDecimal baseUomNetWgtBigDecimal= UOM.UOMQty2StdQty( packKey, uom,netWgtBigDecimal);
+            BigDecimal baseUomGrossWgtBigDecimal= UOM.UOMQty2StdQty( packKey, uom,grossWgtBigDecimal);
+            BigDecimal baseUomTareWgtBigDecimal= UOM.UOMQty2StdQty( packKey, uom,tareWgtBigDecimal);
 
-            String storerKey = CDSysSet.getStorerKey(context);
+            String storerKey = CDSysSet.getStorerKey();
 
             HashMap<String, String> orderHashMap = null;
             //通过传入的orderKey是否为空来判断是否需要创建订单头
             if(UtilHelper.isEmpty(orderKey)){
-                orderHashMap = insertOrder(context, orderType,projectId);
+                orderHashMap = insertOrder( orderType,projectId);
             }else {
-                orderHashMap = Orders.findByOrderKey(context,orderKey,true);
+                orderHashMap = Orders.findByOrderKey(orderKey,true);
             }
             //插入订单行
-            HashMap<String,String> orderLineHashMap = insertOrderDetail(context, storerKey,orderHashMap.get("ORDERKEY"), sku, lotxLocxIdHashMap.get("ID"),sn, baseUomNetWgtBigDecimal.toPlainString(),baseUomGrossWgtBigDecimal.toPlainString(),baseUomTareWgtBigDecimal.toPlainString(), packKey, uom);
+            HashMap<String,String> orderLineHashMap = insertOrderDetail( storerKey,orderHashMap.get("ORDERKEY"), sku, lotxLocxIdHashMap.get("ID"),sn, baseUomNetWgtBigDecimal.toPlainString(),baseUomGrossWgtBigDecimal.toPlainString(),baseUomTareWgtBigDecimal.toPlainString(), packKey, uom);
 
             String[] snList;
             if(UtilHelper.isEmpty(sn)){
@@ -100,11 +100,11 @@ public class LpnCreateSOAdd extends LegacyBaseService {
                 snList = new String[]{lpnOrSN};
             }
 
-            HashMap<String,String> result = PickUtil.doRandomPick(context, orderHashMap.get("ORDERKEY"),orderLineHashMap.get("ORDERLINENUMBER"), lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList,esignatureKey,printer);
+            HashMap<String,String> result = PickUtil.doRandomPick( orderHashMap.get("ORDERKEY"),orderLineHashMap.get("ORDERLINENUMBER"), lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList,esignatureKey,printer);
 
             String toId = result.get("TOID");
             String printLabel = result.get("PRINT");
-            ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(context,sku,toId,lotxLocxIdHashMap.get("ID"));
+            ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(sku,toId,lotxLocxIdHashMap.get("ID"));
 
 
             //写日志到UDTRN
@@ -118,9 +118,9 @@ public class LpnCreateSOAdd extends LegacyBaseService {
             udtrn.CONTENT02 = orderKey;
             udtrn.TITLE03 = "容器号/唯一码/箱号";
             udtrn.CONTENT03 = lpnOrSN;
-            udtrn.Insert(context,userId);
+            udtrn.Insert(userId);
 
-            orderDetailCount = DBHelper.getValue(context, "SELECT COUNT(ORDERKEY) FROM ORDERDETAIL WHERE ORDERKEY = ?",
+            orderDetailCount = DBHelper.getValue( "SELECT COUNT(ORDERKEY) FROM ORDERDETAIL WHERE ORDERKEY = ?",
                     new Object[]{orderHashMap.get("ORDERKEY")}, String.class, "");
 
 
@@ -144,11 +144,11 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         }
     }
 
-    private HashMap<String,String> insertOrder(Context context, String orderType,String projectId) throws Exception {
-        String storerKey = CDSysSet.getStorerKey(context);
-        String userId = context.getUserID();
+    private HashMap<String,String> insertOrder( String orderType,String projectId) throws Exception {
+        String storerKey = CDSysSet.getStorerKey();
+        String userId = EHContextHelper.getUser().getUsername();
         String orderKey;
-        orderKey = LegacyDBHelper.GetNCounterBill(context, "ORDER");
+        orderKey = LegacyDBHelper.GetNCounterBill( "ORDER");
         HashMap<String,String> orders = new LinkedHashMap<>();
         orders.put("ADDWHO",userId);
         orders.put("EDITWHO",userId);
@@ -159,11 +159,11 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         orders.put("EXTERNORDERKEY","WMS"+orderKey);
         orders.put("STORERKEY", storerKey);
         if(!UtilHelper.isEmpty(projectId)){
-            Map<String, String> daasProjectCode = DaasProjectCode.getByProjectId(context, projectId);
+            Map<String, String> daasProjectCode = DaasProjectCode.getByProjectId( projectId);
             orders.put("NOTES",projectId);
             orders.put("CLIENRPROJECTCODE",daasProjectCode.get("CLIENRPROJECTCODE"));
         }
-        LegacyDBHelper.ExecInsert(context,"orders",orders);
+        LegacyDBHelper.ExecInsert("orders",orders);
 
         //写日志到UDTRN
         Udtrn udtrn = new Udtrn();
@@ -174,15 +174,15 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         udtrn.CONTENT01 = orderType;
         udtrn.TITLE02 = "出库单号";
         udtrn.CONTENT02 = orderKey;
-        udtrn.Insert(context,userId);
+        udtrn.Insert(userId);
         return orders;
     }
 
-    private HashMap<String, String> insertOrderDetail(Context context, String storerKey, String orderKey, String sku, String lpn, String sn, String netwgt, String grossWgt, String tareWgt, String packKey, String uom) throws Exception {
+    private HashMap<String, String> insertOrderDetail( String storerKey, String orderKey, String sku, String lpn, String sn, String netwgt, String grossWgt, String tareWgt, String packKey, String uom) throws Exception {
 
-        String userId = context.getUserID();
+        String userId = EHContextHelper.getUser().getUsername();
 
-        String orderLineNumber = DBHelper.getValue(context, "select max(orderlinenumber) from orderdetail where orderkey=?"
+        String orderLineNumber = DBHelper.getValue( "select max(orderlinenumber) from orderdetail where orderkey=?"
                 ,new String[]{orderKey}, "0");
         orderLineNumber=Integer.toString(Integer.parseInt(orderLineNumber)+1);
         while (orderLineNumber.length()<5) orderLineNumber="0"+orderLineNumber;
@@ -206,7 +206,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         orderDetail.put("SERIALNUMBER", sn);
         orderDetail.put("NEWALLOCATIONSTRATEGY", "N21"); //分配策略:匹配数量，然后最佳适配
 
-        LegacyDBHelper.ExecInsert(context, "ORDERDETAIL", orderDetail);
+        LegacyDBHelper.ExecInsert( "ORDERDETAIL", orderDetail);
 
         return orderDetail;
 
@@ -214,11 +214,11 @@ public class LpnCreateSOAdd extends LegacyBaseService {
 
 
 
-    private void checkLpnExistInSO(Context context, String lpn) throws Exception {
+    private void checkLpnExistInSO( String lpn) throws Exception {
 
         String sql = "select ORDERKEY from ORDERDETAIL where IDREQUIRED = ? AND STATUS in ('02','04','06','09') ";
 
-        List<HashMap<String,String>> orderList = DBHelper.executeQuery(context, sql, new Object[]{lpn});
+        List<HashMap<String,String>> orderList = DBHelper.executeQuery( sql, new Object[]{lpn});
 
         if(orderList.size()>0) {
            throw new Exception("此容器已经存在出库单"+orderList.get(0).get("ORDERKEY")+"中");

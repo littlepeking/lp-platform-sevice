@@ -1,9 +1,9 @@
 package com.enhantec.wms.backend.utils.print;
 
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Labels {
 
 
 
-    public static List<HashMap<String, String>> getLpnPrintDefaultData(Context context, String receiptKey, String receiptLinenumber) {
+    public static List<HashMap<String, String>> getLpnPrintDefaultData( String receiptKey, String receiptLinenumber) {
         ArrayList<Object> params = new ArrayList<>();
         String theSQLStmt= "";
 
@@ -63,7 +63,7 @@ public class Labels {
             params.add(receiptLinenumber);
         }
         theSQLStmt.concat(" ORDER BY rd.BARRELNUMBER ");
-        List<HashMap<String,String>> data = DBHelper.executeQuery(context, theSQLStmt, params);
+        List<HashMap<String,String>> data = DBHelper.executeQuery( theSQLStmt, params);
         return data;
     }
 }

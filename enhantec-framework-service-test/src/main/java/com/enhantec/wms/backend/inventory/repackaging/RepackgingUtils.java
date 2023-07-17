@@ -1,10 +1,10 @@
 package com.enhantec.wms.backend.inventory.repackaging;
 
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +37,9 @@ public class RepackgingUtils {
         return list;
     }
 
-    public static boolean isInRepackProcess(Context context, String orderKey, String orderLineNumber){
+    public static boolean isInRepackProcess( String orderKey, String orderLineNumber){
 
-        HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,orderKey,orderLineNumber,true);
+        HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
 
         //如果repackOrderKey不为空，说明单据已经创建但未自动完成后续操作，需要手工执行。
         return !UtilHelper.isEmpty(orderDetailHashMap.get("SUSR2"));

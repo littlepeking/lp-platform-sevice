@@ -1,6 +1,7 @@
 
 package com.enhantec.wms.backend.outbound.ui;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -9,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class ClientReceivedStatus extends LegacyBaseService {
@@ -30,7 +31,7 @@ public class ClientReceivedStatus extends LegacyBaseService {
     }
 
     public void execute(ServiceDataHolder serviceDataHolder) {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -41,13 +42,13 @@ public class ClientReceivedStatus extends LegacyBaseService {
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey(context, ORDERKEY, true);
+            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey( ORDERKEY, true);
             String status=ORDERSInfo.get("STATUS");
             if (!"95".equals(status)){
                 ExceptionHelper.throwRfFulfillLogicException("当前状态不能进行此操作");
             }
 
-            DBHelper.executeUpdate(context, "UPDATE ORDERS SET ClientReceivedStatus = ?  WHERE ORDERKEY = ? ",
+            DBHelper.executeUpdate( "UPDATE ORDERS SET ClientReceivedStatus = ?  WHERE ORDERKEY = ? ",
                             new Object[]{"1", ORDERKEY });
 
             Udtrn UDTRN=new Udtrn();
@@ -64,7 +65,7 @@ public class ClientReceivedStatus extends LegacyBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="出库订单号";    UDTRN.CONTENT01=ORDERKEY;
             UDTRN.TITLE02="是否签收";    UDTRN.CONTENT02="是";
-            UDTRN.Insert(context, userid);
+            UDTRN.Insert( userid);
 
 
         }catch (Exception e){

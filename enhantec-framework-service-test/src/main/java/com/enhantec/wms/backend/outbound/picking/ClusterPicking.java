@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.task.TaskDetail;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class ClusterPicking extends LegacyBaseService {
@@ -37,7 +37,7 @@ public class ClusterPicking extends LegacyBaseService {
         String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderkey");
 
 
-        HashMap<String, String>  orderInfo = Orders.findByOrderKey(context,orderKey,true);
+        HashMap<String, String>  orderInfo = Orders.findByOrderKey(orderKey,true);
 
         //if (!"2".equals(orderInfo.get("ISCONFIRMED"))) ExceptionHelper.throwRfFulfillLogicException("订单未复核不允许拣货");
 
@@ -58,15 +58,15 @@ public class ClusterPicking extends LegacyBaseService {
 
 
 
-        HashMap<String,String> idNotesInfo = IDNotes.findById(context,fromId,true);
+        HashMap<String,String> idNotesInfo = IDNotes.findById(fromId,true);
 
-        HashMap<String,String>  skuHashMap = SKU.findById(context, sku,true);
-        String  stdUom = UOM.getStdUOM(context, idNotesInfo.get("PACKKEY"));
-        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(context, lot,true);
-        HashMap<String,String>  idNotesHashMap = IDNotes.findById(context, fromId,true);
-        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(context, taskDetailKey,true);
-        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(context, fromId,true);
-        HashMap<String,String>  orderDetailHashMap = Orders.findOrderDetailByKey(context,taskDetailHashMap.get("ORDERKEY"),taskDetailHashMap.get("ORDERLINENUMBER"), true);
+        HashMap<String,String>  skuHashMap = SKU.findById( sku,true);
+        String  stdUom = UOM.getStdUOM( idNotesInfo.get("PACKKEY"));
+        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot( lot,true);
+        HashMap<String,String>  idNotesHashMap = IDNotes.findById( fromId,true);
+        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById( taskDetailKey,true);
+        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById( fromId,true);
+        HashMap<String,String>  orderDetailHashMap = Orders.findOrderDetailByKey(taskDetailHashMap.get("ORDERKEY"),taskDetailHashMap.get("ORDERLINENUMBER"), true);
 
         outDO.put("skudescr",skuHashMap.get("DESCR"));
         outDO.put("lottable06",lotHashMap.get("LOTTABLE06").toString());

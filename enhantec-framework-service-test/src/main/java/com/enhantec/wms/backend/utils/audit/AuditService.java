@@ -1,10 +1,10 @@
 package com.enhantec.wms.backend.utils.audit;
 
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  --注册方法 只负责插入审计历史记录，不负责验证
@@ -27,7 +27,7 @@ public class AuditService extends LegacyBaseService {
 
         /*
         EXEDataObjectprocessData.getInputDataMap() = (EXEDataObject)context.theEXEDataObjectStack.stackList.get(1);
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
         String eSignatureKey=null;
 
         
@@ -40,7 +40,7 @@ public class AuditService extends LegacyBaseService {
             // todo implement
             UDTRN uDTRN = new UDTRN();
 
-            doAudit(context,USERNAME,PASSWORD,REASON,NOTES,uDTRN);
+            doAudit(USERNAME,PASSWORD,REASON,NOTES,uDTRN);
 
         }
         catch (Exception e)
@@ -69,28 +69,28 @@ public class AuditService extends LegacyBaseService {
 
     }
 
-    public static void doAudit(Context context, Udtrn uDTRN) throws Exception {
+    public static void doAudit( Udtrn uDTRN) throws Exception {
         //Add audit record
-        String userid = context.getUserID();
-        uDTRN.Insert(context, userid);
+        String userid = EHContextHelper.getUser().getUsername();
+        uDTRN.Insert( userid);
 
     }
 
     @Deprecated
-    public static void doAudit(Context context, String username, String password, String reason, String notes, Udtrn uDTRN) throws Exception {
+    public static void doAudit( String username, String password, String reason, String notes, Udtrn uDTRN) throws Exception {
 
         //Do esignature
-        //String userid = context.getUserID();
+        //String userid = EHContextHelper.getUser().getUsername();
         if (!UtilHelper.isEmpty(username) && !UtilHelper.isEmpty(password)){
             //john 根据复核功能需要，取消当前用户限制
 //            if(!userid.toUpperCase().equals(username.toUpperCase()))
 //                ExceptionHelper.throwRfFulfillLogicException("签名用户不是当前用户");
 //
-            uDTRN.EsignatureKey = ESignatureService.doSignature(context, username,password, reason, notes);
+            uDTRN.EsignatureKey = ESignatureService.doSignature( username,password, reason, notes);
         }
 
         //Add audit record
-        uDTRN.Insert(context, username);
+        uDTRN.Insert( username);
 
     }
 

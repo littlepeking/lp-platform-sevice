@@ -1,16 +1,17 @@
 package com.enhantec.wms.backend.inbound.asn;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class ReceiptDetailDelete extends LegacyBaseService
@@ -29,29 +30,27 @@ public class ReceiptDetailDelete extends LegacyBaseService
 
 
 	public void execute(ServiceDataHolder serviceDataHolder) {
-		String userid = context.getUserID();
-
-
+		String userid = EHContextHelper.getUser().getUsername();
 
 		try {
 			String RECEIPTKEY= serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
 			String RECEIPTLINENUMBER= serviceDataHolder.getInputDataAsMap().getString("RECEIPTLINENUMBER");
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-			HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(context,RECEIPTKEY,true);
+			HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(RECEIPTKEY,true);
 
 			//if (!receiptHashMap.get("ISCONFIRMED").equals("0"))  throw new Exception("收货单已确认,不允许删除明细行");
 
-			HashMap<String,String> receiptDetailHashMap = Receipt.findReceiptDetailById(context,RECEIPTKEY,RECEIPTLINENUMBER,true);
+			HashMap<String,String> receiptDetailHashMap = Receipt.findReceiptDetailById(RECEIPTKEY,RECEIPTLINENUMBER,true);
 
 			//开始收货的ASN不能删除，否则影响桶号的顺序性。如果极端情况发现SN重复导致收货报错，则关闭当前ASN重新建单收货。考虑性能，暂不增加库存校验在建单环节。
 			if (receiptDetailHashMap.get("STATUS").equals("5"))  throw new Exception("收货单行已开始收货,不允许删除");
 			if (receiptDetailHashMap.get("STATUS").equals("9"))  throw new Exception("收货单行已收货,不允许删除");
 			if (receiptDetailHashMap.get("STATUS").equals("11"))  throw new Exception("收货单行已关闭,不允许删除");
 
-			Receipt.deleteReceiptDetail(context,RECEIPTKEY,RECEIPTLINENUMBER);
+			Receipt.deleteReceiptDetail(RECEIPTKEY,RECEIPTLINENUMBER);
 
-			deletePrintTaskByReceiptDetail(context,RECEIPTKEY,RECEIPTLINENUMBER);
+			deletePrintTaskByReceiptDetail(RECEIPTKEY,RECEIPTLINENUMBER);
 
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -64,9 +63,9 @@ public class ReceiptDetailDelete extends LegacyBaseService
 			UDTRN.TITLE01="收货单号";    UDTRN.CONTENT01=RECEIPTKEY;
 			UDTRN.TITLE02="收货行号";    UDTRN.CONTENT02=RECEIPTLINENUMBER;
 			UDTRN.TITLE03="容器条码/箱号";    UDTRN.CONTENT03=receiptDetailHashMap.get("TOID");
-			UDTRN.Insert(context, userid);
+			UDTRN.Insert( userid);
 
-			String totalLines = DBHelper.getValue(context, "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? ",new String[]{RECEIPTKEY},"0");
+			String totalLines = DBHelper.getValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? ",new String[]{RECEIPTKEY},"0");
 
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
@@ -86,8 +85,8 @@ public class ReceiptDetailDelete extends LegacyBaseService
 
 	}
 
-	private void deletePrintTaskByReceiptDetail(Context context, String receiptKey, String receiptLineNumber)throws Exception{
-		PrintHelper.removePrintTaskByReceiptDetail(context, Labels.LPN_UI,receiptKey,receiptLineNumber);
-		PrintHelper.removePrintTaskByReceiptDetail(context, Labels.SN_UI,receiptKey,receiptLineNumber);
+	private void deletePrintTaskByReceiptDetail( String receiptKey, String receiptLineNumber)throws Exception{
+		PrintHelper.removePrintTaskByReceiptDetail( Labels.LPN_UI,receiptKey,receiptLineNumber);
+		PrintHelper.removePrintTaskByReceiptDetail( Labels.SN_UI,receiptKey,receiptLineNumber);
 	}
 }

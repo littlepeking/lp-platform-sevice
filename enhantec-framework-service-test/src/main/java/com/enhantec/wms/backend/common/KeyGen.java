@@ -8,22 +8,22 @@
 
 package com.enhantec.wms.backend.common;
 
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 public class KeyGen {
-    public static String getKey(Context context, String lotxidheader) {
+    public static String getKey( String lotxidheader) {
 
         throw new RuntimeException("not implement");
     }
 
-    public static String getKey(Context context, String keyName, int i, int i1) {
+    public static String getKey( String keyName, int i, int i1) {
 
         throw new RuntimeException("not implement");
 
     }
 
 
-    public static String getKey(Context context, String keyName,int i) {
+    public static String getKey( String keyName,int i) {
 
         throw new RuntimeException("not implement");
 

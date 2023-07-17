@@ -12,7 +12,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +33,7 @@ public class SplitLpn extends LegacyBaseService {
 
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 		try
@@ -56,25 +56,25 @@ public class SplitLpn extends LegacyBaseService {
 			List<String> snList = new ArrayList<>();
 
 			if(!UtilHelper.isEmpty(toId)) {
-				if (SKU.isSerialControl(context, sku)){
-					if(!IDNotes.isBoxId(context,toId))	ExceptionHelper.throwRfFulfillLogicException("扫描的分拆至箱号不符合系统箱号规则，请检查后再提交");
+				if (SKU.isSerialControl( sku)){
+					if(!IDNotes.isBoxId(toId))	ExceptionHelper.throwRfFulfillLogicException("扫描的分拆至箱号不符合系统箱号规则，请检查后再提交");
 				}else {
 //					ExceptionHelper.throwRfFulfillLogicException("按批次管理的物料不支持指定分拆至容器条码，系统会自动生成");
 				}
 			}
 
-			if(SKU.isSerialControl(context,sku) && !IDNotes.isBoxId(context,fromId)){
+			if(SKU.isSerialControl(sku) && !IDNotes.isBoxId(fromId)){
 
-				lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(context,sku,fromId);
+				lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(sku,fromId);
 
 				snList.add(fromId);
 				qtyToSplit = "1";
 
-			}else if(SKU.isSerialControl(context,sku) && IDNotes.isBoxId(context,fromId)){
+			}else if(SKU.isSerialControl(sku) && IDNotes.isBoxId(fromId)){
 
 				ExceptionHelper.throwRfFulfillLogicException("暂不支持整箱号合并操作，请直接扫描唯一码");
 			}else {
-				lotxLocxIdHashMap = LotxLocxId.findById(context, fromId, true);
+				lotxLocxIdHashMap = LotxLocxId.findById( fromId, true);
 				qtyToSplit = toBeMovedNetWgt;
 			}
 
@@ -85,11 +85,11 @@ public class SplitLpn extends LegacyBaseService {
 
 			String toLoc = lotxLocxIdHashMap.get("LOC");
 			if(!UtilHelper.isEmpty(toId)){
-				HashMap<String, String> toIdHashMap = LotxLocxId.findById(context, toId, false);
+				HashMap<String, String> toIdHashMap = LotxLocxId.findById( toId, false);
 				if(toIdHashMap !=null) toLoc = toIdHashMap.get("LOC");
 			}
 
-			HashMap<String,String> result = InventoryHelper.doMove(context,opName, lotxLocxIdHashMap, snList, toId, lotxLocxIdHashMap.get("LOC"), toLoc, toBeMovedNetWgt, toBeMovedGrossWgt, toBeMovedTareWgt, toBeMovedUOM, printer,true);
+			HashMap<String,String> result = InventoryHelper.doMove(opName, lotxLocxIdHashMap, snList, toId, lotxLocxIdHashMap.get("LOC"), toLoc, toBeMovedNetWgt, toBeMovedGrossWgt, toBeMovedTareWgt, toBeMovedUOM, printer,true);
 
 			toId = result.get("TOID");
 			String printLabel = result.get("PRINT");
@@ -108,7 +108,7 @@ public class SplitLpn extends LegacyBaseService {
 			UDTRN.TITLE04="目标库位";    UDTRN.CONTENT04=toLoc;
 			UDTRN.TITLE05="数量";    UDTRN.CONTENT05=qtyToSplit;
 
-			UDTRN.Insert(context, userid);
+			UDTRN.Insert( userid);
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 

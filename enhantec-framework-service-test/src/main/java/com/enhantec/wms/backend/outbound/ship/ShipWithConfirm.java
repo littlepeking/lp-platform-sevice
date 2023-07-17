@@ -15,7 +15,7 @@ public class ShipWithConfirm extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        ServiceHelper.executeService(context, "EHConfirmSO", serviceDataHolder);
-        ServiceHelper.executeService(context,"EHShipByOrder", serviceDataHolder);
+        ServiceHelper.executeService( "EHConfirmSO", serviceDataHolder);
+        ServiceHelper.executeService("EHShipByOrder", serviceDataHolder);
     }
 }

@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.outbound.picking;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.*;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
@@ -17,7 +17,7 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -148,9 +148,9 @@ public class PickUtil {
 
     }
 
-    public static void checkIfSplitTimesOverLimit(Context context, String fromid) {
+    public static void checkIfSplitTimesOverLimit( String fromid) {
 
-        HashMap<String,String> record = DBHelper.getRecord(context,"select KEYCOUNT FROM NCOUNTER n where n.KEYNAME = ? ",  new Object[]{ fromid }, "NCOUNTER");
+        HashMap<String,String> record = DBHelper.getRecord("select KEYCOUNT FROM NCOUNTER n where n.KEYNAME = ? ",  new Object[]{ fromid }, "NCOUNTER");
 
         if( record!=null &&  Integer.parseInt(record.get("KEYCOUNT"))>=26) ExceptionHelper.throwRfFulfillLogicException("同一容器分拆最多允许26次");
     }
@@ -158,7 +158,7 @@ public class PickUtil {
 
     /**
      * 手工完成唯一码拣货（使用NSPRFTPK01C进行整容器拣货时，无需执行此操作）
-     * @param context
+
 
      * @param orderKey
      * @param orderLineNumber
@@ -169,24 +169,24 @@ public class PickUtil {
      * @param itrnKey
      * @throws Exception
      */
-    public static void pickSerialNumber(Context context, String orderKey, String orderLineNumber, String pickdetailKey, HashMap<String, String> fromIdHashMap, String toId, String[] snList, String itrnKey) throws Exception {
+    public static void pickSerialNumber( String orderKey, String orderLineNumber, String pickdetailKey, HashMap<String, String> fromIdHashMap, String toId, String[] snList, String itrnKey) throws Exception {
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
         if (snList.length != 0) {
 
-            String lotxIdKey = LotxId.buildLotxIHeaderInfo(context,  fromIdHashMap.get("SKU"), "O", toId, orderKey, orderLineNumber, pickdetailKey, fromIdHashMap.get("LOT"));
+            String lotxIdKey = LotxId.buildLotxIHeaderInfo(  fromIdHashMap.get("SKU"), "O", toId, orderKey, orderLineNumber, pickdetailKey, fromIdHashMap.get("LOT"));
 
             for (int i = 0; i < snList.length; i++) {
-                LotxId.buildLotxIdDetailInfo(context, lotxIdKey, fromIdHashMap.get("SKU"), "O", fromIdHashMap.get("ID"), toId, orderKey, orderLineNumber, pickdetailKey, fromIdHashMap.get("LOT"), snList[i], i + 1);
+                LotxId.buildLotxIdDetailInfo( lotxIdKey, fromIdHashMap.get("SKU"), "O", fromIdHashMap.get("ID"), toId, orderKey, orderLineNumber, pickdetailKey, fromIdHashMap.get("LOT"), snList[i], i + 1);
             }
 
-            DBHelper.executeUpdate(context, "UPDATE LOTXIDHEADER SET  STATUS ='9' WHERE LOTXIDKEY = ? ", new Object[]{lotxIdKey});
+            DBHelper.executeUpdate( "UPDATE LOTXIDHEADER SET  STATUS ='9' WHERE LOTXIDKEY = ? ", new Object[]{lotxIdKey});
             for (int i = 0; i < snList.length; i++) {
-                DBHelper.executeUpdate(context, "UPDATE SERIALINVENTORY SET LOC = ?, ID = ? , LOT = ? WHERE  SERIALNUMBERLONG = ? AND SKU = ? ", new Object[]{
+                DBHelper.executeUpdate( "UPDATE SERIALINVENTORY SET LOC = ?, ID = ? , LOT = ? WHERE  SERIALNUMBERLONG = ? AND SKU = ? ", new Object[]{
                         "PICKTO", toId, fromIdHashMap.get("LOT"), snList[i], fromIdHashMap.get("SKU")});
 
-                String itrnSerialKey = KeyGen.getKey( context,"ITRNSERIALKEY", 2, 10);
+                String itrnSerialKey = KeyGen.getKey("ITRNSERIALKEY", 2, 10);
 
                 HashMap<String,String> serialItrn = new LinkedHashMap<>();
                 serialItrn.put("SERIALNUMBERLONG", snList[i]);
@@ -208,7 +208,7 @@ public class PickUtil {
                 serialItrn.put("Trantype", "MV");
                 serialItrn.put("ADDWHO", userid);
                 serialItrn.put("EDITWHO", userid);
-                LegacyDBHelper.ExecInsert(context, "ITRNSERIAL", serialItrn);
+                LegacyDBHelper.ExecInsert( "ITRNSERIAL", serialItrn);
 
             }
         }
@@ -221,10 +221,10 @@ public class PickUtil {
      *  key:PRINT,value:是否打印标签
      * @throws Exception
      */
-    public static HashMap<String,String> doRandomPick(Context context, String orderKey, String orderLineNumber, HashMap<String, String> lotxLocxIdHashMap, String toId, String grossUomWgt, String tareUomWgt, String netUomWgt, String uom, BigDecimal stdQtyAllocated, String[] snList, String esignatureKey, String printer) throws Exception {
+    public static HashMap<String,String> doRandomPick( String orderKey, String orderLineNumber, HashMap<String, String> lotxLocxIdHashMap, String toId, String grossUomWgt, String tareUomWgt, String netUomWgt, String uom, BigDecimal stdQtyAllocated, String[] snList, String esignatureKey, String printer) throws Exception {
 
         String fromId = lotxLocxIdHashMap.get("ID");
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -239,19 +239,19 @@ public class PickUtil {
         BigDecimal availQty = new BigDecimal(lotxLocxIdHashMap.get("AVAILABLEQTY"));
 
 
-        //String stdUom = UOM.getStdUOM(context, lotxLocxIdHashMap.get("PACKKEY"));
+        //String stdUom = UOM.getStdUOM( lotxLocxIdHashMap.get("PACKKEY"));
 
-        BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty(context, lotxLocxIdHashMap.get("PACKKEY"), uom, grossUomWgtDecimal);
-        BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty(context, lotxLocxIdHashMap.get("PACKKEY"), uom, tareUomWgtDecimal);
-        BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty(context, lotxLocxIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
+        BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty( lotxLocxIdHashMap.get("PACKKEY"), uom, grossUomWgtDecimal);
+        BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty( lotxLocxIdHashMap.get("PACKKEY"), uom, tareUomWgtDecimal);
+        BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty( lotxLocxIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
 
 
-        OutboundUtils.checkQtyIsAvailableInLotxLocxId(context, fromId,stdQtyTobePicked,stdQtyAllocated);
-        OutboundUtils.checkQtyIsAvailableInIDNotes(context, fromId, stdQtyTobePicked);
+        OutboundUtils.checkQtyIsAvailableInLotxLocxId( fromId,stdQtyTobePicked,stdQtyAllocated);
+        OutboundUtils.checkQtyIsAvailableInIDNotes( fromId, stdQtyTobePicked);
 
         boolean isPickFullLPN = stdQtyTobePicked.compareTo(lpnQty) == 0;
 
-        if (!isPickFullLPN) PickUtil.checkIfSplitTimesOverLimit(context, fromId);
+        if (!isPickFullLPN) PickUtil.checkIfSplitTimesOverLimit( fromId);
 
         boolean printLabel = false;
 
@@ -260,26 +260,26 @@ public class PickUtil {
 
         if (!isPickFullLPN) {
             //动态拣货TOID参数应传入空，系统会自动生成LPN号（批次管理物料生成子容器号，唯一码管理物料生成流水码箱号）
-            toId = IDNotes.splitWgtById(context, stdGrossWgtDecimal, stdQtyTobePicked, stdTareWgtDecimal, grossUomWgt, netUomWgt, tareUomWgt, uom, fromId,toId, orderKey,false);
+            toId = IDNotes.splitWgtById( stdGrossWgtDecimal, stdQtyTobePicked, stdTareWgtDecimal, grossUomWgt, netUomWgt, tareUomWgt, uom, fromId,toId, orderKey,false);
 
             HashMap<String,String> fieldsToBeUpdate = new LinkedHashMap<>();
             fieldsToBeUpdate.put("LASTSHIPPEDLOC", lotxLocxIdHashMap.get("LOC")); //该ID最后一次的拣货自库位
 //            fieldsToBeUpdate.put("LASTLOC", lotxLocxIdHashMap.get("LOC")); //该ID的上一个库位
             fieldsToBeUpdate.put("LASTID", lotxLocxIdHashMap.get("ID")); //该ID的上一个ID
-            IDNotes.update(context, toId, fieldsToBeUpdate);
-            if(IDNotes.isLpnOrBoxId(context,toId)) {
-                HashMap<String, String> orderInfo = Orders.findByOrderKey(context, orderKey, true);
-                List<String> notPrintLpnLabelOrderTypes = CDSysSet.getNotPrintLpnLabelOrderTypes(context);
+            IDNotes.update( toId, fieldsToBeUpdate);
+            if(IDNotes.isLpnOrBoxId(toId)) {
+                HashMap<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
+                List<String> notPrintLpnLabelOrderTypes = CDSysSet.getNotPrintLpnLabelOrderTypes();
                 if(null == notPrintLpnLabelOrderTypes || !notPrintLpnLabelOrderTypes.contains(orderInfo.get("TYPE"))) {
                     printLabel = true;
-                    PrintHelper.printLPNByIDNotes(context, toId, Labels.LPN, printer, "1", "非整桶拣货标签");
+                    PrintHelper.printLPNByIDNotes( toId, Labels.LPN, printer, "1", "非整桶拣货标签");
                 }
             }
             //如果该ID的标签由于固体多次分装的情况发生，已经存在，则应删除已存在的物料剩余量标签的打印任务（因为再次分装后，原待打印的物料剩余量标签的数量已经不正确），并新建打印任务
-            if(CDSysSet.enableLabelWgt(context)) {
+            if(CDSysSet.enableLabelWgt()) {
                 printLabel = true;
-                PrintHelper.removePrintTaskByIDNotes(context, Labels.LPN_UI_SY, fromId);
-                PrintHelper.printLPNByIDNotes(context, fromId, Labels.LPN_UI_SY, printer, "1", "物料剩余量标签");
+                PrintHelper.removePrintTaskByIDNotes( Labels.LPN_UI_SY, fromId);
+                PrintHelper.printLPNByIDNotes( fromId, Labels.LPN_UI_SY, printer, "1", "物料剩余量标签");
             }
 
 
@@ -298,23 +298,23 @@ public class PickUtil {
 //            fieldsToBeUpdate.put("LASTLOC", lotxLocxIdHashMap.get("LOC")); //该ID的上一个库位
             fieldsToBeUpdate.put("LASTID", lotxLocxIdHashMap.get("ID")); //该ID的上一个ID
             fieldsToBeUpdate.put("ORDERKEY", orderKey);
-            IDNotes.update(context, toId, fieldsToBeUpdate);
+            IDNotes.update( toId, fieldsToBeUpdate);
         }
 
-        HashMap<String, String> outHashMap = doPickByAddPickDetail(context,orderKey, orderLineNumber, fromId, toId, stdQtyTobePicked);
+        HashMap<String, String> outHashMap = doPickByAddPickDetail(orderKey, orderLineNumber, fromId, toId, stdQtyTobePicked);
 
         String pickDetailKey =outHashMap.get("PICKDETAILKEY");
         String itrnKey =outHashMap.get("ITRNKEY");
 
 
-        if(SKU.isSerialControl(context,lotxLocxIdHashMap.get("SKU"))) {
+        if(SKU.isSerialControl(lotxLocxIdHashMap.get("SKU"))) {
             //ADD PICKDETAIL的方式进行整箱拣货，需要手工填充序列号库存
             if(snList.length == 0) {
-                List<HashMap<String, String>> snListHashMap = SerialInventory.findByLpn(context, fromId, true);
+                List<HashMap<String, String>> snListHashMap = SerialInventory.findByLpn( fromId, true);
                 snList = snListHashMap.stream().map(x -> x.get("SERIALNUMBERLONG")).toArray(String[]::new);
             }
 
-            PickUtil.pickSerialNumber(context, orderKey, orderLineNumber, pickDetailKey, lotxLocxIdHashMap, toId, snList, itrnKey);
+            PickUtil.pickSerialNumber( orderKey, orderLineNumber, pickDetailKey, lotxLocxIdHashMap, toId, snList, itrnKey);
 
         }
 
@@ -351,7 +351,7 @@ public class PickUtil {
         UDTRN.CONTENT06 = lotxLocxIdHashMap.get("ELOTTABLE03");
         UDTRN.TITLE07 = "拣货数量";
         UDTRN.CONTENT07 = stdQtyTobePicked.toPlainString();
-        UDTRN.Insert(context, userid);
+        UDTRN.Insert( userid);
 
         HashMap<String, String> result = new HashMap<>();
         result.put("TOID", toId);
@@ -360,43 +360,42 @@ public class PickUtil {
         return result;
     }
 
-    public static HashMap<String, String> doPickByAddPickDetail(Context context, String orderKey, String orderLineNumber, String idToBePicked, String toId, BigDecimal stdQtyToBePicked) throws SQLException {
+    public static HashMap<String, String> doPickByAddPickDetail( String orderKey, String orderLineNumber, String idToBePicked, String toId, BigDecimal stdQtyToBePicked) throws SQLException {
 
         EXEDataObject thePickDO = new EXEDataObject();
 
-        HashMap<String,String> lotxLocxIdInfo = LotxLocxId.findById(context,idToBePicked,true);
+        HashMap<String,String> lotxLocxIdInfo = LotxLocxId.findById(idToBePicked,true);
 
         //检查容器条码和订单冻结分配状态匹配
-        PickUtil.checkIdHoldStatusMatchOrderType(context,orderKey, lotxLocxIdInfo);
+        PickUtil.checkIdHoldStatusMatchOrderType(orderKey, lotxLocxIdInfo);
         //检查容器条码和订单质量状态匹配
-        OrderValidationHelper.checkIdQualityStatusMatchOrderType(context,orderKey,lotxLocxIdInfo);
+        OrderValidationHelper.checkIdQualityStatusMatchOrderType(orderKey,lotxLocxIdInfo);
 
-        String pickDetailKey = IdGenerationHelper.getNextKey(context,"PICKDETAILKEY");
+        String pickDetailKey = IdGenerationHelper.getNextKey("PICKDETAILKEY");
 //        thePickDO.clearDO();
 //        thePickDO.setConstraintItem("pickdetailkey", pickDetailKey);
 //        thePickDO.setWhereClause(" WHERE PickDetailKey = :pickdetailkey");
 ////        context.theEXEDataObjectStack.push(thePickDO);
-//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire(context);
+//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire();
 
 
-        String caseId = IdGenerationHelper.getNextKey(context,"CARTONID");
+        String caseId = IdGenerationHelper.getNextKey("CARTONID");
 
 
         double grosswgt = 0.0D;
         double netwgt = 0.0D;
         double tarewgt = 0.0D;
 
-        String stdUOM = UOM.getStdUOM(context, lotxLocxIdInfo.get("PACKKEY"));
+        String stdUOM = UOM.getStdUOM( lotxLocxIdInfo.get("PACKKEY"));
         //right now just provide stduom, it should be always 6
-        String uom = UOM.getUOMCode(context, lotxLocxIdInfo.get("PACKKEY"), stdUOM);
+        String uom = UOM.getUOMCode( lotxLocxIdInfo.get("PACKKEY"), stdUOM);
 
         //支持冻结库存的拣货
-        String statusRequired = lotxLocxIdInfo.get("STATUS").equals("OK")? "OK": InventoryHelper.getHoldStatus4Pick(context,lotxLocxIdInfo);
+        String statusRequired = lotxLocxIdInfo.get("STATUS").equals("OK")? "OK": InventoryHelper.getHoldStatus4Pick(lotxLocxIdInfo);
         //更新拣货明细的自定义字段1为开封，用于反馈赋码系统时确定是否使用箱号还是唯一码
-        HashMap<String,String> idNotesHashMap = IDNotes.findById(context,toId,true);
+        HashMap<String,String> idNotesHashMap = IDNotes.findById(toId,true);
 
         DBHelper.executeUpdate(
-                context,
                 " INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status, PDUDF1 ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,? )",
                 new Object[]{
                         pickDetailKey,
@@ -420,8 +419,8 @@ public class PickUtil {
                         " ",//REPLENISHZONE
                         "N",//DOCARTONIZE
                         "3",//PICKMETHOD 1:定向/3辅助
-                        context.getUserID(),
-                        context.getUserID(),
+                        EHContextHelper.getUser().getUsername(),
+                        EHContextHelper.getUser().getUsername(),
                         99999,
                         statusRequired,
                         lotxLocxIdInfo.get("LOC"),
@@ -467,14 +466,13 @@ public class PickUtil {
 //
 //        triggerDO.setAttribValue("statusRequired", statusRequired);
 //
-//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).postInsertFire(context);
+//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).postInsertFire();
 //
 
                 //todo:
 ////        //更新拣货明细为已拣货
-//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).preUpdateFire(context);
+//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).preUpdateFire();
         DBHelper.executeUpdate(
-                context,
                 "UPDATE PICKDETAIL SET DROPID = ?, LOC = ?, TOLOC = ?, STATUS = ? WHERE PICKDETAILKEY = ? ",
                 new Object[]{toId, "PICKTO","PICKTO", "5", pickDetailKey});
 
@@ -488,7 +486,7 @@ public class PickUtil {
 //        pdUpdateTriggerDO.setAttribValue("statusRequired", statusRequired);
 //
 //        context.theEXEDataObjectStack.push(pdUpdateTriggerDO);
-//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).postUpdateFire(context);
+//        context.theSQLMgr.searchTriggerLibrary("PickDetail")).postUpdateFire();
 //
 //        EXEDataObject outDO = (EXEDataObject) context.theEXEDataObjectStack.stackList.get(1);
 
@@ -501,11 +499,11 @@ public class PickUtil {
     }
 
 
-    public static void checkIdHoldStatusMatchOrderType(Context context, String orderKey, HashMap<String,String> lotxLocxIdInfo){
+    public static void checkIdHoldStatusMatchOrderType( String orderKey, HashMap<String,String> lotxLocxIdInfo){
 
-        HashMap<String, String> orderHashMap = Orders.findByOrderKey(context, orderKey, true);
+        HashMap<String, String> orderHashMap = Orders.findByOrderKey( orderKey, true);
 
-        List<HashMap<String, String>> holdStatusHashMapList = DBHelper.executeQuery(context, "SELECT STATUSCODE from HOLDALLOCATIONMATRIX WHERE ORDERTYPE=?", new Object[]{
+        List<HashMap<String, String>> holdStatusHashMapList = DBHelper.executeQuery( "SELECT STATUSCODE from HOLDALLOCATIONMATRIX WHERE ORDERTYPE=?", new Object[]{
                 orderHashMap.get("TYPE")
         });
 
@@ -515,7 +513,7 @@ public class PickUtil {
             List<String> orderTypeHoldStatusList = holdStatusHashMapList.stream().map(x -> x.get("STATUSCODE")).collect(Collectors.toList());
 
 
-                List<String> holdStatuses = InventoryHelper.getHoldStatuses(context, lotxLocxIdInfo);
+                List<String> holdStatuses = InventoryHelper.getHoldStatuses( lotxLocxIdInfo);
 
                 if (!holdStatuses.stream().anyMatch(x -> orderTypeHoldStatusList.stream().anyMatch(y -> y.equals(x))))
                     ExceptionHelper.throwRfFulfillLogicException("当前容器条码的冻结状态不符合订单拣货要求");

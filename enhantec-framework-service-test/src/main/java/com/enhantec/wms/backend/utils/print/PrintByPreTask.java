@@ -1,12 +1,13 @@
 package com.enhantec.wms.backend.utils.print;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class PrintByPreTask extends LegacyBaseService
 		//this.currentDate = UtilHelper.getCurrentDate();
 
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 	    String USER= serviceDataHolder.getInputDataAsMap().getString( "USER");
 	    String PRINTER= serviceDataHolder.getInputDataAsMap().getString( "PRINTER");
@@ -42,12 +43,12 @@ public class PrintByPreTask extends LegacyBaseService
 		{
 			if (PRINTER.equals("0")) throw new Exception("不能选择缓存打印机");
 
-			int i0= Integer.valueOf(DBHelper.getValue(context, "select count(1) from LABELPRINTER where PRINTERNAME=?",
+			int i0= Integer.valueOf(DBHelper.getValue( "select count(1) from LABELPRINTER where PRINTERNAME=?",
 					new Object[]{PRINTER},"打印机配置").toString());
 
 			if (i0==0)  throw new Exception("系统未注册您选择的打印机");
 
-			String paperSpec = CodeLookup.getCodeLookupValue(context,"PRINTER",PRINTER,"UDF5","打印配置");
+			String paperSpec = CodeLookup.getCodeLookupValue("PRINTER",PRINTER,"UDF5","打印配置");
 
 			String labelSuffix = "";
 			if(!UtilHelper.isEmpty(paperSpec)) {
@@ -57,12 +58,12 @@ public class PrintByPreTask extends LegacyBaseService
 				//labelSuffix += "_DEFAULT";
 			}
 
-			List<HashMap<String,String>> TASKS=DBHelper.executeQuery(context
-					, "select TASKID from PRINT_TASK where PRINTWHO=? and PRINTSTATUS=? ORDER BY TASKID"
+			List<HashMap<String,String>> TASKS=DBHelper.executeQuery(
+					 "select TASKID from PRINT_TASK where PRINTWHO=? and PRINTSTATUS=? ORDER BY TASKID"
 					, new Object[]{USER, "-1"});
 			if (TASKS.size()==0) throw new Exception("未找到打印任务");
 
-			DBHelper.executeUpdate(context, "update PRINT_TASK set PRINTER=?, REPORTNAME = CONCAT(REPORTNAME, ?),  PRINTSTATUS=?,EDITWHO=?,EDITDATE=? WHERE PRINTSTATUS=? and PRINTWHO=?"
+			DBHelper.executeUpdate( "update PRINT_TASK set PRINTER=?, REPORTNAME = CONCAT(REPORTNAME, ?),  PRINTSTATUS=?,EDITWHO=?,EDITDATE=? WHERE PRINTSTATUS=? and PRINTWHO=?"
 					, new Object[]{PRINTER,labelSuffix, "0",userid,UtilHelper.getCurrentSqlDate(),"-1",USER});
 
 		}

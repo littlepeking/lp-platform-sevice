@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.utils.common;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.framework.config.MultiDataSourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +16,7 @@ import java.util.*;
 
 @Deprecated
 public class LegacyDBHelper {
-	
-	public PreparedStatement theStatement = null;
-	public ResultSet theResultSet = null;
-	public Context context=null;
-	public Connection theConnection=null;
+
 	public static boolean Isdebug=true;
 //	public static String DateFormat="yyyy/MM/dd";
 //	public static String DateTimeFormat="yyyy/MM/dd HH:mm:ss";//MM/dd/yyyy hh24:mi:ss
@@ -31,7 +28,7 @@ public class LegacyDBHelper {
 	private static Logger sqlLogger = LoggerFactory.getLogger(LegacyDBHelper.class);
 
 
-	public static void ExecInsert(Context context, String TableName, HashMap<String,String> Fields) throws Exception
+	public static void ExecInsert( String TableName, HashMap<String,String> Fields) throws Exception
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL1="insert into "+TableName+"(";
@@ -54,10 +51,39 @@ public class LegacyDBHelper {
 			}
 			iLine++;
 		}
-		DBHelper.executeUpdate(context, SQL1+") "+SQL2+")",aParams.toArray());
+		DBHelper.executeUpdate( SQL1+") "+SQL2+")",aParams.toArray());
 	}
 
-	public static void ExecDelete(Context context,String TableName,HashMap<String,String> Fields) throws Exception
+	public static void ExecInsert(String orgId, String TableName, HashMap<String,String> Fields) throws Exception
+	{
+		List<Object> aParams=new ArrayList<Object>();
+		String SQL1="insert into "+TableName+"(";
+		String SQL2="values(";
+		int iLine=0;
+		for(Map.Entry<String, String> entry : Fields.entrySet()){
+			String mapKey = entry.getKey();
+			String mapValue = entry.getValue();
+			if (iLine>0) SQL1+=",";
+			SQL1+=mapKey;
+			if (iLine>0) SQL2+=",";
+			if (LegecyUtilHelper.Nz(mapValue,"").equals("@user"))
+			{
+				SQL2+=" CURRENT_USER ";
+			}
+			else
+			{
+				SQL2+="? ";
+				aParams.add(mapValue);
+			}
+			iLine++;
+		}
+		DBHelper.executeUpdate(EHContextHelper.getDataSource(orgId), SQL1+") "+SQL2+")",aParams);
+	}
+
+
+
+
+	public static void ExecDelete(String TableName,HashMap<String,String> Fields) throws Exception
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL="delete "+TableName+" where ";
@@ -77,11 +103,11 @@ public class LegacyDBHelper {
 			}
 			iLine++;
 		}
-		DBHelper.executeUpdate(context, SQL,aParams.toArray());
+		DBHelper.executeUpdate( SQL,aParams.toArray());
 	}
 
 
-	public static void ExecUpdate(Context context,String TableName,HashMap<String,String> UpdateFields,HashMap<String,String> WhereFields) throws Exception
+	public static void ExecUpdate(String TableName,HashMap<String,String> UpdateFields,HashMap<String,String> WhereFields) throws Exception
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL="update "+TableName+" set ";
@@ -132,19 +158,19 @@ public class LegacyDBHelper {
 			}
 			iWhereLine++;
 		}
-		DBHelper.executeUpdate(context, SQL,aParams.toArray());
+		DBHelper.executeUpdate( SQL,aParams.toArray());
 	}
 
 
-	public static void ExecSql(Context context,String Sql,List<String> Params) throws Exception
+	public static void ExecSql(String Sql,List<String> Params) throws Exception
 	{
 		String[] aParams=new String[Params.size()];
 		for(int i1=0;i1<Params.size();i1++) aParams[i1]=Params.get(i1);
-		DBHelper.executeUpdate(context, Sql,aParams);
+		DBHelper.executeUpdate( Sql,aParams);
 	}
 
 
-//	public static int ExecSql(Context context,String Sql,String[] Params) throws Exception
+//	public static int ExecSql(String Sql,String[] Params) throws Exception
 //	{
 //		if (LegacyDBHelper.Isdebug)
 //		{
@@ -157,10 +183,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--ExecSql--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------ExecSql---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //
 //		}
@@ -172,7 +198,7 @@ public class LegacyDBHelper {
 //			sm = conn.prepareStatement(Sql);
 //			if (Params!=null)
 //				for(int i1=0;i1<Params.length;i1++)
-//					setParamValue(context,sm,i1+1,Params[i1]);
+//					setParamValue(sm,i1+1,Params[i1]);
 //			int i1=sm.executeUpdate();
 //			return i1;
 //		}
@@ -181,12 +207,12 @@ public class LegacyDBHelper {
 //			throw e0;
 //		}
 //		finally {
-//			DBHelper.release(context,sm);
+//			DBHelper.release(sm);
 //		}
 //	}
 
 
-//	public static int ExecSqlByObject(Context context,String Sql,Object[] Params) throws Exception
+//	public static int ExecSqlByObject(String Sql,Object[] Params) throws Exception
 //	{
 //
 //		PreparedStatement sm = null;
@@ -205,12 +231,12 @@ public class LegacyDBHelper {
 //		{
 //			throw e0;
 //		}finally {
-//			DBHelper.release(context,sm);
+//			DBHelper.release(sm);
 //		}
 //	}
 
 //
-//	public static int GetCount(Context context,String Sql,String[] Params) throws Exception
+//	public static int GetCount(String Sql,String[] Params) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -224,9 +250,9 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--GetValue--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //			sqlLogger.info("-------------------GetValue---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //		PreparedStatement sm = null;
@@ -236,7 +262,7 @@ public class LegacyDBHelper {
 //		{
 //			sm = conn.prepareStatement(Sql);
 //			for(int i1=0;i1<Params.length;i1++)
-//				setParamValue(context,sm,i1+1,Params[i1]);
+//				setParamValue(sm,i1+1,Params[i1]);
 //			rs=sm.executeQuery();
 //			if (rs.next())
 //			{
@@ -248,11 +274,11 @@ public class LegacyDBHelper {
 //		{
 //			throw e0;
 //		}finally {
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(rs,sm);
 //		}
 //	}
 //
-//	public static String GetValue(Context context,String Sql,String[] Params,String DefValue) throws Exception
+//	public static String GetValue(String Sql,String[] Params,String DefValue) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -266,10 +292,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--GetValue--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------GetValue---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //		PreparedStatement sm = null;
@@ -279,7 +305,7 @@ public class LegacyDBHelper {
 //		{
 //			sm = conn.prepareStatement(Sql);
 //			for(int i1=0;i1<Params.length;i1++)
-//				setParamValue(context,sm,i1+1,Params[i1]);
+//				setParamValue(sm,i1+1,Params[i1]);
 //			rs=sm.executeQuery();
 //			if (rs.next())
 //			{
@@ -292,12 +318,12 @@ public class LegacyDBHelper {
 //		{
 //			throw e0;
 //		}finally {
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(rs,sm);
 //		}
 //	}
 
 
-	public static int GetSeq(Context context,String Seq) throws Exception
+	public static int GetSeq(String Seq) throws Exception
 	{
 
 //    	Statement sm = null;
@@ -337,35 +363,35 @@ public class LegacyDBHelper {
 	}
 
 //
-//	public static String GetNCounterBill(EXEBaseStep frombean,Context context,String KeyName) throws Exception
+//	public static String GetNCounterBill(EXEBaseStep frombean,String KeyName) throws Exception
 //	{
 //		if (frombean==null)
-//			return GetNCounterBill(context,"System",KeyName);
+//			return GetNCounterBill("System",KeyName);
 //		else
 //			return frombean.getNextKey(KeyName, 10, context).getAsString();
 //	}
 //
 
-	public static String GetNCounterBill(Context context,String KeyName) throws Exception
+	public static String GetNCounterBill(String KeyName) throws Exception
 	{
-		return GetNCounterBill(context,"System",KeyName);
+		return GetNCounterBill("System",KeyName);
 	}
 
 
-	public static String GetNCounterBill(Context context,String UserID,String KeyName) throws Exception
+	public static String GetNCounterBill(String UserID,String KeyName) throws Exception
 	{
-		int iBill=GetNCounter(context,UserID,KeyName,1,1);
+		int iBill=GetNCounter(UserID,KeyName,1,1);
 		String Bill=Integer.toString(iBill);
 		while(Bill.length()<10) Bill="0"+Bill;
 		return Bill;
 	}
 
-	public static int GetNCounter(Context context,String KeyName,int Count,int FirstValue) throws Exception
+	public static int GetNCounter(String KeyName,int Count,int FirstValue) throws Exception
 	{
-		return GetNCounter(context,"System",KeyName,Count,FirstValue);
+		return GetNCounter("System",KeyName,Count,FirstValue);
 	}
 
-	public static int GetNCounter(Context context,String UserID,String KeyName,int Count,int FirstValue) throws Exception
+	public static int GetNCounter(String UserID,String KeyName,int Count,int FirstValue) throws Exception
 	{
 
 		//todo get seq
@@ -427,12 +453,12 @@ public class LegacyDBHelper {
 //		{
 //			throw e0;
 //		}finally {
-//			DBHelper.release(context,sm2);
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(sm2);
+//			DBHelper.release(rs,sm);
 //		}
 	}
 
-//	public static int GetWarehouseNCounter(Context context,String warehouse,String KeyName,int Count,int FirstValue) throws Exception
+//	public static int GetWarehouseNCounter(String warehouse,String KeyName,int Count,int FirstValue) throws Exception
 //	{
 //
 //		PreparedStatement sm = null;
@@ -474,13 +500,13 @@ public class LegacyDBHelper {
 //			throw e0;
 //		}
 //		finally {
-//			DBHelper.release(context,sm2);
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(sm2);
+//			DBHelper.release(rs,sm);
 //		}
 //	}
 
 //
-//	public static HashMap<String,String> GetValueMap(Context context,String Sql,String[] Params) throws Exception
+//	public static HashMap<String,String> GetValueMap(String Sql,String[] Params) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -494,10 +520,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--GetValueMap--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------GetValueMap---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //		PreparedStatement sm = null;
@@ -507,7 +533,7 @@ public class LegacyDBHelper {
 //		{
 //			sm = conn.prepareStatement(Sql);
 //			for(int i1=0;i1<Params.length;i1++)
-//				setParamValue(context,sm,i1+1,Params[i1]);
+//				setParamValue(sm,i1+1,Params[i1]);
 //			rs=sm.executeQuery();
 //			ResultSetMetaData data = rs.getMetaData();
 //			if (rs.next())
@@ -524,16 +550,16 @@ public class LegacyDBHelper {
 //			throw e0;
 //		}
 //		finally {
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(rs,sm);
 //		}
 //	}
 //
-//	public static ArrayList<String[]> GetRecordList(Context context,String Sql,String[] Params) throws Exception
+//	public static ArrayList<String[]> GetRecordList(String Sql,String[] Params) throws Exception
 //	{
-//		return GetRecordList(context,Sql,Params,0);
+//		return GetRecordList(Sql,Params,0);
 //	}
 //
-//	public static ArrayList<String[]> GetRecordList(Context context,String Sql,String[] Params,int ReturnFieldCount) throws Exception
+//	public static ArrayList<String[]> GetRecordList(String Sql,String[] Params,int ReturnFieldCount) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -547,10 +573,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--GetRecordList--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------GetRecordList---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //		ArrayList<String[]> aResult=null;
@@ -561,7 +587,7 @@ public class LegacyDBHelper {
 //		{
 //			sm = conn.prepareStatement(Sql);
 //			for(int i1=0;i1<Params.length;i1++)
-//				setParamValue(context,sm,i1+1,Params[i1]);
+//				setParamValue(sm,i1+1,Params[i1]);
 //			rs=sm.executeQuery();
 //			while (rs.next())
 //			{
@@ -578,16 +604,16 @@ public class LegacyDBHelper {
 //		{
 //			throw e0;
 //		}finally {
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(rs,sm);
 //		}
 //	}
 
-//	public static String[] GetValueList(Context context,String Sql,String[] Params) throws Exception
+//	public static String[] GetValueList(String Sql,String[] Params) throws Exception
 //	{
-//		return GetValueList(context,Sql,Params,0);
+//		return GetValueList(Sql,Params,0);
 //	}
 //
-//	public static String[] GetValueList(Context context,String Sql,String[] Params,int ReturnFieldCount) throws Exception
+//	public static String[] GetValueList(String Sql,String[] Params,int ReturnFieldCount) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -601,10 +627,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--GetValueList--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------GetValueList---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //		PreparedStatement sm = null;
@@ -614,7 +640,7 @@ public class LegacyDBHelper {
 //		{
 //			sm = conn.prepareStatement(Sql);
 //			for(int i1=0;i1<Params.length;i1++)
-//				setParamValue(context,sm,i1+1,Params[i1]);
+//				setParamValue(sm,i1+1,Params[i1]);
 //			rs=sm.executeQuery();
 //			if (rs.next())
 //			{
@@ -629,19 +655,19 @@ public class LegacyDBHelper {
 //		{
 //			throw e0;
 //		}finally {
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(rs,sm);
 //		}
 //	}
 
 //
-//	public static List<HashMap<String,String>> GetRecordMap(Context context,String Sql,ArrayList<String> Params) throws Exception
+//	public static List<HashMap<String,String>> GetRecordMap(String Sql,ArrayList<String> Params) throws Exception
 //	{
 //		String[] aParams=new String[Params.size()];
 //		for(int i1=0;i1<Params.size();i1++) aParams[i1]=Params.get(i1);
-//		return GetRecordMap(context,Sql,aParams);
+//		return GetRecordMap(Sql,aParams);
 //	}
 //
-//	public static List<HashMap<String,String>> GetRecordMap(Context context,String Sql,String[] Params) throws Exception
+//	public static List<HashMap<String,String>> GetRecordMap(String Sql,String[] Params) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -655,10 +681,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--GetRecordMap--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------GetRecordMap---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //		List<HashMap<String,String>> aResult=null;
@@ -669,7 +695,7 @@ public class LegacyDBHelper {
 //		{
 //			sm = conn.prepareStatement(Sql);
 //			for(int i1=0;i1<Params.length;i1++)
-//				setParamValue(context,sm,i1+1,Params[i1]);
+//				setParamValue(sm,i1+1,Params[i1]);
 //			int ReturnFieldCount=0;
 //			rs=sm.executeQuery();
 //			while (rs.next())
@@ -695,12 +721,12 @@ public class LegacyDBHelper {
 //		{
 //			throw e0;
 //		}finally {
-//			DBHelper.release(context,rs,sm);
+//			DBHelper.release(rs,sm);
 //		}
 //	}
 
 //
-//	public void OpenSql(Context context,String Sql,ArrayList<String> Params) throws Exception
+//	public void OpenSql(String Sql,ArrayList<String> Params) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -714,10 +740,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--OpenSql--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------OpenSql---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //
@@ -731,19 +757,19 @@ public class LegacyDBHelper {
 //			if (Params!=null)
 //			{
 //				for(int i1=0;i1<Params.size();i1++)
-//					setParamValue(context,theStatement,i1+1,Params.get(i1));
+//					setParamValue(theStatement,i1+1,Params.get(i1));
 //			}
 //			theResultSet=theStatement.executeQuery();
 //			return;
 //		}
 //		catch(Exception e0)
 //		{
-//			DBHelper.release(context,theResultSet,theStatement,theConnection);
+//			DBHelper.release(theResultSet,theStatement,theConnection);
 //			throw e0;
 //		}
 //	}
 //
-//	public void OpenSql(Context context,String Sql,String[] Params) throws Exception
+//	public void OpenSql(String Sql,String[] Params) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -757,10 +783,10 @@ public class LegacyDBHelper {
 //				}
 //			}
 //			System.out.println("--OpenSql--------------------------------------");
-//			System.out.println("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			System.out.println("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //
 //			sqlLogger.info("-------------------OpenSql---------------------");
-//			sqlLogger.info("--user id: "+context.getUserID()+" sql: "+SqlShow);
+//			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
 //
@@ -774,21 +800,21 @@ public class LegacyDBHelper {
 //			if (Params!=null)
 //			{
 //				for(int i1=0;i1<Params.length;i1++)
-//					setParamValue(context,theStatement,i1+1,Params[i1]);
+//					setParamValue(theStatement,i1+1,Params[i1]);
 //			}
 //			theResultSet=theStatement.executeQuery();
 //			return;
 //		}
 //		catch(Exception e0)
 //		{
-//			DBHelper.release(context,theResultSet,theStatement,theConnection);
+//			DBHelper.release(theResultSet,theStatement,theConnection);
 //			throw e0;
 //		}
 //	}
 
 //	public void Close()
 //	{
-//		DBHelper.release(context,theResultSet,theStatement,theConnection);
+//		DBHelper.release(theResultSet,theStatement,theConnection);
 //	}
 
 	public static boolean isDateParam(String Param)
@@ -800,7 +826,7 @@ public class LegacyDBHelper {
 			return false;
 	}
 //
-//	public static void setParamValue(Context context,PreparedStatement statement,int paramIdx,String param) throws SQLException, ParseException
+//	public static void setParamValue(PreparedStatement statement,int paramIdx,String param) throws SQLException, ParseException
 //	{
 //		if (isDateParam(param))
 //		{

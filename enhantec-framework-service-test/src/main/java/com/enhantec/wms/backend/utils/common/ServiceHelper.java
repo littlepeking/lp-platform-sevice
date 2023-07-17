@@ -8,11 +8,11 @@
 
 package com.enhantec.wms.backend.utils.common;
 
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 
 public class ServiceHelper {
-    public static Object executeService(Context context, String serviceName, ServiceDataHolder serviceDataHolder) {
+    public static Object executeService( String serviceName, ServiceDataHolder serviceDataHolder) {
 
         throw new RuntimeException("");
     }

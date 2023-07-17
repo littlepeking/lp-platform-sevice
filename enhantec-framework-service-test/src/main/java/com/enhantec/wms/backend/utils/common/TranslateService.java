@@ -36,7 +36,7 @@ public class TranslateService extends LegacyBaseService {
 //            if(UtilHelper.isEmpty(locale)){
 //                locale = Task.getLocale();
 //            }
-//            Locale sLocale = DBLanguageUtil.getSanitizedLocale(context, locale);
+//            Locale sLocale = DBLanguageUtil.getSanitizedLocale( locale);
 //            GetStringOutputParam qqGetStringOutputParam =processData.getInputDataMap().getString("FieldName"), fieldName);
 //            fieldName = qqGetStringOutputParam.pResult;
 //            GetStringOutputParam qqGetStringOutputParam1 =processData.getInputDataMap().getString("Description"), description);

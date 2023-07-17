@@ -3,13 +3,13 @@ package com.enhantec.wms.backend.outbound.ship;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,18 +29,15 @@ public class ShipById extends LegacyBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        Context context = null;
-
-
         try {
 
-            String userid = context.getUserID();
+            String userid = EHContextHelper.getUser().getUsername();
 
 
 
             String fromId = serviceDataHolder.getInputDataAsMap().getString("fromid");
 
-            boolean isBoxId = IDNotes.isBoxId(context, fromId);
+            boolean isBoxId = IDNotes.isBoxId( fromId);
 
             String orderKey = "";
 
@@ -61,26 +58,26 @@ public class ShipById extends LegacyBaseService {
 
             if(isBoxId) {
 
-                List<HashMap<String, String>> pickDetailInfos = LotxLocxId.findPickedIdsByParentId(context,fromId);
+                List<HashMap<String, String>> pickDetailInfos = LotxLocxId.findPickedIdsByParentId(fromId);
 
-                OrderValidationHelper.checkOrderTypeAndQualityStatusByPickDetailKey(context,pickDetailInfos.get(0).get("PICKDETAILKEY"));
+                OrderValidationHelper.checkOrderTypeAndQualityStatusByPickDetailKey(pickDetailInfos.get(0).get("PICKDETAILKEY"));
 
                 orderKey = pickDetailInfos.get(0).get("ORDERKEY");
 
                 for( HashMap<String, String> pickDetailInfo: pickDetailInfos){
-                    shipSingleLpn(context,pickDetailInfo);
+                    shipSingleLpn(pickDetailInfo);
                 }
 
 
             }else {
 
-                HashMap<String, String> pickDetailInfo = PickDetail.findPickedLpn(context, fromId, true);
+                HashMap<String, String> pickDetailInfo = PickDetail.findPickedLpn( fromId, true);
 
-                OrderValidationHelper.checkOrderTypeAndQualityStatusByPickDetailKey(context,pickDetailInfo.get("PICKDETAILKEY"));
+                OrderValidationHelper.checkOrderTypeAndQualityStatusByPickDetailKey(pickDetailInfo.get("PICKDETAILKEY"));
 
                 orderKey = pickDetailInfo.get("ORDERKEY");
 
-                shipSingleLpn(context,pickDetailInfo);
+                shipSingleLpn(pickDetailInfo);
 
             }
 
@@ -101,7 +98,7 @@ public class ShipById extends LegacyBaseService {
             UDTRN.TITLE02 = "容器条码/箱号";
             UDTRN.CONTENT02 = fromId;
 
-            UDTRN.Insert(context, context.getUserID());
+            UDTRN.Insert( EHContextHelper.getUser().getUsername());
 
 
         }catch (Exception e) {
@@ -118,17 +115,17 @@ public class ShipById extends LegacyBaseService {
         }
     }
 
-    private void shipSingleLpn(Context context, HashMap<String, String> pickDetailInfo ) throws Exception {
+    private void shipSingleLpn( HashMap<String, String> pickDetailInfo ) throws Exception {
 
         
-        DBHelper.executeUpdate(context,"UPDATE DROPID SET STATUS = '0' WHERE DROPID = ? ", new Object[]{pickDetailInfo.get("ID")});
+        DBHelper.executeUpdate("UPDATE DROPID SET STATUS = '0' WHERE DROPID = ? ", new Object[]{pickDetailInfo.get("ID")});
 
         //
-        HashMap<String,String> shippedIdNotesHashMap = IDNotes.decreaseWgtById(context,new BigDecimal(pickDetailInfo.get("QTY")), pickDetailInfo.get("ID"));
+        HashMap<String,String> shippedIdNotesHashMap = IDNotes.decreaseWgtById(new BigDecimal(pickDetailInfo.get("QTY")), pickDetailInfo.get("ID"));
         if(UtilHelper.decimalStrCompare(shippedIdNotesHashMap.get("NETWGT"), "0")>0)
             ExceptionHelper.throwRfFulfillLogicException("待发运的容器条码/箱号"+ pickDetailInfo.get("ID")+"发运时扣库存异常(不为零)，发运失败");
         //校验发运的IDNOTES库存余额应为0并移至历史表，否则报错
-        IDNotes.archiveIDNotes(context, shippedIdNotesHashMap);
+        IDNotes.archiveIDNotes( shippedIdNotesHashMap);
 
         //TODO:通过修改拣货明细状态的方式发运，看是否还有事务问题
         ServiceDataHolder inboundDo = new ServiceDataHolder();

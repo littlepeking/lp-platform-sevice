@@ -1,6 +1,7 @@
 
 package com.enhantec.wms.backend.inbound.receiving;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.Const;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.receiving.Receipt;
@@ -9,7 +10,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class ConfirmASN extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -42,13 +43,13 @@ public class ConfirmASN extends LegacyBaseService {
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(context,receiptKey,true);
+            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
 
             if ("2".equals(receiptInfo.get("ISCONFIRMED"))) {
                 ExceptionHelper.throwRfFulfillLogicException("订单已为复核状态，无需重复确认");
             }
 
-            List<HashMap<String, String>>  receiptDetails = Receipt.findReceiptDetails(context,receiptKey,false);
+            List<HashMap<String, String>>  receiptDetails = Receipt.findReceiptDetails(receiptKey,false);
 
             if (receiptDetails.size()==0) {
                 ExceptionHelper.throwRfFulfillLogicException("没有找到该ASN单的收货明细，不允许确认");
@@ -57,7 +58,7 @@ public class ConfirmASN extends LegacyBaseService {
             //进行复核确认时为ASN生成收货批次
             if(receiptInfo.get("ISCONFIRMED").equals("1")) {
 
-                HashMap<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey(context, "RECEIPTYPE", receiptInfo.get("TYPE"));
+                HashMap<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptInfo.get("TYPE"));
 
 
                 for (HashMap<String, String> receiptDetail : receiptDetails) {
@@ -66,8 +67,8 @@ public class ConfirmASN extends LegacyBaseService {
                             && UtilHelper.isEmpty(receiptDetail.get("TOID"))
                             && UtilHelper.isEmpty(receiptDetail.get("LOTTABLE06"))) {
 
-                        String receiptLot = IdGenerationHelper.createReceiptLot(context, receiptDetail.get("SKU"));
-                        DBHelper.executeUpdate(context, "UPDATE RECEIPTDETAIL SET LOTTABLE06 = ? WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ?",
+                        String receiptLot = IdGenerationHelper.createReceiptLot( receiptDetail.get("SKU"));
+                        DBHelper.executeUpdate( "UPDATE RECEIPTDETAIL SET LOTTABLE06 = ? WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ?",
                                 new Object[]{
                                         receiptLot,
                                         receiptDetail.get("RECEIPTKEY"),
@@ -89,7 +90,7 @@ public class ConfirmASN extends LegacyBaseService {
 
             if(esignatureKey.indexOf(':')==-1) {
 
-                String isConfirmedUser = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         esignatureKey
                 }, String.class, "复核人");
 
@@ -100,12 +101,12 @@ public class ConfirmASN extends LegacyBaseService {
                         ExceptionHelper.throwRfFulfillLogicException("复核人和确认人不能为同一人");
                     } else {
                         //复核操作
-                        DBHelper.executeUpdate(context, "UPDATE RECEIPT SET ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE RECEIPTKEY = ? ",
+                        DBHelper.executeUpdate( "UPDATE RECEIPT SET ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE RECEIPTKEY = ? ",
                                 new Object[]{isConfirmedUser, receiptKey});
                     }
                 } else {
                     //确认操作
-                    DBHelper.executeUpdate(context, "UPDATE RECEIPT SET ISCONFIRMEDUSER = ? , ISCONFIRMED = 1 WHERE RECEIPTKEY = ? ",
+                    DBHelper.executeUpdate( "UPDATE RECEIPT SET ISCONFIRMEDUSER = ? , ISCONFIRMED = 1 WHERE RECEIPTKEY = ? ",
                             new Object[]{isConfirmedUser, receiptKey});
                 }
 
@@ -129,7 +130,7 @@ public class ConfirmASN extends LegacyBaseService {
                 UDTRN.TITLE02 = "操作人";
                 UDTRN.CONTENT02 = isConfirmedUser
                 ;
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
 
             }else{
 
@@ -137,17 +138,17 @@ public class ConfirmASN extends LegacyBaseService {
                 String eSignatureKey1=eSignatureKeys[0];
                 String eSignatureKey2=eSignatureKeys[1];
 
-                String isConfirmedUser1 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey1
                 }, String.class, "确认人");
 
-                String isConfirmedUser2 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey2
                 }, String.class, "复核人");
 
 
                 //确认操作
-                DBHelper.executeUpdate(context, "UPDATE RECEIPT SET ISCONFIRMEDUSER = ? , ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE RECEIPTKEY = ? ",
+                DBHelper.executeUpdate( "UPDATE RECEIPT SET ISCONFIRMEDUSER = ? , ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE RECEIPTKEY = ? ",
                         new Object[]{isConfirmedUser1, isConfirmedUser2, receiptKey});
 
 
@@ -164,7 +165,7 @@ public class ConfirmASN extends LegacyBaseService {
                 UDTRN.CONTENT02 = isConfirmedUser1;
                 UDTRN.TITLE02 = "复核人";
                 UDTRN.CONTENT02 = isConfirmedUser2;
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
 
             }
 

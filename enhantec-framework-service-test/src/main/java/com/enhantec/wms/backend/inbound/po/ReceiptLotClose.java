@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 
 public class ReceiptLotClose  extends LegacyBaseService
@@ -31,7 +31,7 @@ public class ReceiptLotClose  extends LegacyBaseService
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 	    String RECEIPTLOT= serviceDataHolder.getInputDataAsMap().getString("RECEIPTLOT");
 	    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
@@ -40,12 +40,12 @@ public class ReceiptLotClose  extends LegacyBaseService
 		{
 			
 
-			String lot = DBHelper.getValue(context, "select STATUS from PRERECEIPTCHECK where RECEIPTLOT=?"
+			String lot = DBHelper.getValue( "select STATUS from PRERECEIPTCHECK where RECEIPTLOT=?"
 					, new String[]{RECEIPTLOT},String.format("收货批次(%1)未找到", RECEIPTLOT));
 			if (!lot.equals("0"))
 		        throw new FulfillLogicException("当前状态不支持此操作");
 		
-			DBHelper.executeUpdate(context, "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"99",userid,"@date",RECEIPTLOT});
+			DBHelper.executeUpdate( "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"99",userid,"@date",RECEIPTLOT});
 	
 			Udtrn UDTRN=new Udtrn();
 				UDTRN.EsignatureKey=ESIGNATUREKEY;
@@ -56,7 +56,7 @@ public class ReceiptLotClose  extends LegacyBaseService
 			    UDTRN.FROMKEY2="";
 			    UDTRN.FROMKEY3="";
 			    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
-			    UDTRN.Insert(context, userid);
+			    UDTRN.Insert( userid);
 			
 		
 		}

@@ -1,6 +1,7 @@
 package com.enhantec.wms.backend.utils.audit;
 
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
@@ -20,7 +21,7 @@ public class AuthService extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder)
     {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
         try
         {

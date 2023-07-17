@@ -3,10 +3,10 @@ package com.enhantec.wms.backend.inbound.po;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.inbound.asn.utils.ReceiptUtilHelper;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -33,9 +33,9 @@ public class UsedPOBean {
 	public BigDecimal  AsnQTY=null;
 
 
-	public UsedPOBean(Context context, String vPOKEY, String vPOLINENUMBER, String sku) throws Exception
+	public UsedPOBean( String vPOKEY, String vPOLINENUMBER, String sku) throws Exception
 	{
-		HashMap<String,String> mPO= DBHelper.getRecord(context, "select A.UOM,A.QTY,A.RECEIVEDQTY"
+		HashMap<String,String> mPO= DBHelper.getRecord( "select A.UOM,A.QTY,A.RECEIVEDQTY"
 				+ ",A.STATUS,B.SUPPLIER,B.PROJECTCODE,A.SKU,B.PROJECTID,A.ERPLOC"
 				+ " FROM WMS_PO_DETAIL A,WMS_PO B WHERE A.POKEY=B.POKEY AND A.POKEY=? AND A.POLINENUMBER=?", new String[] {vPOKEY,vPOLINENUMBER});
 		//由于通过jde编码建单的数据 po里没有相关sku信息 用收货检查表中sku信息
@@ -44,8 +44,8 @@ public class UsedPOBean {
 		POLINENUMBER=vPOLINENUMBER;
 		SKU=mPO.get("SKU");
 		UOM=mPO.get("UOM");
-		QTY= ReceiptUtilHelper.poWgt2StdQty(context,mPO.get("QTY"),sku);
-		RECEIVEDQTY=ReceiptUtilHelper.poWgt2StdQty(context,mPO.get("RECEIVEDQTY"),sku);
+		QTY= ReceiptUtilHelper.poWgt2StdQty(mPO.get("QTY"),sku);
+		RECEIVEDQTY=ReceiptUtilHelper.poWgt2StdQty(mPO.get("RECEIVEDQTY"),sku);
 		STATUS=mPO.get("STATUS");
 		SUPPLIER=mPO.get("SUPPLIER");
 		SPEC=" ";

@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.Const;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.SKU;
@@ -16,7 +17,7 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 		 
 		 */
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -103,9 +104,9 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 			String qualifiedproducer ="";
 			String RECEIPTKEY="";
-			List<HashMap<String,String>> receiptypelist = DBHelper.executeQuery(context, "select c.UDF1 from PRERECEIPTCHECK p ,WMS_PO wp,CODELKUP c where p.FROMKEY =wp.POKEY" +
+			List<HashMap<String,String>> receiptypelist = DBHelper.executeQuery( "select c.UDF1 from PRERECEIPTCHECK p ,WMS_PO wp,CODELKUP c where p.FROMKEY =wp.POKEY" +
 					"    and c.CODE =wp.POTYPE and c.LISTNAME ='EHPOTYPE' and p.RECEIPTLOT=? ", Arrays.asList(new Object[]{RECEIPTLOT}));
-			//String RECEIPTYPE= CDSysSet.getPOReceiptType(context); //	采购入库（原料入库）
+			//String RECEIPTYPE= CDSysSet.getPOReceiptType(); //	采购入库（原料入库）
 			if (receiptypelist.isEmpty()) throw new Exception("入库类型未配置,无法创建ASN");
 			String RECEIPTYPE= receiptypelist.get(0).get("UDF1"); //	采购入库（原料入库）
 			if (LegecyUtilHelper.isNull(ESIGNATUREKEY)) throw new Exception("未关联到签名信息");
@@ -153,10 +154,10 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			
 			
 			
-			String STORERKEY= DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+			String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
 
 			//ASN由小到大扣减PO库存
-			List<HashMap<String,String>> aPOKEY= DBHelper.executeQuery(context,
+			List<HashMap<String,String>> aPOKEY= DBHelper.executeQuery(
 					 "select FROMKEY,FROMLINENO,FILECHECK,SUPPLIERCHECK,PACKCHECK,WEIGHTCHECK,STATUS,SKU,FROMLOT," +
 							 " SUPPLIERCODE,SUPPLIERNAME,MANUFACTURERCODE,MANUFACTURERNAME,FROMSKU,FROMSKUDESCR," +
 							 " POSUPPLIERCODE,POSUPPLIERNAME,ELOTTABLE07," +
@@ -205,7 +206,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 				qualifiedproducer=mPOKEY.get("qualifiedproducer");
 				if (!STATUS.equals("0")) throw new Exception("当前状态已不能生成ASN");
 				
-				UsedPOBean tempUsedPOBean=new UsedPOBean(context,POKEY,FROMLINENO,sku);
+				UsedPOBean tempUsedPOBean=new UsedPOBean(POKEY,FROMLINENO,sku);
 				tempUsedPOBean.NAMEALPHA=mPOKEY.get("POSUPPLIERNAME");
 				BigDecimal bClacQty = tempUsedPOBean.ClacByAsn(sumnetwgt);
 				
@@ -215,10 +216,10 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			if (sumnetwgt.compareTo(BigDecimal.ZERO)>0) throw new Exception("PO可用数量不足");
 
 
-			HashMap<String,String> skuInfo= SKU.findById(context,sku,true);
+			HashMap<String,String> skuInfo= SKU.findById(sku,true);
 
 
-			HashMap<String,String> packInfo= DBHelper.getRecord(context, "SELECT P.PACKUOM3 UOM, P.PACKDESCR, P.PACKKEY FROM PACK P, SKU S WHERE P.PACKKEY=S.PACKKEY AND SKU = ?", new String[] {sku});
+			HashMap<String,String> packInfo= DBHelper.getRecord( "SELECT P.PACKUOM3 UOM, P.PACKDESCR, P.PACKKEY FROM PACK P, SKU S WHERE P.PACKKEY=S.PACKKEY AND SKU = ?", new String[] {sku});
 
 
 			LpnInfo[] lpnInfos=new LpnInfo[sumBarrelQty];
@@ -229,10 +230,10 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 					for(int i2=0;i2<Integer.parseInt(aBARRELQTY[i]);i2++)
 					{
 						LpnInfo b1=new LpnInfo();
-						if(SKU.isSerialControl(context,sku)){
-							b1.LPN = IdGenerationHelper.createBoxId(context,RECEIPTLOT);
+						if(SKU.isSerialControl(sku)){
+							b1.LPN = IdGenerationHelper.createBoxId(RECEIPTLOT);
 						}else {
-							b1.LPN = IdGenerationHelper.generateLpn(context, RECEIPTLOT);
+							b1.LPN = IdGenerationHelper.generateLpn( RECEIPTLOT);
 						}
 						b1.QTY=new BigDecimal(aNETWGT[i]);
 						b1.PACKKEY=packInfo.get("PACKKEY");
@@ -260,7 +261,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 				RECCHKSTAT	92	检查未通过已处理
 			 */
 
-			RECEIPTKEY= LegacyDBHelper.GetNCounterBill(context, "RECEIPT");
+			RECEIPTKEY= LegacyDBHelper.GetNCounterBill( "RECEIPT");
 
 			HashSet<String> poHashSet = new HashSet<>();
 			HashSet<String> projectCodeHashSet = new HashSet<>();
@@ -269,33 +270,29 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			{
 				UsedPOBean usedPOBean=usedPOBeans.get(i);
 
-				DBHelper.executeUpdate(context
-						, "Update WMS_PO_DETAIL set RECEIVEDQTY=ISNULL(RECEIVEDQTY,0)+?,STATUS=? where POKEY=? and POLINENUMBER=?"
-						, new String[]{trimZerosAndToStr(ReceiptUtilHelper.stdQty2PoWgt(context,skuInfo.get("SNAVGWGT"),usedPOBean.AsnQTY,skuInfo.get("SKU")) ),usedPOBean.STATUS,usedPOBean.POKEY,usedPOBean.POLINENUMBER});
-				DBHelper.executeUpdate(context
-						, "Update WMS_PO set STATUS=? where POKEY=?"
+				DBHelper.executeUpdate( "Update WMS_PO_DETAIL set RECEIVEDQTY=ISNULL(RECEIVEDQTY,0)+?,STATUS=? where POKEY=? and POLINENUMBER=?"
+						, new String[]{trimZerosAndToStr(ReceiptUtilHelper.stdQty2PoWgt(skuInfo.get("SNAVGWGT"),usedPOBean.AsnQTY,skuInfo.get("SKU")) ),usedPOBean.STATUS,usedPOBean.POKEY,usedPOBean.POLINENUMBER});
+				DBHelper.executeUpdate( "Update WMS_PO set STATUS=? where POKEY=?"
 						, new String[]{usedPOBean.STATUS,usedPOBean.POKEY});
 				poHashSet.add(usedPOBean.POKEY);
 				projectCodeHashSet.add(usedPOBean.PROJECTCODE);
 				//记录该PO本次生成ASN的数量，该数量将用于在收货完成后收货接口回传ERP时参考使用
-				DBHelper.executeUpdate(context
-						,"update PRERECEIPTCHECK set POUSEDQTY = ? where RECEIPTLOT=? and fromkey=? and fromlineno=? "
-						,new String[]{trimZerosAndToStr(ReceiptUtilHelper.stdQty2PoWgt(context,skuInfo.get("SNAVGWGT"),usedPOBean.AsnQTY,skuInfo.get("SKU"))),RECEIPTLOT,usedPOBean.POKEY,usedPOBean.POLINENUMBER });
+				DBHelper.executeUpdate("update PRERECEIPTCHECK set POUSEDQTY = ? where RECEIPTLOT=? and fromkey=? and fromlineno=? "
+						,new String[]{trimZerosAndToStr(ReceiptUtilHelper.stdQty2PoWgt(skuInfo.get("SNAVGWGT"),usedPOBean.AsnQTY,skuInfo.get("SKU"))),RECEIPTLOT,usedPOBean.POKEY,usedPOBean.POLINENUMBER });
 			}
 
 			String poListStr = UtilHelper.nvl(poHashSet.stream().collect(Collectors.joining(";")),"");
 			String projectCodeListStr = UtilHelper.nvl(projectCodeHashSet.stream().collect(Collectors.joining(",")),"");
 
-			DBHelper.executeUpdate(context
-					,"update PRERECEIPTCHECK set status=?,editwho=?,editdate=? where RECEIPTLOT=?"
+			DBHelper.executeUpdate("update PRERECEIPTCHECK set status=?,editwho=?,editdate=? where RECEIPTLOT=?"
 					,new String[]{"1",userid,"@date",RECEIPTLOT});
 			
 			HashMap<String,String> RECEIPT=new HashMap<String,String>();
-			if(ESignatureService.getUserByEsignaturkey(context,ESIGNATUREKEY).indexOf(':')==-1){
+			if(ESignatureService.getUserByEsignaturkey(ESIGNATUREKEY).indexOf(':')==-1){
 				RECEIPT.put("ISCONFIRMEDUSER", usedPOBeans.get(0).SUPPLIER);
 			}else {
 				//复核
-				String[] eSignatureKeys = ESignatureService.getUserByEsignaturkey(context,ESIGNATUREKEY).split(":");
+				String[] eSignatureKeys = ESignatureService.getUserByEsignaturkey(ESIGNATUREKEY).split(":");
 				RECEIPT.put("ISCONFIRMEDUSER", eSignatureKeys[0]);
 				RECEIPT.put("ISCONFIRMEDUSER2",eSignatureKeys[1]);;
 
@@ -316,7 +313,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			RECEIPT.put("SHIPFROMADDRESSLINE2", usedPOBeans.get(0).NAMEALPHA);
 			RECEIPT.put("POKEY", poListStr);
 			//采购入库保税检查 prereceiptcheck->receipt
-			HashMap<String,String> bondedCheck= DBHelper.getRecord(context,
+			HashMap<String,String> bondedCheck= DBHelper.getRecord(
 					"select TOP 1 LOTTABLE10,BONDEDSTORES,MHTASKKEY,MHLINENO,ELOTTABLE22" +
 							" from PRERECEIPTCHECK  where   RECEIPTLOT=?  ",new String[]{RECEIPTLOT});
 			RECEIPT.put("ELOTTABLE01",bondedCheck.get("LOTTABLE10"));
@@ -325,7 +322,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			RECEIPT.put("ELOTTABLE24",UtilHelper.isEmpty(bondedCheck.get("MHLINENO"))?" ":bondedCheck.get("MHLINENO"));
 			RECEIPT.put("ELOTTABLE22",UtilHelper.isEmpty(bondedCheck.get("ELOTTABLE22"))?" ":bondedCheck.get("ELOTTABLE22"));
 			//RECEIPT.put("ELOTTABLE25",UtilHelper.isEmpty(bondedCheck.get("ELOTTABLE25"))?" ":bondedCheck.get("ELOTTABLE25"));
-			LegacyDBHelper.ExecInsert(context, "RECEIPT", RECEIPT);
+			LegacyDBHelper.ExecInsert( "RECEIPT", RECEIPT);
 
 			for(int i1=0;i1<lpnInfos.length;i1++)
 			{
@@ -356,7 +353,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 				//LOTTABLE09 供应商名称  ReceiptCheck    POSUPPLIERNAME
 				//ELOTTABLE11 有效期  ReceiptCheck  ELOTTABLE11
 				//ELOTTABLE12 生产日期  ReceiptCheck MANUFACTURERDATE
-				HashMap<String,String> pReceiptCheck= DBHelper.getRecord(context,
+				HashMap<String,String> pReceiptCheck= DBHelper.getRecord(
 						"select p.ELOTTABLE07,p.POSUPPLIERCODE,p.POSUPPLIERNAME,s.busr3 ," +
 								" FORMAT(p.ELOTTABLE11,'"+ Const.DateTimeFormat+"') as ELOTTABLE11,"+
 								" FORMAT(p.MANUFACTURERDATE,'"+ Const.DateTimeFormat+"') as MANUFACTURERDATE, "+
@@ -391,7 +388,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 				if ("1".equalsIgnoreCase(pReceiptCheck.get("ISCOMMONPROJECT"))) {
 					RECEIPTDETAIL.put("SUSR6", projectCodeListStr);
 				}else {
-					RECEIPTDETAIL.put("SUSR6", CDSysSet.getDefaultProjectCode(context));
+					RECEIPTDETAIL.put("SUSR6", CDSysSet.getDefaultProjectCode());
 				}
 				RECEIPTDETAIL.put("SUSR12", usedPOBeans.get(0).PROJECTID); //项目号id暂时取第一条 不考虑多项目号情况
 
@@ -435,8 +432,8 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 					SKU.BUSR3=0(否）:质量状态为RELEASE(无需检验,直接放行)
 
 				*/
-				String qualityStatus = CDQualityStatus.findByReceiptType(context,RECEIPTYPE,sku,"");
-				String poqualityStatus= CodeLookup.getCodeLookupValue(context,"RECCHKRES",pReceiptCheck.get("checkresult"),"UDF2","收货检查结果质量状态");
+				String qualityStatus = CDQualityStatus.findByReceiptType(RECEIPTYPE,sku,"");
+				String poqualityStatus= CodeLookup.getCodeLookupValue("RECCHKRES",pReceiptCheck.get("checkresult"),"UDF2","收货检查结果质量状态");
 				RECEIPTDETAIL.put("ELOTTABLE03",  UtilHelper.isEmpty(poqualityStatus)?qualityStatus:poqualityStatus);
 				RECEIPTDETAIL.put("ELOTTABLE06",  LegecyUtilHelper.Nz(ELOTTABLE06,""));
 				RECEIPTDETAIL.put("ELOTTABLE07",  LegecyUtilHelper.Nz(ELOTTABLE07,""));
@@ -449,18 +446,18 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 				RECEIPTDETAIL.put("ELOTTABLE11",  ELOTTABLE11);
 				RECEIPTDETAIL.put("ELOTTABLE21",  LegecyUtilHelper.Nz(usedPOBeans.get(0).ERPLOC,""));
 				RECEIPTDETAIL.put("NOTES", lpnInfos[i1].NOTE);
-				LegacyDBHelper.ExecInsert(context, "RECEIPTDETAIL", RECEIPTDETAIL);
+				LegacyDBHelper.ExecInsert( "RECEIPTDETAIL", RECEIPTDETAIL);
 
 				//因不存在非整个唯一码可能性，使用重量作为唯一码数量
-				if(SKU.isSerialControl(context,sku)){
+				if(SKU.isSerialControl(sku)){
 
 					int snNum = lpnInfos[i1].QTY.intValue();
 					String[] snlist = new String[snNum];
 					String[] snwgtlist = new String[snNum];
 					String[] snuomlist = new String[snNum];
 					for (int i =0 ; i<snNum;i++){
-						 snlist[i] = IdGenerationHelper.createSNID(context);
-						 if (CDSysSet.enableSNwgt(context)){
+						 snlist[i] = IdGenerationHelper.createSNID();
+						 if (CDSysSet.enableSNwgt()){
 						 	snwgtlist[i] = skuInfo.get("SNAVGWGT");
 						 	snuomlist[i] = skuInfo.get("SNUOM");
 						 }else {
@@ -468,7 +465,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 							 snuomlist[i] = " ";
 						 }
 					}
-					buildReceiptLotxIdInfo(context, sku,"I",lpnInfos[i1].LPN,RECEIPTKEY, LegecyUtilHelper.To_Char(i1+1, 5), snlist,snwgtlist,snuomlist);
+					buildReceiptLotxIdInfo( sku,"I",lpnInfos[i1].LPN,RECEIPTKEY, LegecyUtilHelper.To_Char(i1+1, 5), snlist,snwgtlist,snuomlist);
 
 
 				}
@@ -480,9 +477,9 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 //			printDO.setAttribValue("receiptlinenumber"), ""));
 //			printDO.setAttribValue("labelname"), "LPN"));
 //			printDO.setAttribValue("copies"), "2"));//NOT USE
-//			ServiceHelper.executeService(context, "PrintASNLables", printDO);
+//			ServiceHelper.executeService( "PrintASNLables", printDO);
 			if(!PRINTER.equals("-1")) {
-				PrintHelper.printLPNByReceiptKey(context, RECEIPTKEY, Labels.LPN_UI, PRINTER, "1", "RF采购收货标签");
+				PrintHelper.printLPNByReceiptKey( RECEIPTKEY, Labels.LPN_UI, PRINTER, "1", "RF采购收货标签");
 			}
 
 
@@ -518,7 +515,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 		    UDTRN.TITLE15="桶数";    UDTRN.CONTENT15=BARRELQTY;
 		    UDTRN.TITLE16="备注";    UDTRN.CONTENT16=NOTE;
 		    
-		    UDTRN.Insert(context, userid);
+		    UDTRN.Insert( userid);
 
 		    
 			//----------------------------------------------------------------
@@ -545,19 +542,19 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 
 	}
 
-//	private int createLpn(Context context,String UserID,String Lot,int LpnCount) throws Exception
+//	private int createLpn(String UserID,String Lot,int LpnCount) throws Exception
 //	{
 //		String iCnt=XtSql.GetValue(context//				, "SELECT KEYCOUNT FROM ENTERPRISE.NCOUNTER WHERE KEYNAME=?", new String[]{Lot}, null);
 //		if (iCnt==null)
 //		{
-//			XtSql.ExecSql(context,
+//			XtSql.ExecSql(
 //					, "INSERT INTO ENTERPRISE.NCOUNTER(KEYNAME,KEYCOUNT,ADDWHO,EDITWHO) VALUES(?,?,?,?)"
 //					, new String[]{Lot,Integer.toString(LpnCount),UserID,UserID});
 //			return 1;
 //		}
 //		else
 //		{
-//			XtSql.ExecSql(context,
+//			XtSql.ExecSql(
 //					, "UPDATE ENTERPRISE.NCOUNTER SET KEYCOUNT=KEYCOUNT+?,EDITWHO=?,EDITDATE=? WHERE KEYNAME=?"
 //					, new String[]{Integer.toString(LpnCount),UserID,"@date",Lot});
 //			return Integer.parseInt(iCnt)+1;

@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -37,7 +37,7 @@ public class QcSamplingQryLpn extends LegacyBaseService
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -61,34 +61,33 @@ public class QcSamplingQryLpn extends LegacyBaseService
 			String PACKKEY="";
 			//String SKU="";
 			String SKUDESCR="";
-			//String STORERKEY=XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
+			//String STORERKEY=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
 
-			HashMap<String,String> Order = DBHelper.getRecord(context
-					, "select Status,NOTES from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE},"未找到在库取样单("+ORDERKEY+")");
+			HashMap<String,String> Order = DBHelper.getRecord( "select Status,NOTES from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE},"未找到在库取样单("+ORDERKEY+")");
 			if (Order.get("Status").compareTo("90")>=0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭,不能继续操作");
 			//String cnt1=XtSql.GetValue(context			//		, "select count(1) from ORDERQCLOCKLOC where orderkey=? and loc=?"
 			//		, new String[]{ORDERKEY,LOC}, "0");
-			//String PROJECT=XtSql.GetValue(context, "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[] {"STASYSSET","LGPROJECT"}, "");
+			//String PROJECT=XtSql.GetValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[] {"STASYSSET","LGPROJECT"}, "");
 
-			HashMap<String,String>  locHashMap = Loc.findById(context,LOC,true);;
+			HashMap<String,String>  locHashMap = Loc.findById(LOC,true);;
 
 			if(!locHashMap.get("LOCATIONTYPE").equals("OTHER"))  ExceptionHelper.throwRfFulfillLogicException("不允许对'其他'之外的库位类型进行取样");
 
-			HashMap<String,String> locxlocxIdHashMap = LotxLocxId.findAvailInvByLocId(context, LOC, LPN, false,true);
+			HashMap<String,String> locxlocxIdHashMap = LotxLocxId.findAvailInvByLocId( LOC, LPN, false,true);
 			if(!LOTTABLE06.equals(locxlocxIdHashMap.get("LOTTABLE06"))) throw new Exception("容器条码和收货批次不匹配");
 
-			HashMap<String,String> skuHashMap =  SKU.findById(context,locxlocxIdHashMap.get("SKU"),true);
+			HashMap<String,String> skuHashMap =  SKU.findById(locxlocxIdHashMap.get("SKU"),true);
 
 			if(locxlocxIdHashMap.get("LOTTABLE01").equals(skuHashMap.get("SUSR6"))) throw new Exception("容器"+LPN+"已为取样容器，不允许再次取样");
 
 			availableQty = locxlocxIdHashMap.get("AVAILABLEQTY");
 
-			HashMap<String,String> res= DBHelper.getRecord(context,"select c.PACKUOM3 UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and a.STORERKEY = ? and a.lot=?", new String[]{CodeLookup.getSysConfig(context,"STORERKEY"), locxlocxIdHashMap.get("LOT")},"");
+			HashMap<String,String> res= DBHelper.getRecord("select c.PACKUOM3 UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and a.STORERKEY = ? and a.lot=?", new String[]{CodeLookup.getSysConfig("STORERKEY"), locxlocxIdHashMap.get("LOT")},"");
 
 			uom = res.get("UOM");
 			
 			/*
-			String PUTAWAYZONE=XtSql.GetValue(context, "select PUTAWAYZONE from loc where loc=?", new String[]{LOC}, "");
+			String PUTAWAYZONE=XtSql.GetValue( "select PUTAWAYZONE from loc where loc=?", new String[]{LOC}, "");
 			if (PUTAWAYZONE.equals("DOCK"))
 			{
 				
@@ -97,13 +96,12 @@ public class QcSamplingQryLpn extends LegacyBaseService
 			{
 				
 			}*/
-			//HashMap<String,String> mIDNOTES= XtSql.GetValueMap(context, "SELECT PACKKEY,UOM FROM IDNOTES WHERE ID=?", new String[] {LPN});
+			//HashMap<String,String> mIDNOTES= XtSql.GetValueMap( "SELECT PACKKEY,UOM FROM IDNOTES WHERE ID=?", new String[] {LPN});
 			//PACKKEY=mKC.get("PACKKEY");
-			//PACKKEY=XtSql.GetValue(context, "select packkey from id where id=?", new String[]{LPN}, "");
-			//UOM=XtSql.GetValue(context, "select packuom3 from PACK where PACKKEY=?", new String[]{PACKKEY}, "");
+			//PACKKEY=XtSql.GetValue( "select packkey from id where id=?", new String[]{LPN}, "");
+			//UOM=XtSql.GetValue( "select packuom3 from PACK where PACKKEY=?", new String[]{PACKKEY}, "");
 
-		    HashMap<String,String> odMap= DBHelper.getRecord(context
-		    		, "SELECT UOM, ORIGINALQTY,OPENQTY "
+		    HashMap<String,String> odMap= DBHelper.getRecord( "SELECT UOM, ORIGINALQTY,OPENQTY "
 		    				+ " FROM ORDERDETAIL WHERE ORDERKEY=? AND IDREQUIRED=?"
 		    		, new String[] {ORDERKEY,LPN},"");
 		    boolean recordExists = false;
@@ -124,7 +122,7 @@ public class QcSamplingQryLpn extends LegacyBaseService
 		    //String ORDERLINENUMBER=XtUtils.Nz(mORDER.get("ORDERLINENUMBER"),"");
 			//String STORERKEY=mKC.get("STORERKEY");
 			//SKU=mKC.get("SKU");
-			//SKUDESCR=XtSql.GetValue(context, "select descr from sku where storerkey=? and sku=?"
+			//SKUDESCR=XtSql.GetValue( "select descr from sku where storerkey=? and sku=?"
 			//		, new String[]{STORERKEY,SKU}, "");
 
 			ServiceDataMap theOutDO = new ServiceDataMap();

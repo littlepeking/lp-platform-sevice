@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.outbound.ui;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -8,7 +9,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class InternalCloseSO extends LegacyBaseService {
@@ -28,7 +29,7 @@ public class InternalCloseSO extends LegacyBaseService {
     }
 
     public void execute(ServiceDataHolder serviceDataHolder) {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -38,11 +39,11 @@ public class InternalCloseSO extends LegacyBaseService {
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String> orderHashMap = Orders.findByOrderKey(context,orderKey,true);
+            HashMap<String, String> orderHashMap = Orders.findByOrderKey(orderKey,true);
 
             if(OutboundUtils.isOrderCanBeCancelled(orderHashMap.get("STATUS"))){
                 //order状态是内部创建或者外部创建时，点击"内部取消"按钮，订单状态改成"内部取消"
-                OutboundUtils.cancelOrder(context,orderKey,false);
+                OutboundUtils.cancelOrder(orderKey,false);
 
                 Udtrn UDTRN = new Udtrn();
                 UDTRN.EsignatureKey = esignatureKey;
@@ -54,7 +55,7 @@ public class InternalCloseSO extends LegacyBaseService {
                 UDTRN.FROMKEY3 = "";
                 UDTRN.TITLE01 = "订单号";
                 UDTRN.CONTENT01 = orderKey;
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
 
     
             }else{

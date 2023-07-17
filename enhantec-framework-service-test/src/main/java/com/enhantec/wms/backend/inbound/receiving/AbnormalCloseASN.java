@@ -5,7 +5,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 public class AbnormalCloseASN extends LegacyBaseService {
 
@@ -26,13 +26,13 @@ public class AbnormalCloseASN extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
 
             serviceDataHolder.getInputDataAsMap().setAttribValue("ALLOWABNORMALCLOSE","true");
-            ServiceHelper.executeService(context,"EHCloseASN", serviceDataHolder);
+            ServiceHelper.executeService("EHCloseASN", serviceDataHolder);
           
 
         }catch (Exception e){

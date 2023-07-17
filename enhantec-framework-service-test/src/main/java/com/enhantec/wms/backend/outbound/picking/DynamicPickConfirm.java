@@ -7,12 +7,12 @@ import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.DemandAllocation;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,7 +64,7 @@ public class DynamicPickConfirm extends LegacyBaseService {
             //context.theSQLMgr.transactionBegin();
 
 
-            HashMap<String,String> daHashMap = DemandAllocation.findByKey(context, demandKey,true);
+            HashMap<String,String> daHashMap = DemandAllocation.findByKey( demandKey,true);
 
             String orderKey =daHashMap.get("ORDERKEY");
             String orderLineNumber =daHashMap.get("ORDERLINENUMBER");
@@ -73,18 +73,18 @@ public class DynamicPickConfirm extends LegacyBaseService {
             HashMap<String,String> lotxLocxIdHashMap;
             List<String> snList = new ArrayList<>();
 
-            if(SKU.isSerialControl(context,sku) && !IDNotes.isBoxId(context,fromId)){
+            if(SKU.isSerialControl(sku) && !IDNotes.isBoxId(fromId)){
 
-                lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(context,sku,fromId);
+                lotxLocxIdHashMap = LotxLocxId.findBySkuAndSerialNum(sku,fromId);
                 snList.add(fromId);
 
             }else {
-                lotxLocxIdHashMap = LotxLocxId.findById(context, fromId, true);
+                lotxLocxIdHashMap = LotxLocxId.findById( fromId, true);
             }
             
-            dynamicPickCheck(context,demandKey,lotxLocxIdHashMap,netWgt,uom);
-            decreaseDemandAllocation(context, demandKey,lotxLocxIdHashMap,netWgt,uom);
-            HashMap<String,String> result = PickUtil.doRandomPick(context, orderKey,orderLineNumber, lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList.stream().toArray(String[]::new),esignatureKey,printer);
+            dynamicPickCheck(demandKey,lotxLocxIdHashMap,netWgt,uom);
+            decreaseDemandAllocation( demandKey,lotxLocxIdHashMap,netWgt,uom);
+            HashMap<String,String> result = PickUtil.doRandomPick( orderKey,orderLineNumber, lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList.stream().toArray(String[]::new),esignatureKey,printer);
             String toId = result.get("TOID");
             String printLabel = result.get("PRINT");
 
@@ -108,16 +108,16 @@ public class DynamicPickConfirm extends LegacyBaseService {
 
     }
 
-    private void dynamicPickCheck(Context context, String demandKey,HashMap<String, String> lotxLocxIdHashMap, String netWgt, String uom) throws Exception {
+    private void dynamicPickCheck( String demandKey,HashMap<String, String> lotxLocxIdHashMap, String netWgt, String uom) throws Exception {
 
-        HashMap<String,String> daHashMap = DemandAllocation.findByKey(context, demandKey,true);
+        HashMap<String,String> daHashMap = DemandAllocation.findByKey( demandKey,true);
 
-        checkIfLotMatchDemand(context, daHashMap, lotxLocxIdHashMap);
+        checkIfLotMatchDemand( daHashMap, lotxLocxIdHashMap);
 
         String daQtyAllocated = daHashMap.get("QTYALLOCATED");
         BigDecimal uomQtyTobePicked = UtilHelper.str2Decimal(netWgt,"净重",false);
 
-        BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty(context, lotxLocxIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
+        BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty( lotxLocxIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
 
         if(UtilHelper.decimalStrCompare(stdQtyTobePicked.toPlainString(),daQtyAllocated)>0){
 
@@ -130,7 +130,7 @@ public class DynamicPickConfirm extends LegacyBaseService {
 
 
 
-    private void checkIfLotMatchDemand(Context context, HashMap<String,String> daHashMap, HashMap<String, String> lotxLocxIdHashMap) {
+    private void checkIfLotMatchDemand( HashMap<String,String> daHashMap, HashMap<String, String> lotxLocxIdHashMap) {
 
         String daSku = daHashMap.get("SKU");
 
@@ -165,47 +165,47 @@ public class DynamicPickConfirm extends LegacyBaseService {
 
         if(!UtilHelper.equals(daELottable03, lotxLocxIdHashMap.get("ELOTTABLE03"))){
 
-            String daELottable03Desc = CodeLookup.getCodeLookupValue(context,"MQSTATUS", daELottable03,"DESCRIPTION","质量状态");
-            String idQualityStatusDesc = CodeLookup.getCodeLookupValue(context,"MQSTATUS", lotxLocxIdHashMap.get("ELOTTABLE03"),"DESCRIPTION","质量状态");
+            String daELottable03Desc = CodeLookup.getCodeLookupValue("MQSTATUS", daELottable03,"DESCRIPTION","质量状态");
+            String idQualityStatusDesc = CodeLookup.getCodeLookupValue("MQSTATUS", lotxLocxIdHashMap.get("ELOTTABLE03"),"DESCRIPTION","质量状态");
             ExceptionHelper.throwRfFulfillLogicException("订单出库质量状态应为"+daELottable03Desc+",实际拣货容器"+disLpn+"的质量状态为"+idQualityStatusDesc+",不允许拣货");
 
         }
     }
 
-    private void decreaseDemandAllocation(Context context, String demandKey, HashMap<String,String> lotxLocxIdHashMap, String uomNetWgt,String uom) throws Exception {
+    private void decreaseDemandAllocation( String demandKey, HashMap<String,String> lotxLocxIdHashMap, String uomNetWgt,String uom) throws Exception {
 
         Date currentDate = new Date(Calendar.getInstance().getTimeInMillis());
 
-        HashMap daHashMap = DemandAllocation.findByKey(context,demandKey,true);
+        HashMap daHashMap = DemandAllocation.findByKey(demandKey,true);
 
         BigDecimal uomQtyTobePicked = UtilHelper.str2Decimal(uomNetWgt,"净重",false);
-        BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty(context, lotxLocxIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
+        BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty( lotxLocxIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
 
 
         if(UtilHelper.decimalStrCompare(daHashMap.get("QTYALLOCATED").toString(),stdQtyTobePicked.toPlainString()) < 0){
             ExceptionHelper.throwRfFulfillLogicException("拣货数量"+stdQtyTobePicked.toPlainString()+"不允许大于需求分配量"+daHashMap.get("QTYALLOCATED").toString());
         }else if(UtilHelper.decimalStrCompare(daHashMap.get("QTYALLOCATED").toString(),stdQtyTobePicked.toPlainString()) == 0){
-            DBHelper.executeUpdate(context,
+            DBHelper.executeUpdate(
                     "DELETE DEMANDALLOCATION WHERE DEMANDKEY = ? ",
                     new Object[]{  demandKey});
         }else{
             //QTYALLOCATED>stdQtyTobePicked
-            DBHelper.executeUpdate(context,
+            DBHelper.executeUpdate(
                     "UPDATE DEMANDALLOCATION SET QTYALLOCATED = QTYALLOCATED - ?, EditDate = ?, EditWho = ? WHERE DEMANDKEY = ? ",
                     new Object[]{
                             stdQtyTobePicked.toPlainString(),
                             currentDate,
-                            context.getUserID(),
+                            EHContextHelper.getUser().getUsername(),
                             demandKey
                     });
         }
 
-        DBHelper.executeUpdate(context,
+        DBHelper.executeUpdate(
                 "UPDATE OrderDetail SET QtyAllocated = QtyAllocated - ?, EditDate = ?, EditWho = ? WHERE Orderkey = ? AND OrderLineNumber = ? ",
                 new Object[]{
                 stdQtyTobePicked.toPlainString(),
                 currentDate,
-                context.getUserID(),
+                EHContextHelper.getUser().getUsername(),
                 daHashMap.get("ORDERKEY").toString(),
                 daHashMap.get("ORDERLINENUMBER").toString()
         });

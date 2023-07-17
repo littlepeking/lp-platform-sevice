@@ -1,6 +1,7 @@
 
 package com.enhantec.wms.backend.inbound.receiving;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.receiving.Receipt;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -9,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class ValidateASN extends LegacyBaseService {
@@ -30,7 +31,7 @@ public class ValidateASN extends LegacyBaseService {
     }
 
     public void execute(ServiceDataHolder serviceDataHolder) {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -40,11 +41,11 @@ public class ValidateASN extends LegacyBaseService {
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(context,receiptKey,true);
+            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
 
             if(UtilHelper.isEmpty(receiptInfo.get("EXTERNRECEIPTKEY"))) ExceptionHelper.throwRfFulfillLogicException("外部单号不允许为空");
 
-            ReceiptValidationHelper.validateASN(context, receiptKey);
+            ReceiptValidationHelper.validateASN( receiptKey);
 
           
 

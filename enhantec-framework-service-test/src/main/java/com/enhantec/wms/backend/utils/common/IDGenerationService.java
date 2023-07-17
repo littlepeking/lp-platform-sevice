@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  * --注册方法
@@ -25,8 +25,8 @@ public class IDGenerationService extends LegacyBaseService {
             String keyName = serviceDataHolder.getInputDataAsMap().getString("KEYNAME");
             String keylength = serviceDataHolder.getInputDataAsMap().getString("KEYLENGTH");
 
-            String userid = context.getUserID();
-            String key = IdGenerationHelper.generateIDByKeyName(context, userid, keyName, Integer.parseInt(keylength));
+            String userid = EHContextHelper.getUser().getUsername();
+            String key = IdGenerationHelper.generateIDByKeyName( userid, keyName, Integer.parseInt(keylength));
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             theOutDO.setAttribValue("Key", key);

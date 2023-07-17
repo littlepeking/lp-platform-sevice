@@ -1,16 +1,16 @@
 package com.enhantec.wms.backend.inventory.utils;
 
 import com.enhantec.wms.backend.common.base.SKU;
-import com.enhantec.wms.backend.framework.Context;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class ChangeByLotHelper {
-    public static void checkSkuAttributeIsMatch(String fromSku, String toSku, Context context){
-        HashMap<String,String> fromSkuHashMap = SKU.findById(context,fromSku,true);
-        HashMap<String,String> toSkuHashMap = SKU.findById(context,toSku,true);
+    public static void checkSkuAttributeIsMatch(String fromSku, String toSku){
+        HashMap<String,String> fromSkuHashMap = SKU.findById(fromSku,true);
+        HashMap<String,String> toSkuHashMap = SKU.findById(toSku,true);
         if (!fromSkuHashMap.get("PACKKEY").equalsIgnoreCase(toSkuHashMap.get("PACKKEY")))
             ExceptionHelper.throwRfFulfillLogicException("物料代码"+fromSku+"与物料代码"+toSku+"包装不一致无法转换");
         if (!fromSkuHashMap.get("SNUM_ENDTOEND").equalsIgnoreCase(toSkuHashMap.get("SNUM_ENDTOEND")))

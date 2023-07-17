@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inventory.repackaging;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.receiving.Receipt;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -7,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 
@@ -33,7 +34,7 @@ public class RemoveLabel extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder)
     {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -48,7 +49,7 @@ public class RemoveLabel extends LegacyBaseService {
             if (UtilHelper.isEmpty(id)) throw new Exception("待作废的标签号不能为空");
 
 
-            HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(context,receiptKey,true);
+            HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(receiptKey,true);
 
             /*
                 RECEIPT.SUSR2 分装单关联的收货批次号
@@ -61,19 +62,19 @@ public class RemoveLabel extends LegacyBaseService {
             String orderKey = orderKeyStr.substring(0,10);
             String orderLineNumber = orderKeyStr.substring(10);
 
-            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(context,orderKey,orderLineNumber);
+            boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(orderKey,orderLineNumber);
             if(isInRepackProcess) ExceptionHelper.throwRfFulfillLogicException("分装进行中，不允许进行修改");
 
 
 
-            HashMap<String,String> receiptDetailHashMap =  Receipt.findReceiptDetailByLPN(context,receiptKey,id,true);
+            HashMap<String,String> receiptDetailHashMap =  Receipt.findReceiptDetailByLPN(receiptKey,id,true);
 
             if(UtilHelper.equals(receiptDetailHashMap.get("STATUS"),"20"))
                 ExceptionHelper.throwRfFulfillLogicException("标签"+id+"已作废，无需再次作废");
             else if(!UtilHelper.equals(receiptDetailHashMap.get("STATUS"),"0"))
                 ExceptionHelper.throwRfFulfillLogicException("标签"+id+"不允许作废");
 
-            DBHelper.executeUpdate(context,"UPDATE RECEIPTDETAIL SET STATUS = '20' WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ? ",new Object[]{
+            DBHelper.executeUpdate("UPDATE RECEIPTDETAIL SET STATUS = '20' WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ? ",new Object[]{
                     receiptKey,  receiptDetailHashMap.get("RECEIPTLINENUMBER") });
 
             Udtrn UDTRN=new Udtrn();
@@ -95,7 +96,7 @@ public class RemoveLabel extends LegacyBaseService {
             UDTRN.FROMKEY2LABEL="标签容器号";
             UDTRN.FROMKEY2=id;
             UDTRN.FROMKEY3="";
-            UDTRN.Insert(context, userid);
+            UDTRN.Insert( userid);
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             serviceDataHolder.setReturnCode(1);

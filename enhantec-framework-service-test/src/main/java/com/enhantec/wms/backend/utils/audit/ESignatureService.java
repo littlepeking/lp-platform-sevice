@@ -1,10 +1,10 @@
 package com.enhantec.wms.backend.utils.audit;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -36,7 +36,7 @@ public class ESignatureService extends LegacyBaseService
     {
 
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
         String eSignatureKey=null;
 
 
@@ -50,7 +50,7 @@ public class ESignatureService extends LegacyBaseService
             String REASON = serviceDataHolder.getInputDataAsMap().getString( "REASON");//签名原因
             String  NOTES = serviceDataHolder.getInputDataAsMap().getString( "NOTES");//备注
 //
-            eSignatureKey = doSignature(context, user,PASSWORD, REASON, NOTES);
+            eSignatureKey = doSignature( user,PASSWORD, REASON, NOTES);
 
         }
         catch (Exception e)
@@ -72,18 +72,18 @@ public class ESignatureService extends LegacyBaseService
 
     }
 
-    public static String doSignature(Context context, String userid, String password, String reason, String notes) throws Exception {
+    public static String doSignature( String userid, String password, String reason, String notes) throws Exception {
 
         authenticate(userid, password);
 
         HashMap<String,String> Fields=new HashMap<String,String>();
-        String eSignatureKey = String.valueOf(IdGenerationHelper.getNCounter(context,"ESIGNATURE"));
+        String eSignatureKey = String.valueOf(IdGenerationHelper.getNCounter("ESIGNATURE"));
         Fields.put("SERIALKEY", eSignatureKey);
         Fields.put("SIGN", userid);
         Fields.put("REASON", reason);
         Fields.put("NOTES", notes);
 
-        LegacyDBHelper.ExecInsert(context, "Esignature", Fields);
+        LegacyDBHelper.ExecInsert( "Esignature", Fields);
         return eSignatureKey;
     }
     /**
@@ -91,14 +91,14 @@ public class ESignatureService extends LegacyBaseService
      * @Date: 2021/6/16
      * @Description: 根据ESIGNATUREKEY获User
      */
-    public static String getUserByEsignaturkey(Context context,String ESIGNATUREKEY) throws Exception{
+    public static String getUserByEsignaturkey(String ESIGNATUREKEY) throws Exception{
         if(ESIGNATUREKEY.indexOf(':')==-1){
-            return DBHelper.getValue(context,"select SIGN FROM ESIGNATURE where SERIALKEY =?",
+            return DBHelper.getValue("select SIGN FROM ESIGNATURE where SERIALKEY =?",
                     new Object[]{ESIGNATUREKEY},String.class,null);
         }else {
             String[] eSignatureKeys = ESIGNATUREKEY.split(":");
-            String User1=getUserByEsignaturkey(context,eSignatureKeys[0]);
-            String User2=getUserByEsignaturkey(context,eSignatureKeys[1]);
+            String User1=getUserByEsignaturkey(eSignatureKeys[0]);
+            String User2=getUserByEsignaturkey(eSignatureKeys[1]);
             return User1+":"+User2;
         }
 

@@ -15,7 +15,7 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -44,38 +44,36 @@ public class ReceivingWithASNAdd extends LegacyBaseService {
         String snListStr = serviceDataHolder.getInputDataAsMap().getString("SNLIST");
         String printer = serviceDataHolder.getInputDataAsMap().getString("PRINTER");
 
-        String userId = context.getUserID();
+        String userId = EHContextHelper.getUser().getUsername();
 
         try{
 
-            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(context,receiptKey,true);
+            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(receiptKey,true);
 
             if (receiptHashMap.get("STATUS").equals("9") || receiptHashMap.get("STATUS").equals("11")
                     || receiptHashMap.get("STATUS").equals("15") || receiptHashMap.get("STATUS").equals("20")
             )  throw new Exception("收货单行已收货完成,不允许修改");
 
-            HashMap<String,String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById(context,receiptKey,originalReceiptLineNumber,true);
+            HashMap<String,String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById(receiptKey,originalReceiptLineNumber,true);
 
             if(!(new BigDecimal(originalReceiptDetailHashMap.get("QTYRECEIVED")).compareTo(new BigDecimal(0)) == 0)) ExceptionHelper.throwRfFulfillLogicException("收货指令行的已收货数量必须为0");
 
             //插入收货行的应为STD UOM,但是RF传入的是UOM QTY,需要转换
-            BigDecimal grossWgtStdQty = UOM.UOMQty2StdQty(context ,originalReceiptDetailHashMap.get("PACKKEY"), uom, new BigDecimal(grossWgt));
-            BigDecimal tareWgtStdQQty = UOM.UOMQty2StdQty(context ,originalReceiptDetailHashMap.get("PACKKEY"), uom, new BigDecimal(tareWgt));
-            BigDecimal netWgtStdQQty = UOM.UOMQty2StdQty(context ,originalReceiptDetailHashMap.get("PACKKEY"), uom, new BigDecimal(netWgt));
+            BigDecimal grossWgtStdQty = UOM.UOMQty2StdQty(originalReceiptDetailHashMap.get("PACKKEY"), uom, new BigDecimal(grossWgt));
+            BigDecimal tareWgtStdQQty = UOM.UOMQty2StdQty(originalReceiptDetailHashMap.get("PACKKEY"), uom, new BigDecimal(tareWgt));
+            BigDecimal netWgtStdQQty = UOM.UOMQty2StdQty(originalReceiptDetailHashMap.get("PACKKEY"), uom, new BigDecimal(netWgt));
 
             String[] snList = null;
             if(!UtilHelper.isEmpty(snListStr)){
                 snList = snListStr.split(";;;");
             }
 
-            HashMap<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByOriginalLine(
-                    context,originalReceiptDetailHashMap,lpn,originalReceiptDetailHashMap.get("TOLOC"),"0"
+            HashMap<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByOriginalLine(originalReceiptDetailHashMap,lpn,originalReceiptDetailHashMap.get("TOLOC"),"0"
                     ,netWgtStdQQty.toPlainString(),grossWgtStdQty.toPlainString(),tareWgtStdQQty.toPlainString(),uom,"", snList);
 
-            if(!SKU.isSerialControl(context,insertedReceiptDetail.get("SKU")) ||
-                    CDReceiptType.isBindAndAutoGenerateLpn(context, insertedReceiptDetail.get("SKU"), receiptHashMap.get("TYPE"))) {
+            if(!SKU.isSerialControl(insertedReceiptDetail.get("SKU")) ||
+                    CDReceiptType.isBindAndAutoGenerateLpn( insertedReceiptDetail.get("SKU"), receiptHashMap.get("TYPE"))) {
                         PrintHelper.printLPNByReceiptLineNumber(
-                                context,
                                 insertedReceiptDetail.get("RECEIPTKEY"),
                                 insertedReceiptDetail.get("RECEIPTLINENUMBER"),
                                 Labels.LPN_UI,
@@ -83,8 +81,8 @@ public class ReceivingWithASNAdd extends LegacyBaseService {
 
             }
 
-            if(CDReceiptType.isAutoReceiving(context, receiptHashMap.get("TYPE"))) {
-                Receipt.execReceiptDetailReceiving(context, serviceDataHolder, insertedReceiptDetail, grossWgt, tareWgt, netWgt);
+            if(CDReceiptType.isAutoReceiving( receiptHashMap.get("TYPE"))) {
+                Receipt.execReceiptDetailReceiving( serviceDataHolder, insertedReceiptDetail, grossWgt, tareWgt, netWgt);
             }
 
             Udtrn udtrn = new Udtrn();
@@ -100,7 +98,7 @@ public class ReceivingWithASNAdd extends LegacyBaseService {
             udtrn.TITLE03="容器号/箱号"; udtrn.CONTENT03=lpn;
             udtrn.TITLE04="数量"; udtrn.CONTENT04=netWgt;
             udtrn.TITLE05="单位"; udtrn.CONTENT05=uom;
-            udtrn.Insert(context,userId);
+            udtrn.Insert(userId);
 
 
 

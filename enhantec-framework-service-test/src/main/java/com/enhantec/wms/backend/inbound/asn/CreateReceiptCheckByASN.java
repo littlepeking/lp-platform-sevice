@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.asn;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -30,7 +31,7 @@ public class CreateReceiptCheckByASN extends com.enhantec.wms.backend.framework.
 
     public void execute(com.enhantec.wms.backend.framework.ServiceDataHolder processData)
     {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
         
 
@@ -54,16 +55,16 @@ public class CreateReceiptCheckByASN extends com.enhantec.wms.backend.framework.
                 PRERECEIPTCHECK.put("TRANSCHECK", TRANSCHECK);
                 PRERECEIPTCHECK.put("PACKCHECK", PACKCHECK);
                 PRERECEIPTCHECK.put("checkresult", checkresult);
-                LegacyDBHelper.ExecInsert(context, "PRERECEIPTCHECK", PRERECEIPTCHECK);
+                LegacyDBHelper.ExecInsert( "PRERECEIPTCHECK", PRERECEIPTCHECK);
 
             String[] eSignatureKeys = esignaturekey.split(":");
             String eSignatureKey1=eSignatureKeys[0];
             String eSignatureKey2=eSignatureKeys[1];
-            String isConfirmedUser1 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     eSignatureKey1
             }, String.class, "确认人");
 
-            String isConfirmedUser2 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     eSignatureKey2
             }, String.class, "复核人");
 
@@ -78,11 +79,10 @@ public class CreateReceiptCheckByASN extends com.enhantec.wms.backend.framework.
                 UDTRN.CONTENT04 = isConfirmedUser1;
                 UDTRN.TITLE05 = "复核人";
                 UDTRN.CONTENT05 = isConfirmedUser2;
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
 
-                String ASNReceiptCheckStatus = CodeLookup.getCodeLookupValue(context,"ASNCHKRES",checkresult,"UDF1","检查结果");
-            DBHelper.executeUpdate(context
-                    ,"update receipt set RECEIPTCHECKSTATUS=? where receiptkey=?"
+                String ASNReceiptCheckStatus = CodeLookup.getCodeLookupValue("ASNCHKRES",checkresult,"UDF1","检查结果");
+            DBHelper.executeUpdate("update receipt set RECEIPTCHECKSTATUS=? where receiptkey=?"
                     ,new String[]{ASNReceiptCheckStatus,receiptkey});
 
 

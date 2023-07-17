@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 /**
@@ -30,13 +30,13 @@ public class SignOrder extends LegacyBaseService {
 
         try {
 
-            String userid = context.getUserID();
+            String userid = EHContextHelper.getUser().getUsername();
 
 
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderkey");
 
-            HashMap<String, String> orderInfo = Orders.findByOrderKey(context, orderKey, true);
+            HashMap<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
 
             if (!orderInfo.get("STATUS").equals("95")) {
                 ExceptionHelper.throwRfFulfillLogicException("不能签收未发运的订单");
@@ -44,11 +44,10 @@ public class SignOrder extends LegacyBaseService {
 
             String esignaturekey = serviceDataHolder.getInputDataAsMap().getString("esignaturekey");
 
-            String signedUser = DBHelper.getValue(context,"SELECT SIGN FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+            String signedUser = DBHelper.getValue("SELECT SIGN FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignaturekey},String.class, "电子签名");
 
-            DBHelper.executeUpdate(context
-                    , "UPDATE orders SET SUSR5 = ? where orderkey = ? ",
+            DBHelper.executeUpdate( "UPDATE orders SET SUSR5 = ? where orderkey = ? ",
                     new Object[]{signedUser, orderKey});
 
 
@@ -64,7 +63,7 @@ public class SignOrder extends LegacyBaseService {
 
 
 
-            UDTRN.Insert(context, context.getUserID());
+            UDTRN.Insert( EHContextHelper.getUser().getUsername());
 
 
         }catch (Exception e)

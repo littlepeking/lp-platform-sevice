@@ -9,5 +9,5 @@
 package com.enhantec.wms.backend.framework;
 
 public class UserInfo {
-    public Context context;
+    public ;
 }

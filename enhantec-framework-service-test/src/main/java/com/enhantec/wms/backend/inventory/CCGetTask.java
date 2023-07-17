@@ -34,19 +34,19 @@ public class CCGetTask extends LegacyBaseService {
         serviceDataHolder.getInputDataAsMap().setAttribValue("SOURCEKEY", serviceDataHolder.getInputDataAsMap().getString("taskKey"));
         serviceDataHolder.getInputDataAsMap().setAttribValue("lasttask","CC");
         serviceDataHolder.getInputDataAsMap().setAttribValue("taskoverride","CC");
-        ServiceDataMap outDO = (ServiceDataMap) ServiceHelper.executeService(context,"NSPRFTM01", serviceDataHolder);
+        ServiceDataMap outDO = (ServiceDataMap) ServiceHelper.executeService("NSPRFTM01", serviceDataHolder);
         //
         String sku =  outDO.getString("sku");
         String lot =  outDO.getString("lot");
         String fromId =  outDO.getString("fromid");
         String taskDetailKey =  outDO.getString("taskdetailkey");
 
-        HashMap<String,String> skuHashMap = SKU.findById(context,sku,true);
-        String  stdUom = UOM.getStdUOM(context,skuHashMap.get("PACKKEY"));
-        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(context,lot,true);
-        HashMap<String,String>  idNotesHashMap = IDNotes.findById(context,fromId,true);
-        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(context,taskDetailKey,true);
-        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(context,fromId,true);
+        HashMap<String,String> skuHashMap = SKU.findById(sku,true);
+        String  stdUom = UOM.getStdUOM(skuHashMap.get("PACKKEY"));
+        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(lot,true);
+        HashMap<String,String>  idNotesHashMap = IDNotes.findById(fromId,true);
+        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
+        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(fromId,true);
 
         outDO.setAttribValue("skudescr",skuHashMap.get("DESCR"));
         outDO.setAttribValue("lottable06",lotHashMap.get("LOTTABLE06").toString());

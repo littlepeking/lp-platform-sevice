@@ -3,11 +3,11 @@ package com.enhantec.wms.backend.outbound.ui;
 
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +30,7 @@ public class ConfirmSO extends LegacyBaseService {
     }
 
     public void execute(ServiceDataHolder serviceDataHolder) {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -41,16 +41,16 @@ public class ConfirmSO extends LegacyBaseService {
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey(context, ORDERKEY, true);
+            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey( ORDERKEY, true);
 
-            String isTransferOrderType = DBHelper.getValue(context, "SELECT EXT_UDF_STR5 FROM CODELKUP WHERE LISTNAME = 'ORDERTYPE' AND CODE = ?",
+            String isTransferOrderType = DBHelper.getValue( "SELECT EXT_UDF_STR5 FROM CODELKUP WHERE LISTNAME = 'ORDERTYPE' AND CODE = ?",
                     new Object[]{ORDERSInfo.get("TYPE")},String.class,"",false);
 
             /**
              * 转仓出库类型校验
              */
             if("Y".equals(isTransferOrderType)){
-                checkTransferOrder(context,ORDERSInfo);
+                checkTransferOrder(ORDERSInfo);
             }
 
             //1) 初始状态： 确认按钮为可编辑状态； 取消按钮为不可编辑状态；
@@ -63,7 +63,7 @@ public class ConfirmSO extends LegacyBaseService {
             //0：未确认 1：已确认 2：已复核
 
             if(esignatureKey.indexOf(':')==-1) {
-                String ISCONFIRMEDUSER = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String ISCONFIRMEDUSER = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         esignatureKey
                 }, String.class, "复核人");
 
@@ -74,12 +74,12 @@ public class ConfirmSO extends LegacyBaseService {
                         ExceptionHelper.throwRfFulfillLogicException("复核人和确认人不能为同一人");
                     } else {
                         //复核操作
-                        DBHelper.executeUpdate(context, "UPDATE ORDERS SET ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE ORDERKEY = ? ",
+                        DBHelper.executeUpdate( "UPDATE ORDERS SET ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE ORDERKEY = ? ",
                                 new Object[]{ISCONFIRMEDUSER, ORDERKEY});
                     }
                 } else {
                     //确认操作
-                    DBHelper.executeUpdate(context, "UPDATE ORDERS SET ISCONFIRMEDUSER = ? , ISCONFIRMED = 1 WHERE ORDERKEY = ? ",
+                    DBHelper.executeUpdate( "UPDATE ORDERS SET ISCONFIRMEDUSER = ? , ISCONFIRMED = 1 WHERE ORDERKEY = ? ",
                             new Object[]{ISCONFIRMEDUSER, ORDERKEY});
                 }
 
@@ -102,7 +102,7 @@ public class ConfirmSO extends LegacyBaseService {
                 UDTRN.CONTENT01 = ORDERKEY;
                 UDTRN.TITLE02 = "确认状态";
                 UDTRN.CONTENT02 = "Y";
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
             }else{
                 /**
                  * 增加RF的确认，这里想着可以不在这加，而放到RF端，签名后调用后台两次，暂时先这么写，回头确认一下
@@ -111,16 +111,16 @@ public class ConfirmSO extends LegacyBaseService {
                 String eSignatureKey1=eSignatureKeys[0];
                 String eSignatureKey2=eSignatureKeys[1];
 
-                String isConfirmedUser1 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey1
                 }, String.class, "确认人");
 
-                String isConfirmedUser2 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey2
                 }, String.class, "复核人");
 
                 //复核操作
-                DBHelper.executeUpdate(context, "UPDATE ORDERS SET ISCONFIRMEDUSER = ? ,ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE ORDERKEY = ? ",
+                DBHelper.executeUpdate( "UPDATE ORDERS SET ISCONFIRMEDUSER = ? ,ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE ORDERKEY = ? ",
                         new Object[]{isConfirmedUser1,isConfirmedUser2, ORDERKEY});
 
                 Udtrn UDTRN = new Udtrn();
@@ -138,7 +138,7 @@ public class ConfirmSO extends LegacyBaseService {
                 UDTRN.CONTENT03 = isConfirmedUser1;
                 UDTRN.TITLE04 = "复核人";
                 UDTRN.CONTENT04 = isConfirmedUser2;
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
             }
 
 
@@ -154,16 +154,16 @@ public class ConfirmSO extends LegacyBaseService {
         }
     }
 
-    private void checkTransferOrder(Context context, HashMap<String,String> orderInfo){
-        boolean isTransferGmp = "Y".equalsIgnoreCase(CodeLookup.getCodeLookupByKey(context,"WHTRANFER",orderInfo.get("TOWAREHOUSE")).get("UDF1"));
+    private void checkTransferOrder( HashMap<String,String> orderInfo){
+        boolean isTransferGmp = "Y".equalsIgnoreCase(CodeLookup.getCodeLookupByKey("WHTRANFER",orderInfo.get("TOWAREHOUSE")).get("UDF1"));
         if(isTransferGmp) {
-            List<HashMap<String, String>> orderDetails = Orders.findOrderDetailsByOrderKey(context, orderInfo.get("ORDERKEY"), false);
+            List<HashMap<String, String>> orderDetails = Orders.findOrderDetailsByOrderKey( orderInfo.get("ORDERKEY"), false);
             if (orderDetails.size() != 0) {
                 HashSet<String> lotTable06 = new HashSet<>();
                 orderDetails.forEach(orderDetail -> {
                     lotTable06.add(orderDetail.get("LOTTABLE06"));
                     String sql = "SELECT SKU FROM " + orderInfo.get("TOWAREHOUSE") + ".SKU WHERE SKU = ? AND EXT_UDF_STR3 = ?";
-                    List<HashMap<String, String>> toWareHouseSku = DBHelper.executeQuery(context, sql,
+                    List<HashMap<String, String>> toWareHouseSku = DBHelper.executeQuery( sql,
                             new Object[]{orderInfo.get("TOGMPSKU"), orderDetail.get("SKU")});
                     if (null == toWareHouseSku || toWareHouseSku.size() == 0) {
                         ExceptionHelper.throwRfFulfillLogicException("目标GMP仓库编码信息不存在");

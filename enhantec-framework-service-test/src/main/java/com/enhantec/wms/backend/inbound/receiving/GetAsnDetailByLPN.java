@@ -9,7 +9,7 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -84,7 +84,7 @@ public class GetAsnDetailByLPN extends LegacyBaseService
 			HashMap<String, String> lpnInfo;
 			String barrelDescr="";
 
-			lpnInfo = DBHelper.getRecord(context, receiptDetailSql, new Object[]{lpn}, "待收货明细行", true);
+			lpnInfo = DBHelper.getRecord( receiptDetailSql, new Object[]{lpn}, "待收货明细行", true);
 
 			if(UtilHelper.isEmpty(lpnInfo.get("RECEIPTKEY"))) ExceptionHelper.throwRfFulfillLogicException("未找到待收货明细行");
 			barrelDescr=lpnInfo.get("BARRELNUMBER") +"/"+lpnInfo.get("TOTALBARRELNUMBER");
@@ -107,35 +107,32 @@ public class GetAsnDetailByLPN extends LegacyBaseService
 			String uom=lpnInfo.get("UOM");
 			String packkey=lpnInfo.get("PACKKEY");
 			String receiptType=lpnInfo.get("TYPE");
-			String totalCount= DBHelper.getValue(context
-					, "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0"
+			String totalCount= DBHelper.getValue( "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0"
 					, new String[]{receiptKey,sku}, "0");
-			int receivedCount= (int) DBHelper.getRawValue(context
-					, "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0 AND STATUS>0"
+			int receivedCount= (int) DBHelper.getRawValue( "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0 AND STATUS>0"
 					, new Object[]{receiptKey,sku});
 
-			String lastReceivedLoc = DBHelper.getValue(context
-					, "SELECT TOP 1 TOLOC AS LOC FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND QTYEXPECTED>0 AND STATUS>0 order by editdate desc"
+			String lastReceivedLoc = DBHelper.getValue( "SELECT TOP 1 TOLOC AS LOC FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND QTYEXPECTED>0 AND STATUS>0 order by editdate desc"
 					, new String[]{receiptKey,sku});
 
 			String total = receivedCount +" / "+totalCount;
 			//直接取库存中已存在的库区，如果相同ASN已放入多个库区，结果可能会不准,暂时保留--John
 			final String toloc = !UtilHelper.isEmpty(loc)? loc: lastReceivedLoc!=null? lastReceivedLoc:"";
 
-			HashMap<String,String> skuHashMap  =  SKU.findById(context,sku,true);
+			HashMap<String,String> skuHashMap  =  SKU.findById(sku,true);
 			String skuDescr=skuHashMap.get("DESCR");
 			String storageconditions=skuHashMap.get("COMMODITYCLASS");
 			//界面需要显示原UOM
-			String GROSSWGTEXPECTED = trimZerosAndToStr(UOM.Std2UOMQty(context, packkey,uom,new BigDecimal(lpnInfo.get("GROSSWGTEXPECTED"))));
-			String TAREWGTEXPECTED = trimZerosAndToStr(UOM.Std2UOMQty(context, packkey,uom,new BigDecimal(lpnInfo.get("TAREWGTEXPECTED"))));
-			String NETWGTEXPECTED = trimZerosAndToStr(UOM.Std2UOMQty(context, packkey,uom,new BigDecimal(lpnInfo.get("QTYEXPECTED"))));
+			String GROSSWGTEXPECTED = trimZerosAndToStr(UOM.Std2UOMQty( packkey,uom,new BigDecimal(lpnInfo.get("GROSSWGTEXPECTED"))));
+			String TAREWGTEXPECTED = trimZerosAndToStr(UOM.Std2UOMQty( packkey,uom,new BigDecimal(lpnInfo.get("TAREWGTEXPECTED"))));
+			String NETWGTEXPECTED = trimZerosAndToStr(UOM.Std2UOMQty( packkey,uom,new BigDecimal(lpnInfo.get("QTYEXPECTED"))));
 			List<String> locList = new ArrayList<>();
 			String skuPutawayStrategyKey = skuHashMap.get("PUTAWAYSTRATEGYKEY");
 
 			if ("MULTIZONES".equals(skuPutawayStrategyKey)){
 				List<String> searchZoneArray=null;
 				//Get SKU configured multiple zone list
-				String zones= DBHelper.getValue(context, "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
+				String zones= DBHelper.getValue( "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
 						, new String[] {storerKey,sku}, "");
 
 				if(UtilHelper.isEmpty(zones)){
@@ -162,7 +159,7 @@ public class GetAsnDetailByLPN extends LegacyBaseService
 						else {
 
 
-							ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService(context,"RFPutawayMultiZones",
+							ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService("RFPutawayMultiZones",
 									new ServiceDataHolder(
 											new ServiceDataMap(
 									new HashMap<String, Object>() {{

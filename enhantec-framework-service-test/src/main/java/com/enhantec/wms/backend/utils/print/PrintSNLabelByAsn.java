@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class PrintSNLabelByAsn extends LegacyBaseService
@@ -36,7 +36,7 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -48,12 +48,12 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 		    String LPN= serviceDataHolder.getInputDataAsMap().getString("LPN");
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
 
-			HashMap<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN(context, LPN, true);
-			HashMap<String, String> sku = SKU.findById(context, lastReceiptDetailByLPN.get("SKU"), true);
+			HashMap<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN( LPN, true);
+			HashMap<String, String> sku = SKU.findById( lastReceiptDetailByLPN.get("SKU"), true);
 
-//			CodeLookup.getCodeLookupByKey(context,"IDREPRINT",Labels.SN_UI_CD);
+//			CodeLookup.getCodeLookupByKey("IDREPRINT",Labels.SN_UI_CD);
 
-			PrintHelper.rePrintSnByLPN(context,LPN, Labels.SN_UI_CD,PRINTER,"1","补打标签");
+			PrintHelper.rePrintSnByLPN(LPN, Labels.SN_UI_CD,PRINTER,"1","补打标签");
 
 
 
@@ -71,7 +71,7 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 		    UDTRN.TITLE04="物料编号";    UDTRN.CONTENT04=lastReceiptDetailByLPN.get("SKU");
 		    UDTRN.TITLE05="物料名称";    UDTRN.CONTENT05=sku.get("DESCR");
 
-		    UDTRN.Insert(context, userid);
+		    UDTRN.Insert( userid);
 			
 
 

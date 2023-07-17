@@ -6,14 +6,14 @@ import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.outbound.OutboundUtils;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public class Repackaging extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder)
     {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -59,8 +59,8 @@ public class Repackaging extends LegacyBaseService {
             if (UtilHelper.isEmpty(esignatureKey)) throw new Exception("电子签名不能为空");
 
 
-            HashMap<String,String> orderHashMap = Orders.findByOrderKey(context,orderKey,true);
-            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,orderKey,orderLineNumber,true);
+            HashMap<String,String> orderHashMap = Orders.findByOrderKey(orderKey,true);
+            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
 
             String repackReceiptKey = orderDetailHashMap.get("SUSR1");
 
@@ -68,32 +68,32 @@ public class Repackaging extends LegacyBaseService {
 
             if(UtilHelper.isEmpty(repackReceiptKey)) ExceptionHelper.throwRfFulfillLogicException("找不到该订单行正在进行的分装收货单，请先生成分装签");
 
-            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(context, repackReceiptKey,true);
+            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey( repackReceiptKey,true);
 
             String lottable06 =receiptHashMap.get("SUSR2");
 
             String sku = orderDetailHashMap.get("SKU");
             String packKey = orderDetailHashMap.get("PACKKEY");
 
-            String stdUOM = UOM.getStdUOM(context,packKey);
+            String stdUOM = UOM.getStdUOM(packKey);
 
             //如果repackOrderKey不为空，说明单据已经创建但未自动完成后续操作，需要手工执行。
             if(UtilHelper.isEmpty(rePackOrderKey)) {
 
                 String receiptDetailsSql = "SELECT * FROM RECEIPTDETAIL WHERE STATUS = '0' AND receiptKey = ?  ";
-                List<HashMap<String, String>> receiptDetailList = DBHelper.executeQuery(context, receiptDetailsSql, new Object[]{repackReceiptKey});
+                List<HashMap<String, String>> receiptDetailList = DBHelper.executeQuery( receiptDetailsSql, new Object[]{repackReceiptKey});
                 if (receiptDetailList.size() == 0)
                     ExceptionHelper.throwRfFulfillLogicException("未找到收货单" + repackReceiptKey + "下待收货的分装标签");
 
                 String currentPackLoc = orderDetailHashMap.get("SUSR3");
 
                 String STORERKEY = orderDetailHashMap.get("STORERKEY");
-                //String repackReceiptType= XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKRECT"}, "");
-                String repackOrderType = DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "REPACKORDT"}, "");
+                //String repackReceiptType= XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKRECT"}, "");
+                String repackOrderType = DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "REPACKORDT"}, "");
                 if (UtilHelper.isEmpty(repackOrderType)) ExceptionHelper.throwRfFulfillLogicException("分装出库单类型代码未设置");
 
                 String projectCode = orderHashMap.get("NOTES");
-                rePackOrderKey = LegacyDBHelper.GetNCounterBill( context, "ORDER");
+                rePackOrderKey = LegacyDBHelper.GetNCounterBill( "ORDER");
 
                 HashMap<String,String> repackOrderHashMap = new HashMap<String,String>();
                 repackOrderHashMap.put("AddWho", userid);
@@ -108,16 +108,16 @@ public class Repackaging extends LegacyBaseService {
                 repackOrderHashMap.put("storerkey", STORERKEY);
                 repackOrderHashMap.put("notes", projectCode);
                 repackOrderHashMap.put("ISCONFIRMED", "2");
-                LegacyDBHelper.ExecInsert(context, "orders", repackOrderHashMap);
+                LegacyDBHelper.ExecInsert( "orders", repackOrderHashMap);
                 //记录正在进行的分装出库单号，如果一切执行正常，SUSR1分装入库单号,SUSR2分装出库单号会被自动清空。
-                DBHelper.executeUpdate(context, "UPDATE ORDERDETAIL SET SUSR2 = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ", new Object[]{
+                DBHelper.executeUpdate( "UPDATE ORDERDETAIL SET SUSR2 = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ", new Object[]{
                         rePackOrderKey, orderKey, orderLineNumber});
 
                 //add order lines
                 List<HashMap<String, String>> leftLpnList = RepackgingUtils.getLeftLPNListFromStr(receiptHashMap.get("SUSR5"));
 
                 //添加完全消耗的备货LPN
-                List<HashMap<String, String>> allPreparedIds = DBHelper.executeQuery(context,
+                List<HashMap<String, String>> allPreparedIds = DBHelper.executeQuery(
                         "SELECT a.ID, QTY FROM LOTXLOCXID a, v_lotattribute b WHERE  a.lot=b.lot " +
                                 " and a.LOC = ? AND a.SKU = ? AND b.LOTTABLE06 = ? AND a.QTY>0",
                         new Object[]{currentPackLoc, sku, lottable06});
@@ -147,8 +147,8 @@ public class Repackaging extends LegacyBaseService {
 
                         //////////
                         //校验容器的可用量应大于分装量
-                        HashMap<String, String> idHashMap = LotxLocxId.findAvailInvById(context, leftLpnInfo.get("ID"), true, true);
-                        BigDecimal leftLpnStdQty = UOM.UOMQty2StdQty(context, packKey, leftLpnInfo.get("UOM"), new BigDecimal(leftLpnInfo.get("LEFTQTY")));
+                        HashMap<String, String> idHashMap = LotxLocxId.findAvailInvById( leftLpnInfo.get("ID"), true, true);
+                        BigDecimal leftLpnStdQty = UOM.UOMQty2StdQty( packKey, leftLpnInfo.get("UOM"), new BigDecimal(leftLpnInfo.get("LEFTQTY")));
                         BigDecimal idUsedStdQty = new BigDecimal(idHashMap.get("QTY")).subtract(leftLpnStdQty);
 
 
@@ -166,7 +166,7 @@ public class Repackaging extends LegacyBaseService {
                         if (idUsedStdQty.compareTo(BigDecimal.ZERO) > 0) {
 
                             ///////生成分装出库单行号
-                            Object preOrderLineNumberObj = DBHelper.getValue(context, "SELECT MAX(ORDERLINENUMBER) FROM ORDERDETAIL WHERE ORDERKEY = ?",
+                            Object preOrderLineNumberObj = DBHelper.getValue( "SELECT MAX(ORDERLINENUMBER) FROM ORDERDETAIL WHERE ORDERKEY = ?",
                                     new Object[]{rePackOrderKey}, "");
 
                             int orderLineNumberInt = preOrderLineNumberObj == null ? 1 : Integer.parseInt(preOrderLineNumberObj.toString()) + 1;
@@ -196,7 +196,7 @@ public class Repackaging extends LegacyBaseService {
                             repackOrderDetail.put("IDREQUIRED", leftLpnInfo.get("ID"));
                             repackOrderDetail.put("LOTTABLE06", lottable06);
                             repackOrderDetail.put("NEWALLOCATIONSTRATEGY", "N21"); //分配策略:匹配数量，然后最佳适配
-                            LegacyDBHelper.ExecInsert(context, "orderdetail", repackOrderDetail);
+                            LegacyDBHelper.ExecInsert( "orderdetail", repackOrderDetail);
 
                             totalUsedQty = totalUsedQty.add(idUsedStdQty);
                         }
@@ -216,7 +216,7 @@ public class Repackaging extends LegacyBaseService {
 
                 if(UtilHelper.decimalStrCompare(needIncreasedOpenQty,"0")>0){
 
-                    DBHelper.executeUpdate(context, "UPDATE ORDERDETAIL SET OpenQty = OpenQty + ?, EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
+                    DBHelper.executeUpdate( "UPDATE ORDERDETAIL SET OpenQty = OpenQty + ?, EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
                             , new Object[]{
                                     needIncreasedOpenQty,
                                     userid,
@@ -259,7 +259,7 @@ public class Repackaging extends LegacyBaseService {
                 UDTRN.CONTENT06 = UtilHelper.trimZerosAndToStr(totalUsedQty);
                 UDTRN.TITLE07 = "损耗量";
                 UDTRN.CONTENT07 = UtilHelper.decimalStrSubtract(totalUsedQty.toPlainString(), totalReceivedQty.toPlainString());
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
 
                // context.theSQLMgr.transactionCommit();
 
@@ -271,7 +271,7 @@ public class Repackaging extends LegacyBaseService {
 //                    context.theSQLMgr.transactionBegin();
         
                     //分装出库单发货
-                    OutboundUtils.allocateAndShip(context, rePackOrderKey);
+                    OutboundUtils.allocateAndShip( rePackOrderKey);
                     //发货后立刻提交事务，保证当前分配和发运操作的业务数据完整性。
 //                    context.theSQLMgr.transactionCommit();
 
@@ -287,7 +287,7 @@ public class Repackaging extends LegacyBaseService {
 //                    context.theSQLMgr.transactionBegin();
 
         
-                    ServiceHelper.executeService(context, "EHReceiveAll",
+                    ServiceHelper.executeService( "EHReceiveAll",
                             new ServiceDataHolder(new ServiceDataMap(
                             new HashMap<String, Object>() {{
                         put("RECEIPTKEY", repackReceiptKey);
@@ -295,14 +295,14 @@ public class Repackaging extends LegacyBaseService {
                     }})));
 
 
-                    HashMap<String,String> receivedReceiptHashMap = Receipt.findByReceiptKey(context, repackReceiptKey,true);
+                    HashMap<String,String> receivedReceiptHashMap = Receipt.findByReceiptKey( repackReceiptKey,true);
 
                     if (!receivedReceiptHashMap.get("STATUS").equals("9")){
                         ExceptionHelper.throwRfFulfillLogicException("已执行过分装，但未自动完成。分装出库单" + rePackOrderKey + "已完成，但分装入库单"+repackReceiptKey+"收货未能完成，请手工进行后续分装入库单收货、领料单分配及拣货操作后重试");
                     }else {
 
-                        DBHelper.executeUpdate(context, "UPDATE RECEIPT SET STATUS = 11 WHERE RECEIPTKEY = ?", new Object[]{repackReceiptKey});
-                        DBHelper.executeUpdate(context, "UPDATE RECEIPTDETAIL SET STATUS = 11 WHERE RECEIPTKEY = ? AND STATUS = 9 ", new Object[]{repackReceiptKey});
+                        DBHelper.executeUpdate( "UPDATE RECEIPT SET STATUS = 11 WHERE RECEIPTKEY = ?", new Object[]{repackReceiptKey});
+                        DBHelper.executeUpdate( "UPDATE RECEIPTDETAIL SET STATUS = 11 WHERE RECEIPTKEY = ? AND STATUS = 9 ", new Object[]{repackReceiptKey});
 
                     }
 //                    context.theSQLMgr.transactionCommit();
@@ -316,7 +316,7 @@ public class Repackaging extends LegacyBaseService {
                 try {
 //                    context.theSQLMgr.transactionBegin();
                     //自动分配分装收货单的库存到原领料单并自动拣货
-                    addPickDetails2Order(context, orderDetailHashMap, receiptDetailList);
+                    addPickDetails2Order( orderDetailHashMap, receiptDetailList);
 
 //                    context.theSQLMgr.transactionCommit();
 
@@ -327,7 +327,7 @@ public class Repackaging extends LegacyBaseService {
                 }
             }else{
 
-                HashMap<String,String> rePackOrderHashMap = Orders.findByOrderKey(context,rePackOrderKey,true);
+                HashMap<String,String> rePackOrderHashMap = Orders.findByOrderKey(rePackOrderKey,true);
 
                 if(!rePackOrderHashMap.get("STATUS").equals("95")){
                     ExceptionHelper.throwRfFulfillLogicException("已执行过分装，但未自动完成。请手工对分装出库单"+rePackOrderKey+"进行发货和对分装入库单"+repackReceiptKey+"进行收货，最后对关联的领料单进行分配及拣货后重试");
@@ -343,7 +343,7 @@ public class Repackaging extends LegacyBaseService {
             // SUSR1 分装入库单号
             // SUSR2 分装出库单号
             // SUSR4 已分装完成的单据列表, 格式:  收货批次1|分装入库单号1|分装出库单号1 ; 收货批次2|分装入库单号2分装出库单号2;
-            DBHelper.executeUpdate(context,"UPDATE ORDERDETAIL SET SUSR1 = null, SUSR2 = null, SUSR4 = CONCAT(SUSR4, ?) WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
+            DBHelper.executeUpdate("UPDATE ORDERDETAIL SET SUSR1 = null, SUSR2 = null, SUSR4 = CONCAT(SUSR4, ?) WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
                     lottable06+"|"+repackReceiptKey+"|"+rePackOrderKey+";",  orderKey ,  orderLineNumber });
 
           
@@ -361,33 +361,33 @@ public class Repackaging extends LegacyBaseService {
 
     }
 
-    private void addPickDetails2Order(Context context, HashMap<String, String> orderDetailHashMap, List<HashMap<String, String>> receiptDetailList) throws SQLException {
+    private void addPickDetails2Order( HashMap<String, String> orderDetailHashMap, List<HashMap<String, String>> receiptDetailList) throws SQLException {
 
         EXEDataObject thePickDO = new EXEDataObject();
 
         for(HashMap<String,String> receiptDetail: receiptDetailList) {
 
-            HashMap<String,String> lotxLocxIdInfo = LotxLocxId.findById(context,receiptDetail.get("TOID"),true);
+            HashMap<String,String> lotxLocxIdInfo = LotxLocxId.findById(receiptDetail.get("TOID"),true);
 
 
-            String pickDetailKey = KeyGen.getKey(context,"PICKDETAILKEY", 10);
+            String pickDetailKey = KeyGen.getKey("PICKDETAILKEY", 10);
 
 //            thePickDO.clearDO();
 //            thePickDO.setConstraintItem("pickdetailkey", pickDetailKey);
 //            thePickDO.setWhereClause(" WHERE PickDetailKey = :pickdetailkey");
 //            context.theEXEDataObjectStack.push(thePickDO);
-//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire(context);
+//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire();
 
-            String caseId = KeyGen.getKey(context,"CARTONID", 10);
+            String caseId = KeyGen.getKey("CARTONID", 10);
 
             double grosswgt = 0.0D;
             double netwgt = 0.0D;
             double tarewgt = 0.0D;
-            String stdUOM = UOM.getStdUOM(context, lotxLocxIdInfo.get("PACKKEY"));
+            String stdUOM = UOM.getStdUOM( lotxLocxIdInfo.get("PACKKEY"));
             //right now just provide stduom, it should be always 6
-            String uom = UOM.getUOMCode(context, lotxLocxIdInfo.get("PACKKEY"), stdUOM);
+            String uom = UOM.getUOMCode( lotxLocxIdInfo.get("PACKKEY"), stdUOM);
 
-            DBHelper.executeUpdate(context," INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,? )",
+            DBHelper.executeUpdate(" INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,? )",
             new Object[]{ pickDetailKey
             , caseId
             , " "
@@ -409,8 +409,8 @@ public class Repackaging extends LegacyBaseService {
             , " "//REPLENISHZONE
             , "N"//DOCARTONIZE
             , "3"//PICKMETHOD 1:定向/3辅助
-            , context.getUserID()
-            , context.getUserID()
+            , EHContextHelper.getUser().getUsername()
+            , EHContextHelper.getUser().getUsername()
             , 99999
             , "OK"//STATUSREQUIRED
             , lotxLocxIdInfo.get("LOC")
@@ -455,11 +455,11 @@ public class Repackaging extends LegacyBaseService {
 //
 //            context.theEXEDataObjectStack.push(triggerDO);
 //
-//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).postInsertFire(context);
+//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).postInsertFire();
 
             //更新拣货明细为已拣货
-//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preUpdateFire(context);
-            DBHelper.executeQuery(context,"UPDATE PICKDETAIL SET LOC = ?, TOLOC = ?, STATUS = ? WHERE PICKDETAILKEY = ? ",
+//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preUpdateFire();
+            DBHelper.executeQuery("UPDATE PICKDETAIL SET LOC = ?, TOLOC = ?, STATUS = ? WHERE PICKDETAILKEY = ? ",
             new Object[]{ "PICKTO"
             , "PICKTO"
             , "5" //status: 拣货完成
@@ -472,7 +472,7 @@ public class Repackaging extends LegacyBaseService {
 //            pdUpdateTriggerDO.setAttribValue("FROMLOC"), lotxLocxIdInfo.get("LOC")));
 //            pdUpdateTriggerDO.setAttribValue("STATUS"), "5"));
 //            context.theEXEDataObjectStack.push(pdUpdateTriggerDO);
-//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).postUpdateFire(context);
+//            context.theSQLMgr.searchTriggerLibrary("PickDetail")).postUpdateFire();
 
         }
 

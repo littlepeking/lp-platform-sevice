@@ -1,13 +1,14 @@
 package com.enhantec.wms.backend.qa;
 
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -36,7 +37,7 @@ public class CreateRelease  extends LegacyBaseService {
     {
 
 
-        String userid = context.getUserID();  //当用户
+        String userid = EHContextHelper.getUser().getUsername();  //当用户
         
         try
         {
@@ -44,12 +45,12 @@ public class CreateRelease  extends LegacyBaseService {
             if (UtilHelper.isEmpty(LOTTABLE06)) ExceptionHelper.throwRfFulfillLogicException("所选生成放行单的批号不能为空");
 
             //放行单号
-            String RELEASEKEY= LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter(context, "QA_RELEASE"),10);  //获取新的请检单号
+            String RELEASEKEY= LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter( "QA_RELEASE"),10);  //获取新的请检单号
 
-            String STORERKEY= DBHelper.getValue(context, "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
+            String STORERKEY= DBHelper.getValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
             
             //取批次的相关信息
-            HashMap<String,String> FromLot= DBHelper.getRecord(context, "SELECT A.BUSR4 SKUTYPE, A.SKU , LA.ELOTTABLE02, LA.ELOTTABLE04, LA.ELOTTABLE03 QUALITYSTATUS,LA.ELOTTABLE01,LA.ELOTTABLE19,LA.ELOTTABLE20,LA.ELOTTABLE07, " +
+            HashMap<String,String> FromLot= DBHelper.getRecord( "SELECT A.BUSR4 SKUTYPE, A.SKU , LA.ELOTTABLE02, LA.ELOTTABLE04, LA.ELOTTABLE03 QUALITYSTATUS,LA.ELOTTABLE01,LA.ELOTTABLE19,LA.ELOTTABLE20,LA.ELOTTABLE07, " +
               " LA.ELOTTABLE09 SUPPLIERLOT," +
               " LA.ELOTTABLE08 AS SUPPLIERCODE," +
               " FORMAT(ELOTTABLE05, 'yyyy-MM-dd HH:mm:ss') AS ELOTTABLE05, FORMAT(ELOTTABLE11,'yyyy-MM-dd HH:mm:ss') AS ELOTTABLE11 , A.DESCR" +
@@ -62,12 +63,12 @@ public class CreateRelease  extends LegacyBaseService {
 
             if(!UtilHelper.isEmpty(FromLot.get("ELOTTABLE08"))) {
 
-                SUPPLIERNAME = DBHelper.getValue(context, "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{FromLot.get("ELOTTABLE08")}," ");
+                SUPPLIERNAME = DBHelper.getValue( "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{FromLot.get("ELOTTABLE08")}," ");
 
             }
 
             //取库存的信息
-            HashMap<String,String> record= DBHelper.getRecord(context, "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
+            HashMap<String,String> record= DBHelper.getRecord( "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
                         + " WHERE A.LOT=B.LOT AND QTY>0 AND B.LOTTABLE06=?", new Object[]{LOTTABLE06},"库存明细");
 
                 String barrelNum = record.get("CNT"); //取库存桶数
@@ -118,7 +119,7 @@ public class CreateRelease  extends LegacyBaseService {
             mRELEASE.put("SKUTYPE", FromLot.get("SKUTYPE"));  // 物料类型
 
             //取放行检测内容项目
-            LegacyDBHelper.ExecInsert(context, "RELEASE", mRELEASE);  //放行单写入数据库
+            LegacyDBHelper.ExecInsert( "RELEASE", mRELEASE);  //放行单写入数据库
 
             //创建反馈对象
 

@@ -24,11 +24,11 @@ public class ClusterPickingConfirmV2  {
 //    @Override
 //    public void execute(ProcessData processData) {
 //
-//        Context context = (Context)processData.getInputDataMap();
+//         = ()processData.getInputDataMap();
 //        EXEDataObjectprocessData.getInputDataMap() = ((EXEDataObject) ((Object) context.theEXEDataObjectStack.stackList.get(1)));
 //
 //        String taskdetailkey =processData.getInputDataMap().getString("taskdetailkey");
-//        String userid = context.getUserID();
+//        String userid = EHContextHelper.getUser().getUsername();
 //
 //        String uom =processData.getInputDataMap().getString("uom");
 //        String grossWgt =processData.getInputDataMap().getString("grosswgt");
@@ -65,26 +65,26 @@ public class ClusterPickingConfirmV2  {
 //
 //            if (UtilHelper.isEmpty(taskdetailkey)) ExceptionHelper.throwRfFulfillLogicException("拣货任务号不允许为空");
 //
-//            HashMap<String, String> taskDetailRecord = getTaskInfo(context, taskdetailkey,);
+//            HashMap<String, String> taskDetailRecord = getTaskInfo( taskdetailkey,);
 //
 //            String orderKey = taskDetailRecord.get("ORDERKEY");
 //            String orderLineNumber = taskDetailRecord.get("ORDERLINENUMBER");
 //            String pickdetailKey = taskDetailRecord.get("PICKDETAILKEY");
 //            String orderType = taskDetailRecord.get("TYPE");
 //
-//            HashMap<String,String>  fromIdHashMap = LotxLocxId.findById(context,taskDetailRecord.get("FROMID"),true);
+//            HashMap<String,String>  fromIdHashMap = LotxLocxId.findById(taskDetailRecord.get("FROMID"),true);
 //
 //             BigDecimal taskQty = new BigDecimal(taskDetailRecord.get("QTY"));
 //             BigDecimal lpnQty = new BigDecimal(fromIdHashMap.get("QTY"));
 //             BigDecimal availQty = new BigDecimal(fromIdHashMap.get("AVAILABLEQTY"));
 //
-//             String stdUom = UOM.getStdUOM(context, fromIdHashMap.get("PACKKEY"));
+//             String stdUom = UOM.getStdUOM( fromIdHashMap.get("PACKKEY"));
 //
-//             BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty(context, fromIdHashMap.get("PACKKEY"), uom, grossWgtDecimal);
-//             BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty(context, fromIdHashMap.get("PACKKEY"), uom, tareWgtDecimal);
-//             BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty(context, fromIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
+//             BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty( fromIdHashMap.get("PACKKEY"), uom, grossWgtDecimal);
+//             BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty( fromIdHashMap.get("PACKKEY"), uom, tareWgtDecimal);
+//             BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty( fromIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);
 //
-//             if(!CDOrderType.isAllowOverPick(context,orderType) && UtilHelper.decimalCompare(stdQtyTobePicked,taskQty)>0)
+//             if(!CDOrderType.isAllowOverPick(orderType) && UtilHelper.decimalCompare(stdQtyTobePicked,taskQty)>0)
 //                 ExceptionHelper.throwRfFulfillLogicException("不允许超额拣货");
 //
 //             ///对于固体物料，如果存在非整桶拣货的情况，拆分拣货明细后再做拣货。
@@ -93,27 +93,27 @@ public class ClusterPickingConfirmV2  {
 //             //超拣短拣判断的是拣货量是否等于任务量，是否整托盘是看拣货量是否等于当前的LPN量
 //
 //             boolean isShortPick = stdQtyTobePicked.compareTo(taskQty) < 0;
-//             if (CDOrderType.isSplitTaskAfterShortPick(context,orderType) && isShortPick) {
+//             if (CDOrderType.isSplitTaskAfterShortPick(orderType) && isShortPick) {
 //                 //如果触发固体拣货的短拣，即当拣货量小于任务量，系统自动重置当前任务量为实际拣货量(避免后面再次触发正常流程的短拣逻辑)，同时分拆当前拣货明细和任务
 //                 taskQty = stdQtyTobePicked;
-//                 splitPickDetailAndTask(context, taskdetailkey, stdQtyTobePicked);
+//                 splitPickDetailAndTask( taskdetailkey, stdQtyTobePicked);
 //                 //reload task detail as task already changed.
-//                 taskDetailRecord = getTaskInfo(context, taskdetailkey,);
+//                 taskDetailRecord = getTaskInfo( taskdetailkey,);
 //
 //             }
 //
-//             HashMap<String,String> result = PickUtil.doRandomPick(context, orderKey,orderLineNumber, fromIdHashMap,toId, grossWgt, tareWgt, netWgt, uom,taskQty, snList,esignaturekey,printer);
+//             HashMap<String,String> result = PickUtil.doRandomPick( orderKey,orderLineNumber, fromIdHashMap,toId, grossWgt, tareWgt, netWgt, uom,taskQty, snList,esignaturekey,printer);
 //
 //             toId = result.get("TOID");
 //             String printLabel = result.get("PRINT");
 //
 //             String reasonCode = PickUtil.getPickReason(taskQty, stdQtyTobePicked);
 //
-//             if(CDOrderType.isReduceOrderQtyAfterShortPick(context,orderType)) {
+//             if(CDOrderType.isReduceOrderQtyAfterShortPick(orderType)) {
 //
 //                 if ("SHORT".equals(reasonCode)) {
 //
-//                     DBHelper.executeUpdate(context, "UPDATE ORDERDETAIL SET OpenQty = OpenQty - ?, EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
+//                     DBHelper.executeUpdate( "UPDATE ORDERDETAIL SET OpenQty = OpenQty - ?, EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
 //                             , new Object[]{
 //                                     taskQty.subtract(stdQtyTobePicked).toPlainString()),
 //                                     userid),
@@ -122,11 +122,11 @@ public class ClusterPickingConfirmV2  {
 //                                     orderLineNumber}
 //                     );
 //
-//                     OutboundHelper.GetOrderDetailStatusOutputParam orderDetailStatusParam = getOrderDetailStatus(context, orderKey, orderLineNumber), null, null);
+//                     OutboundHelper.GetOrderDetailStatusOutputParam orderDetailStatusParam = getOrderDetailStatus( orderKey, orderLineNumber), null, null);
 //                     String newOrderDetailStatus = orderDetailStatusParam.pNewStatus;
 //
 //
-//                     DBHelper.executeUpdate(context, "UPDATE ORDERDETAIL SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
+//                     DBHelper.executeUpdate( "UPDATE ORDERDETAIL SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? AND OrderLineNumber = ?"
 //                             , new Object[]{
 //                                     newOrderDetailStatus),
 //                                     userid),
@@ -135,10 +135,10 @@ public class ClusterPickingConfirmV2  {
 //                                     orderLineNumber}
 //                     );
 //
-//                     OutboundHelper.GetOrderStatusOutputParam orderStatusParam = getOrderStatus(context, orderKey, null, null, null);
+//                     OutboundHelper.GetOrderStatusOutputParam orderStatusParam = getOrderStatus( orderKey, null, null, null);
 //                     String newOrderStatus = orderStatusParam.pNewStatus;
 //
-//                     DBHelper.executeUpdate(context, "UPDATE ORDERS SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? "
+//                     DBHelper.executeUpdate( "UPDATE ORDERS SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? "
 //                             , new Object[]{
 //                                     newOrderStatus),
 //                                     userid),
@@ -178,14 +178,14 @@ public class ClusterPickingConfirmV2  {
 //
 //
 //             //
-//             UDTRN.Insert(context, context.getUserID());
+//             UDTRN.Insert( EHContextHelper.getUser().getUsername());
 //             ((SsaWrappedConnection) conn).getConnection().commit();
 //
 //
 //
 //            EXEDataObject outDO = (EXEDataObject) context.theEXEDataObjectStack.stackList.get(1);
 //
-//            HashMap<String, String> taskDetailHashMap = TaskDetail.findById(context, taskdetailkey, true);
+//            HashMap<String, String> taskDetailHashMap = TaskDetail.findById( taskdetailkey, true);
 //            outDO.setAttribValue("status", taskDetailHashMap.get("STATUS"));
 //            outDO.setAttribValue("PRINTLABEL",printLabel);
 //
@@ -211,10 +211,10 @@ public class ClusterPickingConfirmV2  {
 //      
 //    }
 //
-//    public void splitPickDetailAndTask(Context context, String taskdetailkey, BigDecimal stdQtyTobePicked) throws SQLException, SsaException {
+//    public void splitPickDetailAndTask( String taskdetailkey, BigDecimal stdQtyTobePicked) throws SQLException, SsaException {
 //
 //        PreparedStatement qqPrepStmt = null;
-//        Connection qqConnection = null;
+//
 //        try {
 //            //context.theSQLMgr.transactionBegin();
 //
@@ -226,10 +226,10 @@ public class ClusterPickingConfirmV2  {
 //            
 //            //*****************
 //
-//            HashMap<String, String> originalTaskDetailInfo = TaskDetail.findById(context, taskdetailkey, true);
-//            HashMap<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey(context, originalTaskDetailInfo.get("PICKDETAILKEY"), true);
+//            HashMap<String, String> originalTaskDetailInfo = TaskDetail.findById( taskdetailkey, true);
+//            HashMap<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey( originalTaskDetailInfo.get("PICKDETAILKEY"), true);
 //
-//            DBHelper.executeUpdate(context, "UPDATE PICKDETAIL SET QTY = ? , UOMQTY = ? WHERE PICKDETAILKEY = ?",
+//            DBHelper.executeUpdate( "UPDATE PICKDETAIL SET QTY = ? , UOMQTY = ? WHERE PICKDETAILKEY = ?",
 //                    new Object[]{
 //                            //CANNOT use decimalData as qty will become 0 if it is very small like 0.001
 //                            stdQtyTobePicked.toPlainString()),
@@ -237,7 +237,7 @@ public class ClusterPickingConfirmV2  {
 //                            originalTaskDetailInfo.get("PICKDETAILKEY"))
 //                    });
 //
-//            DBHelper.executeUpdate(context, "UPDATE TASKDETAIL SET QTY = ? , UOMQTY = ? WHERE TASKDETAILKEY = ?",
+//            DBHelper.executeUpdate( "UPDATE TASKDETAIL SET QTY = ? , UOMQTY = ? WHERE TASKDETAILKEY = ?",
 //                    new Object[]{
 //                            stdQtyTobePicked.toPlainString()),
 //                            stdQtyTobePicked.toPlainString()),
@@ -275,8 +275,8 @@ public class ClusterPickingConfirmV2  {
 //            DBHelper.setValue(qqPrepStmt, 19, originalPickDetailInfo.get("REPLENISHZONE"));
 //            DBHelper.setValue(qqPrepStmt, 20, originalPickDetailInfo.get("DOCARTONIZE"));
 //            DBHelper.setValue(qqPrepStmt, 21, originalPickDetailInfo.get("PICKMETHOD"));
-//            DBHelper.setValue(qqPrepStmt, 22, context.getUserID());
-//            DBHelper.setValue(qqPrepStmt, 23, context.getUserID());
+//            DBHelper.setValue(qqPrepStmt, 22, EHContextHelper.getUser().getUsername());
+//            DBHelper.setValue(qqPrepStmt, 23, EHContextHelper.getUser().getUsername());
 //            DBHelper.setValue(qqPrepStmt, 24, 99999);
 //            DBHelper.setValue(qqPrepStmt, 25, originalPickDetailInfo.get("STATUSREQUIRED"));
 //            DBHelper.setValue(qqPrepStmt, 26, originalPickDetailInfo.get("FROMLOC"));
@@ -315,8 +315,8 @@ public class ClusterPickingConfirmV2  {
 //            DBHelper.setValue(qqPrepStmt, 19, originalTaskDetailInfo.get("ORDERLINENUMBER"));
 //            DBHelper.setValue(qqPrepStmt, 20, pickDetailKey);
 //            DBHelper.setValue(qqPrepStmt, 21, originalTaskDetailInfo.get("PICKMETHOD"));
-//            DBHelper.setValue(qqPrepStmt, 22, context.getUserID());
-//            DBHelper.setValue(qqPrepStmt, 23, context.getUserID());
+//            DBHelper.setValue(qqPrepStmt, 22, EHContextHelper.getUser().getUsername());
+//            DBHelper.setValue(qqPrepStmt, 23, EHContextHelper.getUser().getUsername());
 //            DBHelper.setValue(qqPrepStmt, 24, originalTaskDetailInfo.get("DOOR"));
 //            DBHelper.setValue(qqPrepStmt, 25, originalTaskDetailInfo.get("ROUTE"));
 //            DBHelper.setValue(qqPrepStmt, 26, originalTaskDetailInfo.get("STOP"));
@@ -346,8 +346,8 @@ public class ClusterPickingConfirmV2  {
 //    }
 //
 //
-//    private HashMap<String, String> getTaskInfo(Context context, String taskdetailkey,) {
-//        return DBHelper.getRecord(context,
+//    private HashMap<String, String> getTaskInfo( String taskdetailkey,) {
+//        return DBHelper.getRecord(
 //                "SELECT O.TYPE, TD.STATUS, TD.LOT,TD.QTY,TD.SKU,TD.STORERKEY,TD.FROMLOC,TD.FROMID,TD.TOID,TD.TOLOC,TD.CASEID,TD.UOM,P.CARTONGROUP ,P.CARTONTYPE ,P.PACKKEY, P.ORDERKEY,P.ORDERLINENUMBER, P.PICKDETAILKEY " +
 //                        " FROM TASKDETAIL TD, PICKDETAIL P,ORDERS O " +
 //                        " WHERE TD.PICKDETAILKEY = P.PICKDETAILKEY AND O.ORDERKEY = TD.ORDERKEY AND TASKDETAILKEY = ? ",
@@ -355,7 +355,7 @@ public class ClusterPickingConfirmV2  {
 //    }
 //
 //
-//    public OutboundHelper.GetOrderDetailStatusOutputParam getOrderDetailStatus(Context context, String pOrderkey, TextData pOrderLineNumber, String pNewStatus, String pDetailHistoryFlag) {
+//    public OutboundHelper.GetOrderDetailStatusOutputParam getOrderDetailStatus( String pOrderkey, TextData pOrderLineNumber, String pNewStatus, String pDetailHistoryFlag) {
 //        OutboundHelper.GetOrderDetailStatusOutputParam var296;
 //        try {
 //            DBSession pSession =  context;
@@ -766,7 +766,7 @@ public class ClusterPickingConfirmV2  {
 //        return var296;
 //    }
 //
-//    public OutboundHelper.GetOrderStatusOutputParam getOrderStatus(Context context,String pOrderkey, String pStatus, String pNewStatus, String pLogHistory) {
+//    public OutboundHelper.GetOrderStatusOutputParam getOrderStatus(String pOrderkey, String pStatus, String pNewStatus, String pLogHistory) {
 //        OutboundHelper.GetOrderStatusOutputParam var108;
 //        try {
 //            DBSession pSession = context;
@@ -846,19 +846,19 @@ public class ClusterPickingConfirmV2  {
 //                maxOrderDetailStatus = "52";
 //            } else if (maxStatus != null && maxStatus.equals("15") && minStatus != null && minStatus.compareToIgnoreCase("15") <= 0) {
 //                maxOrderDetailStatus = "52";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("52") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("55") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("55") < 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "27")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("52") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("55") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("55") < 0 && this.doesOrderDetailStatusExists(pOrderkey, "27")) {
 //                maxOrderDetailStatus = "92";
 //            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("52") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("55") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("55") < 0) {
 //                maxOrderDetailStatus = "52";
 //            } else if (maxStatus != null && maxStatus.equals("29") && minStatus != null && minStatus.equals("29")) {
 //                maxOrderDetailStatus = "29";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("27") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(context,pOrderkey, "92") || this.doesOrderDetailStatusExists(context,pOrderkey, "27") || this.doesOrderDetailStatusExists(context,pOrderkey, "16"))) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("27") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(pOrderkey, "92") || this.doesOrderDetailStatusExists(pOrderkey, "27") || this.doesOrderDetailStatusExists(pOrderkey, "16"))) {
 //                maxOrderDetailStatus = "92";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("25") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(context,pOrderkey, "52") || this.doesOrderDetailStatusExists(context,pOrderkey, "25") || this.doesOrderDetailStatusExists(context,pOrderkey, "15"))) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("25") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && (this.doesOrderDetailStatusExists(pOrderkey, "52") || this.doesOrderDetailStatusExists(pOrderkey, "25") || this.doesOrderDetailStatusExists(pOrderkey, "15"))) {
 //                maxOrderDetailStatus = "52";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "16")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(pOrderkey, "16")) {
 //                maxOrderDetailStatus = "92";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "15")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0 && this.doesOrderDetailStatusExists(pOrderkey, "15")) {
 //                maxOrderDetailStatus = "52";
 //            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("22") >= 0 && maxStatus != null && maxStatus.compareToIgnoreCase("29") <= 0 && minStatus != null && minStatus.compareToIgnoreCase("29") < 0) {
 //                maxOrderDetailStatus = "22";
@@ -876,7 +876,7 @@ public class ClusterPickingConfirmV2  {
 //                maxOrderDetailStatus = "11";
 //            } else if (maxStatus != null && maxStatus.equals("11") && minStatus != null && minStatus.equals("11")) {
 //                maxOrderDetailStatus = "11";
-//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("09") <= 0 && this.doesOrderDetailStatusExists(context,pOrderkey, "06")) {
+//            } else if (maxStatus != null && maxStatus.compareToIgnoreCase("09") <= 0 && this.doesOrderDetailStatusExists(pOrderkey, "06")) {
 //                maxOrderDetailStatus = "06";
 //            } else if (maxStatus != null && maxStatus.equals("08") && minStatus != null && minStatus.equals("08")) {
 //                maxOrderDetailStatus = "08";
@@ -1008,7 +1008,7 @@ public class ClusterPickingConfirmV2  {
 //    }
 //
 //
-//    public boolean doesOrderDetailStatusExists(Context context,String orderKey, String statusKey) {
+//    public boolean doesOrderDetailStatusExists(String orderKey, String statusKey) {
 //        boolean var20;
 //        try {
 //            DBSession pSession =  context;

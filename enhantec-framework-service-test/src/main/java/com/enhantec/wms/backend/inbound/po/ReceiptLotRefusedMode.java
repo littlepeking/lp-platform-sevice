@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 public class ReceiptLotRefusedMode  extends LegacyBaseService
 {
@@ -33,7 +33,7 @@ public class ReceiptLotRefusedMode  extends LegacyBaseService
 
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 	    String RECEIPTLOT= serviceDataHolder.getInputDataAsMap().getString("RECEIPTLOT");
 	    String PROCESSINGMODE= serviceDataHolder.getInputDataAsMap().getString("PROCESSINGMODE");
@@ -43,15 +43,13 @@ public class ReceiptLotRefusedMode  extends LegacyBaseService
 		try
 		{
 
-			String[] LOTS=(String[]) DBHelper.getValueList(context
-					, "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
+			String[] LOTS=(String[]) DBHelper.getValueList( "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
 					, new String[]{RECEIPTLOT}, String.format("收货批次(%1)未找到",RECEIPTLOT)).toArray();
 			if ((!LOTS[0].equals("9"))&&(!LOTS[0].equals("91")))
 		        throw new FulfillLogicException("当前状态不支持此操作");
 
 
-			DBHelper.executeUpdate(context
-					, "update PRERECEIPTCHECK set STATUS=?,PROCESSINGMODE=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"91",PROCESSINGMODE,userid,"@date",RECEIPTLOT});
+			DBHelper.executeUpdate( "update PRERECEIPTCHECK set STATUS=?,PROCESSINGMODE=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"91",PROCESSINGMODE,userid,"@date",RECEIPTLOT});
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
 			UDTRN.FROMTYPE="采购收货检查-拒收后续处理方式维护";
@@ -65,7 +63,7 @@ public class ReceiptLotRefusedMode  extends LegacyBaseService
 		    UDTRN.TITLE03="新状态";    UDTRN.CONTENT03="91";
 		    UDTRN.TITLE04="原处理方式";    UDTRN.CONTENT04=LOTS[1];
 		    UDTRN.TITLE05="新处理方式";    UDTRN.CONTENT05=PROCESSINGMODE;
-		    UDTRN.Insert(context, userid);		
+		    UDTRN.Insert( userid);		
 		
 		}
 		catch (Exception e)

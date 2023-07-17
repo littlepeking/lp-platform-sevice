@@ -6,7 +6,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 /**
@@ -29,7 +29,7 @@ public class ReleasePackLoc extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder)
     {
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -44,7 +44,7 @@ public class ReleasePackLoc extends LegacyBaseService {
             if (UtilHelper.isEmpty(orderLineNumber)) throw new Exception("订单行号不能为空");
             if (UtilHelper.isEmpty(esignatureKey)) throw new Exception("电子签名不能为空");
 
-            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(context,orderKey,orderLineNumber,true);
+            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
 
             String repackReceiptKey = orderDetailHashMap.get("SUSR1");
 
@@ -60,7 +60,7 @@ public class ReleasePackLoc extends LegacyBaseService {
             // SUSR2 分装出库单号
             //SUSR3 当前正在使用的分装间
             // SUSR4 已分装完成的单据列表, 格式:  收货批次1|分装入库单号1|分装出库单号1 ; 收货批次2|分装入库单号2分装出库单号2;
-            DBHelper.executeUpdate(context,"UPDATE ORDERDETAIL SET SUSR3 = null WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
+            DBHelper.executeUpdate("UPDATE ORDERDETAIL SET SUSR3 = null WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",new Object[]{
                     orderKey ,  orderLineNumber });
 
 
@@ -87,7 +87,7 @@ public class ReleasePackLoc extends LegacyBaseService {
             UDTRN.CONTENT01 = orderKey + orderLineNumber;
             UDTRN.TITLE02 = "分装间";
             UDTRN.CONTENT02 = currentPackLoc;
-            UDTRN.Insert(context, userid);
+            UDTRN.Insert( userid);
 
           
         }

@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
@@ -33,7 +34,7 @@ public class CreateReceiptLotByPO  extends LegacyBaseService
     public void execute(ServiceDataHolder serviceDataHolder)
     {
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
         
 
@@ -125,7 +126,7 @@ CODE	DESCRIPTION
             String POLINENUMBER=PoKey.substring(iPoKey+1);
             PoKey=PoKey.substring(0,iPoKey);
 
-            HashMap<String,String> mPO= DBHelper.getRecord(context,
+            HashMap<String,String> mPO= DBHelper.getRecord(
                     "SELECT A.SUPPLIER,B.qty-ISNULL(B.receivedqty,0) as AVAILABLEQTY,A.ISINTERFACEPO FROM WMS_PO A,WMS_PO_DETAIL B  " +
                             "WHERE A.POKEY=? AND B.POLINENUMBER=? AND B.STATUS<?  AND A.POKEY =B.POKEY "
                     ,new String[]{PoKey,POLINENUMBER,"9"});
@@ -134,12 +135,12 @@ CODE	DESCRIPTION
                 throw new FulfillLogicException("采购订单(%1),物料代码(%2)无有效记录",PoKey,Sku);
 
 
-            String STORERKEY= DBHelper.getValue(context, "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","STORERKEY"}, null);
-            String WAREHOUSECODE= DBHelper.getValue(context, "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","WAREHOUSE"}, null);
-            SKUDESCR= DBHelper.getValue(context                    , "SELECT DESCR FROM SKU WHERE STORERKEY=? AND SKU=?", new String[]{STORERKEY,Sku}, "");
+            String STORERKEY= DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","STORERKEY"}, null);
+            String WAREHOUSECODE= DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","WAREHOUSE"}, null);
+            SKUDESCR= DBHelper.getValue( "SELECT DESCR FROM SKU WHERE STORERKEY=? AND SKU=?", new String[]{STORERKEY,Sku}, "");
 
-            String CurDate= DBHelper.getValue(context, " select FORMAT(getdate(), 'yyMMdd')", new String[]{}, null);
-            String CurLot= DBHelper.getValue(context, "select RECEIPTLOT from PRERECEIPTCHECK where RECEIPTLOT like '"+WAREHOUSECODE+CurDate+"%' and STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=?", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
+            String CurDate= DBHelper.getValue( " select FORMAT(getdate(), 'yyMMdd')", new String[]{}, null);
+            String CurLot= DBHelper.getValue( "select RECEIPTLOT from PRERECEIPTCHECK where RECEIPTLOT like '"+WAREHOUSECODE+CurDate+"%' and STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=?", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
             if (CurLot!=null)
             {
                 ResultType="Load";
@@ -147,7 +148,7 @@ CODE	DESCRIPTION
             }
             if (ResultType==null)
             {
-                String OldLot= DBHelper.getValue(context, "select RECEIPTLOT from PRERECEIPTCHECK where STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=? order by RECEIPTLOT", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
+                String OldLot= DBHelper.getValue( "select RECEIPTLOT from PRERECEIPTCHECK where STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=? order by RECEIPTLOT", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
                 if (OldLot!=null)
                 {
                     if (!LegecyUtilHelper.CheckYesNo(ForceNew))
@@ -168,8 +169,8 @@ CODE	DESCRIPTION
 
                 //if (!mPO.get("PUOM").equals(Uom)) throw new Exception("当前计量单位("+Uom+")与采购计量单位("+mPO.get("PUOM")+")不一致");
 
-                 STATUS= CodeLookup.getCodeLookupValue(context,"RECCHKRES",checkresult,"UDF1","收货结果");
-                ReceiptLot= IdGenerationHelper.createReceiptLot(context,Sku);
+                 STATUS= CodeLookup.getCodeLookupValue("RECCHKRES",checkresult,"UDF1","收货结果");
+                ReceiptLot= IdGenerationHelper.createReceiptLot(Sku);
                 HashMap<String,String> PRERECEIPTCHECK=new HashMap<String,String>();
                 PRERECEIPTCHECK.put("WHSEID", "@user");
                 PRERECEIPTCHECK.put("ADDWHO", userid);
@@ -214,7 +215,7 @@ CODE	DESCRIPTION
                 //PRERECEIPTCHECK POSUPPLIERNAME NVARCHAR2 (255)  采购单供应商名称
                 //PRERECEIPTCHECK POMANUFACTURERNAME NVARCHAR2 (255)  采购单生产商名称
 
-                LegacyDBHelper.ExecInsert(context, "PRERECEIPTCHECK", PRERECEIPTCHECK);
+                LegacyDBHelper.ExecInsert( "PRERECEIPTCHECK", PRERECEIPTCHECK);
 
                 ResultType="New";
 
@@ -223,11 +224,11 @@ CODE	DESCRIPTION
                 String[] eSignatureKeys = ESIGNATUREKEY.split(":");
                 String eSignatureKey1=eSignatureKeys[0];
                 String eSignatureKey2=eSignatureKeys[1];
-                String isConfirmedUser1 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey1
                 }, String.class, "确认人");
 
-                String isConfirmedUser2 = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey2
                 }, String.class, "复核人");
                 UDTRN.FROMTYPE="采购收货检查-创建批次";
@@ -257,14 +258,14 @@ CODE	DESCRIPTION
                 UDTRN.CONTENT16 = isConfirmedUser1;
                 UDTRN.TITLE17 = "复核人";
                 UDTRN.CONTENT17 = isConfirmedUser2;
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
 
                 theOutDO.setAttribValue("FROMKEY"+Integer.toString(1), PoKey+"-"+POLINENUMBER);
                 theOutDO.setAttribValue("FROMQTY"+Integer.toString(1), mPO.get("AVAILABLEQTY"));
 
             }else{
 
-                List<HashMap<String,String>> r1= DBHelper.executeQuery(context, "select a.ELOTTABLE07,FORMAT(a.ELOTTABLE11, 'yyyyMMdd') ELOTTABLE11, a.FROMKEY,a.FROMLINENO,a.STATUS,a.UOM,a.TOTALBARREL,a.QTY, b.qty-ISNULL(b.receivedqty,0) as AVAILABLEQTY from prereceiptcheck a,WMS_PO_DETAIL b where a.fromkey=b.pokey and a.fromlineno=b.polinenumber " +
+                List<HashMap<String,String>> r1= DBHelper.executeQuery( "select a.ELOTTABLE07,FORMAT(a.ELOTTABLE11, 'yyyyMMdd') ELOTTABLE11, a.FROMKEY,a.FROMLINENO,a.STATUS,a.UOM,a.TOTALBARREL,a.QTY, b.qty-ISNULL(b.receivedqty,0) as AVAILABLEQTY from prereceiptcheck a,WMS_PO_DETAIL b where a.fromkey=b.pokey and a.fromlineno=b.polinenumber " +
                         " and a.RECEIPTLOT=? order by a.serialkey", new String[]{ReceiptLot});
 
 

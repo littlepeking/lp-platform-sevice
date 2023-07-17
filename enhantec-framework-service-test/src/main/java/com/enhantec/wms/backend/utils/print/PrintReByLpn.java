@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.utils.print;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
@@ -7,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -39,7 +40,7 @@ public class PrintReByLpn extends LegacyBaseService
 
 //		EXEDataObjectprocessData.getInputDataMap() = (EXEDataObject)context.theEXEDataObjectStack.stackList.get(1);
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -55,14 +56,14 @@ public class PrintReByLpn extends LegacyBaseService
 //			if ((!LOCATION.equals("CJ"))&&(!LOCATION.equals("CK")))
 //				throw new Exception("参数错误");
 			
-			HashMap<String,String> mID= DBHelper.getRecord(context, "select id.ID, id.SKU,l.LOTTABLE06,sku.DESCR,id.BARRELDESCR,sku.DESCR from IDNOTES id,SKU sku,v_lotattribute l where sku.sku = id.sku and id.lot=l.lot and id.ID=?", new String[] {LPN});
+			HashMap<String,String> mID= DBHelper.getRecord( "select id.ID, id.SKU,l.LOTTABLE06,sku.DESCR,id.BARRELDESCR,sku.DESCR from IDNOTES id,SKU sku,v_lotattribute l where sku.sku = id.sku and id.lot=l.lot and id.ID=?", new String[] {LPN});
 			if (mID.isEmpty()) throw new Exception("未找到桶信息");
 
-			DBHelper.getRecord(context, "select PRINTERNAME from LABELPRINTER WHERE PRINTERNAME=?", new Object[]{PRINTER},"注册的打印机",true);
+			DBHelper.getRecord( "select PRINTERNAME from LABELPRINTER WHERE PRINTERNAME=?", new Object[]{PRINTER},"注册的打印机",true);
 
-			CodeLookup.getCodeLookupByKey(context,"IDREPRINT",LABELTYPE);
+			CodeLookup.getCodeLookupByKey("IDREPRINT",LABELTYPE);
 
-			PrintHelper.printLPNByIDNotes(context,mID.get("ID"), LABELTYPE,PRINTER,"1","补打标签");
+			PrintHelper.printLPNByIDNotes(mID.get("ID"), LABELTYPE,PRINTER,"1","补打标签");
 
 
 
@@ -81,7 +82,7 @@ public class PrintReByLpn extends LegacyBaseService
 		    UDTRN.TITLE04="物料编号";    UDTRN.CONTENT04=mID.get("SKU");
 		    UDTRN.TITLE05="物料名称";    UDTRN.CONTENT05=mID.get("DESCR");
 		   
-		    UDTRN.Insert(context, userid);
+		    UDTRN.Insert( userid);
 			
 
 

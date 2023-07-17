@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.job;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -8,7 +9,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,28 +31,28 @@ public class UpdateQualityStatusJob extends LegacyBaseService {
 
 	public void execute(ServiceDataHolder serviceDataHolder)
 	{
-		String userid = context.getUserID();  //当用户
+		String userid = EHContextHelper.getUser().getUsername();  //当用户
   //取数据库连接
 		try
 		{
 			//查询过复测期的库存批次质量状态
 			//SELECT DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))     --first second of today
-			List<HashMap<String,String>> list =  DBHelper.executeQuery(context, "SELECT STORERKEY, SKU, ELOT, ELOTTABLE13 FROM enterprise.ELOTATTRIBUTE WHERE (ELOTTABLE03 = 'RELEASE' OR ELOTTABLE03 = 'CONDIREL') AND ELOTTABLE05 < DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)) "
+			List<HashMap<String,String>> list =  DBHelper.executeQuery( "SELECT STORERKEY, SKU, ELOT, ELOTTABLE13 FROM enterprise.ELOTATTRIBUTE WHERE (ELOTTABLE03 = 'RELEASE' OR ELOTTABLE03 = 'CONDIREL') AND ELOTTABLE05 < DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)) "
 					, new Object[]{});
 
 			//更新过期库存批次对应的质量状态为待检或停止发运
 			if(list.size()>0) {
 				for (HashMap<String,String> tempLotAttr : list) {
 
-					String newQAStatus  = CDSysSet.getElot05ExpiredQualityStatus(context);
+					String newQAStatus  = CDSysSet.getElot05ExpiredQualityStatus();
 
 //					if(tempLotAttr.get("ELOTTABLE13").equals("0")||
 //						tempLotAttr.get("ELOTTABLE13").equals("1")) newQAStatus = "QUARANTINE";
-					DBHelper.executeUpdate(context, "UPDATE enterprise.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT = ? "
+					DBHelper.executeUpdate( "UPDATE enterprise.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT = ? "
 							, new Object[]{userid, UtilHelper.getCurrentSqlDate(), newQAStatus, tempLotAttr.get("ELOT")});
 
 //					//更新标签表对应的质量状态
-//					DBHelper.executeUpdate(context, "UPDATE IDNOTES SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT=? "
+//					DBHelper.executeUpdate( "UPDATE IDNOTES SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT=? "
 //							, new Object[]{userid),UtilHelper.getCurrentSqlDate(),newQAStatus), tempLotAttr.get("LOTTABLE06"))});
 //
 
@@ -67,7 +68,7 @@ public class UpdateQualityStatusJob extends LegacyBaseService {
 					UDTRN.CONTENT01 = tempLotAttr.get("SKU");
 					UDTRN.TITLE02 = "收货批次";
 					UDTRN.CONTENT02 = tempLotAttr.get("ELOT");
-					UDTRN.Insert(context, userid);
+					UDTRN.Insert( userid);
 				}
 
 			}
@@ -75,20 +76,20 @@ public class UpdateQualityStatusJob extends LegacyBaseService {
 
 			//查询过有效期的库存批次质量状态
 			//SELECT DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))     --first second of today
-			list =  DBHelper.executeQuery(context, "SELECT SKU, ELOT, ELOTTABLE13 FROM  enterprise.ELOTATTRIBUTE WHERE (ELOTTABLE03 = 'RELEASE' OR ELOTTABLE03 = 'CONDIREL' OR ELOTTABLE03 = 'QUARANTINE') AND  ELOTTABLE11 < DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 7, GETDATE()), 0)) "
+			list =  DBHelper.executeQuery( "SELECT SKU, ELOT, ELOTTABLE13 FROM  enterprise.ELOTATTRIBUTE WHERE (ELOTTABLE03 = 'RELEASE' OR ELOTTABLE03 = 'CONDIREL' OR ELOTTABLE03 = 'QUARANTINE') AND  ELOTTABLE11 < DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 7, GETDATE()), 0)) "
 					, new Object[]{});
 
 			//更新过期库存批次对应的质量状态为不合格
 			if(list.size()>0) {
 				for (HashMap<String,String> tempLotAttr : list) {
 					//String newQAStatus  = "REJECT";
-					String newQAStatus  = CDSysSet.getElot11ExpiredQualityStatus(context);
+					String newQAStatus  = CDSysSet.getElot11ExpiredQualityStatus();
 
-					DBHelper.executeUpdate(context, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT = ? "
+					DBHelper.executeUpdate( "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT = ? "
 							, new Object[]{userid, UtilHelper.getCurrentSqlDate(), newQAStatus, tempLotAttr.get("ELOT")});
 //
 //					//更新标签表对应的质量状态
-//					DBHelper.executeUpdate(context, "UPDATE IDNOTES SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT=? "
+//					DBHelper.executeUpdate( "UPDATE IDNOTES SET EDITWHO=?, EDITDATE=?, ELOTTABLE03=? WHERE ELOT=? "
 //							, new Object[]{userid),UtilHelper.getCurrentSqlDate(),newQAStatus), tempLotAttr.get("LOTTABLE06"))});
 
 
@@ -105,7 +106,7 @@ public class UpdateQualityStatusJob extends LegacyBaseService {
 					UDTRN.CONTENT01 = tempLotAttr.get("SKU");
 					UDTRN.TITLE02 = "收货批次";
 					UDTRN.CONTENT02 = tempLotAttr.get("ELOT");
-					UDTRN.Insert(context, userid);
+					UDTRN.Insert( userid);
 
 				}
 

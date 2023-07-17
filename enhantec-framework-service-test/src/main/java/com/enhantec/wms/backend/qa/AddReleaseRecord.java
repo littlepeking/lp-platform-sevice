@@ -9,7 +9,7 @@ import com.enhantec.wms.backend.utils.audit.AuditService;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -37,7 +37,7 @@ public class AddReleaseRecord extends LegacyBaseService {
     public void execute(ServiceDataHolder serviceDataHolder)
     {
 
-        String userid = context.getUserID();  //当用户
+        String userid = EHContextHelper.getUser().getUsername();  //当用户
         
         try
         {
@@ -57,12 +57,12 @@ public class AddReleaseRecord extends LegacyBaseService {
             if (UtilHelper.isEmpty(lottable06)) ExceptionHelper.throwRfFulfillLogicException("所选生成放行单的批号不能为空");
 
             //放行单号
-            String releaseKey = LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter(context, "QA_RELEASE"),10);  //获取新的请检单号
+            String releaseKey = LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter( "QA_RELEASE"),10);  //获取新的请检单号
 
-            String STORERKEY= DBHelper.getValue(context, "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
+            String STORERKEY= DBHelper.getValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
 
 
-            HashMap<String,String> skuHashMap = SKU.findById(context,mapJson.get("SKU"),true);
+            HashMap<String,String> skuHashMap = SKU.findById(mapJson.get("SKU"),true);
 
           //  String SUPPLIERNAME ="";
           /*  if(!UtilHelper.isEmpty(mapJson.get("ELOTTABLE08"))) {
@@ -72,7 +72,7 @@ public class AddReleaseRecord extends LegacyBaseService {
             }*/
 
             //取库存的信息
-            HashMap<String,String> record= DBHelper.getRecord(context, "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
+            HashMap<String,String> record= DBHelper.getRecord( "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
                         + " WHERE A.LOT=B.LOT AND QTY>0 AND B.LOTTABLE06=?", new Object[]{lottable06},"库存明细");
 
             String barrelNum = record.get("CNT"); //桶数
@@ -124,17 +124,17 @@ public class AddReleaseRecord extends LegacyBaseService {
             mRELEASE.put("NOTES", mapJson.get("NOTES"));  // 物料类型
             mRELEASE.put("STATUS", "1");  // 放行状态
             //取放行检测内容项目
-            LegacyDBHelper.ExecInsert(context, "RELEASE", mRELEASE);  //放行单写入数据库
+            LegacyDBHelper.ExecInsert( "RELEASE", mRELEASE);  //放行单写入数据库
 
             //更新库存批次对应的质量状态
-            DBHelper.executeUpdate(context, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET ELOTTABLE13=ELOTTABLE13 + ?  WHERE ELOT=? "
+            DBHelper.executeUpdate( "UPDATE ENTERPRISE.ELOTATTRIBUTE SET ELOTTABLE13=ELOTTABLE13 + ?  WHERE ELOT=? "
                     , new Object[]{mapJson.get("ISRETESTRELEASE"),lottable06});
          /*   //elottable21 记录首次放行质量状态
-            String elotTable21=DBHelper.getValue(context,"select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
+            String elotTable21=DBHelper.getValue("select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
                     lottable06)
             },"批属性");
             if (UtilHelper.isEmpty(elotTable21)){
-                DBHelper.executeUpdate(context, "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?,ELOTTABLE21=? WHERE ELOT=? "
+                DBHelper.executeUpdate( "UPDATE ENTERPRISE.ELOTATTRIBUTE SET EDITWHO=?, EDITDATE=?,ELOTTABLE21=? WHERE ELOT=? "
                         , new Object[]{userid),UtilHelper.getCurrentSqlDate(),mapJson.get("ELOTTABLE03")),lottable06)});
             }*/
 
@@ -155,7 +155,7 @@ public class AddReleaseRecord extends LegacyBaseService {
             udtrn.TITLE07="变更号";    udtrn.CONTENT07= mapJson.get("ELOTTABLE20");
             udtrn.TITLE08="生产批号";    udtrn.CONTENT08= mapJson.get("ELOTTABLE07");
             udtrn.TITLE09="物料批号/供应商批号";    udtrn.CONTENT09= mapJson.get("ELOTTABLE09");
-            AuditService.doAudit(context,udtrn);
+            AuditService.doAudit(udtrn);
 
             //创建反馈对象
             ServiceDataMap theOutDO = new ServiceDataMap();

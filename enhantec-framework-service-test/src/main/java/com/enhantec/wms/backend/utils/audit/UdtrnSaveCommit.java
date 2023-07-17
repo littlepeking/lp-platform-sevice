@@ -1,11 +1,12 @@
 package com.enhantec.wms.backend.utils.audit;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 
 public class UdtrnSaveCommit extends LegacyBaseService
 {
@@ -29,7 +30,7 @@ public class UdtrnSaveCommit extends LegacyBaseService
 		//public RrDateTime currentDate;
 		//this.currentDate = UtilHelper.getCurrentDate();
 
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -45,8 +46,8 @@ public class UdtrnSaveCommit extends LegacyBaseService
 		    
 		    for(int i1=0;i1<aSERIALKEY.length;i1++)
 		    {
-		    	DBHelper.executeUpdate(context, "INSERT INTO UDTRN("+FIELDS+") SELECT "+FIELDS+" FROM UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
-		    	DBHelper.executeUpdate(context, "DELETE UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
+		    	DBHelper.executeUpdate( "INSERT INTO UDTRN("+FIELDS+") SELECT "+FIELDS+" FROM UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
+		    	DBHelper.executeUpdate( "DELETE UDTRN_TEMP WHERE SERIALKEY=?", new String[] {aSERIALKEY[i1]});
 		    }
 
 			ServiceDataMap theOutDO = new ServiceDataMap();

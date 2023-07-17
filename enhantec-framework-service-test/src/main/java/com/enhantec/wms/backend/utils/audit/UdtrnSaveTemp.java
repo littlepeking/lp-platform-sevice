@@ -6,7 +6,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -40,7 +40,7 @@ public class UdtrnSaveTemp  extends LegacyBaseService
 		//this.currentDate = UtilHelper.getCurrentDate();
 
 		
-		String userid = context.getUserID();
+		String userid = EHContextHelper.getUser().getUsername();
 
 
 
@@ -74,7 +74,7 @@ public class UdtrnSaveTemp  extends LegacyBaseService
 			}
 			
 			String typename=type;
-			HashMap<String,String> mBIO= DBHelper.getRecord(context, "SELECT BIONAME, TABLENAME, SAVETYPE, DELTYPE, LOTFIELD, KEYFIELD, KEYFIELDLABEL FROM UDTRN_TABLE WHERE BIONAME=?", new String[] {bioname});
+			HashMap<String,String> mBIO= DBHelper.getRecord( "SELECT BIONAME, TABLENAME, SAVETYPE, DELTYPE, LOTFIELD, KEYFIELD, KEYFIELDLABEL FROM UDTRN_TABLE WHERE BIONAME=?", new String[] {bioname});
 			if (mBIO.isEmpty()) throw new Exception("BIO("+bioname+")未注册日志信息");
 			if (type.equals("SAVE")) typename=mBIO.get("SAVETYPE");
 			if (type.equals("DELETE")) typename=mBIO.get("DELTYPE");
@@ -88,10 +88,10 @@ public class UdtrnSaveTemp  extends LegacyBaseService
 					//一行最多插入30个字段，超过再新建一条记录
 					if ((count==0)||(count>=30))
 					{
-						if (tempUdtrn!=null) LegacyDBHelper.ExecInsert(context, "UDTRN_TEMP", tempUdtrn);
+						if (tempUdtrn!=null) LegacyDBHelper.ExecInsert( "UDTRN_TEMP", tempUdtrn);
 						count=0;
 						tempUdtrn=new HashMap<String,String>();
-						String SEQ_UDTRN= String.valueOf(IdGenerationHelper.getNCounter(context, "UDTRN_TEMP"));
+						String SEQ_UDTRN= String.valueOf(IdGenerationHelper.getNCounter( "UDTRN_TEMP"));
 						if (!SERIALKEY.equals("")) SERIALKEY+=",";
 						SERIALKEY+=SEQ_UDTRN;
 						tempUdtrn.put("SERIALKEY", SEQ_UDTRN);
@@ -133,11 +133,11 @@ public class UdtrnSaveTemp  extends LegacyBaseService
 
 			}
 			//最后将剩余的凑不足30个的变化字段保存下来
-			if (tempUdtrn!=null) LegacyDBHelper.ExecInsert(context, "UDTRN_TEMP", tempUdtrn);
+			if (tempUdtrn!=null) LegacyDBHelper.ExecInsert( "UDTRN_TEMP", tempUdtrn);
 			
 			/*
 			HashMap<String,String> mTRAN=new HashMap<String,String>();
-			String SEQ_UDTRN=Integer.toString(XtSql.GetSeq(context, "SEQ_UDTRN"));
+			String SEQ_UDTRN=Integer.toString(XtSql.GetSeq( "SEQ_UDTRN"));
 			mTRAN.put("ADDWHO", userid);
 			mTRAN.put("EDITWHO", userid);
 			mTRAN.put("FROMTYPE", GetFieldValue(aFieldName,aFieldNew,mBIO.get("LOTFIELD")));
@@ -170,7 +170,7 @@ public class UdtrnSaveTemp  extends LegacyBaseService
 					}
 				}
 			}
-			XtSql.ExecInsert(context, "UDTRN_TEMP", mTRAN);
+			XtSql.ExecInsert( "UDTRN_TEMP", mTRAN);
 			*/
 
 

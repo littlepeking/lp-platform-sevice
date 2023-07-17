@@ -18,9 +18,9 @@
  *******************************************************************************/
 package com.enhantec.wms.backend.inbound.putaway.strategies;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 	public void execute(ServiceDataHolder serviceDataHolder) {
 
 
-		currentUser = context.getUserID();
+		currentUser = EHContextHelper.getUser().getUsername();
 
 		String zones = serviceDataHolder.getInputDataAsMap().getString("zones");
 
@@ -56,10 +56,6 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 
 		List<String> searchZoneArray =null;
 
-		int qqRowCount1 = 0;
-		Connection qqConnection1 = null;
-		PreparedStatement qqPrepStmt1 = null;
-		ResultSet qqResultSet1 = null;
 
 		if(zones ==null ||zones.isEmpty()){
 			ExceptionHelper.throwRfFulfillLogicException("未获取到物料上架区列表");
@@ -71,7 +67,6 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 		for(String zone : searchZoneArray) {
 
 			List<HashMap<String,String>>  res = DBHelper.executeQuery(
-					context,
 					" SELECT * FROM putawayzone WHERE putawayzone = ?",
 					Arrays.asList(zone)
 			);
@@ -82,7 +77,7 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 
 			serviceDataHolder.getInputDataAsMap().setAttribValue("searchZone", searchZone);
 
-			 ServiceHelper.executeService(context, "RFPutawayP1S1Wrapper", serviceDataHolder);
+			 ServiceHelper.executeService( "RFPutawayP1S1Wrapper", serviceDataHolder);
 
 			String toLoc = serviceDataHolder.getOutputDataAsMap().getString("ToLoc");
 
@@ -100,13 +95,13 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 
 
 	@Deprecated
-	public String getPutawayLoc(Context context, EXEDataObject pDO) {
+	public String getPutawayLoc( EXEDataObject pDO) {
 		String result;
 		try {
-//			logger.debug("starting getPutawayLoc(Context context, EXEDataObject pDO)");
+//			logger.debug("starting getPutawayLoc( EXEDataObject pDO)");
 //			context.theEXEDataObjectStack.push(pDO);
 //			Process RFPUTAWAY = context.searchObjectLibrary("NSPRFPUTAWAY"));
-//			context = (Context)RFPUTAWAY.execute(context);
+//			context = ()RFPUTAWAY.execute();
 //			EXEDataObject theReturnDO = (EXEDataObject)context.theEXEDataObjectStack.stackList.get(1);
 //			String toLoc = null;
 //			if (theReturnDO.isState(EXEConstantsConstants.STATE_OK)) {
@@ -116,7 +111,7 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 
 //			result = toLoc;
 		} finally {
-//			logger.debug("leaving getPutawayLoc(Context context, EXEDataObject pDO)");
+//			logger.debug("leaving getPutawayLoc( EXEDataObject pDO)");
 		}
 
 		throw new RuntimeException("not implement");

@@ -1,6 +1,7 @@
 
 package com.enhantec.wms.backend.inbound.po;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -8,7 +9,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 
 public class UnConfirmPoByUI extends LegacyBaseService {
@@ -32,7 +33,7 @@ public class UnConfirmPoByUI extends LegacyBaseService {
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
 
         try {
@@ -42,13 +43,13 @@ public class UnConfirmPoByUI extends LegacyBaseService {
             String poKey = serviceDataHolder.getInputDataAsMap().getString("POKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String SQL="SELECT * FROM WMS_PO WHERE  POKEY = ?  ";
-            HashMap<String, String>  record = DBHelper.getRecord(context, SQL, new Object[]{ poKey},"变更单");
+            HashMap<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"未找到");
             
-            String user = DBHelper.getValue(context, "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String user = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     esignatureKey
             }, String.class, "复核人");
-            DBHelper.executeUpdate(context, "UPDATE WMS_PO SET CONFIRMSTATUS = ?,ISCONFIRMEDUSER1 ='',ISCONFIRMEDUSER2 = '' WHERE POKEY = ? ",
+            DBHelper.executeUpdate( "UPDATE WMS_PO SET CONFIRMSTATUS = ?,ISCONFIRMEDUSER1 ='',ISCONFIRMEDUSER2 = '' WHERE POKEY = ? ",
                     new Object[]{"0",poKey});
             Udtrn UDTRN = new Udtrn();
 
@@ -64,7 +65,7 @@ public class UnConfirmPoByUI extends LegacyBaseService {
             UDTRN.CONTENT01 = poKey;
             UDTRN.TITLE02 = "操作人";
             UDTRN.CONTENT02 = user;
-            UDTRN.Insert(context, userid);
+            UDTRN.Insert( userid);
 
           
 

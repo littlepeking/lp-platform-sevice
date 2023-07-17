@@ -9,11 +9,10 @@ import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.wms.backend.framework.Context;import com.enhantec.wms.backend.framework.ServiceDataHolder;
-import com.enhantec.wms.backend.framework.UserInfo;
+import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 import java.math.BigDecimal;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -34,15 +33,13 @@ public class SwapPickDetailLPN extends LegacyBaseService {
 //
 //    private static ILogger logger = SCELoggerFactory.getInstance(SwapPickDetailLPN.class);
 
-    UserInfo ourUser = new UserInfo();
-
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
         try {
 //            ourUser = new UserInfo();
 //            ourUser.mySqlMgr = pContext.theSQLMgr;
 //            ourUser.mySession = ourUser.mySqlMgr.getDBSession();
-//            ourUser.name = pContext.getUserID();
+//            ourUser.name = pEHContextHelper.getUser().getUsername();
 
 //
 //            EXEDataObjectprocessData.getInputDataMap() = ((EXEDataObject) ((Object) pContext.theEXEDataObjectStack.stackList.get(1)));
@@ -50,24 +47,24 @@ public class SwapPickDetailLPN extends LegacyBaseService {
             String taskDetailKey = serviceDataHolder.getInputDataAsMap().getString("TASKDETAILKEY");
             String newId = serviceDataHolder.getInputDataAsMap().getString("NEWID");
 
-            HashMap<String, String> lotxLocxIdInfo = LotxLocxId.findAvailInvById(context,newId,false,true);
+            HashMap<String, String> lotxLocxIdInfo = LotxLocxId.findAvailInvById(newId,false,true);
 
-            HashMap<String, String> taskDetailInfo = TaskDetail.findById(context,taskDetailKey,true);
-
-
-            swapLpnValidate(context, lotxLocxIdInfo, taskDetailInfo);
+            HashMap<String, String> taskDetailInfo = TaskDetail.findById(taskDetailKey,true);
 
 
-            String newTaskDetailKey = swapPickDetail(context, taskDetailInfo, newId);
+            swapLpnValidate( lotxLocxIdInfo, taskDetailInfo);
+
+
+            String newTaskDetailKey = swapPickDetail( taskDetailInfo, newId);
 
             EXEDataObject outDO = new EXEDataObject();
 
-            HashMap<String,String>  skuHashMap = SKU.findById(context,taskDetailInfo.get("SKU"),true);
-            HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(context,taskDetailInfo.get("LOT"),true);
-            HashMap<String,String>  idNotesHashMap = IDNotes.findById(context,newId,true);
-            HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(context,newTaskDetailKey,true);
-            HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(context,newId,true);
-            String  stdUom = UOM.getStdUOM(context,idNotesHashMap.get("PACKKEY"));
+            HashMap<String,String>  skuHashMap = SKU.findById(taskDetailInfo.get("SKU"),true);
+            HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(taskDetailInfo.get("LOT"),true);
+            HashMap<String,String>  idNotesHashMap = IDNotes.findById(newId,true);
+            HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(newTaskDetailKey,true);
+            HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(newId,true);
+            String  stdUom = UOM.getStdUOM(idNotesHashMap.get("PACKKEY"));
 
             outDO.setAttribValue("taskdetailkey",newTaskDetailKey);
             outDO.setAttribValue("skudescr",skuHashMap.get("DESCR"));
@@ -100,9 +97,9 @@ public class SwapPickDetailLPN extends LegacyBaseService {
 
     }
 
-    public void swapLpnValidate(Context context, HashMap<String, String> newLotxlocxidInfo, HashMap<String, String> taskDetailInfo) {
+    public void swapLpnValidate( HashMap<String, String> newLotxlocxidInfo, HashMap<String, String> taskDetailInfo) {
 
-        HashMap<String, String> orderDetailInfo = Orders.findOrderDetailByKey(context, taskDetailInfo.get("ORDERKEY"),taskDetailInfo.get("ORDERLINENUMBER"), true);
+        HashMap<String, String> orderDetailInfo = Orders.findOrderDetailByKey( taskDetailInfo.get("ORDERKEY"),taskDetailInfo.get("ORDERLINENUMBER"), true);
         if(!UtilHelper.isEmpty(orderDetailInfo.get("SERIALNUMBER"))) ExceptionHelper.throwRfFulfillLogicException("指定唯一码出库时，不允许切换容器");
 
         if(!trimZerosAndToStr(newLotxlocxidInfo.get("AVAILABLEQTY")).equals(
@@ -113,7 +110,7 @@ public class SwapPickDetailLPN extends LegacyBaseService {
          ExceptionHelper.throwRfFulfillLogicException("目标容器可用量"+trimZerosAndToStr(newLotxlocxidInfo.get("AVAILABLEQTY"))
                  +"小于当前分配量"+trimZerosAndToStr(taskDetailInfo.get("QTY")));
 
-        HashMap<String, String> lotxlocxidInfo = LotxLocxId.findById(context, taskDetailInfo.get("FROMID"), true);
+        HashMap<String, String> lotxlocxidInfo = LotxLocxId.findById( taskDetailInfo.get("FROMID"), true);
 
 
         			/*
@@ -161,21 +158,21 @@ public class SwapPickDetailLPN extends LegacyBaseService {
 
     }
 
-    public String swapPickDetail(Context context, HashMap<String,String> taskDetailInfo,String newId) throws SQLException {
+    public String swapPickDetail( HashMap<String,String> taskDetailInfo,String newId) throws SQLException {
 
 
-        Connection qqConnection = null;
+
 
         try {
-              HashMap<String, String> pickDetailInfo = PickDetail.findByPickDetailKey(context, taskDetailInfo.get("PICKDETAILKEY"), true);
-              HashMap<String, String> lotxLocxIdInfo = LotxLocxId.findAvailInvById(context, newId,false, true);
+              HashMap<String, String> pickDetailInfo = PickDetail.findByPickDetailKey( taskDetailInfo.get("PICKDETAILKEY"), true);
+              HashMap<String, String> lotxLocxIdInfo = LotxLocxId.findAvailInvById( newId,false, true);
 
 
             int qqRowCount = 0;
 
             PreparedStatement qqPrepStmt = null;
 
-            DBHelper.executeUpdate(context,
+            DBHelper.executeUpdate(
                         "UPDATE PICKDETAIL SET STATUS = 0 WHERE PICKDETAILKEY = ?",new Object[]{
                                 taskDetailInfo.get("PICKDETAILKEY")
             });
@@ -189,7 +186,7 @@ public class SwapPickDetailLPN extends LegacyBaseService {
 //              thePickDO.setWhereClause(" WHERE PickDetailKey = :pickdetailkey");
 //              context.theEXEDataObjectStack.push(thePickDO);
 //              logger.info("Calling TrPickDetail.preUpdateFire()");
-//              context.theSQLMgr.searchTriggerLibrary("PickDetail")).preDeleteFire(context);
+//              context.theSQLMgr.searchTriggerLibrary("PickDetail")).preDeleteFire();
 //              
 //              qqPrepStmt = DBHelper.executeUpdate(" DELETE FROM PICKDETAIL WHERE PickDetailKey = ?");
 //              new Object[]{ pickDetailInfo.get("PICKDETAILKEY"));
@@ -197,24 +194,24 @@ public class SwapPickDetailLPN extends LegacyBaseService {
 
 
 
-              String pickDetailKey = KeyGen.getKey( context,"PICKDETAILKEY", 10);
+              String pickDetailKey = KeyGen.getKey( "PICKDETAILKEY", 10);
 //              thePickDO.clearDO();
 //              thePickDO.setConstraintItem("pickdetailkey", pickDetailKey);
 //              thePickDO.setWhereClause(" WHERE PickDetailKey = :pickdetailkey");
 //              context.theEXEDataObjectStack.push(thePickDO);
-//              context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire(context);
+//              context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire();
 
-            String caseId = KeyGen.getKey(context, "CARTONID", 10);
+            String caseId = KeyGen.getKey( "CARTONID", 10);
 
             double grosswgt = 0.0D;
             double netwgt = 0.0D;
             double tarewgt = 0.0D;
 
-            String stdUOM = UOM.getStdUOM(context, lotxLocxIdInfo.get("PACKKEY"));
+            String stdUOM = UOM.getStdUOM( lotxLocxIdInfo.get("PACKKEY"));
             //right now just provide stduom, it should be always 6
-            String uom = UOM.getUOMCode(context, lotxLocxIdInfo.get("PACKKEY"), stdUOM);
+            String uom = UOM.getUOMCode( lotxLocxIdInfo.get("PACKKEY"), stdUOM);
 
-            DBHelper.executeUpdate(context,
+            DBHelper.executeUpdate(
                     " INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,? )",new Object[]{
                            new Object[]{
 
@@ -239,8 +236,8 @@ public class SwapPickDetailLPN extends LegacyBaseService {
                                    , pickDetailInfo.get("REPLENISHZONE")
                                    , pickDetailInfo.get("DOCARTONIZE")
                                    , pickDetailInfo.get("PICKMETHOD")
-                                   ,context.getUserID()
-                                   , context.getUserID()
+                                   ,EHContextHelper.getUser().getUsername()
+                                   , EHContextHelper.getUser().getUsername()
                                    , 99999
                                    , pickDetailInfo.get("STATUSREQUIRED")
                                    , lotxLocxIdInfo.get("LOC")
@@ -282,17 +279,17 @@ public class SwapPickDetailLPN extends LegacyBaseService {
 ////
 //              context.theEXEDataObjectStack.push(triggerDO);
 //
-//              context.theSQLMgr.searchTriggerLibrary("PickDetail")).postInsertFire(context);
+//              context.theSQLMgr.searchTriggerLibrary("PickDetail")).postInsertFire();
 //
-//              context.theSQLMgr.searchTriggerLibrary("TaskDetail")).preInsertFire(context);
+//              context.theSQLMgr.searchTriggerLibrary("TaskDetail")).preInsertFire();
 
-              HashMap<String, String> locInfo = Loc.findById(context, lotxLocxIdInfo.get("LOC"), true);
+              HashMap<String, String> locInfo = Loc.findById( lotxLocxIdInfo.get("LOC"), true);
 
-              String newTaskDetailKey = KeyGen.getKey(context,"TASKDETAILKEY", 10);
+              String newTaskDetailKey = KeyGen.getKey("TASKDETAILKEY", 10);
 
               java.sql.Date currentDate = UtilHelper.getCurrentSqlDate();
 
-              DBHelper.executeUpdate(context," INSERT INTO TASKDETAIL ( TaskDetailKey, TaskType, StorerKey, Sku, Lot, UOM, UOMQTY, Qty, FromLoc, LogicalFromLoc, FromID, ToLoc, ToId, SourceType, SourceKey, WaveKey, CaseId, OrderKey, OrderLineNumber, PickDetailKey, PickMethod, AddWho, EditWho, Door, Route, Stop, Putawayzone,STATUS,USERKEY,REASONKEY,STARTTIME,ENDTIME ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,? )",
+              DBHelper.executeUpdate(" INSERT INTO TASKDETAIL ( TaskDetailKey, TaskType, StorerKey, Sku, Lot, UOM, UOMQTY, Qty, FromLoc, LogicalFromLoc, FromID, ToLoc, ToId, SourceType, SourceKey, WaveKey, CaseId, OrderKey, OrderLineNumber, PickDetailKey, PickMethod, AddWho, EditWho, Door, Route, Stop, Putawayzone,STATUS,USERKEY,REASONKEY,STARTTIME,ENDTIME ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,? )",
                 new Object[]{
                newTaskDetailKey
               , "PK"
@@ -315,15 +312,15 @@ public class SwapPickDetailLPN extends LegacyBaseService {
               , pickDetailInfo.get("ORDERLINENUMBER")
               , pickDetailKey
               , pickDetailInfo.get("PICKMETHOD")
-              , context.getUserID()
-              , context.getUserID()
+              , EHContextHelper.getUser().getUsername()
+              , EHContextHelper.getUser().getUsername()
               , pickDetailInfo.get("DOOR")
               , pickDetailInfo.get("ROUTE")
               , pickDetailInfo.get("STOP")
               , locInfo.get("PUTAWAYZONE")
               //Add following fields for occupy the task immediately
               , "3" //status
-              , context.getUserID()
+              , EHContextHelper.getUser().getUsername()
               , " "//reasonekey
 
               , currentDate
@@ -335,7 +332,7 @@ public class SwapPickDetailLPN extends LegacyBaseService {
 //              triggerDO.setAttribValue("taskdetailkey"), newTaskDetailKey));
 //
 //              context.theEXEDataObjectStack.push(triggerDO);
-//              context.theSQLMgr.searchTriggerLibrary("TaskDetail")).postInsertFire(context);
+//              context.theSQLMgr.searchTriggerLibrary("TaskDetail")).postInsertFire();
 //              context.theSQLMgr.transactionCommit();
               return newTaskDetailKey;
         }catch (Exception e){

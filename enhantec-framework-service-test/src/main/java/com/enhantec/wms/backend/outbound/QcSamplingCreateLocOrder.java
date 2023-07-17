@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.outbound;
 
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.framework.LegacyBaseService;
@@ -7,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
-import java.sql.Connection;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -39,7 +40,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
         //this.currentDate = UtilHelper.getCurrentDate();
 
 
-        String userid = context.getUserID();
+        String userid = EHContextHelper.getUser().getUsername();
 
         
 
@@ -55,37 +56,35 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
         String skuDescr="";
         String total1="0";
         String total3="0";
-        String ORDERTYPE = CDSysSet.getSampleOrderType(context);//原料取样出库
+        String ORDERTYPE = CDSysSet.getSampleOrderType();//原料取样出库
         boolean orderExists =false;
         HashMap<String,String> samplePackInfo=null;
         try
         {
-            String STORERKEY= DBHelper.getValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
-            //String LGPROJECT=XtSql.GetValue(context, "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","LGPROJECT"}, "");
+            String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+            //String LGPROJECT=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","LGPROJECT"}, "");
 
-            String lot= DBHelper.getValue(context
-                    , "select a.lot LOT from lotxlocxid a,v_lotattribute b where a.lot=b.lot and a.qty>0 and a.STORERKEY = ? and b.lottable06=? ", new String[]{STORERKEY, LOTTABLE06},"");
+            String lot= DBHelper.getValue( "select a.lot LOT from lotxlocxid a,v_lotattribute b where a.lot=b.lot and a.qty>0 and a.STORERKEY = ? and b.lottable06=? ", new String[]{STORERKEY, LOTTABLE06},"");
             if (UtilHelper.isEmpty(lot)) throw new Exception("当前批次在系统中无库存");
 
 
-            HashMap<String,String> res= DBHelper.getRecord(context,"select c.PACKKEY, c.PACKUOM3  UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and c.PACKKEY = s.PACKKEY and a.STORERKEY = ? and a.lot=?", new String[]{STORERKEY, lot});
+            HashMap<String,String> res= DBHelper.getRecord("select c.PACKKEY, c.PACKUOM3  UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and c.PACKKEY = s.PACKKEY and a.STORERKEY = ? and a.lot=?", new String[]{STORERKEY, lot});
 
             uom = res.get("UOM");
             sku = res.get("SKU");
             packKey = res.get("PACKKEY");
             skuDescr = res.get("SKUDESCR");
 
-            samplePackInfo= DBHelper.getRecord(context,"select c.PACKKEY, c.PACKUOM3 UOM, s.SKU SKU, s.DESCR SKUDESCR " +
+            samplePackInfo= DBHelper.getRecord("select c.PACKKEY, c.PACKUOM3 UOM, s.SKU SKU, s.DESCR SKUDESCR " +
                     " from v_lotattribute a, pack c, SKU s " +
                     " where s.SKU = a.SKU and c.PACKKEY = s.SUSR6 and a.STORERKEY = ? and a.lot=?",new Object[]{STORERKEY, lot},sku+"的取样包装配置",true);
 
 
-            String OldOrderKey= DBHelper.getValue(context
-                    , "select orderkey from orders where STORERKEY = ? and REFERENCENUM=? and type = ? and status<'90'", new String[]{STORERKEY, LOTTABLE06, ORDERTYPE}, "");
+            String OldOrderKey= DBHelper.getValue( "select orderkey from orders where STORERKEY = ? and REFERENCENUM=? and type = ? and status<'90'", new String[]{STORERKEY, LOTTABLE06, ORDERTYPE}, "");
             //if (!XtUtils.isNull(OldOrderKey)) throw new Exception("当前批次有未关闭的在库取样单("+OldOrderKey+")");
 
             if (LegecyUtilHelper.isNull(OldOrderKey)) {
-                OrderKey = LegacyDBHelper.GetNCounterBill(context, "ORDER");
+                OrderKey = LegacyDBHelper.GetNCounterBill( "ORDER");
                 HashMap<String,String> Fields = new HashMap<String,String>();
                 Fields.put("AddWho", userid);
                 Fields.put("EditWho", userid);
@@ -98,7 +97,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
                 Fields.put("storerkey", STORERKEY);
                 //Fields.put("SUSR1", XtUtils.FormatUdf("PROJECTCODE", LGPROJECT, 30));
                 //Fields.put("notes", PROJECTCODE);
-                LegacyDBHelper.ExecInsert(context, "orders", Fields);
+                LegacyDBHelper.ExecInsert( "orders", Fields);
 
                 Udtrn UDTRN = new Udtrn();
                 UDTRN.EsignatureKey = ESIGNATUREKEY;
@@ -113,13 +112,13 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
                 UDTRN.TITLE02 = "出库单号";
                 UDTRN.CONTENT02 = OrderKey;
                 //UDTRN.TITLE03="项目";    UDTRN.CONTENT03=PROJECTCODE;
-                UDTRN.Insert(context, userid);
+                UDTRN.Insert( userid);
             }else{
                 orderExists = true;
                 OrderKey = OldOrderKey;
-//                List<HashMap<String,String>> mapList =XtSql.GetRecordMap(context, "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{OrderKey});
+//                List<HashMap<String,String>> mapList =XtSql.GetRecordMap( "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{OrderKey});
 //
-//                UOMConverter uomConverter =  new UOMConverter(context);
+//                UOMConverter uomConverter =  new UOMConverter();
 //                String finalPackKey = packKey;
 //                Function<HashMap<String,String>, BigDecimal> calcORIGINALQTY = e-> {
 //                    try {
@@ -141,8 +140,8 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
 //                    total1 = String.valueOf(mapList.stream().map(calcORIGINALQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //                    total2 = String.valueOf(mapList.stream().map(calcOPENQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //                }
-                total1= DBHelper.getValue(context, "SELECT SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
-                total3= DBHelper.getValue(context, "select sum(ORIGINALQTY) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
+                total1= DBHelper.getValue( "SELECT SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
+                total3= DBHelper.getValue( "select sum(ORIGINALQTY) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
 
             }
 
