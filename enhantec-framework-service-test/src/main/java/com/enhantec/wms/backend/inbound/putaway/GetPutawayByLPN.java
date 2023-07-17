@@ -1,6 +1,5 @@
 package com.enhantec.wms.backend.inbound.putaway;
 
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.framework.LegacyBaseService;

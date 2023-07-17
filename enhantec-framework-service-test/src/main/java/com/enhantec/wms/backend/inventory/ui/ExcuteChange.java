@@ -190,7 +190,7 @@ public class ExcuteChange extends LegacyBaseService {
 
 
     private void callTransferService( String newTransferKey, String tempTransferDetailKey) {
-        EXEDataObject theTriggerDO = new EXEDataObject();
+//        EXEDataObject theTriggerDO = new EXEDataObject();
 //        theTriggerDO.setConstraintItem("transferkey"), newTransferKey));
 //        theTriggerDO.setConstraintItem("transferdetailkey"), tempTransferDetailKey));
 //        theTriggerDO.setWhereClause("WHERE TransferKey = :transferkey and TRANSFERLINENUMBER = :transferdetailkey ");
