@@ -77,7 +77,7 @@ public class LegacyDBHelper {
 			}
 			iLine++;
 		}
-		DBHelper.executeUpdate(EHContextHelper.getDataSource(orgId), SQL1+") "+SQL2+")",aParams);
+		DBHelper.executeUpdateByOrgId(EHContextHelper.getDataSource(orgId), SQL1+") "+SQL2+")",aParams);
 	}
 
 

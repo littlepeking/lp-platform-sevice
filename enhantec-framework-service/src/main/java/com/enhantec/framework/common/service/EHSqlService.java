@@ -11,6 +11,7 @@ package com.enhantec.framework.common.service;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.enhantec.framework.common.utils.DSConstants;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,13 +24,50 @@ public class EHSqlService {
 
     @DS(DSConstants.DS_PARAM)
     public List<Map<String, Object>> selectList(String dataSource, String statement, List<Object> params) {
-        return  SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
+        return SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
     }
     @DS(DSConstants.DS_DEFAULT)
     public List<Map<String, Object>> selectList(String statement, List<Object> params) {
-        return  SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
+        return SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
     }
 
+    @DS(DSConstants.DS_PARAM)
+    public Map<String, Object> selectOne(String dataSource, String statement, List<Object> params) {
+        return SqlRunner.db().selectOne(convertQuestionMark2Index(statement),params.toArray());
+    }
+
+    @DS(DSConstants.DS_DEFAULT)
+    public Map<String, Object> selectOne(String statement, List<Object> params) {
+        return SqlRunner.db().selectOne(convertQuestionMark2Index(statement),params.toArray());
+    }
+
+    @DS(DSConstants.DS_PARAM)
+    public boolean executeUpdate(String dataSource, String statement, List<Object> params) {
+        return doUpdate(statement, params);
+    }
+
+
+    @DS(DSConstants.DS_PARAM)
+    public boolean executeUpdateByOrgId(String orgId, String statement, List<Object> params) {
+        return executeUpdate(EHContextHelper.getDataSource(orgId), statement, params);
+    }
+
+
+    @DS(DSConstants.DS_DEFAULT)
+    public boolean executeUpdate(String statement, List<Object> params) {
+        return doUpdate(statement, params);
+    }
+
+    private boolean doUpdate(String statement, List<Object> params) {
+        if(statement.toLowerCase().startsWith("insert into"))
+            return  SqlRunner.db().insert(convertQuestionMark2Index(statement),params.toArray());
+        else  if(statement.toLowerCase().startsWith("update"))
+            return  SqlRunner.db().update(convertQuestionMark2Index(statement),params.toArray());
+        else  if(statement.toLowerCase().startsWith("delete "))
+            return  SqlRunner.db().delete(convertQuestionMark2Index(statement),params.toArray());
+        else
+            throw new UnsupportedOperationException("本方法不支持除 insert/update/delete 外的操作");
+    }
 
 
     private  static String convertQuestionMark2Index(String sql) {

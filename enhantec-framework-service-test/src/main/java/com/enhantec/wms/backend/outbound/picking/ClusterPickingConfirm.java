@@ -777,9 +777,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
             String maxStatus = null;
             String minStatus = null;
             pNewStatus = "NA";
-            //
-            PreparedStatement qqPrepStmt = null;
-            ResultSet qqResultSet = null;
+
 
             Map<String,Object>  res = DBHelper.getRawRecord( " SELECT COUNT ( * ) count, MAX ( Status ) maxStatus, MIN ( Status ) minStatus FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' and ( openqty>0 or shippedqty>0 or qtypreallocated>0 or qtyallocated>0 or qtypicked>0 )",
                 new Object[]{ pOrderkey});
@@ -885,12 +883,11 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                 ordDtZeroQtyCount = 0;
                 String zeroQtyMinStatus = null;
 
-                Map<String,String>  res1 = DBHelper.getRecord(" SELECT COUNT ( * ), MIN ( Status ) FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' ",
+                Map<String,Object> res1 = DBHelper.getRawRecord(" SELECT COUNT ( * ) COUNT, MIN ( Status ) STATUS FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' ",
                     new Object[]{ pOrderkey});
 
-                        ordDtZeroQtyCount = (Integer) DBHelper.getValue(qqResultSet, 1);
-                        zeroQtyMinStatus =  (String) DBHelper.getValue(qqResultSet, 2);
-
+                        ordDtZeroQtyCount = (Integer) res1.get("COUNT");
+                        zeroQtyMinStatus =  (String) res1.get("STATUS");
 
                 if (ordDtZeroQtyCount != 0) {
                     pNewStatus = zeroQtyMinStatus;
