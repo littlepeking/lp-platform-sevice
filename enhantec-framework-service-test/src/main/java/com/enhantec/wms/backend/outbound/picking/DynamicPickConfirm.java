@@ -14,10 +14,7 @@ import com.enhantec.wms.backend.utils.common.*;
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  --注册方法
@@ -64,13 +61,13 @@ public class DynamicPickConfirm extends LegacyBaseService {
             //context.theSQLMgr.transactionBegin();
 
 
-            HashMap<String,String> daHashMap = DemandAllocation.findByKey( demandKey,true);
+            Map<String,String> daHashMap = DemandAllocation.findByKey( demandKey,true);
 
             String orderKey =daHashMap.get("ORDERKEY");
             String orderLineNumber =daHashMap.get("ORDERLINENUMBER");
             String sku = daHashMap.get("SKU");
 
-            HashMap<String,String> lotxLocxIdHashMap;
+            Map<String,String> lotxLocxIdHashMap;
             List<String> snList = new ArrayList<>();
 
             if(SKU.isSerialControl(sku) && !IDNotes.isBoxId(fromId)){
@@ -84,7 +81,7 @@ public class DynamicPickConfirm extends LegacyBaseService {
             
             dynamicPickCheck(demandKey,lotxLocxIdHashMap,netWgt,uom);
             decreaseDemandAllocation( demandKey,lotxLocxIdHashMap,netWgt,uom);
-            HashMap<String,String> result = PickUtil.doRandomPick( orderKey,orderLineNumber, lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList.stream().toArray(String[]::new),esignatureKey,printer);
+            Map<String,String> result = PickUtil.doRandomPick( orderKey,orderLineNumber, lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList.stream().toArray(String[]::new),esignatureKey,printer);
             String toId = result.get("TOID");
             String printLabel = result.get("PRINT");
 
@@ -108,9 +105,9 @@ public class DynamicPickConfirm extends LegacyBaseService {
 
     }
 
-    private void dynamicPickCheck( String demandKey,HashMap<String, String> lotxLocxIdHashMap, String netWgt, String uom) throws Exception {
+    private void dynamicPickCheck( String demandKey,Map<String, String> lotxLocxIdHashMap, String netWgt, String uom) throws Exception {
 
-        HashMap<String,String> daHashMap = DemandAllocation.findByKey( demandKey,true);
+        Map<String,String> daHashMap = DemandAllocation.findByKey( demandKey,true);
 
         checkIfLotMatchDemand( daHashMap, lotxLocxIdHashMap);
 
@@ -130,7 +127,7 @@ public class DynamicPickConfirm extends LegacyBaseService {
 
 
 
-    private void checkIfLotMatchDemand( HashMap<String,String> daHashMap, HashMap<String, String> lotxLocxIdHashMap) {
+    private void checkIfLotMatchDemand( Map<String,String> daHashMap, Map<String, String> lotxLocxIdHashMap) {
 
         String daSku = daHashMap.get("SKU");
 
@@ -172,11 +169,11 @@ public class DynamicPickConfirm extends LegacyBaseService {
         }
     }
 
-    private void decreaseDemandAllocation( String demandKey, HashMap<String,String> lotxLocxIdHashMap, String uomNetWgt,String uom) throws Exception {
+    private void decreaseDemandAllocation( String demandKey, Map<String,String> lotxLocxIdHashMap, String uomNetWgt,String uom) throws Exception {
 
         Date currentDate = new Date(Calendar.getInstance().getTimeInMillis());
 
-        HashMap daHashMap = DemandAllocation.findByKey(demandKey,true);
+        Map<String, String> daHashMap = DemandAllocation.findByKey(demandKey,true);
 
         BigDecimal uomQtyTobePicked = UtilHelper.str2Decimal(uomNetWgt,"净重",false);
         BigDecimal stdQtyTobePicked = UOM.UOMQty2StdQty( lotxLocxIdHashMap.get("PACKKEY"), uom, uomQtyTobePicked);

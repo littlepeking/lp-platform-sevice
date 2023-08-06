@@ -1,37 +1,34 @@
 package com.enhantec.wms.backend.common.receiving;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.ServiceDataHolder;
-import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
-import com.enhantec.wms.backend.utils.common.ServiceHelper;
-import com.enhantec.wms.backend.utils.common.UtilHelper;
 import com.enhantec.wms.backend.common.Const;
 import com.enhantec.wms.backend.common.base.*;
 import com.enhantec.wms.backend.common.base.code.CDReceiptType;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
+import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
-import static com.enhantec.wms.backend.utils.common.UtilHelper.nvl;
+import java.util.Map;
+
 import static com.enhantec.wms.backend.common.base.LotxId.buildReceiptLotxIdInfo;
+import static com.enhantec.wms.backend.utils.common.UtilHelper.nvl;
 public class Receipt {
 
-    public static HashMap<String, String> findByReceiptKey( String receiptKey, boolean checkExist) {
+    public static Map<String, String> findByReceiptKey( String receiptKey, boolean checkExist) {
 
         String SQL="SELECT * FROM RECEIPT WHERE  receiptKey = ?  ";
-        HashMap<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ receiptKey},"收货单");
+        Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ receiptKey},"收货单");
         if(checkExist && record == null ) ExceptionHelper.throwRfFulfillLogicException("收货单为"+receiptKey+"未找到");
         return record;
     }
 
-    public static HashMap<String, String> findReceiptDetailByLPN(String receiptKey, String lpn, boolean checkExist) {
+    public static Map<String, String> findReceiptDetailByLPN(String receiptKey, String lpn, boolean checkExist) {
 
         String SQL="SELECT * FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?  AND TOID = ?";
-        HashMap<String,String> record= DBHelper.getRecord( SQL, new Object[]{receiptKey, lpn},"收货明细");
+        Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{receiptKey, lpn},"收货明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("容器条码为"+lpn+"的收货明细未找到");
         return record;
     }
@@ -39,26 +36,26 @@ public class Receipt {
     /**
      * 查询最后被收货的LPN的收货单信息
      */
-    public static HashMap<String,String> findLastReceiptDetailByLPN(String lpn,boolean checkExist){
+    public static Map<String,String> findLastReceiptDetailByLPN(String lpn,boolean checkExist){
         String sql = "SELECT TOP 1 * FROM RECEIPTDETAIL WHERE TOID = ? ORDER BY EDITDATE DESC";
-        HashMap<String, String> record = DBHelper.getRecord( sql, new Object[]{lpn}, "收货明细");
+        Map<String, String> record = DBHelper.getRecord( sql, new Object[]{lpn}, "收货明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("容器条码为"+lpn+"的收货明细未找到");
         return record;
     }
 
 
-    public static HashMap<String, String> findReceiptDetailById( String receiptKey, String receiptLineNumber, boolean checkExist) {
+    public static Map<String, String> findReceiptDetailById( String receiptKey, String receiptLineNumber, boolean checkExist) {
 
         String SQL="SELECT * FROM RECEIPTDETAIL WHERE  receiptKey = ? and receiptLineNumber = ? ";
-        HashMap<String,String> record= DBHelper.getRecord( SQL, new Object[]{ receiptKey,receiptLineNumber},"收货明细");
+        Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ receiptKey,receiptLineNumber},"收货明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("收货单为"+receiptKey+receiptLineNumber+"的收货明细未找到");
         return record;
     }
 
-    public static List<HashMap<String, String>> findReceiptDetails( String receiptKey, boolean checkExist) {
+    public static List<Map<String, String>> findReceiptDetails( String receiptKey, boolean checkExist) {
 
         String SQL="SELECT * FROM RECEIPTDETAIL WHERE  receiptKey = ?  ";
-        List<HashMap<String, String>>  list = DBHelper.executeQuery( SQL, new Object[]{ receiptKey});
+        List<Map<String, String>>  list = DBHelper.executeQuery( SQL, new Object[]{ receiptKey});
         if(checkExist && list.size() == 0 ) ExceptionHelper.throwRfFulfillLogicException("收货单为"+receiptKey+"的收货明细未找到");
         return list;
     }
@@ -97,8 +94,8 @@ public class Receipt {
      * 4.批次管理的物料退库：originLpn 有值
      * @throws Exception
      */
-    public static HashMap<String,String> insertReceiptDetailByReturnLpn(
-             HashMap<String,String> receiptHashMap, String receiptLinuNumber,
+    public static Map<String,String> insertReceiptDetailByReturnLpn(
+             Map<String,String> receiptHashMap, String receiptLinuNumber,
             String sku, String newLpn, String originLpn, String loc, String isOpened,
             String netStdWgt, String grossStdWgt, String tareStdWgt, String uom, String regrossWgt,
             String[] snList, String[] snWightList, String[] snUomList)throws Exception {
@@ -106,14 +103,14 @@ public class Receipt {
         //只有唯一码的情况，绑定的newLpn才有值，校验其是否符合收货要求
         if(!UtilHelper.isEmpty(newLpn)) {
 
-            HashMap<String, String> receiptDetailInfo = DBHelper.getRecord(
+            Map<String, String> receiptDetailInfo = DBHelper.getRecord(
                     "SELECT RECEIPTKEY FROM RECEIPTDETAIL WHERE STATUS = 0 AND RECEIPTKEY = ? AND TOID = ? "
                     , new Object[]{receiptHashMap.get("RECEIPTPKEY"), newLpn}, "收货明细");
             if (receiptDetailInfo != null) {
                 throw new Exception("容器条码" + newLpn + "已存在于收货单" + receiptHashMap.get("RECEIPTPKEY") + "的待收货明细中,不允许重复添加");
             }
 
-            HashMap<String, String> lpnInfo = LotxLocxId.findById( newLpn, false);
+            Map<String, String> lpnInfo = LotxLocxId.findById( newLpn, false);
             if (lpnInfo != null) ExceptionHelper.throwRfFulfillLogicException("当前容器条码仍有库存，不允许退货");
 
 
@@ -129,7 +126,7 @@ public class Receipt {
         //根据不同的业务场景校验数据是否合法，同时如果LPN为空则生成新的LPN。
 
         //LPN的最后一次历史库存信息（注意：唯一码查询出的是之前所属的所属箱信息，数量为箱内的总数量）
-        HashMap<String,String>  lpnHisInfo = null;
+        Map<String,String>  lpnHisInfo = null;
 
         //不绑定箱号时，扫描单个唯一码直接收货，为每个唯一码一个箱子流水号，同时在收货单行上记录该唯一码，目的是为了方便RF和界面查询。
         String singleSerialNumber  = "";
@@ -171,7 +168,7 @@ public class Receipt {
             if(!UtilHelper.isEmpty(originLpn)){
                 //唯一码物料整箱退库,箱号不变，但需要填充SN明细行
                 lpnHisInfo = IDNotesHistory.findLastShippedRecordById(originLpn,true);
-                List<HashMap<String, String>> lastShippedSNsById = IDNotesHistory.findLastShippedSNsById( originLpn, true);
+                List<Map<String, String>> lastShippedSNsById = IDNotesHistory.findLastShippedSNsById( originLpn, true);
                 snList = lastShippedSNsById.stream().map(x -> x.get("SERIALNUMBER")).toArray(String[]::new);
                 snWightList = lastShippedSNsById.stream().map(x -> x.get("NETWEIGHT")).toArray(String[]::new);
                 snUomList = lastShippedSNsById.stream().map(x -> x.get("SNUOM")).toArray(String[]::new);
@@ -198,7 +195,7 @@ public class Receipt {
                     loc = lpnHisInfo.get("LOC");
                 }else{
                     //正常退库，库存必须为0
-                    HashMap<String, String> lpnInfo = LotxLocxId.findById( newLpn, false);
+                    Map<String, String> lpnInfo = LotxLocxId.findById( newLpn, false);
                     if (lpnInfo != null) ExceptionHelper.throwRfFulfillLogicException("当前容器条码仍有库存，不允许退货");
 
                     lpnHisInfo = IDNotesHistory.findLastShippedRecordById( originLpn, true);
@@ -213,7 +210,7 @@ public class Receipt {
 
         }
         //根据退货批次生成类型，生成新的退货收货批次信息
-        HashMap<String, String> newReceiptLotHashMap = buildReturnLotInfo( receiptHashMap, lpnHisInfo);
+        Map<String, String> newReceiptLotHashMap = buildReturnLotInfo( receiptHashMap, lpnHisInfo);
         //
         if(needGenerateBoxId){
             newLpn = IdGenerationHelper.createBoxId(newReceiptLotHashMap.get("LOTTABLE06"));
@@ -229,7 +226,7 @@ public class Receipt {
 
         String userId = EHContextHelper.getUser().getUsername();
 
-        HashMap<String,String> newReceiptDetail = new LinkedHashMap<>();
+        Map<String,String> newReceiptDetail = new HashMap<>();
 
         String storerKey = java.lang.String.valueOf(DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?",
                 new Object[]{"SYSSET","STORERKEY"}, "默认货主"));
@@ -320,12 +317,12 @@ public class Receipt {
         return newReceiptDetail;
     }
 
-    private static boolean isAllowReceivingToExistingInv( HashMap<String, String> receiptHashMap, String sku, String originLpn) {
+    private static boolean isAllowReceivingToExistingInv( Map<String, String> receiptHashMap, String sku, String originLpn) {
 
         boolean useExistInventory = false;
         if(!SKU.isSerialControl( sku) &&CDReceiptType.isReturnTypeWithInventory( receiptHashMap.get("TYPE")) ){
 
-            HashMap<String, String> lotxLocxIdById = LotxLocxId.findById( originLpn, false);
+            Map<String, String> lotxLocxIdById = LotxLocxId.findById( originLpn, false);
             if(lotxLocxIdById != null){
                 useExistInventory = true;
             }
@@ -334,12 +331,12 @@ public class Receipt {
     }
 
     //生成退货批属性信息
-    private static HashMap<String,String> buildReturnLotInfo( HashMap<String,String> receiptHashMap, HashMap<String,String> lpnHisInfo) throws Exception {
+    private static Map<String,String> buildReturnLotInfo( Map<String,String> receiptHashMap, Map<String,String> lpnHisInfo) throws Exception {
 
-       HashMap<String,String> newReceiptLotHashMap = new HashMap<>();
+       Map<String,String> newReceiptLotHashMap = new HashMap<>();
 
        //RECEIPTDETAIL.SUSR10 退货LPN的原收货批次，用于收货时供相同批次的LPN检索已生成的子批号，避免子批次重复生成。
-       HashMap<String,String> receiptLottableInfoHashMap = DBHelper.getRecord("SELECT TOP 1 * FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND SUSR10 = ? ",
+       Map<String,String> receiptLottableInfoHashMap = DBHelper.getRecord("SELECT TOP 1 * FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND SUSR10 = ? ",
                 new Object[]{receiptHashMap.get("RECEIPTKEY"), lpnHisInfo.get("LOTTABLE06")},"",false);
 
        if(receiptLottableInfoHashMap != null){
@@ -374,7 +371,7 @@ public class Receipt {
      * 插入待收货明细行
      * @throws Exception
      */
-    public static HashMap<String,String> insertReceiptDetailByOriginalLine( HashMap<String,String> originalReceiptLineHashMap,String lpn,String loc, String isOpened, String netStdWgt, String grossStdWgt, String tareStdWgt, String uom, String regrossWgt,String[] snList)throws Exception {
+    public static Map<String,String> insertReceiptDetailByOriginalLine( Map<String,String> originalReceiptLineHashMap,String lpn,String loc, String isOpened, String netStdWgt, String grossStdWgt, String tareStdWgt, String uom, String regrossWgt,String[] snList)throws Exception {
 
         String receiptLot = originalReceiptLineHashMap.get("LOTTABLE06");
         if(UtilHelper.isEmpty(receiptLot)) {
@@ -407,9 +404,9 @@ public class Receipt {
 
         String userId = EHContextHelper.getUser().getUsername();
 
-        HashMap<String,String> newReceiptDetail = new LinkedHashMap<>();
+        Map<String,String> newReceiptDetail = new HashMap<>();
 
-        HashMap<String, String> receiptDetailInfo = DBHelper.getRecord(
+        Map<String, String> receiptDetailInfo = DBHelper.getRecord(
                 "SELECT RECEIPTKEY FROM RECEIPTDETAIL WHERE STATUS = 0 AND TOID = ? "
                 , new Object[]{lpn}, "收货明细");
         if (receiptDetailInfo != null) {
@@ -506,7 +503,7 @@ public class Receipt {
      */
     public static void deleteReceiptDetail(String receiptKey,String receiptLineNumber)throws Exception{
 
-        HashMap<String,String> receiptDetailInfo = Receipt.findReceiptDetailById(receiptKey,receiptLineNumber,true);
+        Map<String,String> receiptDetailInfo = Receipt.findReceiptDetailById(receiptKey,receiptLineNumber,true);
 
         if(!receiptDetailInfo.get("STATUS").equals("0"))  ExceptionHelper.throwRfFulfillLogicException("当前收货单行已经收货，不允许删除");
 
@@ -521,7 +518,7 @@ public class Receipt {
                     new Object[]{receiptDetailInfo.get("RECEIPTKEY"), receiptDetailInfo.get("RECEIPTLINENUMBER")});
         }
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptDetailInfo.get("TYPE"));
+        Map<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptDetailInfo.get("TYPE"));
         if(Const.RECEIPT_RF_TYPE_WITH_ASN.equalsIgnoreCase(receiptTypeHashMap.get("UDF5"))) {
             refreshReceiptBarrelNumber( receiptKey, receiptDetailInfo.get("ORIGINALLINENUMBER"));
         }
@@ -529,7 +526,7 @@ public class Receipt {
 
     private static void refreshReceiptBarrelNumber( String receiptKey,String originalLineNumber){
 
-        List<HashMap<String,String>> receiptDetails = DBHelper.executeQuery("SELECT RECEIPTLINENUMBER FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND ORIGINALLINENUMBER = ? ",
+        List<Map<String,String>> receiptDetails = DBHelper.executeQuery("SELECT RECEIPTLINENUMBER FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND ORIGINALLINENUMBER = ? ",
                 new Object[]{receiptKey, originalLineNumber}
                 );
 
@@ -549,7 +546,7 @@ public class Receipt {
 
     }
 
-    public static void execReceiptDetailReceiving( ServiceDataHolder serviceDataHolder, HashMap<String,String> insertedReceiptDetail, String grossWgt, String tareWgt, String netWgt) throws Exception {
+    public static void execReceiptDetailReceiving( ServiceDataHolder serviceDataHolder, Map<String,String> insertedReceiptDetail, String grossWgt, String tareWgt, String netWgt) throws Exception {
         //调用API执行收货。
         serviceDataHolder.getInputDataAsMap().setAttribValue("LPN", insertedReceiptDetail.get("TOID"));//箱号
         serviceDataHolder.getInputDataAsMap().setAttribValue("RECEIPTKEY", insertedReceiptDetail.get("RECEIPTKEY"));//ASN收货单号
@@ -564,7 +561,7 @@ public class Receipt {
         ServiceHelper.executeService( "ReceivingWithSignature", serviceDataHolder);
 
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", insertedReceiptDetail.get("TYPE"));
+        Map<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", insertedReceiptDetail.get("TYPE"));
 
         //有汇总指令的ASN收货要更新桶号信息
         if(Const.RECEIPT_RF_TYPE_WITH_ASN.equalsIgnoreCase(receiptTypeHashMap.get("UDF5"))) {
@@ -586,10 +583,10 @@ public class Receipt {
     public static void processReceiptStatus(String receiptKey){
 
         //如果明细收货行收了汇总收货行的货，明细收货行应显示为已接收，更新汇总收货行的状态为5（收货中）。
-        List<HashMap<String, String>> records = DBHelper.executeQuery(
+        List<Map<String, String>> records = DBHelper.executeQuery(
                 "SELECT ORIGINALLINENUMBER,SUM(QTYRECEIVED) QTYRECEIVED,MIN(STATUS) AS STATUS FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND ORIGINALLINENUMBER IS NOT NULL GROUP BY ORIGINALLINENUMBER ",
                 new Object[]{receiptKey});
-        for (HashMap<String, String> record : records) {
+        for (Map<String, String> record : records) {
             //当明细收货行>=汇总行的数量时，汇总行应更新已接收
             String qtyExpected = DBHelper.getValue( "SELECT QTYEXPECTED FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ?",
                     new Object[]{receiptKey, record.get("ORIGINALLINENUMBER")}, String.class, "");
@@ -602,7 +599,7 @@ public class Receipt {
         }
 
         //这里更新的是收货单单头的状态。
-        HashMap<String, String> record = DBHelper.getRecord(
+        Map<String, String> record = DBHelper.getRecord(
                 "SELECT SUM(CASE WHEN (STATUS = '0' OR STATUS = '5') THEN 1 ELSE 0 END) AS DONE , SUM (CASE WHEN STATUS = '9' THEN 1 ELSE 0 END) AS NOTSTART FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
                 new Object[]{receiptKey}, "");
         //该出库单所有单行的STATUS为0的count，即单行为新建状态的行数

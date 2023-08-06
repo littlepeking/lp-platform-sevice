@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  --注册方法
@@ -36,15 +36,15 @@ public class CCPostTask extends LegacyBaseService {
 
             String taskDetailKey = serviceDataHolder.getInputDataAsMap().getString("taskdetailkey");
 
-            HashMap<String,String> taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
+            Map<String,String> taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
 
             String storerKey =  taskDetailHashMap.get("STORERKEY");
             String sku =  taskDetailHashMap.get("SKU");
-            HashMap<String,String>  skuHashMap = SKU.findById(sku,true);
+            Map<String,String>  skuHashMap = SKU.findById(sku,true);
             String lot =  taskDetailHashMap.get("LOT");
             String loc =  taskDetailHashMap.get("FROMLOC");
             String id =  taskDetailHashMap.get("FROMID");
-            HashMap<String,String> idNotesInfo = IDNotes.findById(id,true);
+            Map<String,String> idNotesInfo = IDNotes.findById(id,true);
             String packKey =  idNotesInfo.get("PACKKEY");
             String uom =   serviceDataHolder.getInputDataAsMap().getString("uom");
             String qty =  serviceDataHolder.getInputDataAsMap().getString("ccqty");

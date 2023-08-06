@@ -104,7 +104,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 			String qualifiedproducer ="";
 			String RECEIPTKEY="";
-			List<HashMap<String,String>> receiptypelist = DBHelper.executeQuery( "select c.UDF1 from PRERECEIPTCHECK p ,WMS_PO wp,CODELKUP c where p.FROMKEY =wp.POKEY" +
+			List<Map<String,String>> receiptypelist = DBHelper.executeQuery( "select c.UDF1 from PRERECEIPTCHECK p ,WMS_PO wp,CODELKUP c where p.FROMKEY =wp.POKEY" +
 					"    and c.CODE =wp.POTYPE and c.LISTNAME ='EHPOTYPE' and p.RECEIPTLOT=? ", Arrays.asList(new Object[]{RECEIPTLOT}));
 			//String RECEIPTYPE= CDSysSet.getPOReceiptType(); //	采购入库（原料入库）
 			if (receiptypelist.isEmpty()) throw new Exception("入库类型未配置,无法创建ASN");
@@ -157,7 +157,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
 
 			//ASN由小到大扣减PO库存
-			List<HashMap<String,String>> aPOKEY= DBHelper.executeQuery(
+			List<Map<String,String>> aPOKEY= DBHelper.executeQuery(
 					 "select FROMKEY,FROMLINENO,FILECHECK,SUPPLIERCHECK,PACKCHECK,WEIGHTCHECK,STATUS,SKU,FROMLOT," +
 							 " SUPPLIERCODE,SUPPLIERNAME,MANUFACTURERCODE,MANUFACTURERNAME,FROMSKU,FROMSKUDESCR," +
 							 " POSUPPLIERCODE,POSUPPLIERNAME,ELOTTABLE07," +
@@ -189,7 +189,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			//ArrayList<PO_bean> Run_PP=new ArrayList<PO_bean>();
 			for(int iPO=0;(iPO<aPOKEY.size())&&(sumnetwgt.compareTo(BigDecimal.ZERO)>0);iPO++)
 			{
-				HashMap<String,String> mPOKEY=aPOKEY.get(iPO);
+				Map<String,String> mPOKEY=aPOKEY.get(iPO);
 				String POKEY=mPOKEY.get("FROMKEY");
 				String FROMLINENO=mPOKEY.get("FROMLINENO");
 				String STATUS=mPOKEY.get("STATUS");
@@ -216,10 +216,10 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			if (sumnetwgt.compareTo(BigDecimal.ZERO)>0) throw new Exception("PO可用数量不足");
 
 
-			HashMap<String,String> skuInfo= SKU.findById(sku,true);
+			Map<String,String> skuInfo= SKU.findById(sku,true);
 
 
-			HashMap<String,String> packInfo= DBHelper.getRecord( "SELECT P.PACKUOM3 UOM, P.PACKDESCR, P.PACKKEY FROM PACK P, SKU S WHERE P.PACKKEY=S.PACKKEY AND SKU = ?", new String[] {sku});
+			Map<String,String> packInfo= DBHelper.getRecord( "SELECT P.PACKUOM3 UOM, P.PACKDESCR, P.PACKKEY FROM PACK P, SKU S WHERE P.PACKKEY=S.PACKKEY AND SKU = ?", new String[] {sku});
 
 
 			LpnInfo[] lpnInfos=new LpnInfo[sumBarrelQty];
@@ -287,7 +287,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			DBHelper.executeUpdate("update PRERECEIPTCHECK set status=?,editwho=?,editdate=? where RECEIPTLOT=?"
 					,new String[]{"1",userid,"@date",RECEIPTLOT});
 			
-			HashMap<String,String> RECEIPT=new HashMap<String,String>();
+			Map<String,String> RECEIPT=new HashMap<String,String>();
 			if(ESignatureService.getUserByEsignaturkey(ESIGNATUREKEY).indexOf(':')==-1){
 				RECEIPT.put("ISCONFIRMEDUSER", usedPOBeans.get(0).SUPPLIER);
 			}else {
@@ -313,7 +313,7 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 			RECEIPT.put("SHIPFROMADDRESSLINE2", usedPOBeans.get(0).NAMEALPHA);
 			RECEIPT.put("POKEY", poListStr);
 			//采购入库保税检查 prereceiptcheck->receipt
-			HashMap<String,String> bondedCheck= DBHelper.getRecord(
+			Map<String,String> bondedCheck= DBHelper.getRecord(
 					"select TOP 1 LOTTABLE10,BONDEDSTORES,MHTASKKEY,MHLINENO,ELOTTABLE22" +
 							" from PRERECEIPTCHECK  where   RECEIPTLOT=?  ",new String[]{RECEIPTLOT});
 			RECEIPT.put("ELOTTABLE01",bondedCheck.get("LOTTABLE10"));
@@ -353,14 +353,14 @@ public class ReceiptLotCreateAsn extends LegacyBaseService
 				//LOTTABLE09 供应商名称  ReceiptCheck    POSUPPLIERNAME
 				//ELOTTABLE11 有效期  ReceiptCheck  ELOTTABLE11
 				//ELOTTABLE12 生产日期  ReceiptCheck MANUFACTURERDATE
-				HashMap<String,String> pReceiptCheck= DBHelper.getRecord(
+				Map<String,String> pReceiptCheck= DBHelper.getRecord(
 						"select p.ELOTTABLE07,p.POSUPPLIERCODE,p.POSUPPLIERNAME,s.busr3 ," +
 								" FORMAT(p.ELOTTABLE11,'"+ Const.DateTimeFormat+"') as ELOTTABLE11,"+
 								" FORMAT(p.MANUFACTURERDATE,'"+ Const.DateTimeFormat+"') as MANUFACTURERDATE, "+
 								" FORMAT(p.RETESTDATE,'"+ Const.DateTimeFormat+"') as RETESTDATE,checkresult,ISCOMMONPROJECT,PROJECTCODE"+
 								" from PRERECEIPTCHECK p,SKU s where p.RECEIPTLOT=? and s.sku=p.sku ",new String[]{RECEIPTLOT});
 
-				HashMap<String,String> RECEIPTDETAIL=new HashMap<String,String>();
+				Map<String,String> RECEIPTDETAIL=new HashMap<String,String>();
 				RECEIPTDETAIL.put("ELOTTABLE03", pReceiptCheck.get("busr3"));
 
 				RECEIPTDETAIL.put("ELOTTABLE08", pReceiptCheck.get("POSUPPLIERCODE"));

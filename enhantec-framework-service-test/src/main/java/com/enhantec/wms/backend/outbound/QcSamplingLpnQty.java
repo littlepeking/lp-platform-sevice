@@ -12,8 +12,8 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class QcSamplingLpnQty extends LegacyBaseService
 {
@@ -75,13 +75,13 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			if (Status.compareTo("90")>=0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭,不能继续操作");
 
 
-			HashMap<String,String> odMap= DBHelper.getRecord( "SELECT OPENQTY, UOM "
+			Map<String,String> odMap= DBHelper.getRecord( "SELECT OPENQTY, UOM "
 							+ " FROM ORDERDETAIL WHERE ORDERKEY=? AND IDREQUIRED=?"
 					, new String[] {ORDERKEY,LPN},"");
 
 			if(!odMap.isEmpty()) ExceptionHelper.throwRfFulfillLogicException("该容器条码已存在于本取样单中，请删除后再添加");
 
-			HashMap<String,String> mKC = LotxLocxId.findAvailInvByLocId( LOC, LPN, false,true);
+			Map<String,String> mKC = LotxLocxId.findAvailInvByLocId( LOC, LPN, false,true);
 			if(!LOTTABLE06.equals(mKC.get("LOTTABLE06"))) throw new Exception("容器条码和取样批次不匹配");
 
 			String packKey=mKC.get("PACKKEY");
@@ -89,7 +89,7 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			//String PUTAWAYZONE=XtSql.GetValue( "select PUTAWAYZONE from loc where loc=?", new String[]{LOC}, "");
 			//if (PUTAWAYZONE.equals("DOCK")) throw new Exception("不允许在收货库位取样,请先上架");
 			
-//			HashMap<String,String> mIDNOTES=XtSql.GetValueMap( "SELECT PACKKEY,UOM,BARRELDESCR FROM IDNOTES WHERE ID=?", new String[]{LPN});
+//			Map<String,String> mIDNOTES=XtSql.GetValueMap( "SELECT PACKKEY,UOM,BARRELDESCR FROM IDNOTES WHERE ID=?", new String[]{LPN});
 //			if (mIDNOTES.isEmpty()) throw new Exception("未找到桶信息");
 			
 			String STORERKEY=mKC.get("STORERKEY");
@@ -109,9 +109,9 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			orderlinenumber=Integer.toString(Integer.parseInt(orderlinenumber)+1);
 			while (orderlinenumber.length()<5) orderlinenumber="0"+orderlinenumber;
 
-			HashMap<String, String> orderInfo = Orders.findByOrderKey(ORDERKEY,true);
+			Map<String, String> orderInfo = Orders.findByOrderKey(ORDERKEY,true);
 			
-			HashMap<String,String> OrderDetail=new HashMap<String,String>();
+			Map<String,String> OrderDetail=new HashMap<String,String>();
 			OrderDetail.put("ADDWHO", userid);
 			OrderDetail.put("EDITWHO", userid);
 			OrderDetail.put("STATUS", "02");
@@ -167,9 +167,9 @@ public class QcSamplingLpnQty extends LegacyBaseService
 			//----------------
             //String CountLpn1=XtSql.GetValue( "select count(1) from (select distinct IDREQUIRED from ORDERDETAIL where orderkey=?) a",new String[]{ORDERKEY},"");
 			//            TOTAL1="取样容器("+CountLpn1+")";
-//			List<HashMap<String,String>> mapList =XtSql.GetRecordMap( "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY});
+//			List<Map<String,String>> mapList =XtSql.GetRecordMap( "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY});
 //
-//			Function<HashMap<String,String>, BigDecimal> calcORIGINALQTY = e-> {
+//			Function<Map<String,String>, BigDecimal> calcORIGINALQTY = e-> {
 //				try {
 //					return uomConverter.UOMQty2StdQty(packKey, e.get("UOM"), new BigDecimal(e.get("ORIGINALQTY")));
 //				} catch (Exception exception) {
@@ -177,7 +177,7 @@ public class QcSamplingLpnQty extends LegacyBaseService
 //				}
 //			};
 //
-//			Function<HashMap<String,String>, BigDecimal> calcOPENQTY = e-> {
+//			Function<Map<String,String>, BigDecimal> calcOPENQTY = e-> {
 //				try {
 //					return uomConverter.UOMQty2StdQty(packKey, e.get("UOM"), new BigDecimal(e.get("OPENQTY")));
 //				} catch (Exception exception) {

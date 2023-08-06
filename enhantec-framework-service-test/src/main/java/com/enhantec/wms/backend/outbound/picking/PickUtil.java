@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.outbound.picking;
 
+import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.*;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
@@ -21,7 +22,8 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +38,7 @@ public class PickUtil {
 
     }
 
-    public static String getQualityStatusSqlFilterStr(HashMap<String, String> orderTypeInfo, String qualityStatus) {
+    public static String getQualityStatusSqlFilterStr(Map<String, String> orderTypeInfo, String qualityStatus) {
 
 
         if(!UtilHelper.isEmpty(qualityStatus)) {
@@ -94,7 +96,7 @@ public class PickUtil {
 
 
 
-    public static String getQualityStatusSqlOrderByStr(HashMap<String, String> orderTypeInfo, String qualityStatus) {
+    public static String getQualityStatusSqlOrderByStr(Map<String, String> orderTypeInfo, String qualityStatus) {
 
 
         if (!UtilHelper.isEmpty(qualityStatus)) {
@@ -150,7 +152,7 @@ public class PickUtil {
 
     public static void checkIfSplitTimesOverLimit( String fromid) {
 
-        HashMap<String,String> record = DBHelper.getRecord("select KEYCOUNT FROM NCOUNTER n where n.KEYNAME = ? ",  new Object[]{ fromid }, "NCOUNTER");
+        Map<String,String> record = DBHelper.getRecord("select KEYCOUNT FROM NCOUNTER n where n.KEYNAME = ? ",  new Object[]{ fromid }, "NCOUNTER");
 
         if( record!=null &&  Integer.parseInt(record.get("KEYCOUNT"))>=26) ExceptionHelper.throwRfFulfillLogicException("同一容器分拆最多允许26次");
     }
@@ -169,7 +171,7 @@ public class PickUtil {
      * @param itrnKey
      * @throws Exception
      */
-    public static void pickSerialNumber( String orderKey, String orderLineNumber, String pickdetailKey, HashMap<String, String> fromIdHashMap, String toId, String[] snList, String itrnKey) throws Exception {
+    public static void pickSerialNumber( String orderKey, String orderLineNumber, String pickdetailKey, Map<String, String> fromIdHashMap, String toId, String[] snList, String itrnKey) throws Exception {
 
         String userid = EHContextHelper.getUser().getUsername();
 
@@ -188,7 +190,7 @@ public class PickUtil {
 
                 String itrnSerialKey = KeyGen.getKey("ITRNSERIALKEY", 2, 10);
 
-                HashMap<String,String> serialItrn = new LinkedHashMap<>();
+                Map<String,String> serialItrn = new HashMap<>();
                 serialItrn.put("SERIALNUMBERLONG", snList[i]);
                 serialItrn.put("SERIALNUMBER", snList[i]);
                 serialItrn.put("ITRNSERIALKEY", itrnSerialKey);
@@ -221,7 +223,7 @@ public class PickUtil {
      *  key:PRINT,value:是否打印标签
      * @throws Exception
      */
-    public static HashMap<String,String> doRandomPick( String orderKey, String orderLineNumber, HashMap<String, String> lotxLocxIdHashMap, String toId, String grossUomWgt, String tareUomWgt, String netUomWgt, String uom, BigDecimal stdQtyAllocated, String[] snList, String esignatureKey, String printer) throws Exception {
+    public static Map<String,String> doRandomPick( String orderKey, String orderLineNumber, Map<String, String> lotxLocxIdHashMap, String toId, String grossUomWgt, String tareUomWgt, String netUomWgt, String uom, BigDecimal stdQtyAllocated, String[] snList, String esignatureKey, String printer) throws Exception {
 
         String fromId = lotxLocxIdHashMap.get("ID");
         String userid = EHContextHelper.getUser().getUsername();
@@ -262,13 +264,13 @@ public class PickUtil {
             //动态拣货TOID参数应传入空，系统会自动生成LPN号（批次管理物料生成子容器号，唯一码管理物料生成流水码箱号）
             toId = IDNotes.splitWgtById( stdGrossWgtDecimal, stdQtyTobePicked, stdTareWgtDecimal, grossUomWgt, netUomWgt, tareUomWgt, uom, fromId,toId, orderKey,false);
 
-            HashMap<String,String> fieldsToBeUpdate = new LinkedHashMap<>();
+            Map<String,String> fieldsToBeUpdate = new HashMap<>();
             fieldsToBeUpdate.put("LASTSHIPPEDLOC", lotxLocxIdHashMap.get("LOC")); //该ID最后一次的拣货自库位
 //            fieldsToBeUpdate.put("LASTLOC", lotxLocxIdHashMap.get("LOC")); //该ID的上一个库位
             fieldsToBeUpdate.put("LASTID", lotxLocxIdHashMap.get("ID")); //该ID的上一个ID
             IDNotes.update( toId, fieldsToBeUpdate);
             if(IDNotes.isLpnOrBoxId(toId)) {
-                HashMap<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
+                Map<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
                 List<String> notPrintLpnLabelOrderTypes = CDSysSet.getNotPrintLpnLabelOrderTypes();
                 if(null == notPrintLpnLabelOrderTypes || !notPrintLpnLabelOrderTypes.contains(orderInfo.get("TYPE"))) {
                     printLabel = true;
@@ -288,7 +290,7 @@ public class PickUtil {
             toId = fromId;
 
             //更新标签信息
-            HashMap<String,String> fieldsToBeUpdate = new HashMap<String,String>();
+            Map<String,String> fieldsToBeUpdate = new HashMap<String,String>();
 
             fieldsToBeUpdate.put("GROSSWGTLABEL", grossUomWgt);//原毛重标签量
             fieldsToBeUpdate.put("TAREWGTLABEL", tareUomWgt);//原皮重标签量
@@ -301,7 +303,7 @@ public class PickUtil {
             IDNotes.update( toId, fieldsToBeUpdate);
         }
 
-        HashMap<String, String> outHashMap = doPickByAddPickDetail(orderKey, orderLineNumber, fromId, toId, stdQtyTobePicked);
+        Map<String, String> outHashMap = doPickByAddPickDetail(orderKey, orderLineNumber, fromId, toId, stdQtyTobePicked);
 
         String pickDetailKey =outHashMap.get("PICKDETAILKEY");
         String itrnKey =outHashMap.get("ITRNKEY");
@@ -310,7 +312,7 @@ public class PickUtil {
         if(SKU.isSerialControl(lotxLocxIdHashMap.get("SKU"))) {
             //ADD PICKDETAIL的方式进行整箱拣货，需要手工填充序列号库存
             if(snList.length == 0) {
-                List<HashMap<String, String>> snListHashMap = SerialInventory.findByLpn( fromId, true);
+                List<Map<String, String>> snListHashMap = SerialInventory.findByLpn( fromId, true);
                 snList = snListHashMap.stream().map(x -> x.get("SERIALNUMBERLONG")).toArray(String[]::new);
             }
 
@@ -353,18 +355,18 @@ public class PickUtil {
         UDTRN.CONTENT07 = stdQtyTobePicked.toPlainString();
         UDTRN.Insert( userid);
 
-        HashMap<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
         result.put("TOID", toId);
         result.put("PRINT", String.valueOf(printLabel));
 
         return result;
     }
 
-    public static HashMap<String, String> doPickByAddPickDetail( String orderKey, String orderLineNumber, String idToBePicked, String toId, BigDecimal stdQtyToBePicked) throws SQLException {
+    public static Map<String, String> doPickByAddPickDetail( String orderKey, String orderLineNumber, String idToBePicked, String toId, BigDecimal stdQtyToBePicked) throws SQLException {
 
-        EXEDataObject thePickDO = new EXEDataObject();
+        ServiceDataMap thePickDO = new ServiceDataMap();
 
-        HashMap<String,String> lotxLocxIdInfo = LotxLocxId.findById(idToBePicked,true);
+        Map<String,String> lotxLocxIdInfo = LotxLocxId.findById(idToBePicked,true);
 
         //检查容器条码和订单冻结分配状态匹配
         PickUtil.checkIdHoldStatusMatchOrderType(orderKey, lotxLocxIdInfo);
@@ -393,7 +395,7 @@ public class PickUtil {
         //支持冻结库存的拣货
         String statusRequired = lotxLocxIdInfo.get("STATUS").equals("OK")? "OK": InventoryHelper.getHoldStatus4Pick(lotxLocxIdInfo);
         //更新拣货明细的自定义字段1为开封，用于反馈赋码系统时确定是否使用箱号还是唯一码
-        HashMap<String,String> idNotesHashMap = IDNotes.findById(toId,true);
+        Map<String,String> idNotesHashMap = IDNotes.findById(toId,true);
 
         DBHelper.executeUpdate(
                 " INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status, PDUDF1 ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,? )",
@@ -499,11 +501,11 @@ public class PickUtil {
     }
 
 
-    public static void checkIdHoldStatusMatchOrderType( String orderKey, HashMap<String,String> lotxLocxIdInfo){
+    public static void checkIdHoldStatusMatchOrderType( String orderKey, Map<String,String> lotxLocxIdInfo){
 
-        HashMap<String, String> orderHashMap = Orders.findByOrderKey( orderKey, true);
+        Map<String, String> orderHashMap = Orders.findByOrderKey( orderKey, true);
 
-        List<HashMap<String, String>> holdStatusHashMapList = DBHelper.executeQuery( "SELECT STATUSCODE from HOLDALLOCATIONMATRIX WHERE ORDERTYPE=?", new Object[]{
+        List<Map<String, String>> holdStatusHashMapList = DBHelper.executeQuery( "SELECT STATUSCODE from HOLDALLOCATIONMATRIX WHERE ORDERTYPE=?", new Object[]{
                 orderHashMap.get("TYPE")
         });
 

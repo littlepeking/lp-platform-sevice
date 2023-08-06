@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class ValidateSO extends LegacyBaseService {
 
@@ -37,12 +37,12 @@ public class ValidateSO extends LegacyBaseService {
             String ORDERKEY = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String> orderInfo =  Orders.findByOrderKey(ORDERKEY,true);
+            Map<String, String> orderInfo =  Orders.findByOrderKey(ORDERKEY,true);
 
             //john -- check if order type and quality status is match
             OrderValidationHelper.checkOrderTypeAndQualityStatusMatch4Alloc(ORDERKEY);
             OrderValidationHelper.validateFieldsBeforeShip(ORDERKEY);
-            HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));
+            Map<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));
             if ("Y".equalsIgnoreCase(orderTypeEntry.get("EXT_UDF_STR4"))) {
                 OrderValidationHelper.validateReturnPo( ORDERKEY);
             }

@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class ConfirmASN extends LegacyBaseService {
@@ -43,13 +43,13 @@ public class ConfirmASN extends LegacyBaseService {
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
+            Map<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
 
             if ("2".equals(receiptInfo.get("ISCONFIRMED"))) {
                 ExceptionHelper.throwRfFulfillLogicException("订单已为复核状态，无需重复确认");
             }
 
-            List<HashMap<String, String>>  receiptDetails = Receipt.findReceiptDetails(receiptKey,false);
+            List<Map<String, String>>  receiptDetails = Receipt.findReceiptDetails(receiptKey,false);
 
             if (receiptDetails.size()==0) {
                 ExceptionHelper.throwRfFulfillLogicException("没有找到该ASN单的收货明细，不允许确认");
@@ -58,10 +58,10 @@ public class ConfirmASN extends LegacyBaseService {
             //进行复核确认时为ASN生成收货批次
             if(receiptInfo.get("ISCONFIRMED").equals("1")) {
 
-                HashMap<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptInfo.get("TYPE"));
+                Map<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptInfo.get("TYPE"));
 
 
-                for (HashMap<String, String> receiptDetail : receiptDetails) {
+                for (Map<String, String> receiptDetail : receiptDetails) {
                     //为ASN指令行生成收货批次
                     if (Const.RECEIPT_RF_TYPE_WITH_ASN.equalsIgnoreCase(receiptTypeInfo.get("UDF5"))
                             && UtilHelper.isEmpty(receiptDetail.get("TOID"))

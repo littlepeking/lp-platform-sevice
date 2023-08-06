@@ -32,9 +32,9 @@ public class IDNotes {
 
     }
 
-    public static HashMap<String,String> decreaseWgtById( BigDecimal netWgt, String id) throws Exception {
+    public static Map<String,String> decreaseWgtById( BigDecimal netWgt, String id) throws Exception {
 
-        HashMap<String,String> currentIDNotes = DBHelper.getRecordByConditions("IDNOTES", new HashMap<String,Object>(){{
+        Map<String,String> currentIDNotes = DBHelper.getRecordByConditions("IDNOTES", new HashMap<String,Object>(){{
             put("ID",id);
         }},"容器标签数据");
 
@@ -66,9 +66,9 @@ public class IDNotes {
     }
 
     //分装的情况下要更新原始重量，发运操作没有分拆容器所以不需要执行此方法
-    public static HashMap<String,String> syncOriginalWgtById( String id) throws Exception {
+    public static Map<String,String> syncOriginalWgtById( String id) throws Exception {
 
-        HashMap<String,String> currentIDNotes = DBHelper.getRecordByConditions("IDNOTES", new HashMap<String,Object>(){{
+        Map<String,String> currentIDNotes = DBHelper.getRecordByConditions("IDNOTES", new HashMap<String,Object>(){{
             put("ID",id);
         }},"容器标签数据");
 
@@ -106,9 +106,9 @@ public class IDNotes {
      */
     public static String splitWgtById( BigDecimal grossWgt, BigDecimal netWgt, BigDecimal tareWgt, String grossWgtLabel, String netWgtLabel, String tareWgtLabel, String uomLabel,  String id, String toid, String orderKey, boolean isSplitLpn) throws Exception {
 
-        HashMap<String,String> fromIDNotes = IDNotes.findById( id,true);
+        Map<String,String> fromIDNotes = IDNotes.findById( id,true);
 
-        HashMap<String,String> decreasedFromIdNotes = decreaseWgtById( netWgt, id);
+        Map<String,String> decreasedFromIdNotes = decreaseWgtById( netWgt, id);
         syncOriginalWgtById( id);
 
         String barrelNumber ="";
@@ -123,7 +123,7 @@ public class IDNotes {
 
         if(!UtilHelper.isEmpty(toid)) {
 
-            HashMap<String, String> toIdLotxLocxIdHashMap = LotxLocxId.findById( toid, false);
+            Map<String, String> toIdLotxLocxIdHashMap = LotxLocxId.findById( toid, false);
 
             if (toIdLotxLocxIdHashMap != null) {
 
@@ -132,7 +132,7 @@ public class IDNotes {
                         ExceptionHelper.throwRfFulfillLogicException("该箱号存在可用库存，不能作为拣货至箱号");
                 }
 
-                HashMap<String, String> toIdNotes = IDNotes.findById( toid, false);
+                Map<String, String> toIdNotes = IDNotes.findById( toid, false);
 
                 if (toIdNotes != null && !toIdNotes.get("LOT").equals(decreasedFromIdNotes.get("LOT"))) {
                     if(!UtilHelper.isEmpty(orderKey)) {
@@ -142,7 +142,7 @@ public class IDNotes {
                     }
                 }
 
-                HashMap<String,String> updateFields = new LinkedHashMap<>();
+                Map<String,String> updateFields = new HashMap<>();
                 updateFields.put("ORIGINALGROSSWGT", UtilHelper.decimalStrAdd(toIdNotes.get("ORIGINALGROSSWGT"), grossWgt));//原始毛重
                 updateFields.put("ORIGINALTAREWGT", UtilHelper.decimalStrAdd(toIdNotes.get("ORIGINALTAREWGT"), tareWgt));//原始皮重
                 updateFields.put("ORIGINALNETWGT", UtilHelper.decimalStrAdd(toIdNotes.get("ORIGINALNETWGT"), netWgt));//原始净重
@@ -154,7 +154,7 @@ public class IDNotes {
                 updateFields.put("NETWGTLABEL", UtilHelper.decimalStrAdd(toIdNotes.get("NETWGT"), netWgt));
 //                updateFields.put("UOMLABEL", "");
                 updateFields.put("ISOPENED", "1");
-                HashMap<String,String> whereFields = new LinkedHashMap<>();
+                Map<String,String> whereFields = new HashMap<>();
                 whereFields.put("ID", toid);
                 LegacyDBHelper.ExecUpdate( "idnotes", updateFields, whereFields);
                 if(UtilHelper.decimalStrCompare(decreasedFromIdNotes.get("NETWGT"),"0") == 0) {
@@ -188,7 +188,7 @@ public class IDNotes {
             //  订单号为空：移动
             if (!UtilHelper.isEmpty(orderKey)) {
 
-                HashMap<String,String> orderHashMap = Orders.findByOrderKey(orderKey,true);
+                Map<String,String> orderHashMap = Orders.findByOrderKey(orderKey,true);
 
                 //批次号管理物料不会使用流水号作为LPN，因为无法追溯。这里也暂不关心是否自动生成LPN的配置，只要为空都自动生成。
                 if(!SKU.isSerialControl( fromIDNotes.get("SKU"))) {
@@ -234,7 +234,7 @@ public class IDNotes {
 
         //add New IDNotes
         String userid = EHContextHelper.getUser().getUsername();
-        HashMap<String,String> IDNOTES = new HashMap<String,String>();
+        Map<String,String> IDNOTES = new HashMap<String,String>();
         IDNOTES.put("AddWho", userid);
         IDNOTES.put("EditWho", userid);
         IDNOTES.put("STORERKEY", decreasedFromIdNotes.get("STORERKEY"));
@@ -271,7 +271,7 @@ public class IDNotes {
         return toid;
     }
 
-    public static void update( String id, HashMap<String,String> updateFields) throws Exception {
+    public static void update( String id, Map<String,String> updateFields) throws Exception {
 
         if(UtilHelper.isEmpty(id)) throw new Exception("待更新的容器号不能为空");
 
@@ -282,12 +282,12 @@ public class IDNotes {
         LegacyDBHelper.ExecUpdate( "IDNOTES",updateFields, new HashMap<String,String>(){{put("ID",id);}});
     }
 
-    public static HashMap<String,String> findAvailInvById(String id,boolean checkExist) throws DBResourceException {
+    public static Map<String,String> findAvailInvById(String id,boolean checkExist) throws DBResourceException {
 
 
         if(UtilHelper.isEmpty(id)) ExceptionHelper.throwRfFulfillLogicException("ID不能为空");
 
-        HashMap<String,String> record = DBHelper.getRecord("select * from idnotes where NETWGT > 0 AND id=?", new Object[]{id},"容器标签");
+        Map<String,String> record = DBHelper.getRecord("select * from idnotes where NETWGT > 0 AND id=?", new Object[]{id},"容器标签");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到容器标签的库存");
 
         return record;
@@ -298,12 +298,12 @@ public class IDNotes {
 
     //目前IDNOTES表中的数据NETWGT都大于0，出现为0的自动移至历史数据。
     //TODO:移动拆分容器数量为0时，归档IDNOTES
-    public static HashMap<String,String> findById(String id,boolean checkExist) throws DBResourceException {
+    public static Map<String,String> findById(String id,boolean checkExist) throws DBResourceException {
 
 
         if(UtilHelper.isEmpty(id)) ExceptionHelper.throwRfFulfillLogicException("ID不能为空");
 
-        HashMap<String,String>  record = DBHelper.getRecord("select * from idnotes where id=?", new Object[]{id},"容器标签");
+        Map<String,String>  record = DBHelper.getRecord("select * from idnotes where id=?", new Object[]{id},"容器标签");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("容器标签"+id+"不存在");
 
         return record;
@@ -358,7 +358,7 @@ public class IDNotes {
         return false;
     }
 
-//    public static HashMap<String,String> ship( String id) throws Exception {
+//    public static Map<String,String> ship( String id) throws Exception {
 //
 //        findById(id,true);
 //        List<Object> params = new ArrayList<>();
@@ -371,8 +371,8 @@ public class IDNotes {
 //    }
 
 
-    public static void archiveIDNotes( HashMap<String, String> shippedIdNotesHashMap) throws Exception {
-        HashMap<String,String> idNotesHistory=new LinkedHashMap<>();
+    public static void archiveIDNotes( Map<String, String> shippedIdNotesHashMap) throws Exception {
+        Map<String,String> idNotesHistory=new HashMap<>();
         idNotesHistory.put("ADDWHO", EHContextHelper.getUser().getUsername());
         idNotesHistory.put("EDITWHO", EHContextHelper.getUser().getUsername());
         idNotesHistory.put("ADDDATE", "@date");
@@ -420,10 +420,10 @@ public class IDNotes {
 
         if(isSkuSerialControl){
 
-            List<HashMap<String,String>> snList = SerialInventory.findByLpn(shippedIdNotesHashMap.get("ID"),true);
+            List<Map<String,String>> snList = SerialInventory.findByLpn(shippedIdNotesHashMap.get("ID"),true);
 
-            for(HashMap<String,String> sn :snList){
-                HashMap<String,String> snHistory=new LinkedHashMap<>();
+            for(Map<String,String> sn :snList){
+                Map<String,String> snHistory=new HashMap<>();
                 snHistory.put("IDSERIALKEY", shippedIdNotesHashMap.get("SERIALKEY"));
                 snHistory.put("ID", shippedIdNotesHashMap.get("ID"));
                 snHistory.put("SKU", shippedIdNotesHashMap.get("SKU"));
@@ -452,7 +452,7 @@ public class IDNotes {
      * @param checkExist
      * @return
      */
-    public static HashMap<String,String> findByIdWithLotInfo(String id,boolean checkExist){
+    public static Map<String,String> findByIdWithLotInfo(String id,boolean checkExist){
         String sql = "SELECT A.*,ELOT.*,s.*"+
                 " FROM IDNOTES A , V_LOTATTRIBUTE ELOT, SKU S WHERE A.LOT = ELOT.LOT AND A.SKU = S.SKU AND A.ID = ? ";
         return DBHelper.getRecord(sql,new Object[]{id},"容器条码",checkExist);

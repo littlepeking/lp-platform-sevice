@@ -21,7 +21,7 @@ package com.enhantec.framework.common.model;
 
 import lombok.Data;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 @Data
@@ -35,6 +35,6 @@ public class PageParams {
     int pageIndex;
 
     List<EHDataGridFilterInfo> filters;
-    HashMap<String,Object> params;
-    HashMap<String,String> orderBy;
+    Map<String,Object> params;
+    Map<String,String> orderBy;
 }

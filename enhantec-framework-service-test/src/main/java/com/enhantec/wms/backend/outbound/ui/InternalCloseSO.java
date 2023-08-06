@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class InternalCloseSO extends LegacyBaseService {
 
@@ -39,7 +39,7 @@ public class InternalCloseSO extends LegacyBaseService {
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String> orderHashMap = Orders.findByOrderKey(orderKey,true);
+            Map<String, String> orderHashMap = Orders.findByOrderKey(orderKey,true);
 
             if(OutboundUtils.isOrderCanBeCancelled(orderHashMap.get("STATUS"))){
                 //order状态是内部创建或者外部创建时，点击"内部取消"按钮，订单状态改成"内部取消"

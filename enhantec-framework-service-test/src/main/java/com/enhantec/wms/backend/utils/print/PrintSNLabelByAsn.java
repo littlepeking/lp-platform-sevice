@@ -9,7 +9,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class PrintSNLabelByAsn extends LegacyBaseService
 {
@@ -48,8 +48,8 @@ public class PrintSNLabelByAsn extends LegacyBaseService
 		    String LPN= serviceDataHolder.getInputDataAsMap().getString("LPN");
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
 
-			HashMap<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN( LPN, true);
-			HashMap<String, String> sku = SKU.findById( lastReceiptDetailByLPN.get("SKU"), true);
+			Map<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN( LPN, true);
+			Map<String, String> sku = SKU.findById( lastReceiptDetailByLPN.get("SKU"), true);
 
 //			CodeLookup.getCodeLookupByKey("IDREPRINT",Labels.SN_UI_CD);
 

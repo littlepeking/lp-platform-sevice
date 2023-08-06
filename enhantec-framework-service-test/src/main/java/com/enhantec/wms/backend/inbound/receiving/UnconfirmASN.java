@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class UnconfirmASN extends LegacyBaseService {
 
@@ -41,7 +41,7 @@ public class UnconfirmASN extends LegacyBaseService {
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
+            Map<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
 
             if(!receiptInfo.get("STATUS").equals("0")) ExceptionHelper.throwRfFulfillLogicException("非新建状态的ASN不允许取消确认");
 

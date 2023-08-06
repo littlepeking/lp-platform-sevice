@@ -13,7 +13,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 /**
@@ -38,14 +38,14 @@ public class RepackagingSuggestion extends LegacyBaseService {
 
  
 
-            HashMap<String,String> zoneInfo = CodeLookup.getCodeLookupByKey( "SYSSET","PACKZONE");
+            Map<String,String> zoneInfo = CodeLookup.getCodeLookupByKey( "SYSSET","PACKZONE");
             if(UtilHelper.isEmpty(zoneInfo.get("UDF1"))) ExceptionHelper.throwRfFulfillLogicException("仓库分装区配置未进行设置");
-            //List<HashMap<String,String>> packLocs = Loc.findByZone(zoneInfo.get("UDF1"),false);
-            HashMap<String,String> orderInfo = Orders.findByOrderKey(orderKey,true);
-            HashMap<String,String> orderDetailInfo = Orders.findOrderDetailByKey(orderKey, orderLineNumber,true);
-            HashMap<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey("ORDERTYPE",orderInfo.get("TYPE"));
+            //List<Map<String,String>> packLocs = Loc.findByZone(zoneInfo.get("UDF1"),false);
+            Map<String,String> orderInfo = Orders.findByOrderKey(orderKey,true);
+            Map<String,String> orderDetailInfo = Orders.findOrderDetailByKey(orderKey, orderLineNumber,true);
+            Map<String,String> orderTypeInfo = CodeLookup.getCodeLookupByKey("ORDERTYPE",orderInfo.get("TYPE"));
 
-            HashMap<String,String> skuInfo = SKU.findById(orderDetailInfo.get("SKU"),true);
+            Map<String,String> skuInfo = SKU.findById(orderDetailInfo.get("SKU"),true);
 
             String mainUOM = UOM.getStdUOM( skuInfo.get("PACKKEY"));
 
@@ -135,7 +135,7 @@ public class RepackagingSuggestion extends LegacyBaseService {
 
             querySqlSB.append(orderByClause);
 
-            List<HashMap<String, String>> list = DBHelper.executeQuery( querySqlSB.toString(), new Object[]{});
+            List<Map<String, String>> list = DBHelper.executeQuery( querySqlSB.toString(), new Object[]{});
 
             serviceDataHolder.setReturnCode(1);
             serviceDataHolder.setOutputData(list);

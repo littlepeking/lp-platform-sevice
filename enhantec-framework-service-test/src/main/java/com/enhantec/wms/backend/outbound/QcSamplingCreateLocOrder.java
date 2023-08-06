@@ -9,8 +9,10 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.framework.common.utils.EHContextHelper;
+
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.HashMap;
 
 public class QcSamplingCreateLocOrder  extends LegacyBaseService
 {
@@ -58,7 +60,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
         String total3="0";
         String ORDERTYPE = CDSysSet.getSampleOrderType();//原料取样出库
         boolean orderExists =false;
-        HashMap<String,String> samplePackInfo=null;
+        Map<String,String> samplePackInfo=null;
         try
         {
             String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
@@ -68,7 +70,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
             if (UtilHelper.isEmpty(lot)) throw new Exception("当前批次在系统中无库存");
 
 
-            HashMap<String,String> res= DBHelper.getRecord("select c.PACKKEY, c.PACKUOM3  UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and c.PACKKEY = s.PACKKEY and a.STORERKEY = ? and a.lot=?", new String[]{STORERKEY, lot});
+            Map<String,String> res= DBHelper.getRecord("select c.PACKKEY, c.PACKUOM3  UOM, s.SKU SKU, s.DESCR SKUDESCR from v_lotattribute a, pack c, SKU s where s.SKU = a.SKU and c.PACKKEY = s.PACKKEY and a.STORERKEY = ? and a.lot=?", new String[]{STORERKEY, lot});
 
             uom = res.get("UOM");
             sku = res.get("SKU");
@@ -85,7 +87,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
 
             if (LegecyUtilHelper.isNull(OldOrderKey)) {
                 OrderKey = LegacyDBHelper.GetNCounterBill( "ORDER");
-                HashMap<String,String> Fields = new HashMap<String,String>();
+                Map<String,String> Fields = new HashMap<String,String>();
                 Fields.put("AddWho", userid);
                 Fields.put("EditWho", userid);
                 Fields.put("type", ORDERTYPE);
@@ -116,11 +118,11 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
             }else{
                 orderExists = true;
                 OrderKey = OldOrderKey;
-//                List<HashMap<String,String>> mapList =XtSql.GetRecordMap( "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{OrderKey});
+//                List<Map<String,String>> mapList =XtSql.GetRecordMap( "select ORIGINALQTY,OPENQTY,UOM from ORDERDETAIL where orderkey=?",new String[]{OrderKey});
 //
 //                UOMConverter uomConverter =  new UOMConverter();
 //                String finalPackKey = packKey;
-//                Function<HashMap<String,String>, BigDecimal> calcORIGINALQTY = e-> {
+//                Function<Map<String,String>, BigDecimal> calcORIGINALQTY = e-> {
 //                    try {
 //                        return uomConverter.UOMQty2StdQty(finalPackKey, e.get("UOM"), new BigDecimal(e.get("ORIGINALQTY")));
 //                    } catch (Exception exception) {
@@ -128,7 +130,7 @@ public class QcSamplingCreateLocOrder  extends LegacyBaseService
 //                    }
 //                };
 //
-//                Function<HashMap<String,String>, BigDecimal> calcOPENQTY = e-> {
+//                Function<Map<String,String>, BigDecimal> calcOPENQTY = e-> {
 //                    try {
 //                        return uomConverter.UOMQty2StdQty(finalPackKey, e.get("UOM"), new BigDecimal(e.get("OPENQTY")));
 //                    } catch (Exception exception) {

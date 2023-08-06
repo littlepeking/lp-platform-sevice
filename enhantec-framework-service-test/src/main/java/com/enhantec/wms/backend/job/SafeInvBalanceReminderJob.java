@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class SafeInvBalanceReminderJob extends LegacyBaseService {
@@ -36,14 +36,14 @@ public class SafeInvBalanceReminderJob extends LegacyBaseService {
 					, new Object[]{
 							Const.SKU_SAFE_INV_BALANCE_TYPE
 					});
-			List<HashMap<String,String>> list =  DBHelper.executeQuery(
+			List<Map<String,String>> list =  DBHelper.executeQuery(
 					"select s.AVAIL_QTY ,s2.TOTALAVAILABLE,s.SKU from SKU s ,( select sum((QTY-QTYPICKED-QTYALLOCATED-QTYONHOLD)) as TOTALAVAILABLE,l.SKU from LOT l ,V_LOTATTRIBUTE vl" +
 							" where l.LOT=vl.LOT  GROUP BY l.SKU ) s2 " +
 							" where s2.sku = s.SKU  and s.AVAIL_QTY >(s2.TOTALAVAILABLE - s.AVAIL_QTY)  ",
 					new Object[]{});
 
 			if(list.size()>0) {
-				for (HashMap<String,String> temp : list) {
+				for (Map<String,String> temp : list) {
 
 					DBHelper.executeUpdate(
 							"INSERT INTO REMINDER (REMINDERTYPE,[DATE],MSG) VALUES (?,?,?)"

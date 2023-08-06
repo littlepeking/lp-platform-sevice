@@ -14,7 +14,7 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class SplitLpn extends LegacyBaseService {
@@ -51,7 +51,7 @@ public class SplitLpn extends LegacyBaseService {
 
 			if(UtilHelper.isEmpty(fromId)) ExceptionHelper.throwRfFulfillLogicException("容器条码不允许为空");
 
-			HashMap<String,String> lotxLocxIdHashMap = null;
+			Map<String,String> lotxLocxIdHashMap = null;
 			String qtyToSplit ="0";
 			List<String> snList = new ArrayList<>();
 
@@ -85,11 +85,11 @@ public class SplitLpn extends LegacyBaseService {
 
 			String toLoc = lotxLocxIdHashMap.get("LOC");
 			if(!UtilHelper.isEmpty(toId)){
-				HashMap<String, String> toIdHashMap = LotxLocxId.findById( toId, false);
+				Map<String, String> toIdHashMap = LotxLocxId.findById( toId, false);
 				if(toIdHashMap !=null) toLoc = toIdHashMap.get("LOC");
 			}
 
-			HashMap<String,String> result = InventoryHelper.doMove(opName, lotxLocxIdHashMap, snList, toId, lotxLocxIdHashMap.get("LOC"), toLoc, toBeMovedNetWgt, toBeMovedGrossWgt, toBeMovedTareWgt, toBeMovedUOM, printer,true);
+			Map<String,String> result = InventoryHelper.doMove(opName, lotxLocxIdHashMap, snList, toId, lotxLocxIdHashMap.get("LOC"), toLoc, toBeMovedNetWgt, toBeMovedGrossWgt, toBeMovedTareWgt, toBeMovedUOM, printer,true);
 
 			toId = result.get("TOID");
 			String printLabel = result.get("PRINT");

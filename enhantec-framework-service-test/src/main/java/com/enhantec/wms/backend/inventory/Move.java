@@ -16,7 +16,7 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,10 +65,10 @@ public class Move extends LegacyBaseService {
 
 			if(isMoveAction) {
 
-				HashMap<String, String> packZoneInfo = CodeLookup.getCodeLookupByKey( "SYSSET", "PACKZONE");
+				Map<String, String> packZoneInfo = CodeLookup.getCodeLookupByKey( "SYSSET", "PACKZONE");
 
 				String locCountQuery = "SELECT count(1) TOTALNUM FROM LOC WHERE PUTAWAYZONE = ? AND LOC = ? ";
-				HashMap<String, String> countRecord = DBHelper.getRecord( locCountQuery, new Object[]{
+				Map<String, String> countRecord = DBHelper.getRecord( locCountQuery, new Object[]{
 						packZoneInfo.get("UDF1"),
 						toLoc
 
@@ -80,7 +80,7 @@ public class Move extends LegacyBaseService {
 				}
 			}
 
-			HashMap<String,String> lotxLocxIdHashMap;
+			Map<String,String> lotxLocxIdHashMap;
 			String qtyToMove;
 			List<String> snList = new ArrayList<>();
 
@@ -104,7 +104,7 @@ public class Move extends LegacyBaseService {
 
 				lotxLocxIdHashMap = LotxLocxId.findById( fromId, true);
 
-				List<HashMap<String,String>> snHashMapList =  SerialInventory.findByLpn(fromId,true);
+				List<Map<String,String>> snHashMapList =  SerialInventory.findByLpn(fromId,true);
 				snList.addAll(snHashMapList.stream().map(x->x.get("SERIALNUMBER")).collect(Collectors.toList()));
 				qtyToMove = String.valueOf(snList.size());
 				toId =fromId;

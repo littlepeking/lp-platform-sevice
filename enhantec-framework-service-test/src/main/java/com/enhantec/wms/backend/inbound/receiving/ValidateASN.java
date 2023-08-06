@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class ValidateASN extends LegacyBaseService {
 
@@ -41,7 +41,7 @@ public class ValidateASN extends LegacyBaseService {
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
+            Map<String, String>  receiptInfo =  Receipt.findByReceiptKey(receiptKey,true);
 
             if(UtilHelper.isEmpty(receiptInfo.get("EXTERNRECEIPTKEY"))) ExceptionHelper.throwRfFulfillLogicException("外部单号不允许为空");
 

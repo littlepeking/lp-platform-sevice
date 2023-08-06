@@ -7,7 +7,7 @@ import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.SKU;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class CDReceiptType {
     /**
@@ -42,7 +42,7 @@ public class CDReceiptType {
      */
     public static boolean isAutoReceiving( String receiptType){
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
+        Map<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
         if("Y".equalsIgnoreCase(receiptTypeHashMap.get("UDF2"))){
             return true;
         }else {
@@ -56,7 +56,7 @@ public class CDReceiptType {
      */
     public static String getReceivingFuncType( String receiptType){
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
+        Map<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
         return receiptTypeHashMap.get("UDF5");
     }
 
@@ -65,7 +65,7 @@ public class CDReceiptType {
 
     public static boolean isBindAndAutoGenerateLpn( String sku, String receiptType) {
 
-        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
+        Map<String, String> codelkup = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
 
         if(!UtilHelper.isEmpty(codelkup.get("UDF3"))) {
 
@@ -87,7 +87,7 @@ public class CDReceiptType {
      */
     public static boolean isBindingNewLpn(String sku,String receiptType) {
 
-        HashMap<String, String> codelkup = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
+        Map<String, String> codelkup = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
 
         if(SKU.isSerialControl(sku) && !UtilHelper.isEmpty(codelkup.get("UDF3"))) {
 
@@ -105,7 +105,7 @@ public class CDReceiptType {
     //是否允许超拣
     public static boolean isAllowOverPick(String receiptType) throws Exception{
 
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
+        Map<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
         if("Y".equalsIgnoreCase(receiptTypeHashMap.get("UDF4"))){
             return true;
         }else {
@@ -121,7 +121,7 @@ public class CDReceiptType {
             1: 当容器开封时，退货的批次号为原批次号+R(A-Z)
             2: 退货的批次号直接从系统获取下一新的收货批次号，且Elottable07生产批号+R(A-Z)
      */
-        HashMap<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
+        Map<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", receiptType);
         return receiptTypeHashMap.get("UDF6");
     }
 

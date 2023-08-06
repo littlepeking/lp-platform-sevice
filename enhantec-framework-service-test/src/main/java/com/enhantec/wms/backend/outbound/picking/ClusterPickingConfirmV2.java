@@ -65,14 +65,14 @@ public class ClusterPickingConfirmV2  {
 //
 //            if (UtilHelper.isEmpty(taskdetailkey)) ExceptionHelper.throwRfFulfillLogicException("拣货任务号不允许为空");
 //
-//            HashMap<String, String> taskDetailRecord = getTaskInfo( taskdetailkey,);
+//            Map<String, String> taskDetailRecord = getTaskInfo( taskdetailkey,);
 //
 //            String orderKey = taskDetailRecord.get("ORDERKEY");
 //            String orderLineNumber = taskDetailRecord.get("ORDERLINENUMBER");
 //            String pickdetailKey = taskDetailRecord.get("PICKDETAILKEY");
 //            String orderType = taskDetailRecord.get("TYPE");
 //
-//            HashMap<String,String>  fromIdHashMap = LotxLocxId.findById(taskDetailRecord.get("FROMID"),true);
+//            Map<String,String>  fromIdHashMap = LotxLocxId.findById(taskDetailRecord.get("FROMID"),true);
 //
 //             BigDecimal taskQty = new BigDecimal(taskDetailRecord.get("QTY"));
 //             BigDecimal lpnQty = new BigDecimal(fromIdHashMap.get("QTY"));
@@ -102,7 +102,7 @@ public class ClusterPickingConfirmV2  {
 //
 //             }
 //
-//             HashMap<String,String> result = PickUtil.doRandomPick( orderKey,orderLineNumber, fromIdHashMap,toId, grossWgt, tareWgt, netWgt, uom,taskQty, snList,esignaturekey,printer);
+//             Map<String,String> result = PickUtil.doRandomPick( orderKey,orderLineNumber, fromIdHashMap,toId, grossWgt, tareWgt, netWgt, uom,taskQty, snList,esignaturekey,printer);
 //
 //             toId = result.get("TOID");
 //             String printLabel = result.get("PRINT");
@@ -185,7 +185,7 @@ public class ClusterPickingConfirmV2  {
 //
 //            EXEDataObject outDO = (EXEDataObject) context.theEXEDataObjectStack.stackList.get(1);
 //
-//            HashMap<String, String> taskDetailHashMap = TaskDetail.findById( taskdetailkey, true);
+//            Map<String, String> taskDetailHashMap = TaskDetail.findById( taskdetailkey, true);
 //            outDO.setAttribValue("status", taskDetailHashMap.get("STATUS"));
 //            outDO.setAttribValue("PRINTLABEL",printLabel);
 //
@@ -226,8 +226,8 @@ public class ClusterPickingConfirmV2  {
 //            
 //            //*****************
 //
-//            HashMap<String, String> originalTaskDetailInfo = TaskDetail.findById( taskdetailkey, true);
-//            HashMap<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey( originalTaskDetailInfo.get("PICKDETAILKEY"), true);
+//            Map<String, String> originalTaskDetailInfo = TaskDetail.findById( taskdetailkey, true);
+//            Map<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey( originalTaskDetailInfo.get("PICKDETAILKEY"), true);
 //
 //            DBHelper.executeUpdate( "UPDATE PICKDETAIL SET QTY = ? , UOMQTY = ? WHERE PICKDETAILKEY = ?",
 //                    new Object[]{
@@ -346,7 +346,7 @@ public class ClusterPickingConfirmV2  {
 //    }
 //
 //
-//    private HashMap<String, String> getTaskInfo( String taskdetailkey,) {
+//    private Map<String, String> getTaskInfo( String taskdetailkey,) {
 //        return DBHelper.getRecord(
 //                "SELECT O.TYPE, TD.STATUS, TD.LOT,TD.QTY,TD.SKU,TD.STORERKEY,TD.FROMLOC,TD.FROMID,TD.TOID,TD.TOLOC,TD.CASEID,TD.UOM,P.CARTONGROUP ,P.CARTONTYPE ,P.PACKKEY, P.ORDERKEY,P.ORDERLINENUMBER, P.PICKDETAILKEY " +
 //                        " FROM TASKDETAIL TD, PICKDETAIL P,ORDERS O " +

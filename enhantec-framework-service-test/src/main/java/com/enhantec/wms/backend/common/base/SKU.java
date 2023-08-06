@@ -5,15 +5,15 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class SKU {
 
-    public static  HashMap<String,String> findById(  String sku, boolean checkExist) throws FulfillLogicException {
+    public static  Map<String,String> findById(  String sku, boolean checkExist) throws FulfillLogicException {
 
         if(UtilHelper.isEmpty(sku)) ExceptionHelper.throwRfFulfillLogicException("物料代码不能为空");
 
-        HashMap<String,String>  record = DBHelper.getRecord("select * from sku where sku = ?", new Object[]{sku},"物料代码");
+        Map<String,String>  record = DBHelper.getRecord("select * from sku where sku = ?", new Object[]{sku},"物料代码");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("物料代码"+sku+"不存在");
 
         return record;
@@ -24,7 +24,7 @@ public class SKU {
     //是否唯一码管理
     public static boolean isSerialControl( String sku) {
 
-        HashMap<String,String> skuHashMap = SKU.findById( sku,true);
+        Map<String,String> skuHashMap = SKU.findById( sku,true);
 
         return "1".equals(skuHashMap.get("SNUM_ENDTOEND"));
 

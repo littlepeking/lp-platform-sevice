@@ -14,7 +14,7 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr;
@@ -46,7 +46,7 @@ public class ShipByOrder extends LegacyBaseService {
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderkey");
 
-            HashMap<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
+            Map<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
             String PRODLOTEXPECTED =orderInfo.get("PRODLOTEXPECTED");
 
             if (CDSysSet.isShipByConfirm()){
@@ -77,9 +77,9 @@ public class ShipByOrder extends LegacyBaseService {
             if (!unAllocatedODCount.equals("0")
                     || !unPickedCount.equals("0")) throw new Exception("请确认订单数量已分配和拣货完毕");
 
-            List<HashMap<String, String>> pickDetails = PickDetail.findByOrderKey( orderKey, true);
+            List<Map<String, String>> pickDetails = PickDetail.findByOrderKey( orderKey, true);
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("esignaturekey");
-            HashMap<String, String> orderTypeConf = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));
+            Map<String, String> orderTypeConf = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));
             //是否转仓出库类型
             if("Y".equalsIgnoreCase(orderTypeConf.get("EXT_UDF_STR5"))){
                 String toWarehouse = orderInfo.get("TOWAREHOUSE");
@@ -96,13 +96,13 @@ public class ShipByOrder extends LegacyBaseService {
             }
 
 
-            for(HashMap<String, String> pickDetail: pickDetails){
+            for(Map<String, String> pickDetail: pickDetails){
                 if(!pickDetail.get("STATUS").equals("9")) {
                     if (!UtilHelper.isEmpty(PRODLOTEXPECTED)){
                         //如果orders目标收货批次不为空 将目标收货批次放在idnotes
                         DBHelper.executeUpdate("update IDNOTES SET PRODLOTEXPECTED = ? WHERE ID = ? ", new Object[]{PRODLOTEXPECTED , pickDetail.get("ID")});
                     }
-                    HashMap<String, String> shippedIdNotesHashMap = IDNotes.decreaseWgtById( new BigDecimal(pickDetail.get("QTY")), pickDetail.get("ID"));
+                    Map<String, String> shippedIdNotesHashMap = IDNotes.decreaseWgtById( new BigDecimal(pickDetail.get("QTY")), pickDetail.get("ID"));
                     if(UtilHelper.decimalStrCompare(shippedIdNotesHashMap.get("NETWGT"), "0")==0) {
                         // ExceptionHelper.throwRfFulfillLogicException("待发运的容器条码/箱号" + pickDetail.get("ID") + "发运时扣库存异常(不为零)，发运失败");
                         //校验发运的IDNOTES库存余额应为0并移至历史表，否则报错
@@ -117,7 +117,7 @@ public class ShipByOrder extends LegacyBaseService {
 //            shipProcess.execute();
 //            context.theEXEDataObjectStack.pop();
 
-            HashMap<String, String> updatedOrderInfo = Orders.findByOrderKey( orderKey, true);
+            Map<String, String> updatedOrderInfo = Orders.findByOrderKey( orderKey, true);
             if (!"95".equals(updatedOrderInfo.get("STATUS")))
                 ExceptionHelper.throwRfFulfillLogicException("发运失败，请检查订单数据是否正确");
 
@@ -146,13 +146,13 @@ public class ShipByOrder extends LegacyBaseService {
             UDTRN.Insert( EHContextHelper.getUser().getUsername());
 
             //生基采购退货还po单客户化 创建单据时控制一个出库单仅出一个批次 直接查询拣货数量 归还po数量
-            HashMap<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));
+            Map<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));
             if ("Y".equalsIgnoreCase(orderTypeEntry.get("EXT_UDF_STR4"))) {
                 String pokey=orderInfo.get("BUYERPO");
                 String poLine=orderInfo.get("BUYERPOLINE");
-                for(HashMap<String, String> pickDetail: pickDetails) {
+                for(Map<String, String> pickDetail: pickDetails) {
                     String pickqty =pickDetail.get("QTY");
-                    HashMap<String, String> skuHash = SKU.findById( pickDetail.get("SKU"),true);
+                    Map<String, String> skuHash = SKU.findById( pickDetail.get("SKU"),true);
                     BigDecimal updateqty = ReceiptUtilHelper.stdQty2PoWgt(skuHash.get("SNAVGWGT"),new BigDecimal(pickqty),pickDetail.get("SKU"));
                     DBHelper.executeUpdate( "Update WMS_PO_DETAIL set RECEIVEDQTY=ISNULL(RECEIVEDQTY,0)-? where POKEY=? and POLINENUMBER=?"
                             , new String[]{trimZerosAndToStr(updateqty),pokey,poLine});
@@ -175,10 +175,10 @@ public class ShipByOrder extends LegacyBaseService {
     /**
      * 仓库间转移
      */
-    private void generateTargetWarehouseAsn( List<HashMap<String,String>> pickDetails, String toWarehouseName,HashMap<String,String> orderInfo,String esignatureKey)throws Exception{
+    private void generateTargetWarehouseAsn( List<Map<String,String>> pickDetails, String toWarehouseName,Map<String,String> orderInfo,String esignatureKey)throws Exception{
         String fromWarehouseName = EHContextHelper.getCurrentOrgId();
-        HashMap<String,String> fromWarehouseConf = CodeLookup.getCodeLookupByKey( "WHTRANFER", fromWarehouseName.toUpperCase());
-        HashMap<String,String> toWarehouseConf = CodeLookup.getCodeLookupByKey( "WHTRANFER", toWarehouseName);
+        Map<String,String> fromWarehouseConf = CodeLookup.getCodeLookupByKey( "WHTRANFER", fromWarehouseName.toUpperCase());
+        Map<String,String> toWarehouseConf = CodeLookup.getCodeLookupByKey( "WHTRANFER", toWarehouseName);
 
         boolean gmpToGmp = "Y".equalsIgnoreCase(fromWarehouseConf.get("UDF1")) && "Y".equalsIgnoreCase(toWarehouseConf.get("UDF1"));
         boolean gmpToNonGmp = "Y".equalsIgnoreCase(fromWarehouseConf.get("UDF1")) && "N".equalsIgnoreCase(toWarehouseConf.get("UDF1"));
@@ -189,22 +189,22 @@ public class ShipByOrder extends LegacyBaseService {
 
         int seq = 0;
         ToWHAsnBuilder toWHAsnBuilder = new ToWHAsnBuilder( toWarehouseName,getToWarehouseReceiptType(orderInfo.get("TYPE"),toWarehouseName));
-        for (HashMap<String, String> pickDetail : pickDetails) {
-            HashMap<String, String> fromSkuMap = SKU.findById( pickDetail.get("SKU"), true);
+        for (Map<String, String> pickDetail : pickDetails) {
+            Map<String, String> fromSkuMap = SKU.findById( pickDetail.get("SKU"), true);
             String toSKU = pickDetail.get("SKU");
             if(gmpToNonGmp){
                 toSKU = fromSkuMap.get("EXT_UDF_STR3");//GMP转NON-GMP使用JDE编码
             }
             if(nonGmpToGmp){
                 String sql = "SELECT SKU FROM " + orderInfo.get("TOWAREHOUSE") + ".SKU WHERE SKU = ? AND EXT_UDF_STR3 = ?";
-                List<HashMap<String, String>> toWareHouseSku = DBHelper.executeQuery( sql,
+                List<Map<String, String>> toWareHouseSku = DBHelper.executeQuery( sql,
                         new Object[]{orderInfo.get("TOGMPSKU"), pickDetail.get("SKU")});
                 if (null == toWareHouseSku) {
                     ExceptionHelper.throwRfFulfillLogicException("目标GMP仓库编码信息不存在");
                 }
                 toSKU = orderInfo.get("TOGMPSKU");
             }
-            HashMap<String, String> toSkuMap = DBHelper.getRecord(
+            Map<String, String> toSkuMap = DBHelper.getRecord(
                     "SELECT * FROM " + toWarehouseName + ".SKU WHERE SKU = ?",
                     new Object[]{toSKU}, "仓库"+toWarehouseConf.get("DESCRIPTION")+"物料代码为"+toSKU+"的物料", true);
             if(!fromSkuMap.get("PACKKEY").equals(toSkuMap.get("PACKKEY"))){
@@ -238,15 +238,15 @@ public class ShipByOrder extends LegacyBaseService {
 
                 receiptKey = toWHAsnBuilder.buildReceiptHeadInfo(isConfirmedUser1,isConfirmedUser2);
             }
-            HashMap<String, String> fromIdNotesHashMap = LotxLocxId.findById( pickDetail.get("ID"), true);
+            Map<String, String> fromIdNotesHashMap = LotxLocxId.findById( pickDetail.get("ID"), true);
             String receiptLineNumber = toWHAsnBuilder.buildReceiptDetailInfo(receiptKey,toSKU,++seq,fromIdNotesHashMap);
             if(SKU.isSerialControl(fromIdNotesHashMap.get("SKU"))){
-                List<HashMap<String, String>> pickLotXIdDetail = LotxId.findDetailsByPickDetailKey( pickDetail.get("PICKDETAILKEY"), true);
+                List<Map<String, String>> pickLotXIdDetail = LotxId.findDetailsByPickDetailKey( pickDetail.get("PICKDETAILKEY"), true);
                 String [] snList = new String[pickLotXIdDetail.size()];
                 String [] snWgtList = new String[pickLotXIdDetail.size()];
                 String [] snUomList = new String[pickLotXIdDetail.size()];
                 for (int i = 0; i < pickLotXIdDetail.size(); i++) {
-                    HashMap<String, String> serialNumberList = SerialInventory.findBySkuAndSN( fromIdNotesHashMap.get("SKU"),
+                    Map<String, String> serialNumberList = SerialInventory.findBySkuAndSN( fromIdNotesHashMap.get("SKU"),
                             pickLotXIdDetail.get(i).get("OOTHER1"), true);
                     snList[i] = serialNumberList.get("SERIALNUMBER");
                     snWgtList[i] = serialNumberList.get("NETWEIGHT");
@@ -259,7 +259,7 @@ public class ShipByOrder extends LegacyBaseService {
         }
     }
     private String getToWarehouseReceiptType(String orderType,String toWarehouse) throws Exception{
-        HashMap<String, String> toWareHouseConf = DBHelper.getRecord(
+        Map<String, String> toWareHouseConf = DBHelper.getRecord(
                 "SELECT * FROM CODELKUP WHERE LISTNAME = 'TOWHCONF' AND UDF1 = ? AND UDF2 = ?",
                 new Object[]{toWarehouse, orderType}, "", false);
         if(null == toWareHouseConf || toWareHouseConf.isEmpty()){

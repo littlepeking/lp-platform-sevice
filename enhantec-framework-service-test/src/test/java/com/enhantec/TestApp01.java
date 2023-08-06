@@ -37,14 +37,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TestApp01 {
 
     @Autowired
-    private WebApplication;
+    private WebApplicationContext context;
 
 
     private MockMvc mockMvc;
 
     @BeforeEach
     public void setup(){
-        mockMvc = MockMvcBuilders.webAppContextSetup()
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
     }

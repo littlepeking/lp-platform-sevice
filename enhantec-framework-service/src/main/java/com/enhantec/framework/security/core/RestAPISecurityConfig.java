@@ -73,6 +73,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -207,7 +208,7 @@ public class RestAPISecurityConfig extends WebSecurityConfigurerAdapter {
     AuthenticationSuccessHandler jsonAuthSuccessHandler() {
         return (req, res, auth) -> {
             // custom payload
-            HashMap<String, Object> extPayLoad = new HashMap<>();
+            Map<String,Object> extPayLoad = new HashMap<>();
             EHUser user = (EHUser) auth.getPrincipal();
             // jwt token
             String jwt = jwtTokenProvider.createToken(auth, extPayLoad);

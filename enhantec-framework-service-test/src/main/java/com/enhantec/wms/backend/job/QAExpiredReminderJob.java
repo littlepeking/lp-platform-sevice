@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class QAExpiredReminderJob extends LegacyBaseService {
@@ -51,7 +51,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 			//查找满足复测期提醒要求的库存批次
 			//DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))     --first second of today
 			//DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()) + 1, 0)) --last second of today
-			List<HashMap<String,String>> list =  DBHelper.executeQuery(
+			List<Map<String,String>> list =  DBHelper.executeQuery(
 					"SELECT DISTINCT la.SKU, la.LOT, la.LOTTABLE06, FORMAT(DATEADD(HH,8,ELOTTABLE05), 'yyyy-MM-dd') ELOTTABLE05,la.ELOTTABLE13 RETESTTIMES," +
 							" DATEDIFF(DAY,DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()) + 1, 0)), DATEADD(s, -1, DATEADD(DAY, DATEDIFF(DAY, 0, ELOTTABLE05) + 1, 0))) AS LEFTDAYS " +
 							" FROM V_LOTATTRIBUTE la " +
@@ -60,7 +60,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 					new Object[]{remindDays});
 
 			if(list.size()>0) {
-				for (HashMap<String,String> tempLotAttr : list) {
+				for (Map<String,String> tempLotAttr : list) {
 
 					int retestTimes = Integer.parseInt(tempLotAttr.get("RETESTTIMES"));
 					int leftDays = Integer.parseInt(tempLotAttr.get("LEFTDAYS"));
@@ -145,7 +145,7 @@ public class QAExpiredReminderJob extends LegacyBaseService {
 					new Object[]{remindDays});
 
 			if(list.size()>0) {
-				for (HashMap<String,String> tempLotAttr : list) {
+				for (Map<String,String> tempLotAttr : list) {
 
 					int leftDays = Integer.parseInt(tempLotAttr.get("LEFTDAYS"));
 					if(leftDays>0){

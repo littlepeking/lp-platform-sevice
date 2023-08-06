@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.HashSet;
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class ConfirmSO extends LegacyBaseService {
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey( ORDERKEY, true);
+            Map<String, String>  ORDERSInfo = Orders.findByOrderKey( ORDERKEY, true);
 
             String isTransferOrderType = DBHelper.getValue( "SELECT EXT_UDF_STR5 FROM CODELKUP WHERE LISTNAME = 'ORDERTYPE' AND CODE = ?",
                     new Object[]{ORDERSInfo.get("TYPE")},String.class,"",false);
@@ -154,16 +154,16 @@ public class ConfirmSO extends LegacyBaseService {
         }
     }
 
-    private void checkTransferOrder( HashMap<String,String> orderInfo){
+    private void checkTransferOrder( Map<String,String> orderInfo){
         boolean isTransferGmp = "Y".equalsIgnoreCase(CodeLookup.getCodeLookupByKey("WHTRANFER",orderInfo.get("TOWAREHOUSE")).get("UDF1"));
         if(isTransferGmp) {
-            List<HashMap<String, String>> orderDetails = Orders.findOrderDetailsByOrderKey( orderInfo.get("ORDERKEY"), false);
+            List<Map<String, String>> orderDetails = Orders.findOrderDetailsByOrderKey( orderInfo.get("ORDERKEY"), false);
             if (orderDetails.size() != 0) {
                 HashSet<String> lotTable06 = new HashSet<>();
                 orderDetails.forEach(orderDetail -> {
                     lotTable06.add(orderDetail.get("LOTTABLE06"));
                     String sql = "SELECT SKU FROM " + orderInfo.get("TOWAREHOUSE") + ".SKU WHERE SKU = ? AND EXT_UDF_STR3 = ?";
-                    List<HashMap<String, String>> toWareHouseSku = DBHelper.executeQuery( sql,
+                    List<Map<String, String>> toWareHouseSku = DBHelper.executeQuery( sql,
                             new Object[]{orderInfo.get("TOGMPSKU"), orderDetail.get("SKU")});
                     if (null == toWareHouseSku || toWareHouseSku.size() == 0) {
                         ExceptionHelper.throwRfFulfillLogicException("目标GMP仓库编码信息不存在");

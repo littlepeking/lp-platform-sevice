@@ -10,7 +10,8 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Map;
 import java.util.List;
 
 public class UpdateQualityStatusJob extends LegacyBaseService {
@@ -37,12 +38,12 @@ public class UpdateQualityStatusJob extends LegacyBaseService {
 		{
 			//查询过复测期的库存批次质量状态
 			//SELECT DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))     --first second of today
-			List<HashMap<String,String>> list =  DBHelper.executeQuery( "SELECT STORERKEY, SKU, ELOT, ELOTTABLE13 FROM enterprise.ELOTATTRIBUTE WHERE (ELOTTABLE03 = 'RELEASE' OR ELOTTABLE03 = 'CONDIREL') AND ELOTTABLE05 < DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)) "
+			List<Map<String,String>> list =  DBHelper.executeQuery( "SELECT STORERKEY, SKU, ELOT, ELOTTABLE13 FROM enterprise.ELOTATTRIBUTE WHERE (ELOTTABLE03 = 'RELEASE' OR ELOTTABLE03 = 'CONDIREL') AND ELOTTABLE05 < DATEADD(s, 1, DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)) "
 					, new Object[]{});
 
 			//更新过期库存批次对应的质量状态为待检或停止发运
 			if(list.size()>0) {
-				for (HashMap<String,String> tempLotAttr : list) {
+				for (Map<String,String> tempLotAttr : list) {
 
 					String newQAStatus  = CDSysSet.getElot05ExpiredQualityStatus();
 
@@ -81,7 +82,7 @@ public class UpdateQualityStatusJob extends LegacyBaseService {
 
 			//更新过期库存批次对应的质量状态为不合格
 			if(list.size()>0) {
-				for (HashMap<String,String> tempLotAttr : list) {
+				for (Map<String,String> tempLotAttr : list) {
 					//String newQAStatus  = "REJECT";
 					String newQAStatus  = CDSysSet.getElot11ExpiredQualityStatus();
 

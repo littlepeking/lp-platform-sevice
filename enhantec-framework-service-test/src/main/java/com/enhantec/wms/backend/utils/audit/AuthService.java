@@ -72,7 +72,7 @@ public class AuthService extends LegacyBaseService {
 //
 //            authnService.remove();
 //        } catch (com.epiphany.shr.util.exceptions.EpiSecurityException e) {
-//            HashMap<String, String> userDetails=new HashMap<String, String>();
+//            Map<String, String> userDetails=new HashMap<String, String>();
 //
 //            userDetails.put("callerID", fullyQualifiedname);
 //            //userDetails.put("component", component);

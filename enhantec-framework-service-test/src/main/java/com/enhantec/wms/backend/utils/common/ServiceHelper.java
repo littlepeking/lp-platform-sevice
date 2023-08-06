@@ -1,19 +1,20 @@
-/**
- * Copyright (C) 2022, Enhantec
- * All rights reserved.
- * <p>
- * Author: John Wang
- * Email: john.wang_ca@hotmail.com
- */
-
 package com.enhantec.wms.backend.utils.common;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
-
+import com.enhantec.wms.backend.framework.ServiceDataMap;
 public class ServiceHelper {
-    public static Object executeService( String serviceName, ServiceDataHolder serviceDataHolder) {
+    @DS(DSConstants.DS_DEFAULT)
+    public static ServiceDataMap executeService(String serviceName, ServiceDataHolder serviceDataHolder) {
 
-        throw new RuntimeException("");
+            LegacyBaseService service = EHContextHelper.getBean(serviceName, LegacyBaseService.class);
+
+            service.execute(serviceDataHolder);
+
+            return serviceDataHolder.getOutputDataAsMap();
+
     }
 }

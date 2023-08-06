@@ -9,6 +9,7 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class CreateReceiptCheckByASN extends com.enhantec.wms.backend.framework.LegacyBaseService
@@ -46,7 +47,7 @@ public class CreateReceiptCheckByASN extends com.enhantec.wms.backend.framework.
             String receiptkey = processData.getInputDataAsMap().getString("RECEIPTKEY");
 
 
-                HashMap<String,String> PRERECEIPTCHECK=new HashMap<String,String>();
+                Map<String,String> PRERECEIPTCHECK=new HashMap<String,String>();
                 PRERECEIPTCHECK.put("WHSEID", "@user");
                 PRERECEIPTCHECK.put("ADDWHO", userid);
                 PRERECEIPTCHECK.put("EDITWHO", userid);

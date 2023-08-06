@@ -7,7 +7,7 @@ import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class GenerateReceiptLot extends LegacyBaseService {
@@ -38,7 +38,7 @@ public class GenerateReceiptLot extends LegacyBaseService {
 
             String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
 
-            HashMap<String, String> receiptHashmap = Receipt.findByReceiptKey(receiptKey,true);
+            Map<String, String> receiptHashmap = Receipt.findByReceiptKey(receiptKey,true);
 
             if(!receiptHashmap.get("ISCONFIRMED").equals("0")) ExceptionHelper.throwRfFulfillLogicException("已确认或复核的单据不允许生成收货批次");
 
@@ -48,10 +48,10 @@ public class GenerateReceiptLot extends LegacyBaseService {
 
             //增加ASN类型的判断
             if(isNotPOReceiptType){
-                List<HashMap<String, String>> receiptGroupBySku = DBHelper.executeQuery(
+                List<Map<String, String>> receiptGroupBySku = DBHelper.executeQuery(
                         "SELECT SKU,MAX(LOTTABLE06) AS LOTTABLE06 FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? GROUP BY SKU",
                         new Object[]{receiptKey});
-                for (HashMap<String, String> receiptDetail : receiptGroupBySku) {
+                for (Map<String, String> receiptDetail : receiptGroupBySku) {
                     if(!SKU.isSerialControl(receiptDetail.get("SKU"))){
                         String lottable06 = receiptDetail.get("LOTTABLE06");
                         if(UtilHelper.isEmpty(lottable06)){
@@ -61,7 +61,7 @@ public class GenerateReceiptLot extends LegacyBaseService {
                     }
                 }
             }else{
-                HashMap<String,String> warehousePrefixConfig = CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
+                Map<String,String> warehousePrefixConfig = CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
                 if(!exReceiptKey.startsWith(warehousePrefixConfig.get("UDF1"))) ExceptionHelper.throwRfFulfillLogicException("收货批号识别出错，正确的批号前缀应为"+warehousePrefixConfig.get("UDF1"));
                 populateReceiptDetails(receiptKey, exReceiptKey,null);
 
@@ -84,7 +84,7 @@ public class GenerateReceiptLot extends LegacyBaseService {
 
     private void populateReceiptDetails(String receiptKey, String receiptLot,String sku) throws Exception {
 
-        List<HashMap<String, String>> receiptDetails;
+        List<Map<String, String>> receiptDetails;
         if(null == sku || UtilHelper.isEmpty(sku)) {
             receiptDetails = Receipt.findReceiptDetails( receiptKey, true);
         }else{
@@ -97,7 +97,7 @@ public class GenerateReceiptLot extends LegacyBaseService {
         String totalBarrel = String.valueOf(receiptDetails.size());
         while (totalBarrel.length()<3) totalBarrel="0"+totalBarrel;
         int barrel = 0;
-        for(HashMap<String, String> receiptDetail: receiptDetails){
+        for(Map<String, String> receiptDetail: receiptDetails){
             barrel++;
             String tempLpn;
             if(UtilHelper.isEmpty(receiptDetail.get("TOID"))) {

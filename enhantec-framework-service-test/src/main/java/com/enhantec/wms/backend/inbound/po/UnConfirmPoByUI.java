@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class UnConfirmPoByUI extends LegacyBaseService {
 
@@ -43,7 +43,7 @@ public class UnConfirmPoByUI extends LegacyBaseService {
             String poKey = serviceDataHolder.getInputDataAsMap().getString("POKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String SQL="SELECT * FROM WMS_PO WHERE  POKEY = ?  ";
-            HashMap<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
+            Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"未找到");
             
             String user = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{

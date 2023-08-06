@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.util.List;
-import java.util.HashMap;
+import java.util.Map;import java.util.HashMap;
 
 
 public class CreateReceiptLotByPO  extends LegacyBaseService
@@ -126,7 +126,7 @@ CODE	DESCRIPTION
             String POLINENUMBER=PoKey.substring(iPoKey+1);
             PoKey=PoKey.substring(0,iPoKey);
 
-            HashMap<String,String> mPO= DBHelper.getRecord(
+            Map<String,String> mPO= DBHelper.getRecord(
                     "SELECT A.SUPPLIER,B.qty-ISNULL(B.receivedqty,0) as AVAILABLEQTY,A.ISINTERFACEPO FROM WMS_PO A,WMS_PO_DETAIL B  " +
                             "WHERE A.POKEY=? AND B.POLINENUMBER=? AND B.STATUS<?  AND A.POKEY =B.POKEY "
                     ,new String[]{PoKey,POLINENUMBER,"9"});
@@ -171,7 +171,7 @@ CODE	DESCRIPTION
 
                  STATUS= CodeLookup.getCodeLookupValue("RECCHKRES",checkresult,"UDF1","收货结果");
                 ReceiptLot= IdGenerationHelper.createReceiptLot(Sku);
-                HashMap<String,String> PRERECEIPTCHECK=new HashMap<String,String>();
+                Map<String,String> PRERECEIPTCHECK=new HashMap<String,String>();
                 PRERECEIPTCHECK.put("WHSEID", "@user");
                 PRERECEIPTCHECK.put("ADDWHO", userid);
                 PRERECEIPTCHECK.put("EDITWHO", userid);
@@ -265,13 +265,13 @@ CODE	DESCRIPTION
 
             }else{
 
-                List<HashMap<String,String>> r1= DBHelper.executeQuery( "select a.ELOTTABLE07,FORMAT(a.ELOTTABLE11, 'yyyyMMdd') ELOTTABLE11, a.FROMKEY,a.FROMLINENO,a.STATUS,a.UOM,a.TOTALBARREL,a.QTY, b.qty-ISNULL(b.receivedqty,0) as AVAILABLEQTY from prereceiptcheck a,WMS_PO_DETAIL b where a.fromkey=b.pokey and a.fromlineno=b.polinenumber " +
+                List<Map<String,String>> r1= DBHelper.executeQuery( "select a.ELOTTABLE07,FORMAT(a.ELOTTABLE11, 'yyyyMMdd') ELOTTABLE11, a.FROMKEY,a.FROMLINENO,a.STATUS,a.UOM,a.TOTALBARREL,a.QTY, b.qty-ISNULL(b.receivedqty,0) as AVAILABLEQTY from prereceiptcheck a,WMS_PO_DETAIL b where a.fromkey=b.pokey and a.fromlineno=b.polinenumber " +
                         " and a.RECEIPTLOT=? order by a.serialkey", new String[]{ReceiptLot});
 
 
                 for(int i1=0;i1<r1.size();i1++)
                 {
-                    HashMap<String,String> m1=r1.get(i1);
+                    Map<String,String> m1=r1.get(i1);
                     if (FROMKEY==null)
                     {
                         FROMKEY=m1.get("FROMKEY");

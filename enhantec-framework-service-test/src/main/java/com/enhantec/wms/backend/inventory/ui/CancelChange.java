@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class CancelChange extends LegacyBaseService {
 
@@ -40,7 +40,7 @@ public class CancelChange extends LegacyBaseService {
             String changekey = serviceDataHolder.getInputDataAsMap().getString("CHANGEKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String SQL="SELECT * FROM ENCHGPROJECTCODE WHERE  CHANGEKEY = ?  ";
-            HashMap<String, String> record = DBHelper.getRecord( SQL, new Object[]{ changekey},"变更单");
+            Map<String, String> record = DBHelper.getRecord( SQL, new Object[]{ changekey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("变更单为"+changekey+"未找到");
             if ("5".equalsIgnoreCase(record.get("STATUS"))) throw new Exception("已经执行不可取消");
             DBHelper.executeUpdate( "UPDATE ENCHGPROJECTCODE SET STATUS = 6 WHERE CHANGEKEY = ?", new String[]{changekey});

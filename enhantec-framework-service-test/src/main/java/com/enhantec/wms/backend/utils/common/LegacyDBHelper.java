@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 
 import java.util.*;
 
@@ -28,7 +28,7 @@ public class LegacyDBHelper {
 	private static Logger sqlLogger = LoggerFactory.getLogger(LegacyDBHelper.class);
 
 
-	public static void ExecInsert( String TableName, HashMap<String,String> Fields) throws Exception
+	public static void ExecInsert( String TableName, Map<String,String> Fields) throws Exception
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL1="insert into "+TableName+"(";
@@ -54,7 +54,7 @@ public class LegacyDBHelper {
 		DBHelper.executeUpdate( SQL1+") "+SQL2+")",aParams.toArray());
 	}
 
-	public static void ExecInsert(String orgId, String TableName, HashMap<String,String> Fields) throws Exception
+	public static void ExecInsert(String orgId, String TableName, Map<String,String> Fields) throws Exception
 	{
 		List<Object> aParams=new ArrayList<Object>();
 		String SQL1="insert into "+TableName+"(";
@@ -83,7 +83,7 @@ public class LegacyDBHelper {
 
 
 
-	public static void ExecDelete(String TableName,HashMap<String,String> Fields) throws Exception
+	public static void ExecDelete(String TableName,Map<String,String> Fields) throws Exception
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL="delete "+TableName+" where ";
@@ -107,7 +107,7 @@ public class LegacyDBHelper {
 	}
 
 
-	public static void ExecUpdate(String TableName,HashMap<String,String> UpdateFields,HashMap<String,String> WhereFields) throws Exception
+	public static void ExecUpdate(String TableName,Map<String,String> UpdateFields,Map<String,String> WhereFields) throws Exception
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL="update "+TableName+" set ";
@@ -506,7 +506,7 @@ public class LegacyDBHelper {
 //	}
 
 //
-//	public static HashMap<String,String> GetValueMap(String Sql,String[] Params) throws Exception
+//	public static Map<String,String> GetValueMap(String Sql,String[] Params) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -528,7 +528,7 @@ public class LegacyDBHelper {
 //
 //		PreparedStatement sm = null;
 //		ResultSet rs = null;
-//		HashMap<String,String> Result=new HashMap<String,String>();
+//		Map<String,String> Result=new HashMap<String,String>();
 //		try
 //		{
 //			sm = conn.prepareStatement(Sql);
@@ -660,14 +660,14 @@ public class LegacyDBHelper {
 //	}
 
 //
-//	public static List<HashMap<String,String>> GetRecordMap(String Sql,ArrayList<String> Params) throws Exception
+//	public static List<Map<String,String>> GetRecordMap(String Sql,ArrayList<String> Params) throws Exception
 //	{
 //		String[] aParams=new String[Params.size()];
 //		for(int i1=0;i1<Params.size();i1++) aParams[i1]=Params.get(i1);
 //		return GetRecordMap(Sql,aParams);
 //	}
 //
-//	public static List<HashMap<String,String>> GetRecordMap(String Sql,String[] Params) throws Exception
+//	public static List<Map<String,String>> GetRecordMap(String Sql,String[] Params) throws Exception
 //	{
 //
 //		if (LegacyDBHelper.Isdebug)
@@ -687,7 +687,7 @@ public class LegacyDBHelper {
 //			sqlLogger.info("--user id: "+EHContextHelper.getUser().getUsername()+" sql: "+SqlShow);
 //		}
 //
-//		List<HashMap<String,String>> aResult=null;
+//		List<Map<String,String>> aResult=null;
 //		PreparedStatement sm = null;
 //		ResultSet rs = null;
 //		String[] ResultField=null;
@@ -702,13 +702,13 @@ public class LegacyDBHelper {
 //			{
 //				if (aResult==null)
 //				{
-//					aResult=new List<HashMap<String,String>>();
+//					aResult=new List<Map<String,String>>();
 //					ReturnFieldCount=rs.getMetaData().getColumnCount();
 //					ResultField=new String[ReturnFieldCount];
 //					for(int i1=0;i1<ReturnFieldCount;i1++)
 //						ResultField[i1]=rs.getMetaData().getColumnName(i1+1);
 //				}
-//				HashMap<String,String> mRecord=new HashMap<String,String>();
+//				Map<String,String> mRecord=new HashMap<String,String>();
 //				for(int i1=0;i1<ReturnFieldCount;i1++)
 //				{
 //					mRecord.put(ResultField[i1], rs.getString(i1+1));

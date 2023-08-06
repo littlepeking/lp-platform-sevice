@@ -181,14 +181,14 @@ public class UtilHelper {
         else return obj.toString();
     }
 
-//    public static List<HashMap<String, String>> convertEXEDataObject2List(EXEDataObject res) {
+//    public static List<Map<String, String>> convertEXEDataObject2List(EXEDataObject res) {
 //
-//        List<HashMap<String, String>> list = new ArrayList<>();
+//        List<Map<String, String>> list = new ArrayList<>();
 //
 //        if (res != null && res.getRowCount() != 0) {
 //            res.setRow(1);
 //            while (true) {
-//                HashMap<String, String> tempObj = new HashMap<>();
+//                Map<String, String> tempObj = new HashMap<>();
 //                for (Object columnName : res.getAttribNames()) {
 //                    String col = ((TextData) columnName).getValue();
 //                    String val = res.getString(col);
@@ -307,15 +307,15 @@ public class UtilHelper {
         }
     }
 
-    public static HashMap<String,String> jsonToMap(String t) throws JSONException {
+    public static Map<String,String> jsonToMap(String t) throws JSONException {
 
-        HashMap<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         JSONObject mapObj = JSONObject.parseObject(t);
         return prepareProperties(mapObj);
     }
 
-    static private HashMap<String, String> prepareProperties(JSONObject jo) {
-        HashMap<String, String> properties = new HashMap<>();
+    static private Map<String, String> prepareProperties(JSONObject jo) {
+        Map<String, String> properties = new HashMap<>();
         if(jo == null) {
             return properties;
         }

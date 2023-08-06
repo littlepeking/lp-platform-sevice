@@ -103,7 +103,7 @@ public class JWTFilter extends OncePerRequestFilter {
                         ehRequestContextHolder.setDataSource(MultiDataSourceConfig.DATA_SOURCE_ORG_PREFIX + orgId);
                         ehRequestContextHolder.setLanguageCode(servletRequest.getHeader("Accept-Language"));
 
-                        if(StringUtils.hasText(orgId)){
+                        if(StringUtils.hasText(orgId) && !"null".equals(orgId)){
                             roleList = roleService.findByOrgIdAndUserId(orgId, user.getId(),true);
 
                         }else {

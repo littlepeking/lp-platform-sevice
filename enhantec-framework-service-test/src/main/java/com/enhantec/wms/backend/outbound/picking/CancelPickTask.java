@@ -9,7 +9,7 @@ import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * JOHN 20200208
@@ -32,7 +32,7 @@ public class CancelPickTask  extends LegacyBaseService {
 
             String taskDetailKey = serviceDataHolder.getInputDataAsMap().getString("TASKDETAILKEY");
 
-            HashMap<String, String> taskDetailInfo = TaskDetail.findById(taskDetailKey,true);
+            Map<String, String> taskDetailInfo = TaskDetail.findById(taskDetailKey,true);
 
             if(!taskDetailInfo.get("STATUS").equals("0") && !taskDetailInfo.get("STATUS").equals("3"))
                 ExceptionHelper.throwRfFulfillLogicException("待删除的任务状态必须为未定或处理中");
@@ -55,10 +55,10 @@ public class CancelPickTask  extends LegacyBaseService {
 
     }
 
-    public void cancelPickDetail( HashMap<String,String> taskDetailInfo) throws SQLException {
+    public void cancelPickDetail( Map<String,String> taskDetailInfo) throws SQLException {
 
 
-            HashMap<String, String> pickDetailInfo = PickDetail.findByPickDetailKey( taskDetailInfo.get("PICKDETAILKEY"), true);
+            Map<String, String> pickDetailInfo = PickDetail.findByPickDetailKey( taskDetailInfo.get("PICKDETAILKEY"), true);
 
             DBHelper.executeUpdate(
                         "UPDATE PICKDETAIL SET STATUS = 0 WHERE PICKDETAILKEY = ?",

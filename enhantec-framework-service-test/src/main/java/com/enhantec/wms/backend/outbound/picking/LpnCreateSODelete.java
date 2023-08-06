@@ -1,6 +1,7 @@
 package com.enhantec.wms.backend.outbound.picking;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
@@ -12,7 +13,7 @@ import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 /**
@@ -51,7 +52,7 @@ public class LpnCreateSODelete extends LegacyBaseService {
 //            if(status.compareTo("09")>0) throw new Exception("发货订单"+orderKey+"已经关闭或发货，不能继续操作");
             if(status.equals("95")) throw new Exception("发货订单"+orderKey+"已经关闭或发货，不能继续操作");
 
-            HashMap<String,String> orderDetailInfo= DBHelper.getRecord(
+            Map<String,String> orderDetailInfo= DBHelper.getRecord(
                     "SELECT IDREQUIRED, EXTERNLINENO,SKU,OPENQTY,SUSR2,SUSR3 FROM ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=? AND STATUS in ('02','04','06','09','55') ",
                     new Object[]{orderKey, orderLineNumber},"订单明细行",false);
             if (null == orderDetailInfo || orderDetailInfo.isEmpty()) throw new Exception("未找到出库单明细行或该明细行的状态已不允许删除");
@@ -59,14 +60,14 @@ public class LpnCreateSODelete extends LegacyBaseService {
             /**
              * 删除拣货明细
              */
-            List<HashMap<String, String>> pickDetailList = PickDetail.findByOrderKeyAndOrderLineNumber(
+            List<Map<String, String>> pickDetailList = PickDetail.findByOrderKeyAndOrderLineNumber(
                     orderKey,
                     orderLineNumber, true);
 
             PreparedStatement qqPrepStmt;
 
             String pickdetailkey = pickDetailList.get(0).get("PICKDETAILKEY");
-            EXEDataObject thePickDO = new EXEDataObject();
+            ServiceDataMap thePickDO = new ServiceDataMap();
 //            thePickDO.clearDO();
 //            thePickDO.setConstraintItem("pickdetailkey", pickdetailkey);
 //            thePickDO.setWhereClause(" WHERE PickDetailKey = :pickdetailkey");
@@ -79,7 +80,7 @@ public class LpnCreateSODelete extends LegacyBaseService {
 //            context.theSQLMgr.searchTriggerLibrary("PickDetail")).postDeleteFire();
 
 
-            HashMap<String,String> idHashMap = IDNotes.findById(orderDetailInfo.get("IDREQUIRED"), true);
+            Map<String,String> idHashMap = IDNotes.findById(orderDetailInfo.get("IDREQUIRED"), true);
 
             DBHelper.executeUpdate("DELETE ORDERDETAIL WHERE ORDERKEY = ? and ORDERLINENUMBER=?",
                     new Object[]{orderKey, orderLineNumber});
@@ -103,7 +104,7 @@ public class LpnCreateSODelete extends LegacyBaseService {
             udtrn.TITLE06 = "出库数量"; udtrn.CONTENT06=orderDetailInfo.get("OPENQTY");
             udtrn.Insert(userid);
 
-            EXEDataObject theOutDO = new EXEDataObject();
+            ServiceDataMap theOutDO = new ServiceDataMap();
 //            theOutDO.clearDO();
 //            theOutDO.setRow(theOutDO.createRow());
 

@@ -11,13 +11,13 @@ import com.enhantec.wms.backend.outbound.allocation.OrderProcessingP1S1;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class OutboundUtils {
 
     public static void checkQtyIsAvailableInLotxLocxId( String ID, BigDecimal qty, BigDecimal allocatedQty) {
-        HashMap<String, String> lotxLocxIdHashMap =  LotxLocxId.findById( ID,true);
+        Map<String, String> lotxLocxIdHashMap =  LotxLocxId.findById( ID,true);
 
         BigDecimal availQty = new BigDecimal(lotxLocxIdHashMap.get("AVAILABLEQTY"));
 
@@ -27,7 +27,7 @@ public class OutboundUtils {
     }
 
     public static void checkQtyIsAvailableInIDNotes( String ID, BigDecimal qty) {
-        HashMap<String, String> idNotesHashMap = IDNotes.findById( ID,true);
+        Map<String, String> idNotesHashMap = IDNotes.findById( ID,true);
 
         BigDecimal idNotesQty = new BigDecimal(idNotesHashMap.get("NETWGT"));
 
@@ -43,13 +43,13 @@ public class OutboundUtils {
         if(shipWithIDNotes) {
 
             //同步减少IDNOTES的库存
-            List<HashMap<String,String>> Details = DBHelper.executeQuery( "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
+            List<Map<String,String>> Details = DBHelper.executeQuery( "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
                             + ",ORIGINALQTY,OPENQTY,SHIPPEDQTY,QTYPREALLOCATED,QTYALLOCATED,QTYPICKED,UOM,PACKKEY "
                             + " from orderdetail where orderkey=? order by orderlinenumber", new String[]{orderKey});
 
             for (int iDetail = 0; iDetail < Details.size(); iDetail++) {
 
-                HashMap<String,String> mDetail = Details.get(iDetail);
+                Map<String,String> mDetail = Details.get(iDetail);
                 String id = mDetail.get("IDREQUIRED");
                 String openQty = mDetail.get("ORIGINALQTY");
 
@@ -71,7 +71,7 @@ public class OutboundUtils {
         OrderProcessingP1S1 allocateProcess = new OrderProcessingP1S1();
         allocateProcess.execute(allocateDO);
 
-        EXEDataObject shipDO = new EXEDataObject();
+        ServiceDataMap shipDO = new ServiceDataMap();
         shipDO.setAttribValue("orderkey", orderKey);
         shipDO.setAttribValue("TransactionStarted", "true");
         //todo

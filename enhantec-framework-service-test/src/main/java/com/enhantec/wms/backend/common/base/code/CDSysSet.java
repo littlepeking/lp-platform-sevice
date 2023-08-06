@@ -6,7 +6,7 @@ import com.enhantec.wms.backend.common.base.CodeLookup;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class CDSysSet {
@@ -14,7 +14,7 @@ public class CDSysSet {
     //复验期到期质量状态
     public static String getElot05ExpiredQualityStatus(){
 
-        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
+        Map<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
 
         return !UtilHelper.isEmpty(codeHashMap.get("UDF1")) ? codeHashMap.get("UDF1"): "QUARANTINE";
 
@@ -22,7 +22,7 @@ public class CDSysSet {
     //有效期到期质量状态
     public static String getElot11ExpiredQualityStatus(){
 
-        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT11CONF");
+        Map<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT11CONF");
 
         return !UtilHelper.isEmpty(codeHashMap.get("UDF1")) ? codeHashMap.get("UDF1"): "QUARANTINE";
 
@@ -30,7 +30,7 @@ public class CDSysSet {
     // 到期提醒的错误名称（默认为"复验期",CSS需配置为"停止发运期"）
     public static String getElot05DisplayName(){
 
-        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
+        Map<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
 
         return !UtilHelper.isEmpty(codeHashMap.get("UDF2")) ? codeHashMap.get("UDF2"): "复验";
 
@@ -38,7 +38,7 @@ public class CDSysSet {
 
     public static int getElot05MaxRemindDays(){
 
-        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
+        Map<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
 
         return !UtilHelper.isEmpty(codeHashMap.get("UDF3")) ? Integer.parseInt(codeHashMap.get("UDF3")): 15;
 
@@ -46,7 +46,7 @@ public class CDSysSet {
 
     public static int getElot05MaxRemindTimes(){
 
-        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
+        Map<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "ELOT05CONF");
 
         return !UtilHelper.isEmpty(codeHashMap.get("UDF4")) ? Integer.parseInt(codeHashMap.get("UDF4")): 999;
 
@@ -54,7 +54,7 @@ public class CDSysSet {
 
     public static String getDefaultProjectCode(){
 
-        HashMap<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "DEFPRJCODE");
+        Map<String,String> codeHashMap = CodeLookup.getCodeLookupByKey( "SYSSET", "DEFPRJCODE");
 
         return !UtilHelper.isEmpty(codeHashMap.get("UDF1")) ? codeHashMap.get("UDF1"): "COMMONPROJECT";
 
@@ -149,11 +149,11 @@ public class CDSysSet {
      * 获取箱号前缀配置：UDF1，箱号前缀
      * 生基箱号规则=箱号前缀+批次号+两位流水
      */
-    public static HashMap<String,String> getBoxPrefix(){
+    public static Map<String,String> getBoxPrefix(){
         return CodeLookup.getCodeLookupByKey("SYSSET","BOXPREFIX");
     }
 
-    public static HashMap<String,String> getBoxPrefix(String dbId){
+    public static Map<String,String> getBoxPrefix(String dbId){
         return CodeLookup.getCodeLookupByKey("SYSSET","BOXPREFIX",dbId);
     }
 
@@ -163,11 +163,11 @@ public class CDSysSet {
      * UDF2：时间格式，如'yyyyMMdd'
      * UDF3：流水号长度
      */
-    public static HashMap<String,String> getLotPrefix(){
+    public static Map<String,String> getLotPrefix(){
         return CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
     }
 
-    public static HashMap<String,String> getLotPrefix(String dbId){
+    public static Map<String,String> getLotPrefix(String dbId){
         return CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE",dbId);
     }
 
@@ -175,11 +175,11 @@ public class CDSysSet {
      * 获取LPN前缀配置：UDF1，箱号前缀
      * 生基LPN规则=LPN前缀+批次号+两位流水
      */
-    public static HashMap<String,String> getLpnPrefix(){
+    public static Map<String,String> getLpnPrefix(){
         return CodeLookup.getCodeLookupByKey("SYSSET","LPNPREFIX");
     }
 
-    public static HashMap<String,String> getLpnPrefix(String dbId){
+    public static Map<String,String> getLpnPrefix(String dbId){
         return CodeLookup.getCodeLookupByKey("SYSSET","LPNPREFIX",dbId);
     }
 
@@ -187,7 +187,7 @@ public class CDSysSet {
      * 获取不打印LPN标签的出库类型列表
      */
     public static List<String> getNotPrintLpnLabelOrderTypes(){
-        HashMap<String, String> notPrintConf = CodeLookup.getCodeLookupByKey( "SYSSET", "NOTPRINT");
+        Map<String, String> notPrintConf = CodeLookup.getCodeLookupByKey( "SYSSET", "NOTPRINT");
         if(UtilHelper.isEmpty(notPrintConf.get("UDF1"))){
             return null;
         }else{

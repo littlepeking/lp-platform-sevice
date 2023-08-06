@@ -9,13 +9,13 @@ import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public class LotxId {
 
-    public static HashMap<String,String> findDetailByReceiptLineAndSn( String receiptKey, String receiptLineNumber, String serialNumber, boolean checkExist)throws FulfillLogicException {
+    public static Map<String,String> findDetailByReceiptLineAndSn( String receiptKey, String receiptLineNumber, String serialNumber, boolean checkExist)throws FulfillLogicException {
         if(UtilHelper.isEmpty(receiptKey)) ExceptionHelper.throwRfFulfillLogicException("收货单号不能为空");
         if(UtilHelper.isEmpty(receiptLineNumber)) ExceptionHelper.throwRfFulfillLogicException("收货单行号不能为空");
         if(UtilHelper.isEmpty(serialNumber)) ExceptionHelper.throwRfFulfillLogicException("唯一码不能为空");
@@ -26,23 +26,23 @@ public class LotxId {
                 "唯一码"+serialNumber+"在收货单"+receiptKey+",行号"+receiptLineNumber+"不存在",checkExist);
     }
 
-    public static List<HashMap<String,String>> findDetailsByReceiptLineAndLpn( String receiptKey,String receiptLineNumber, String lpn, boolean checkExist) throws FulfillLogicException {
+    public static List<Map<String,String>> findDetailsByReceiptLineAndLpn( String receiptKey,String receiptLineNumber, String lpn, boolean checkExist) throws FulfillLogicException {
 
         if(UtilHelper.isEmpty(receiptKey)) ExceptionHelper.throwRfFulfillLogicException("收货单号不能为空");
         if(UtilHelper.isEmpty(receiptLineNumber)) ExceptionHelper.throwRfFulfillLogicException("收货单行号不能为空");
         if(UtilHelper.isEmpty(lpn)) ExceptionHelper.throwRfFulfillLogicException("箱号不能为空");
 
-        List<HashMap<String,String>> snList = DBHelper.executeQuery("select * from LotxIdDetail where SOURCEKEY = ? and SOURCELINENUMBER = ? and IOFLAG = 'I' and ID = ?", new Object[]{receiptKey,receiptLineNumber,lpn});
+        List<Map<String,String>> snList = DBHelper.executeQuery("select * from LotxIdDetail where SOURCEKEY = ? and SOURCELINENUMBER = ? and IOFLAG = 'I' and ID = ?", new Object[]{receiptKey,receiptLineNumber,lpn});
         if(checkExist && snList.size() == 0) ExceptionHelper.throwRfFulfillLogicException(" 箱号:"+lpn+" 在收货单中不存在唯一码数据");
 
         return snList;
     }
 
-    public static List<HashMap<String,String>> findDetailsByPickDetailKey( String pickDetailKey, boolean checkExist) throws FulfillLogicException {
+    public static List<Map<String,String>> findDetailsByPickDetailKey( String pickDetailKey, boolean checkExist) throws FulfillLogicException {
 
         if(UtilHelper.isEmpty(pickDetailKey)) ExceptionHelper.throwRfFulfillLogicException("拣货明细号不能为空");
 
-        List<HashMap<String,String>> snList = DBHelper.executeQuery("select * from LotxIdDetail where IOFLAG = 'O' and PICKDETAILKEY = ?", new Object[]{pickDetailKey});
+        List<Map<String,String>> snList = DBHelper.executeQuery("select * from LotxIdDetail where IOFLAG = 'O' and PICKDETAILKEY = ?", new Object[]{pickDetailKey});
         if(checkExist && snList.size() == 0) ExceptionHelper.throwRfFulfillLogicException("拣货明细号:"+pickDetailKey+" 在出库单中不存在唯一码数据");
 
         return snList;
@@ -80,7 +80,7 @@ public class LotxId {
         if ("I".equals(ioFlag)) {
 
 
-            HashMap<String, String> lotxIdDetail = DBHelper.getRecord( "SELECT ID FROM LOTXIDDETAIL WHERE SOURCEKEY = ? AND SERIALNUMBERLONG = ? AND IOFLAG ='I'",
+            Map<String, String> lotxIdDetail = DBHelper.getRecord( "SELECT ID FROM LOTXIDDETAIL WHERE SOURCEKEY = ? AND SERIALNUMBERLONG = ? AND IOFLAG ='I'",
                     new Object[]{ sourceKey, sn}, "唯一码", false );
 
             if(lotxIdDetail != null) ExceptionHelper.throwRfFulfillLogicException("唯一码" + sn + "已经存在于当前收货单的箱号" + lotxIdDetail.get("ID") + "中,添加失败");
@@ -98,7 +98,7 @@ public class LotxId {
             ExceptionHelper.throwRfFulfillLogicException("错误的IOFLAG参数");
         }
 
-        HashMap<String,String> lotxIdDetailHashMap = new LinkedHashMap<>();
+        Map<String,String> lotxIdDetailHashMap = new HashMap<>();
         lotxIdDetailHashMap.put("WHSEID", "@user");
         lotxIdDetailHashMap.put("LOTXIDKEY", lotxidKey);
         lotxIdDetailHashMap.put("SKU", sku);
@@ -130,7 +130,7 @@ public class LotxId {
     public static String buildLotxIHeaderInfo( String sku, String ioFlag, String id, String sourceKey, String sourceLineNumber,String pickDetailKey,String lot) throws Exception {
         String lotxidKey = KeyGen.getKey("LOTXIDHEADER");
 
-        HashMap<String,String> lotxIdHeaderHashMap = new LinkedHashMap<>();
+        Map<String,String> lotxIdHeaderHashMap = new HashMap<>();
         lotxIdHeaderHashMap.put("WHSEID", "@user");
         lotxIdHeaderHashMap.put("LOTXIDKEY", lotxidKey);
         lotxIdHeaderHashMap.put("STORERKEY", CDSysSet.getStorerKey());
@@ -159,7 +159,7 @@ public class LotxId {
         if ("I".equals(ioFlag)) {
 
 
-            HashMap<String, String> lotxIdDetail = DBHelper.getRecord( "SELECT ID FROM LOTXIDDETAIL WHERE SOURCEKEY = ? AND SERIALNUMBERLONG = ? AND IOFLAG ='I'",
+            Map<String, String> lotxIdDetail = DBHelper.getRecord( "SELECT ID FROM LOTXIDDETAIL WHERE SOURCEKEY = ? AND SERIALNUMBERLONG = ? AND IOFLAG ='I'",
                     new Object[]{ sourceKey, sn}, "唯一码", false );
 
             if(lotxIdDetail != null) ExceptionHelper.throwRfFulfillLogicException("唯一码" + sn + "已经存在于当前收货单的箱号" + lotxIdDetail.get("ID") + "中,添加失败");
@@ -177,7 +177,7 @@ public class LotxId {
             ExceptionHelper.throwRfFulfillLogicException("错误的IOFLAG参数");
         }
 
-        HashMap<String,String> lotxIdDetailHashMap = new LinkedHashMap<>();
+        Map<String,String> lotxIdDetailHashMap = new HashMap<>();
         lotxIdDetailHashMap.put("WHSEID", "@user");
         lotxIdDetailHashMap.put("LOTXIDKEY", lotxidKey);
         lotxIdDetailHashMap.put("SKU", sku);

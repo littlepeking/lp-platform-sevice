@@ -1,5 +1,9 @@
 package com.enhantec.wms.backend.inbound.receiving;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
+import com.enhantec.framework.common.utils.DSConstants;
+import com.enhantec.framework.config.EHRequestContextHolder;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.receiving.Receipt;
@@ -12,9 +16,14 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
+@Service
 public class CloseASN extends LegacyBaseService {
 
 
@@ -36,6 +45,17 @@ public class CloseASN extends LegacyBaseService {
         String userid = EHContextHelper.getUser().getUsername();
 
 
+//        EHContextHelper.switchOrgId("wh01");
+//        DBHelper.executeQueryRawData("select * from t1",new ArrayList<>());
+//        EHContextHelper.switchOrgId("1565464895783219202");
+//        DBHelper.executeQueryRawData("select * from t1",new ArrayList<>());
+//
+//        DBHelper.executeQueryRawDataByOrgId("wh01","select * from t1",new ArrayList<>());
+//
+//        DBHelper.executeQueryRawData("select * from t1",new ArrayList<>());
+
+
+
         try {
 
 
@@ -44,7 +64,7 @@ public class CloseASN extends LegacyBaseService {
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String allowAbnormalClose = serviceDataHolder.getInputDataAsMap().getString("ALLOWABNORMALCLOSE");
 
-            HashMap<String, String>  receiptInfo = Receipt.findByReceiptKey(receiptKey,true);
+            Map<String, String>  receiptInfo = Receipt.findByReceiptKey(receiptKey,true);
 
             //鉴于使用场景很少暂时禁用异常关闭功能，以方便RF使用通用的关闭逻辑
             // if(receiptInfo.get("STATUS").equals("0")&& !("true").equalsIgnoreCase(allowAbnormalClose))
@@ -62,7 +82,7 @@ public class CloseASN extends LegacyBaseService {
                     )
             );
 
-            HashMap<String, String> receiptHashmap = Receipt.findByReceiptKey(receiptKey,true);
+            Map<String, String> receiptHashmap = Receipt.findByReceiptKey(receiptKey,true);
 
             if(!UtilHelper.isEmpty(notes)) {
                 DBHelper.executeUpdate( "UPDATE RECEIPT " +
@@ -83,22 +103,22 @@ public class CloseASN extends LegacyBaseService {
 
                 //考虑有ASN收货存在指令行，去掉HAVING SUM(QTYEXPECTED-QTYRECEIVED)>0 子句，同时在收货过程中指令明细行的的预计收货数量会自动置为0，保证SUM(QTYEXPECTED-QTYRECEIVED)回滚的数量匹配。
                 //ORIGINALLINENUMBER IS NO NULL时为非指令行，忽略预期量
-                List<HashMap<String, String>> rollbackSkuQtyHashMap = DBHelper.executeQuery(
+                List<Map<String, String>> rollbackSkuQtyHashMap = DBHelper.executeQuery(
                         "SELECT EXTERNRECEIPTKEY, SKU, SUM(CASE WHEN ORIGINALLINENUMBER IS NOT NULL THEN 0 ELSE QTYEXPECTED END - QTYRECEIVED) AS ROLLBACKQTY FROM RECEIPTDETAIL " +
                                 " WHERE RECEIPTKEY =? GROUP BY EXTERNRECEIPTKEY, SKU ", new Object[]{
                                 receiptKey
                         });
 
-                for (HashMap<String, String> rollbackSkuQty : rollbackSkuQtyHashMap) {
+                for (Map<String, String> rollbackSkuQty : rollbackSkuQtyHashMap) {
                     String conversion = SKU.findById( rollbackSkuQty.get("SKU"), true).get("SNAVGWGT");
                     BigDecimal totalRollbackQty = ReceiptUtilHelper.stdQty2PoWgt(conversion,new BigDecimal(rollbackSkuQty.get("ROLLBACKQTY")),rollbackSkuQty.get("SKU"));
 
-                    List<HashMap<String, String>> preReceiptCheckList = DBHelper.executeQuery(
+                    List<Map<String, String>> preReceiptCheckList = DBHelper.executeQuery(
                             "SELECT SERIALKEY,FROMKEY, FROMLINENO,POUSEDQTY FROM PRERECEIPTCHECK WHERE RECEIPTLOT = ? ORDER BY FROMKEY DESC, FROMLINENO DESC", new Object[]{
                                     rollbackSkuQty.get("EXTERNRECEIPTKEY")
                             });
 
-                    for (HashMap<String, String> preReceiptCheckRec : preReceiptCheckList) {
+                    for (Map<String, String> preReceiptCheckRec : preReceiptCheckList) {
                         if (totalRollbackQty.compareTo(BigDecimal.ZERO) > 0) {
 
                             BigDecimal currentPOUsedQty = new BigDecimal(preReceiptCheckRec.get("POUSEDQTY"));

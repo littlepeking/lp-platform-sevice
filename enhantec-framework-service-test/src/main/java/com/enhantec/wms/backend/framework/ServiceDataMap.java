@@ -1,6 +1,7 @@
 package com.enhantec.wms.backend.framework;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ServiceDataMap {
 
@@ -8,18 +9,18 @@ public class ServiceDataMap {
     public ServiceDataMap(){
     }
 
-    public ServiceDataMap(HashMap data){
+    public ServiceDataMap(Map data){
         this.data = data;
     }
 
-    private HashMap data;
+    private Map data;
 
 
-    public HashMap getData() {
+    public Map getData() {
         return data;
     }
 
-    public void setData(HashMap data) {
+    public void setData(Map data) {
         this.data = data;
     }
 

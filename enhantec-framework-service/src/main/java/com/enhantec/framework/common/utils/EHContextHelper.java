@@ -83,6 +83,17 @@ public class EHContextHelper {
 
     }
 
+    public static void switchOrgId(String orgId){
+
+        EHRequestContextHolder ehRequestContextHolder = getBean(EHRequestContextHolder.class);
+
+        ehRequestContextHolder.setDataSource(getDataSource(orgId));
+        ehRequestContextHolder.setOrgId(EHContextHelper.getCurrentOrgId());
+
+    }
+
+
+
     public static String getCurrentDataSource() {
         EHRequestContextHolder requestContextHolder = EHContextHelper.getBean(EHRequestContextHolder.class);
         return requestContextHolder.getDataSource();

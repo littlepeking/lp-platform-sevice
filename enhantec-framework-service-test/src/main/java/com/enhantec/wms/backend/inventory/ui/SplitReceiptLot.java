@@ -9,8 +9,8 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 
@@ -48,7 +48,7 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 
             String idStr = "'" + String.join("','",idArray)+ "'" ;
 
-            List<HashMap<String,String>> lottabl06List = DBHelper.executeQuery( "SELECT DISTINCT la.LOTTABLE06 FROM IDNOTES  id, LOTATTRIBUTE la " +
+            List<Map<String,String>> lottabl06List = DBHelper.executeQuery( "SELECT DISTINCT la.LOTTABLE06 FROM IDNOTES  id, LOTATTRIBUTE la " +
                     " WHERE id.LOT = la.LOT AND ID IN ("+idStr+")", new Object[]{});
 
             if(lottabl06List.size()>1) ExceptionHelper.throwRfFulfillLogicException("请选择相同收货批次的容器进行批次拆分合并");
@@ -63,9 +63,9 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
                  lottable06Splitted = IdGenerationHelper.createSubReceiptLot( lottabl06ToBeSplit, "S");
 
                 //新增ELOTATTIBUTE批次记录
-                HashMap<String, String> elotHashMap = VLotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
+                Map<String, String> elotHashMap = VLotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
 
-                HashMap<String,String> newELotHashMap = new HashMap<String,String>();
+                Map<String,String> newELotHashMap = new HashMap<String,String>();
                 newELotHashMap.put("STORERKEY", elotHashMap.get("STORERKEY"));
                 newELotHashMap.put("SKU", elotHashMap.get("SKU"));
                 newELotHashMap.put("ELOT", lottable06Splitted);
@@ -80,8 +80,8 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 
             }else {
                 //合并
-                HashMap<String, String> elotHashMap = VLotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
-                HashMap<String, String> mergeelotHashMap = VLotAttribute.findElottableByLottable06( toLottablemerge, true);
+                Map<String, String> elotHashMap = VLotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
+                Map<String, String> mergeelotHashMap = VLotAttribute.findElottableByLottable06( toLottablemerge, true);
                 for (int i = 1; i <= 25; i++) {
                     String num = UtilHelper.addPrefixZeros4Number(i, 2);
                     String toElotpro=UtilHelper.isEmpty(mergeelotHashMap.get("ELOTTABLE" +num))?" ":mergeelotHashMap.get("ELOTTABLE" +num);
@@ -142,11 +142,11 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
         int maxTransferDetailKey = 0;
 
         //key-transferDetailKey value-id
-        HashMap<String,String> transferDetailKeyHashMap = new HashMap<>();
+        Map<String,String> transferDetailKeyHashMap = new HashMap<>();
 
         for(String id : idArray) {
 
-            HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById( id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
+            Map<String, String> idHashMap = LotxLocxId.findFullAvailInvById( id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
 
             String newTransferDetailKey = UtilHelper.To_Char(new Integer(++maxTransferDetailKey), 5);
 
@@ -215,7 +215,7 @@ public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBa
 
             //更新IDNOTES的LOT
             String id =transferDetailKeyHashMap.get(tempTransferDetailKey);
-            HashMap<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById( id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
+            Map<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById( id, "容器" + id + "不存在或者已被分配或拣货，当前状态不允许拆批次");
             DBHelper.executeUpdate("UPDATE IDNOTES SET LOT = ? WHERE ID = ? ",
                     new Object[]{idHashMapUpdated.get("LOT"),idHashMapUpdated.get("ID")});
 

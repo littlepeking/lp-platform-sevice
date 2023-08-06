@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.outbound.picking;
 
+import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.DaasProjectCode;
 import com.enhantec.wms.backend.common.base.IDNotes;
@@ -15,8 +16,8 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         String userId = EHContextHelper.getUser().getUsername();
         
 
-        HashMap<String,String> lotxLocxIdHashMap;
+        Map<String,String> lotxLocxIdHashMap;
         String sn;
 
         try{
@@ -83,7 +84,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
 
             String storerKey = CDSysSet.getStorerKey();
 
-            HashMap<String, String> orderHashMap = null;
+            Map<String, String> orderHashMap = null;
             //通过传入的orderKey是否为空来判断是否需要创建订单头
             if(UtilHelper.isEmpty(orderKey)){
                 orderHashMap = insertOrder( orderType,projectId);
@@ -91,7 +92,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
                 orderHashMap = Orders.findByOrderKey(orderKey,true);
             }
             //插入订单行
-            HashMap<String,String> orderLineHashMap = insertOrderDetail( storerKey,orderHashMap.get("ORDERKEY"), sku, lotxLocxIdHashMap.get("ID"),sn, baseUomNetWgtBigDecimal.toPlainString(),baseUomGrossWgtBigDecimal.toPlainString(),baseUomTareWgtBigDecimal.toPlainString(), packKey, uom);
+            Map<String,String> orderLineHashMap = insertOrderDetail( storerKey,orderHashMap.get("ORDERKEY"), sku, lotxLocxIdHashMap.get("ID"),sn, baseUomNetWgtBigDecimal.toPlainString(),baseUomGrossWgtBigDecimal.toPlainString(),baseUomTareWgtBigDecimal.toPlainString(), packKey, uom);
 
             String[] snList;
             if(UtilHelper.isEmpty(sn)){
@@ -100,7 +101,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
                 snList = new String[]{lpnOrSN};
             }
 
-            HashMap<String,String> result = PickUtil.doRandomPick( orderHashMap.get("ORDERKEY"),orderLineHashMap.get("ORDERLINENUMBER"), lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList,esignatureKey,printer);
+            Map<String,String> result = PickUtil.doRandomPick( orderHashMap.get("ORDERKEY"),orderLineHashMap.get("ORDERLINENUMBER"), lotxLocxIdHashMap,"", grossWgt, tareWgt, netWgt, uom, BigDecimal.ZERO, snList,esignatureKey,printer);
 
             String toId = result.get("TOID");
             String printLabel = result.get("PRINT");
@@ -124,7 +125,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
                     new Object[]{orderHashMap.get("ORDERKEY")}, String.class, "");
 
 
-            EXEDataObject theOutDO = new EXEDataObject();
+            ServiceDataMap theOutDO = new ServiceDataMap();
 //            theOutDO.clearDO();
 //            theOutDO.setRow(theOutDO.createRow());
 
@@ -144,12 +145,12 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         }
     }
 
-    private HashMap<String,String> insertOrder( String orderType,String projectId) throws Exception {
+    private Map<String,String> insertOrder( String orderType,String projectId) throws Exception {
         String storerKey = CDSysSet.getStorerKey();
         String userId = EHContextHelper.getUser().getUsername();
         String orderKey;
         orderKey = LegacyDBHelper.GetNCounterBill( "ORDER");
-        HashMap<String,String> orders = new LinkedHashMap<>();
+        Map<String,String> orders = new HashMap<>();
         orders.put("ADDWHO",userId);
         orders.put("EDITWHO",userId);
         orders.put("TYPE", orderType);
@@ -178,7 +179,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         return orders;
     }
 
-    private HashMap<String, String> insertOrderDetail( String storerKey, String orderKey, String sku, String lpn, String sn, String netwgt, String grossWgt, String tareWgt, String packKey, String uom) throws Exception {
+    private Map<String, String> insertOrderDetail( String storerKey, String orderKey, String sku, String lpn, String sn, String netwgt, String grossWgt, String tareWgt, String packKey, String uom) throws Exception {
 
         String userId = EHContextHelper.getUser().getUsername();
 
@@ -187,7 +188,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
         orderLineNumber=Integer.toString(Integer.parseInt(orderLineNumber)+1);
         while (orderLineNumber.length()<5) orderLineNumber="0"+orderLineNumber;
 
-        HashMap<String,String> orderDetail = new LinkedHashMap<>();
+        Map<String,String> orderDetail = new HashMap<>();
         orderDetail.put("ADDWHO", userId);
         orderDetail.put("EDITWHO", userId);
         orderDetail.put("STATUS","02");
@@ -218,7 +219,7 @@ public class LpnCreateSOAdd extends LegacyBaseService {
 
         String sql = "select ORDERKEY from ORDERDETAIL where IDREQUIRED = ? AND STATUS in ('02','04','06','09') ";
 
-        List<HashMap<String,String>> orderList = DBHelper.executeQuery( sql, new Object[]{lpn});
+        List<Map<String,String>> orderList = DBHelper.executeQuery( sql, new Object[]{lpn});
 
         if(orderList.size()>0) {
            throw new Exception("此容器已经存在出库单"+orderList.get(0).get("ORDERKEY")+"中");

@@ -7,7 +7,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public class UOM {
 
     public static BigDecimal getConversionRate2Std( String packKey, String uom) throws Exception {
 
-        HashMap<String, String> uomHashMap = getUOMHashMap( packKey);
+        Map<String, String> uomHashMap = getUOMHashMap( packKey);
 
         if(uomHashMap.size()==0||uomHashMap==null) ExceptionHelper.throwRfFulfillLogicException("未发现包装"+packKey);
 
@@ -48,8 +48,8 @@ public class UOM {
 
     }
 
-    public static HashMap<String, String> getUOMHashMap( String packKey) throws DBResourceException {
-        HashMap<String,String> uomHashMap = DBHelper.getRecord(
+    public static Map<String, String> getUOMHashMap( String packKey) throws DBResourceException {
+        Map<String,String> uomHashMap = DBHelper.getRecord(
                  "select p.QTY as PACKQTY3, p.INNERPACK as PACKQTY2,p.CASECNT as PACKQTY1,p.PALLET as PACKQTY4,p.[CUBE] as PACKQTY5,p.GROSSWGT as PACKQTY6,p.NETWGT as PACKQTY7,p.OTHERUNIT1 as PACKQTY8,p.OTHERUNIT2 as PACKQTY9, " +
                         "p.PACKUOM1, p.PACKUOM2, p.PACKUOM3, p.PACKUOM4, p.PACKUOM5, p.PACKUOM6, p.PACKUOM7, p.PACKUOM8, p.PACKUOM9 from pack p where p.PACKKEY = ?"
                 , new Object[]{packKey},"计量单位");
@@ -57,7 +57,7 @@ public class UOM {
     }
 
     public static String getStdUOM( String packKey) throws DBResourceException {
-        HashMap<String,String> uomHashMap= getUOMHashMap( packKey);
+        Map<String,String> uomHashMap= getUOMHashMap( packKey);
         return uomHashMap.get("PACKUOM3");
     }
 

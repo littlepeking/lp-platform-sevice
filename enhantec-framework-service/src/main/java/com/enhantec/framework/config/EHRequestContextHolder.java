@@ -21,6 +21,7 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
+import java.util.Map;
 import java.util.HashMap;
 
 @RequestScope
@@ -32,6 +33,6 @@ public class EHRequestContextHolder {
     String languageCode ="zh-CN";
     String dataSource;
     //用于存储和传递request级别的自定义上下文变量
-    HashMap<String,Object> data = new HashMap();
+    Map<String,Object> data = new HashMap();
 
 }

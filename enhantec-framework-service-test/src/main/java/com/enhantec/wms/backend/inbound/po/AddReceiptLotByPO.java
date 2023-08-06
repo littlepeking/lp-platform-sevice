@@ -9,8 +9,9 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.enhantec.wms.backend.utils.common.LegecyUtilHelper.Nz;
 
@@ -61,14 +62,14 @@ public class AddReceiptLotByPO extends LegacyBaseService
 		        throw new FulfillLogicException("记录已存在,不能重复生成");
 
 
-			HashMap<String,String> mRec = DBHelper.getRecord( "SELECT FROMTYPE,FROMKEY,FROMLINENO,FROMSKU,FROMSKUDESCR,A.SKU,B.ERPLOC,A.FROMLOT" +
+			Map<String,String> mRec = DBHelper.getRecord( "SELECT FROMTYPE,FROMKEY,FROMLINENO,FROMSKU,FROMSKUDESCR,A.SKU,B.ERPLOC,A.FROMLOT" +
 							"RECEIPTLOT,MANUFACTURERCODE,A.UOM,A.QTY,A.STATUS,PROCESSINGMODE,SKUSTATUSCHECK,SKUSTATUSINPUT,A.PROJECTCODE,A.ISCOMMONPROJECT,A.ELOTTABLE07,A.ELOTTABLE22,A.ELOTTABLE11," +
 							"SKUSTATUSFROM,POSUPPLIERCODE,POSUPPLIERNAME,TOTALBARREL,MANUFACTURERDATE,RETESTDATE,TRANSCHECK,FILECHECK,PACKCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,A.supplieritem,A.qualifiedproducer,PACKCOUNTCHECK" +
 							" FROM PRERECEIPTCHECK A, WMS_PO_DETAIL B,WMS_PO S WHERE A.FROMKEY = B.POKEY  AND A.FROMLINENO = B.POLINENUMBER AND S.POKEY = B.POKEY " +
 							"AND RECEIPTLOT=?", new String[]{ RECEIPTLOT});
 			if (mRec.isEmpty()) throw new Exception("未找到批次检查记录");
 
-			HashMap<String,String> mPO = DBHelper.getRecord(
+			Map<String,String> mPO = DBHelper.getRecord(
 					"SELECT A.SUPPLIER,B.ERPLOC FROM WMS_PO A,WMS_PO_DETAIL B WHERE  A.POKEY=B.POKEY AND A.POKEY=? AND A.STATUS<? AND POLINENUMBER=?"
 					, new String[]{POKEY, "9",POLINENUMBER});
 			if (mPO.isEmpty()) 
@@ -77,7 +78,7 @@ public class AddReceiptLotByPO extends LegacyBaseService
 			if (!Nz(mRec.get("POSUPPLIERCODE"),"").equals(Nz(mPO.get("SUPPLIER"),"")))  throw new Exception("当前PO与其它PO供应商不一致");
 			if (!Nz(mRec.get("ERPLOC"),"").equals(Nz(mPO.get("ERPLOC"),"")))  throw new Exception("当前PO与其它PO分布场所不一致");
 
-			HashMap<String,String> mPRERECEIPTCHECK=new HashMap<String,String>();
+			Map<String,String> mPRERECEIPTCHECK=new HashMap<String,String>();
 			mPRERECEIPTCHECK.put("WHSEID", "@user");
 			mPRERECEIPTCHECK.put("addwho", userid);
 			mPRERECEIPTCHECK.put("editwho", userid);
@@ -145,13 +146,13 @@ public class AddReceiptLotByPO extends LegacyBaseService
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 
-			List<HashMap<String,String>> aChk = DBHelper.executeQuery( "select a.FROMKEY,a.FROMLINENO," +
+			List<Map<String,String>> aChk = DBHelper.executeQuery( "select a.FROMKEY,a.FROMLINENO," +
 					"b.qty-ISNULL(b.receivedqty,0) as QTY" +
 					"  from prereceiptcheck a,WMS_PO_DETAIL b where a.fromkey=b.pokey and a.fromlineno=b.polinenumber " +
 					" and a.RECEIPTLOT=? order by a.serialkey", new String[]{RECEIPTLOT});
 			for(int i1=0;i1<aChk.size();i1++)
 			{
-				HashMap<String,String> mChk=aChk.get(i1);
+				Map<String,String> mChk=aChk.get(i1);
 				theOutDO.setAttribValue("FROMKEY"+Integer.toString(i1+1), mChk.get("FROMKEY")+"-"+mChk.get("FROMLINENO"));
 				theOutDO.setAttribValue("FROMQTY"+Integer.toString(i1+1), mChk.get("QTY"));
 			}

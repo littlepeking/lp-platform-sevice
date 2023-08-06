@@ -81,7 +81,7 @@ public class GetAsnDetailByLPN extends LegacyBaseService
 					" FROM RECEIPT A,RECEIPTDETAIL B " +
 					"WHERE A.RECEIPTKEY=B.RECEIPTKEY AND B.QTYEXPECTED>0 AND A.STATUS IN ('0','5') AND B.STATUS='0' AND B.TOID=? ";
 
-			HashMap<String, String> lpnInfo;
+			Map<String, String> lpnInfo;
 			String barrelDescr="";
 
 			lpnInfo = DBHelper.getRecord( receiptDetailSql, new Object[]{lpn}, "待收货明细行", true);
@@ -119,7 +119,7 @@ public class GetAsnDetailByLPN extends LegacyBaseService
 			//直接取库存中已存在的库区，如果相同ASN已放入多个库区，结果可能会不准,暂时保留--John
 			final String toloc = !UtilHelper.isEmpty(loc)? loc: lastReceivedLoc!=null? lastReceivedLoc:"";
 
-			HashMap<String,String> skuHashMap  =  SKU.findById(sku,true);
+			Map<String,String> skuHashMap  =  SKU.findById(sku,true);
 			String skuDescr=skuHashMap.get("DESCR");
 			String storageconditions=skuHashMap.get("COMMODITYCLASS");
 			//界面需要显示原UOM
@@ -162,7 +162,7 @@ public class GetAsnDetailByLPN extends LegacyBaseService
 							ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService("RFPutawayMultiZones",
 									new ServiceDataHolder(
 											new ServiceDataMap(
-									new HashMap<String, Object>() {{
+									new HashMap<String,Object>() {{
 
 										put("storerkey", storerKey);
 										put("sku", sku);

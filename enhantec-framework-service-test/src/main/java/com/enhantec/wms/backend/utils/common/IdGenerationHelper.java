@@ -2,7 +2,7 @@ package com.enhantec.wms.backend.utils.common;
 
 import java.sql.*;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.KeyGen;
@@ -17,7 +17,7 @@ public class IdGenerationHelper {
      * 检查容器条码规则或者箱号规则的配置是否准确
      * @return
      */
-    public static boolean checkWareHouseOrBoxPrefixConf(HashMap<String, String> wareHouseOrBoxPrefixConfMap){
+    public static boolean checkWareHouseOrBoxPrefixConf(Map<String, String> wareHouseOrBoxPrefixConfMap){
         if(UtilHelper.isEmpty(wareHouseOrBoxPrefixConfMap.get("UDF2")) && !isDateTimeConf(wareHouseOrBoxPrefixConfMap.get("UDF2"))){
             return false;
         }
@@ -44,7 +44,7 @@ public class IdGenerationHelper {
 
     public static String createReceiptLot( String sku) throws Exception
     {
-        HashMap<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
+        Map<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
         if(!checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.WAREHOUSE配置不符合要求");
         String warehouseCode = UtilHelper.nvl(lotRuleCodelkup.get("UDF1"),"");
         String skuTypeCode= DBHelper.getValue( "select udf4 from codelkup a,sku s where a.listname=? and a.code=s.busr4 and s.sku=?", new String[]{"SKUTYPE1",sku}, "");//根据sku获批号是sm||sc
@@ -56,7 +56,7 @@ public class IdGenerationHelper {
     }
     public static String createReceiptLot() throws Exception
     {
-        HashMap<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
+        Map<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
         if(!checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.WAREHOUSE配置不符合要求");
         String warehouseCode = UtilHelper.nvl(lotRuleCodelkup.get("UDF1"),"");
         String CurDate= DBHelper.getValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
@@ -80,7 +80,7 @@ public class IdGenerationHelper {
     }
     public static String createSNID() throws Exception
     {
-        HashMap<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","SNPREFIX");
+        Map<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","SNPREFIX");
         if(!checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.SNPREFIX配置不符合要求");
         String warehouseCode = UtilHelper.nvl(lotRuleCodelkup.get("UDF1"),"");
         String CurDate= DBHelper.getValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
@@ -200,7 +200,7 @@ public class IdGenerationHelper {
         String parentLpn = newLpn.substring(0,newLpn.length()-1);
         String suffix = newLpn.substring(newLpn.length()-1);
 
-        HashMap<String,String> parentIdnotes = IDNotes.findById(parentLpn,true);
+        Map<String,String> parentIdnotes = IDNotes.findById(parentLpn,true);
 
         return parentIdnotes.get("BARRELNUMBER")+suffix;
 
@@ -249,7 +249,7 @@ public class IdGenerationHelper {
 
             if (Count<=0)  ExceptionHelper.throwRfFulfillLogicException("Not find ("+KeyName+") by ncounter");
 
-            HashMap<String,Object> seqHashMap = DBHelper.getRawRecord("Select KeyCount from ncounter where KeyName=?",new Object[]{KeyName.toUpperCase()},"", false);
+            Map<String,Object> seqHashMap = DBHelper.getRawRecord("Select KeyCount from ncounter where KeyName=?",new Object[]{KeyName.toUpperCase()},"", false);
 
             if (seqHashMap!=null)
             {

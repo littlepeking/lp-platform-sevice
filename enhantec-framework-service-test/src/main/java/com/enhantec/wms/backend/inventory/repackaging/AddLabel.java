@@ -15,8 +15,8 @@ import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr;
 
@@ -77,8 +77,8 @@ public class AddLabel extends LegacyBaseService {
                 ExceptionHelper.throwRfFulfillLogicException("输入的毛皮净重不匹配");
             }
 
-            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
-            HashMap<String,String>  skuHashMap = SKU.findById(orderDetailHashMap.get("SKU"),true);
+            Map<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
+            Map<String,String>  skuHashMap = SKU.findById(orderDetailHashMap.get("SKU"),true);
 
             BigDecimal stdGrossWgtDecimal = UOM.UOMQty2StdQty( skuHashMap.get("PACKKEY"), uom, grossWgtDecimal);
             BigDecimal stdTareWgtDecimal = UOM.UOMQty2StdQty( skuHashMap.get("PACKKEY"), uom, tareWgtDecimal);
@@ -99,7 +99,7 @@ public class AddLabel extends LegacyBaseService {
 
                 currentRepackReceiptKey= LegacyDBHelper.GetNCounterBill( "RECEIPT");
 
-                HashMap<String,String> RECEIPT=new HashMap<String,String>();
+                Map<String,String> RECEIPT=new HashMap<String,String>();
                 RECEIPT.put("ADDWHO", userid);
                 RECEIPT.put("EDITWHO", userid);
                 RECEIPT.put("RECEIPTKEY", currentRepackReceiptKey);
@@ -120,7 +120,7 @@ public class AddLabel extends LegacyBaseService {
                      currentRepackReceiptKey,  orderKey ,  orderLineNumber });
 
             }else{
-                HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(currentRepackReceiptKey,true);
+                Map<String,String> receiptHashMap =  Receipt.findByReceiptKey(currentRepackReceiptKey,true);
                 //RECEIPT.SUSR2 当前进行的分装批次号
                 if(!UtilHelper.equals(receiptHashMap.get("SUSR2"),lottable06)) ExceptionHelper.throwRfFulfillLogicException("当前分装进行中的批次为"+receiptHashMap.get("SUSR2")+"，请先完成该批次分装");
 
@@ -151,7 +151,7 @@ public class AddLabel extends LegacyBaseService {
 				E批属性12	原材料-取样日期/成品-生产日期
 			*/
 
-            HashMap<String,String> lpnInfo=DBHelper.getRecord(
+            Map<String,String> lpnInfo=DBHelper.getRecord(
                     " SELECT TOP 1 s.SKU, s.DESCR SKUDESCR,s.PACKKEY, s.COMMODITYCLASS STORAGECONDITIONS,id.TAREWGT,id.ISOPENED, " +
                             "id.BARRELNUMBER, id.TOTALBARREL, id.barreldescr BARRELDESCR, " +
                             "id.ORIGINALGROSSWGT, id.ORIGINALTAREWGT, id.ORIGINALNETWGT, id.PROJECTCODE, " +
@@ -174,7 +174,7 @@ public class AddLabel extends LegacyBaseService {
 
             String suppilerName = " ";
             if(!UtilHelper.isEmpty(lpnInfo.get("ELOTTABLE08"))) {
-                HashMap<String, String> supplierInfo = DBHelper.getRecord(
+                Map<String, String> supplierInfo = DBHelper.getRecord(
                         "SELECT * FROM STORER WHERE TYPE = '5' AND STORERKEY = ? "
                         , new Object[]{lpnInfo.get("ELOTTABLE08")},"供应商信息");
                 if (supplierInfo == null) throw new Exception("未找到供应商" + lpnInfo.get("ELOTTABLE08") + "");
@@ -186,7 +186,7 @@ public class AddLabel extends LegacyBaseService {
             //分装条码自动生成，生成规则：批号+F+001，分装物料批次号+F+3位流水。
             String newLpn = IdGenerationHelper.generateLpn( lottable06+"F");
 
-            HashMap<String,String> receiptDetail=new HashMap<String,String>();
+            Map<String,String> receiptDetail=new HashMap<String,String>();
             receiptDetail.put("STORERKEY", storerKey);
             receiptDetail.put("SKU", lpnInfo.get("SKU"));
             receiptDetail.put("RECEIPTKEY", currentRepackReceiptKey);

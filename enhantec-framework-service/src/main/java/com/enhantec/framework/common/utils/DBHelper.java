@@ -21,6 +21,7 @@ package com.enhantec.framework.common.utils;
 
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public class DBHelper {
      * @return
      */
     public static Map<String, Object> camelCaseMap(Map<String, Object> map) {
-        Map<String, Object> newMap = new HashMap<String, Object>();
+        Map<String, Object> newMap = new HashMap<>();
         Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> entry = it.next();

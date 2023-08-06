@@ -12,7 +12,9 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class CloseSO extends LegacyBaseService {
@@ -46,9 +48,9 @@ public class CloseSO extends LegacyBaseService {
             String notes = DBHelper.getValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignatureKey},String.class,"电子签名");
 
-            HashMap<String, String>  orderInfo = Orders.findByOrderKey(orderKey,true);
+            Map<String, String>  orderInfo = Orders.findByOrderKey(orderKey,true);
 
-            List<HashMap<String, String>>  pickDetailList = PickDetail.findByOrderKey(orderKey,false);
+            List<Map<String, String>>  pickDetailList = PickDetail.findByOrderKey(orderKey,false);
 
             if(pickDetailList.stream().anyMatch(x-> "3".equals(x.get("STATUS")))) throw new Exception("存在处理中状态的拣货项，请完成或删除该拣货项后再关闭订单");
 

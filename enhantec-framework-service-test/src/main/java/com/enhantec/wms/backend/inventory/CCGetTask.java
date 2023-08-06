@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  --??
@@ -41,12 +41,12 @@ public class CCGetTask extends LegacyBaseService {
         String fromId =  outDO.getString("fromid");
         String taskDetailKey =  outDO.getString("taskdetailkey");
 
-        HashMap<String,String> skuHashMap = SKU.findById(sku,true);
+        Map<String,String> skuHashMap = SKU.findById(sku,true);
         String  stdUom = UOM.getStdUOM(skuHashMap.get("PACKKEY"));
-        HashMap<String,Object>  lotHashMap = VLotAttribute.findByLot(lot,true);
-        HashMap<String,String>  idNotesHashMap = IDNotes.findById(fromId,true);
-        HashMap<String,String>  taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
-        HashMap<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(fromId,true);
+        Map<String,Object>  lotHashMap = VLotAttribute.findByLot(lot,true);
+        Map<String,String>  idNotesHashMap = IDNotes.findById(fromId,true);
+        Map<String,String>  taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
+        Map<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(fromId,true);
 
         outDO.setAttribValue("skudescr",skuHashMap.get("DESCR"));
         outDO.setAttribValue("lottable06",lotHashMap.get("LOTTABLE06").toString());

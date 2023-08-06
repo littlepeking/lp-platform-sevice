@@ -16,8 +16,8 @@ import com.enhantec.wms.backend.utils.print.PrintHelper;
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 /**
  *
@@ -60,11 +60,11 @@ public class ReturnWithASNAdd extends LegacyBaseService {
             if (UtilHelper.isEmpty(tareWgt)) throw new Exception("未成功获取皮重数据");
             if (UtilHelper.isEmpty(netWgt)) throw new Exception("未成功获取净重数据");
 
-            HashMap<String, String> receiptHashMap = buildReceiptHeader(receiptKey,receiptType);
+            Map<String, String> receiptHashMap = buildReceiptHeader(receiptKey,receiptType);
 
 
             if(!UtilHelper.isEmpty(originalReceiptLineNumber)) {
-                HashMap<String, String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById( receiptKey, originalReceiptLineNumber, true);
+                Map<String, String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById( receiptKey, originalReceiptLineNumber, true);
                 if(!(new BigDecimal(originalReceiptDetailHashMap.get("QTYRECEIVED")).compareTo(new BigDecimal(0)) == 0))
                     ExceptionHelper.throwRfFulfillLogicException("收货指令行的已收货数量必须为0");
                 toLoc = originalReceiptDetailHashMap.get("TOLOC");
@@ -74,7 +74,7 @@ public class ReturnWithASNAdd extends LegacyBaseService {
             if(!UtilHelper.isEmpty(toLocConf)){
                 toLoc = toLocConf;
             }
-            HashMap<String, String> skuMap = SKU.findById( sku, true);
+            Map<String, String> skuMap = SKU.findById( sku, true);
 
             String packKey = skuMap.get("PACKKEY");
 
@@ -97,7 +97,7 @@ public class ReturnWithASNAdd extends LegacyBaseService {
                 }
             }
 
-            HashMap<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByReturnLpn( receiptHashMap, originalReceiptLineNumber,sku,lpn,originLpn, toLoc,isOpened
+            Map<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByReturnLpn( receiptHashMap, originalReceiptLineNumber,sku,lpn,originLpn, toLoc,isOpened
                     ,netWgtStdQQty.toPlainString(),grossWgtStdQty.toPlainString(),tareWgtStdQQty.toPlainString(),uom,reGrossWgt, snArray.toArray(new String[snArray.size()]),snWightArray.toArray(new String[snWightArray.size()]), snUomArray.toArray(new String[snUomArray.size()]));
             /**
              * 唯一码控制的打印LPN和SN标签
@@ -136,7 +136,7 @@ public class ReturnWithASNAdd extends LegacyBaseService {
                     }
                 }
             } else if (CDSysSet.enableLabelWgt()) {
-                HashMap<String, String> idNotesHistory = IDNotesHistory.findLastShippedRecordById( insertedReceiptDetail.get("TOID"), true);
+                Map<String, String> idNotesHistory = IDNotesHistory.findLastShippedRecordById( insertedReceiptDetail.get("TOID"), true);
                 String originalNetWgt = idNotesHistory.get("ORIGINALNETWGT");
                 String expectedNetWgt = insertedReceiptDetail.get("QTYEXPECTED");
 
@@ -200,9 +200,9 @@ public class ReturnWithASNAdd extends LegacyBaseService {
 
     }
 
-    private HashMap<String,String> buildReceiptHeader( String receiptKey, String receiptType) throws Exception {
+    private Map<String,String> buildReceiptHeader( String receiptKey, String receiptType) throws Exception {
 
-        HashMap<String, String> receiptHashMap = null;
+        Map<String, String> receiptHashMap = null;
 
         String exReceiptKey = "";
 
@@ -210,7 +210,7 @@ public class ReturnWithASNAdd extends LegacyBaseService {
 
         if(UtilHelper.isEmpty(receiptKey)) {
             receiptKey = LegacyDBHelper.GetNCounterBill( "RECEIPT");
-            HashMap<String,String> newReceiptHashMap = new HashMap<String,String>();
+            Map<String,String> newReceiptHashMap = new HashMap<String,String>();
             newReceiptHashMap.put("ADDWHO", userid);
             newReceiptHashMap.put("EDITWHO", userid);
             newReceiptHashMap.put("RECEIPTKEY", receiptKey);

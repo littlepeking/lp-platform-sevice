@@ -16,8 +16,8 @@ import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 /**
  *
@@ -48,13 +48,13 @@ public class ReceivingWithASNAdd extends LegacyBaseService {
 
         try{
 
-            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey(receiptKey,true);
+            Map<String,String> receiptHashMap = Receipt.findByReceiptKey(receiptKey,true);
 
             if (receiptHashMap.get("STATUS").equals("9") || receiptHashMap.get("STATUS").equals("11")
                     || receiptHashMap.get("STATUS").equals("15") || receiptHashMap.get("STATUS").equals("20")
             )  throw new Exception("收货单行已收货完成,不允许修改");
 
-            HashMap<String,String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById(receiptKey,originalReceiptLineNumber,true);
+            Map<String,String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById(receiptKey,originalReceiptLineNumber,true);
 
             if(!(new BigDecimal(originalReceiptDetailHashMap.get("QTYRECEIVED")).compareTo(new BigDecimal(0)) == 0)) ExceptionHelper.throwRfFulfillLogicException("收货指令行的已收货数量必须为0");
 
@@ -68,7 +68,7 @@ public class ReceivingWithASNAdd extends LegacyBaseService {
                 snList = snListStr.split(";;;");
             }
 
-            HashMap<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByOriginalLine(originalReceiptDetailHashMap,lpn,originalReceiptDetailHashMap.get("TOLOC"),"0"
+            Map<String,String> insertedReceiptDetail = Receipt.insertReceiptDetailByOriginalLine(originalReceiptDetailHashMap,lpn,originalReceiptDetailHashMap.get("TOLOC"),"0"
                     ,netWgtStdQQty.toPlainString(),grossWgtStdQty.toPlainString(),tareWgtStdQQty.toPlainString(),uom,"", snList);
 
             if(!SKU.isSerialControl(insertedReceiptDetail.get("SKU")) ||

@@ -7,8 +7,8 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class UsedPOBean {
 
@@ -35,7 +35,7 @@ public class UsedPOBean {
 
 	public UsedPOBean( String vPOKEY, String vPOLINENUMBER, String sku) throws Exception
 	{
-		HashMap<String,String> mPO= DBHelper.getRecord( "select A.UOM,A.QTY,A.RECEIVEDQTY"
+		Map<String,String> mPO= DBHelper.getRecord( "select A.UOM,A.QTY,A.RECEIVEDQTY"
 				+ ",A.STATUS,B.SUPPLIER,B.PROJECTCODE,A.SKU,B.PROJECTID,A.ERPLOC"
 				+ " FROM WMS_PO_DETAIL A,WMS_PO B WHERE A.POKEY=B.POKEY AND A.POKEY=? AND A.POLINENUMBER=?", new String[] {vPOKEY,vPOLINENUMBER});
 		//由于通过jde编码建单的数据 po里没有相关sku信息 用收货检查表中sku信息

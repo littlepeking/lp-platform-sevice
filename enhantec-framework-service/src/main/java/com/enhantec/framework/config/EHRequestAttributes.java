@@ -19,8 +19,9 @@ package com.enhantec.framework.config;
 
 import org.springframework.web.context.request.RequestAttributes;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map;
 
 //This class maintains a map of request scope beans internally. if it contains the bean then it returns that bean otherwise it returns null.
 public class EHRequestAttributes implements RequestAttributes {

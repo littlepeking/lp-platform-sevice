@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 
@@ -58,20 +58,20 @@ public class ShipById extends LegacyBaseService {
 
             if(isBoxId) {
 
-                List<HashMap<String, String>> pickDetailInfos = LotxLocxId.findPickedIdsByParentId(fromId);
+                List<Map<String, String>> pickDetailInfos = LotxLocxId.findPickedIdsByParentId(fromId);
 
                 OrderValidationHelper.checkOrderTypeAndQualityStatusByPickDetailKey(pickDetailInfos.get(0).get("PICKDETAILKEY"));
 
                 orderKey = pickDetailInfos.get(0).get("ORDERKEY");
 
-                for( HashMap<String, String> pickDetailInfo: pickDetailInfos){
+                for( Map<String, String> pickDetailInfo: pickDetailInfos){
                     shipSingleLpn(pickDetailInfo);
                 }
 
 
             }else {
 
-                HashMap<String, String> pickDetailInfo = PickDetail.findPickedLpn( fromId, true);
+                Map<String, String> pickDetailInfo = PickDetail.findPickedLpn( fromId, true);
 
                 OrderValidationHelper.checkOrderTypeAndQualityStatusByPickDetailKey(pickDetailInfo.get("PICKDETAILKEY"));
 
@@ -115,13 +115,13 @@ public class ShipById extends LegacyBaseService {
         }
     }
 
-    private void shipSingleLpn( HashMap<String, String> pickDetailInfo ) throws Exception {
+    private void shipSingleLpn( Map<String, String> pickDetailInfo ) throws Exception {
 
         
         DBHelper.executeUpdate("UPDATE DROPID SET STATUS = '0' WHERE DROPID = ? ", new Object[]{pickDetailInfo.get("ID")});
 
         //
-        HashMap<String,String> shippedIdNotesHashMap = IDNotes.decreaseWgtById(new BigDecimal(pickDetailInfo.get("QTY")), pickDetailInfo.get("ID"));
+        Map<String,String> shippedIdNotesHashMap = IDNotes.decreaseWgtById(new BigDecimal(pickDetailInfo.get("QTY")), pickDetailInfo.get("ID"));
         if(UtilHelper.decimalStrCompare(shippedIdNotesHashMap.get("NETWGT"), "0")>0)
             ExceptionHelper.throwRfFulfillLogicException("待发运的容器条码/箱号"+ pickDetailInfo.get("ID")+"发运时扣库存异常(不为零)，发运失败");
         //校验发运的IDNOTES库存余额应为0并移至历史表，否则报错

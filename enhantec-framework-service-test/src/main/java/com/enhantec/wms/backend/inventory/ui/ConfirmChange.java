@@ -6,7 +6,7 @@ import com.enhantec.wms.backend.inventory.utils.ChangeByLotHelper;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class ConfirmChange extends LegacyBaseService {
@@ -37,13 +37,13 @@ public class ConfirmChange extends LegacyBaseService {
             String changekey = serviceDataHolder.getInputDataAsMap().getString("CHANGEKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String SQL="SELECT * FROM ENCHGPROJECTCODE WHERE  CHANGEKEY = ?  ";
-            HashMap<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ changekey},"变更单");
+            Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ changekey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("变更单为"+changekey+"未找到");
 
-            List<HashMap<String,String>> ehchangeDetailList = DBHelper.executeQuery( "select  e.FROMSKU,e.TOSKU from  ENCHGPROJECTCODEDETAIL e " +
+            List<Map<String,String>> ehchangeDetailList = DBHelper.executeQuery( "select  e.FROMSKU,e.TOSKU from  ENCHGPROJECTCODEDETAIL e " +
                     "      where  e.CHANGEKEY = ?", new Object[]{
                     changekey});
-            for (HashMap<String,String> ehchangedetailHash:ehchangeDetailList) {
+            for (Map<String,String> ehchangedetailHash:ehchangeDetailList) {
                 ChangeByLotHelper.checkSkuAttributeIsMatch(ehchangedetailHash.get("FROMSKU"),ehchangedetailHash.get("TOSKU"));
             }
 
@@ -76,7 +76,7 @@ public class ConfirmChange extends LegacyBaseService {
     private static void checkConfirmUser(String changeKey, String confirmUser){
         String SQL = "select * from ENCHGPROJECTCODE where ISCONFIRMEDUSER1=?  " +
                 "and changekey=?";
-        HashMap<String, String>  record = DBHelper.getRecord(SQL, new Object[]{ confirmUser,changeKey},"变更单");
+        Map<String, String>  record = DBHelper.getRecord(SQL, new Object[]{ confirmUser,changeKey},"变更单");
         if( record != null ) ExceptionHelper.throwRfFulfillLogicException("变更单为"+changeKey+"复核人，确认人不能为同一人");
     }
     private static void updateConfirmUserByChangeKey(String changeKey, String confirmUser, String field,String status){

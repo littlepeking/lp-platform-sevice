@@ -10,8 +10,8 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class AddReleaseRecord extends LegacyBaseService {
 
@@ -45,7 +45,7 @@ public class AddReleaseRecord extends LegacyBaseService {
             String jsonStr = serviceDataHolder.getInputDataAsMap().getString("JsonStr");
             String eSignatureKey = serviceDataHolder.getInputDataAsMap().getString("EsignatureKey");
 
-            HashMap<String,String> mapJson = UtilHelper.jsonToMap(jsonStr);
+            Map<String,String> mapJson = UtilHelper.jsonToMap(jsonStr);
 
             String lottable06 = mapJson.get("LOTTABLE06");
             String eLottable05 = UtilHelper.getString(mapJson.get("ELOTTABLE05"));//复测期，停止发运期
@@ -62,7 +62,7 @@ public class AddReleaseRecord extends LegacyBaseService {
             String STORERKEY= DBHelper.getValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
 
 
-            HashMap<String,String> skuHashMap = SKU.findById(mapJson.get("SKU"),true);
+            Map<String,String> skuHashMap = SKU.findById(mapJson.get("SKU"),true);
 
           //  String SUPPLIERNAME ="";
           /*  if(!UtilHelper.isEmpty(mapJson.get("ELOTTABLE08"))) {
@@ -72,7 +72,7 @@ public class AddReleaseRecord extends LegacyBaseService {
             }*/
 
             //取库存的信息
-            HashMap<String,String> record= DBHelper.getRecord( "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
+            Map<String,String> record= DBHelper.getRecord( "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
                         + " WHERE A.LOT=B.LOT AND QTY>0 AND B.LOTTABLE06=?", new Object[]{lottable06},"库存明细");
 
             String barrelNum = record.get("CNT"); //桶数
@@ -81,7 +81,7 @@ public class AddReleaseRecord extends LegacyBaseService {
 
 
             //创建请检单
-            HashMap<String,String> mRELEASE=new HashMap<String,String>();
+            Map<String,String> mRELEASE=new HashMap<String,String>();
             mRELEASE.put("ADDWHO", userid);  //创建人
             mRELEASE.put("EDITWHO", userid);  //更新人
 

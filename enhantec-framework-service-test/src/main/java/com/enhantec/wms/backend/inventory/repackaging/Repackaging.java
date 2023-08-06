@@ -17,7 +17,8 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -59,8 +60,8 @@ public class Repackaging extends LegacyBaseService {
             if (UtilHelper.isEmpty(esignatureKey)) throw new Exception("电子签名不能为空");
 
 
-            HashMap<String,String> orderHashMap = Orders.findByOrderKey(orderKey,true);
-            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
+            Map<String,String> orderHashMap = Orders.findByOrderKey(orderKey,true);
+            Map<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
 
             String repackReceiptKey = orderDetailHashMap.get("SUSR1");
 
@@ -68,7 +69,7 @@ public class Repackaging extends LegacyBaseService {
 
             if(UtilHelper.isEmpty(repackReceiptKey)) ExceptionHelper.throwRfFulfillLogicException("找不到该订单行正在进行的分装收货单，请先生成分装签");
 
-            HashMap<String,String> receiptHashMap = Receipt.findByReceiptKey( repackReceiptKey,true);
+            Map<String,String> receiptHashMap = Receipt.findByReceiptKey( repackReceiptKey,true);
 
             String lottable06 =receiptHashMap.get("SUSR2");
 
@@ -81,7 +82,7 @@ public class Repackaging extends LegacyBaseService {
             if(UtilHelper.isEmpty(rePackOrderKey)) {
 
                 String receiptDetailsSql = "SELECT * FROM RECEIPTDETAIL WHERE STATUS = '0' AND receiptKey = ?  ";
-                List<HashMap<String, String>> receiptDetailList = DBHelper.executeQuery( receiptDetailsSql, new Object[]{repackReceiptKey});
+                List<Map<String, String>> receiptDetailList = DBHelper.executeQuery( receiptDetailsSql, new Object[]{repackReceiptKey});
                 if (receiptDetailList.size() == 0)
                     ExceptionHelper.throwRfFulfillLogicException("未找到收货单" + repackReceiptKey + "下待收货的分装标签");
 
@@ -95,7 +96,7 @@ public class Repackaging extends LegacyBaseService {
                 String projectCode = orderHashMap.get("NOTES");
                 rePackOrderKey = LegacyDBHelper.GetNCounterBill( "ORDER");
 
-                HashMap<String,String> repackOrderHashMap = new HashMap<String,String>();
+                Map<String,String> repackOrderHashMap = new HashMap<>();
                 repackOrderHashMap.put("AddWho", userid);
                 repackOrderHashMap.put("EditWho", userid);
                 repackOrderHashMap.put("type", repackOrderType);
@@ -114,15 +115,15 @@ public class Repackaging extends LegacyBaseService {
                         rePackOrderKey, orderKey, orderLineNumber});
 
                 //add order lines
-                List<HashMap<String, String>> leftLpnList = RepackgingUtils.getLeftLPNListFromStr(receiptHashMap.get("SUSR5"));
+                List<Map<String, String>> leftLpnList = RepackgingUtils.getLeftLPNListFromStr(receiptHashMap.get("SUSR5"));
 
                 //添加完全消耗的备货LPN
-                List<HashMap<String, String>> allPreparedIds = DBHelper.executeQuery(
+                List<Map<String, String>> allPreparedIds = DBHelper.executeQuery(
                         "SELECT a.ID, QTY FROM LOTXLOCXID a, v_lotattribute b WHERE  a.lot=b.lot " +
                                 " and a.LOC = ? AND a.SKU = ? AND b.LOTTABLE06 = ? AND a.QTY>0",
                         new Object[]{currentPackLoc, sku, lottable06});
 
-                for (HashMap<String, String> idRec : allPreparedIds) {
+                for (Map<String, String> idRec : allPreparedIds) {
 
                     Boolean existInLeftLpnList = leftLpnList.stream().anyMatch(x -> x.get("ID").equals(idRec.get("ID")));
 
@@ -143,11 +144,11 @@ public class Repackaging extends LegacyBaseService {
 
                 if (leftLpnList.size() > 0) {
 
-                    for (HashMap<String, String> leftLpnInfo : leftLpnList) {
+                    for (Map<String, String> leftLpnInfo : leftLpnList) {
 
                         //////////
                         //校验容器的可用量应大于分装量
-                        HashMap<String, String> idHashMap = LotxLocxId.findAvailInvById( leftLpnInfo.get("ID"), true, true);
+                        Map<String, String> idHashMap = LotxLocxId.findAvailInvById( leftLpnInfo.get("ID"), true, true);
                         BigDecimal leftLpnStdQty = UOM.UOMQty2StdQty( packKey, leftLpnInfo.get("UOM"), new BigDecimal(leftLpnInfo.get("LEFTQTY")));
                         BigDecimal idUsedStdQty = new BigDecimal(idHashMap.get("QTY")).subtract(leftLpnStdQty);
 
@@ -177,7 +178,7 @@ public class Repackaging extends LegacyBaseService {
                                 repackOrderLineNumber = "0" + repackOrderLineNumber;
                             ///
 
-                            HashMap<String,String> repackOrderDetail = new HashMap<String,String>();
+                            Map<String,String> repackOrderDetail = new HashMap<String,String>();
                             repackOrderDetail.put("ADDWHO", userid);
                             repackOrderDetail.put("EDITWHO", userid);
                             repackOrderDetail.put("STATUS", "04");
@@ -289,13 +290,13 @@ public class Repackaging extends LegacyBaseService {
         
                     ServiceHelper.executeService( "EHReceiveAll",
                             new ServiceDataHolder(new ServiceDataMap(
-                            new HashMap<String, Object>() {{
+                            new HashMap<String,Object>() {{
                         put("RECEIPTKEY", repackReceiptKey);
                         put("ESIGNATUREKEY","");
                     }})));
 
 
-                    HashMap<String,String> receivedReceiptHashMap = Receipt.findByReceiptKey( repackReceiptKey,true);
+                    Map<String,String> receivedReceiptHashMap = Receipt.findByReceiptKey( repackReceiptKey,true);
 
                     if (!receivedReceiptHashMap.get("STATUS").equals("9")){
                         ExceptionHelper.throwRfFulfillLogicException("已执行过分装，但未自动完成。分装出库单" + rePackOrderKey + "已完成，但分装入库单"+repackReceiptKey+"收货未能完成，请手工进行后续分装入库单收货、领料单分配及拣货操作后重试");
@@ -327,7 +328,7 @@ public class Repackaging extends LegacyBaseService {
                 }
             }else{
 
-                HashMap<String,String> rePackOrderHashMap = Orders.findByOrderKey(rePackOrderKey,true);
+                Map<String,String> rePackOrderHashMap = Orders.findByOrderKey(rePackOrderKey,true);
 
                 if(!rePackOrderHashMap.get("STATUS").equals("95")){
                     ExceptionHelper.throwRfFulfillLogicException("已执行过分装，但未自动完成。请手工对分装出库单"+rePackOrderKey+"进行发货和对分装入库单"+repackReceiptKey+"进行收货，最后对关联的领料单进行分配及拣货后重试");
@@ -361,13 +362,13 @@ public class Repackaging extends LegacyBaseService {
 
     }
 
-    private void addPickDetails2Order( HashMap<String, String> orderDetailHashMap, List<HashMap<String, String>> receiptDetailList) throws SQLException {
+    private void addPickDetails2Order( Map<String, String> orderDetailHashMap, List<Map<String, String>> receiptDetailList) throws SQLException {
 
-        EXEDataObject thePickDO = new EXEDataObject();
+        ServiceDataMap thePickDO = new ServiceDataMap();
 
-        for(HashMap<String,String> receiptDetail: receiptDetailList) {
+        for(Map<String,String> receiptDetail: receiptDetailList) {
 
-            HashMap<String,String> lotxLocxIdInfo = LotxLocxId.findById(receiptDetail.get("TOID"),true);
+            Map<String,String> lotxLocxIdInfo = LotxLocxId.findById(receiptDetail.get("TOID"),true);
 
 
             String pickDetailKey = KeyGen.getKey("PICKDETAILKEY", 10);

@@ -9,8 +9,8 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.List;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class GetReceiptLotByPO extends LegacyBaseService
 {
@@ -49,14 +49,14 @@ public class GetReceiptLotByPO extends LegacyBaseService
 
 			String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
 
-			List<HashMap<String,String>> r1 = DBHelper.executeQuery( "select FROMKEY,FROMLINENO,STATUS,FROMSKU,FROMSKUDESCR,SKU,FROMLOT,SUPPLIERCODE,MANUFACTURERCODE,PROCESSINGMODE,UOM,QTY,TOTALBARREL,ELOTTABLE11,RETESTDATE,PACKCHECK,FILECHECK,TRANSCHECK,MANUFACTURERDATE,ELOTTABLE07,PACKCOUNTCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,supplieritem,qualifiedproducer,POSUPPLIERNAME,ISCOMMONPROJECT,PROJECTCODE from PRERECEIPTCHECK where RECEIPTLOT=? order by serialkey", new String[]{ ReceiptLot});
+			List<Map<String,String>> r1 = DBHelper.executeQuery( "select FROMKEY,FROMLINENO,STATUS,FROMSKU,FROMSKUDESCR,SKU,FROMLOT,SUPPLIERCODE,MANUFACTURERCODE,PROCESSINGMODE,UOM,QTY,TOTALBARREL,ELOTTABLE11,RETESTDATE,PACKCHECK,FILECHECK,TRANSCHECK,MANUFACTURERDATE,ELOTTABLE07,PACKCOUNTCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,supplieritem,qualifiedproducer,POSUPPLIERNAME,ISCOMMONPROJECT,PROJECTCODE from PRERECEIPTCHECK where RECEIPTLOT=? order by serialkey", new String[]{ ReceiptLot});
 			if (r1 == null) {
 				throw new FulfillLogicException("收货批次(%1)未找到", ReceiptLot);
 			}
 
 			for(int i1=0;i1<r1.size();i1++)
 			{
-				HashMap<String,String> m1=r1.get(i1);
+				Map<String,String> m1=r1.get(i1);
 				if (i1==0)
 				{
 					String SKUDESCR= DBHelper.getValue( "SELECT DESCR FROM SKU WHERE STORERKEY=? and SKU=?", new String[]{STORERKEY,m1.get("SKU")}, "");
@@ -96,7 +96,7 @@ public class GetReceiptLotByPO extends LegacyBaseService
 
 
 
-				HashMap<String,String> FROMQTY= DBHelper.getRecord( "select A.qty-ISNULL(A.receivedqty,0) as QTY,B.supplierNAME,B.SUPPLIER,A.UOM " +
+				Map<String,String> FROMQTY= DBHelper.getRecord( "select A.qty-ISNULL(A.receivedqty,0) as QTY,B.supplierNAME,B.SUPPLIER,A.UOM " +
 								" FROM WMS_PO_DETAIL A,WMS_PO B WHERE A.POKEY=B.POKEY AND A.POKEY=? AND A.POLINENUMBER=?"
 						, new String[]{m1.get("FROMKEY"),m1.get("FROMLINENO")});
 				theOutDO.setAttribValue("FROMKEY"+Integer.toString(i1+1), m1.get("FROMKEY")+"-"+m1.get("FROMLINENO"));

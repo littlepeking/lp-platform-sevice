@@ -9,8 +9,8 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class PrintReByLpn extends LegacyBaseService
 {
@@ -56,7 +56,7 @@ public class PrintReByLpn extends LegacyBaseService
 //			if ((!LOCATION.equals("CJ"))&&(!LOCATION.equals("CK")))
 //				throw new Exception("参数错误");
 			
-			HashMap<String,String> mID= DBHelper.getRecord( "select id.ID, id.SKU,l.LOTTABLE06,sku.DESCR,id.BARRELDESCR,sku.DESCR from IDNOTES id,SKU sku,v_lotattribute l where sku.sku = id.sku and id.lot=l.lot and id.ID=?", new String[] {LPN});
+			Map<String,String> mID= DBHelper.getRecord( "select id.ID, id.SKU,l.LOTTABLE06,sku.DESCR,id.BARRELDESCR,sku.DESCR from IDNOTES id,SKU sku,v_lotattribute l where sku.sku = id.sku and id.lot=l.lot and id.ID=?", new String[] {LPN});
 			if (mID.isEmpty()) throw new Exception("未找到桶信息");
 
 			DBHelper.getRecord( "select PRINTERNAME from LABELPRINTER WHERE PRINTERNAME=?", new Object[]{PRINTER},"注册的打印机",true);

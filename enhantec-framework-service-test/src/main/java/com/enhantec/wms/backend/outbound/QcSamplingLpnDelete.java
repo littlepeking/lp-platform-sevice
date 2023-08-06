@@ -11,8 +11,8 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegecyUtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class QcSamplingLpnDelete extends LegacyBaseService
 {
@@ -61,7 +61,7 @@ public class QcSamplingLpnDelete extends LegacyBaseService
 			if (LegecyUtilHelper.isNull(Status)) throw new Exception("未找到在库取样单("+ORDERKEY+")");
 			if (Status.compareTo("09")>0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭或扣量,不能继续操作");
 				
-			HashMap<String,String> mORDER= DBHelper.getRecord( "SELECT EXTERNLINENO,SKU,SUSR1,SUSR2,SUSR3 FROM ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=?", new String[]{ORDERKEY,ORDERLINENUMBER});
+			Map<String,String> mORDER= DBHelper.getRecord( "SELECT EXTERNLINENO,SKU,SUSR1,SUSR2,SUSR3 FROM ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=?", new String[]{ORDERKEY,ORDERLINENUMBER});
 			if (mORDER.isEmpty()) throw new Exception("未找到记录,是确认否重复删除");
 			
 			DBHelper.executeUpdate( "DELETE ORDERDETAIL WHERE ORDERKEY=? AND ORDERLINENUMBER=?", new String[]{ORDERKEY,ORDERLINENUMBER});

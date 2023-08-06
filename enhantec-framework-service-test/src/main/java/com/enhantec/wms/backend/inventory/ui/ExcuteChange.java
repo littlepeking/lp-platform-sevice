@@ -9,8 +9,10 @@ import com.enhantec.wms.backend.inventory.utils.InventoryValidationHelper;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 
 public class ExcuteChange extends LegacyBaseService {
@@ -43,10 +45,10 @@ public class ExcuteChange extends LegacyBaseService {
 
             String SQL = " select  e2.FROMELOT,e2.FROMSKU,e2.TOSKU,e2.PACKEY,e.STATUS,e2.changeline from ENCHGPROJECTCODE e , ENCHGPROJECTCODEDETAIL e2 " +
                     "          where e.CHANGEKEY = e2.CHANGEKEY AND e.CHANGEKEY = ?";
-            List<HashMap<String,String>> list = DBHelper.executeQuery( SQL, new Object[]{
+            List<Map<String,String>> list = DBHelper.executeQuery( SQL, new Object[]{
                     changekey});
             //校验后生成新批次，调用TRANSFER传入变更信息
-            for(HashMap<String,String> changeRecord:list){
+            for(Map<String,String> changeRecord:list){
                 if (!"3".equalsIgnoreCase(changeRecord.get("STATUS")))
                     ExceptionHelper.throwRfFulfillLogicException("变更单为"+changekey+"未复核无法操作");
                 String fromSku=changeRecord.get("FROMSKU");
@@ -56,8 +58,8 @@ public class ExcuteChange extends LegacyBaseService {
                 InventoryValidationHelper.validateLotQty(fromLottable06);
                String toLottable06= IdGenerationHelper.createReceiptLot(toSku);
                //插入新批次将旧批次批属性复制至新批次
-                HashMap<String,String> elotHashMap = VLotAttribute.findElottableByLottable06(fromLottable06,true);
-                HashMap<String,String> newELotHashMap = new HashMap<String,String>();
+                Map<String,String> elotHashMap = VLotAttribute.findElottableByLottable06(fromLottable06,true);
+                Map<String,String> newELotHashMap = new HashMap<String,String>();
                 newELotHashMap.put("STORERKEY", elotHashMap.get("STORERKEY"));
                 newELotHashMap.put("SKU", toSku);
                 newELotHashMap.put("ELOT", toLottable06);
@@ -104,14 +106,14 @@ public class ExcuteChange extends LegacyBaseService {
         int maxTransferDetailKey = 0;
 
         //key-transferDetailKey value-id
-        HashMap<String,String> transferDetailKeyHashMap = new HashMap<>();
+        Map<String,String> transferDetailKeyHashMap = new HashMap<>();
         //查询lottable06下所有lpn
         String SQL = " select  d.id from v_lotattribute b, IDNOTES d , lotxlocxid l " +
                 "          where b.lot=d.lot AND l.id=d.id AND b.lottable06 = ? and l.QTY > 0";
-        List<HashMap<String,String>> idList = DBHelper.executeQuery( SQL, new Object[]{
+        List<Map<String,String>> idList = DBHelper.executeQuery( SQL, new Object[]{
                 fromLottable06});
-        for (HashMap<String,String> id :idList) {
-            HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById( id.get("ID"), "容器" + id + "不存在或者已被分配或拣货，当前状态不允许转换");
+        for (Map<String,String> id :idList) {
+            Map<String, String> idHashMap = LotxLocxId.findFullAvailInvById( id.get("ID"), "容器" + id + "不存在或者已被分配或拣货，当前状态不允许转换");
 
             String newTransferDetailKey = UtilHelper.To_Char(new Integer(++maxTransferDetailKey), 5);
 
@@ -178,7 +180,7 @@ public class ExcuteChange extends LegacyBaseService {
 
                 //更新IDNOTES
                 String idBeUpdate = transferDetailKeyHashMap.get(tempTransferDetailKey);
-                HashMap<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById( idBeUpdate, "容器" + idBeUpdate + "不存在或者已被分配或拣货，当前状态不允许拆批次");
+                Map<String, String> idHashMapUpdated = LotxLocxId.findFullAvailInvById( idBeUpdate, "容器" + idBeUpdate + "不存在或者已被分配或拣货，当前状态不允许拆批次");
                 DBHelper.executeUpdate( "UPDATE IDNOTES SET LOT = ?,SKU=? WHERE ID = ? ",
                         new Object[]{idHashMapUpdated.get("LOT"), toSku,idHashMapUpdated.get("ID")});
             }

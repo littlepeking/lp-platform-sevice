@@ -16,8 +16,8 @@ import com.enhantec.wms.backend.utils.print.PrintHelper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class QcSamplingPostOrder extends LegacyBaseService
 {
@@ -57,7 +57,7 @@ public class QcSamplingPostOrder extends LegacyBaseService
 			String PRINTER= serviceDataHolder.getInputDataAsMap().getString( "PRINTER");
 			String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
 			String NewPrg=null;
-			HashMap<String,String>  orderHashMap= DBHelper.getRecord( "select Status,Notes, STORERKEY from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE},"未找到在库取样单("+ORDERKEY+")");
+			Map<String,String>  orderHashMap= DBHelper.getRecord( "select Status,Notes, STORERKEY from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE},"未找到在库取样单("+ORDERKEY+")");
 
 			if (orderHashMap.get("Status").compareTo("90")>=0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭,不能继续操作");
 
@@ -73,19 +73,19 @@ public class QcSamplingPostOrder extends LegacyBaseService
 			if(UtilHelper.decimalStrCompare(KEEPQTY,
 					totalOriginalQty)>0) throw new Exception("留样量不允许大于取样量");
 
-			List<HashMap<String,String>> Details= DBHelper.executeQuery( "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
+			List<Map<String,String>> Details= DBHelper.executeQuery( "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS,PACKKEY, UOM"
 							+ ",ORIGINALQTY,OPENQTY,SHIPPEDQTY,QTYPREALLOCATED,QTYALLOCATED,QTYPICKED,UOM,PACKKEY "
 							+ " from orderdetail where orderkey=? order by orderlinenumber", new String[]{ORDERKEY});
 			String[] IDS=new String[Details.size()];
 			String[] SKUs=new String[Details.size()];
 
-			HashMap<String,String> samplePackInfo=null;
+			Map<String,String> samplePackInfo=null;
 
 			BigDecimal qyTotalQty = BigDecimal.ZERO; //总取样量
 
 			for(int iDetail=0;iDetail<Details.size();iDetail++)
 			{
-				HashMap<String,String> mDetail=Details.get(iDetail);
+				Map<String,String> mDetail=Details.get(iDetail);
 //				String ORDERLINENUMBER=mDetail.get("ORDERLINENUMBER");
 //				String STORERKEY=mDetail.get("STORERKEY");
 				String SKU=mDetail.get("SKU");
@@ -108,7 +108,7 @@ public class QcSamplingPostOrder extends LegacyBaseService
 				}
 
 				//插入取样后剩余量标签
-				HashMap<String,String> leftIdNotesHashMap = IDNotes.findById(ID,true);
+				Map<String,String> leftIdNotesHashMap = IDNotes.findById(ID,true);
 
 				//扣样后剩余量>0并且扣样量>0，打印剩余量标签
 				if(UtilHelper.decimalStrCompare(leftIdNotesHashMap.get("NETWGT"), "0")>0
@@ -118,10 +118,10 @@ public class QcSamplingPostOrder extends LegacyBaseService
 
 				//插入取样标签，一个无重量的取样标签
 
-				HashMap<String,String> existIDNotes = IDNotes.findById(ID,true);
+				Map<String,String> existIDNotes = IDNotes.findById(ID,true);
 				String qyLpn = IdGenerationHelper.generateLpn( LOTTABLE06+"QY");
 				//取样出库单里的susr1记录了取样的取样标签的重量信息。
-				HashMap<String,String> qyIdnotes = new LinkedHashMap<>();
+				Map<String,String> qyIdnotes = new HashMap<>();
 				qyIdnotes.put("AddWho", userid);
 				qyIdnotes.put("EditWho", userid);
 				qyIdnotes.put("ID", qyLpn);//取样流水号
@@ -148,13 +148,13 @@ public class QcSamplingPostOrder extends LegacyBaseService
 			}
 
 			//插入留样容器的IDNOTES，重量信息是传进来的KEEPQTY(留样重量)
-			HashMap<String, String> existIDNotes = IDNotes.findById( IDS[0], true);
+			Map<String, String> existIDNotes = IDNotes.findById( IDS[0], true);
 
 			if(UtilHelper.decimalStrCompare(KEEPQTY, "0")>0) {
 
 				String lyLpn = IdGenerationHelper.generateLpn( LOTTABLE06 + "LY");
 
-				HashMap<String,String> lyIDNOTES = new HashMap<String,String>();
+				Map<String,String> lyIDNOTES = new HashMap<String,String>();
 				lyIDNOTES.put("AddWho", userid);
 				lyIDNOTES.put("EditWho", userid);
 				lyIDNOTES.put("ID", lyLpn);//留样LPN
@@ -193,7 +193,7 @@ public class QcSamplingPostOrder extends LegacyBaseService
 				//自动生成留样入库单
 
 				ServiceHelper.executeService( "EHReturnCreateAsn",
-						new ServiceDataHolder(new ServiceDataMap(new HashMap<String, Object>() {{
+						new ServiceDataHolder(new ServiceDataMap(new HashMap<String,Object>() {{
 							put("LPN", lyLpn);
 							put("RECTYPE", CDSysSet.getSampleReceiptType());
 							put("GROSSWGT", KEEPQTY);
@@ -224,13 +224,13 @@ public class QcSamplingPostOrder extends LegacyBaseService
 				样品编号：ORDERS.SUSR3
 
 			 */
-			HashMap<String,String> sampleLpnPrefix = CodeLookup.getCodeLookupByKey( "SYSSET","SAMPLEPRE");
+			Map<String,String> sampleLpnPrefix = CodeLookup.getCodeLookupByKey( "SYSSET","SAMPLEPRE");
 			String prefix = sampleLpnPrefix.get("UDF1");
 			String ypLpn = IdGenerationHelper.generateID(userid,prefix,1);
 
 
 			//插入样品标签，会插入一个无重量的样品标签
-			HashMap<String,String> ypIdnotes = new HashMap<String,String>();
+			Map<String,String> ypIdnotes = new HashMap<String,String>();
 			ypIdnotes.put("AddWho", userid);
 			ypIdnotes.put("EditWho", userid);
 			ypIdnotes.put("ID", ypLpn);//留样LPN
@@ -279,7 +279,7 @@ public class QcSamplingPostOrder extends LegacyBaseService
 			OutboundUtils.allocateAndShip( ORDERKEY,false);
 			//更新取样时间
 			for (int iDetail = 0; iDetail < Details.size(); iDetail++) {
-				HashMap<String,String> mDetail = Details.get(iDetail);
+				Map<String,String> mDetail = Details.get(iDetail);
 				String id = mDetail.get("IDREQUIRED");
 				DBHelper.executeUpdate(
 						"UPDATE IDNOTES SET INSPECTIONDATE = ? WHERE ID = ? ", new ArrayList<Object>() {

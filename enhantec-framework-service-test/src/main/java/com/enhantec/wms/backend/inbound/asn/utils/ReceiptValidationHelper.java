@@ -12,10 +12,8 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReceiptValidationHelper {
@@ -30,27 +28,27 @@ public class ReceiptValidationHelper {
      */
     public static void validateASN( String receiptKey) throws Exception {
 
-        HashMap<String, String> receiptInfo =  Receipt.findByReceiptKey( receiptKey,true);
-        List<HashMap<String, String>> receiptDetails =  Receipt.findReceiptDetails( receiptKey,true);
+        Map<String, String> receiptInfo =  Receipt.findByReceiptKey( receiptKey,true);
+        List<Map<String, String>> receiptDetails =  Receipt.findReceiptDetails( receiptKey,true);
 
         HashSet<String> existingLpnHashSet = new HashSet<>();
-        HashMap<String,String> receiptLotHashMap = new HashMap<>();
-        HashMap<String,String> receiptQAStatusHashMap = new HashMap<>();
-        HashMap<String,String> receiptInvTypeHashMap = new HashMap<>();
-        HashMap<String,String> receiptSpecHashMap = new HashMap<>();
-        HashMap<String,String> supplierCodeHashMap = new HashMap<>();
-        HashMap<String,String> supplierLotHashMap = new HashMap<>();
-        HashMap<String,String> elottable02LotHashMap = new HashMap<>();
-        HashMap<String,String> lottable04HashMap = new HashMap<>();
-        HashMap<String,String> purchaseCodeHashMap = new HashMap<>();
+        Map<String,String> receiptLotHashMap = new HashMap<>();
+        Map<String,String> receiptQAStatusHashMap = new HashMap<>();
+        Map<String,String> receiptInvTypeHashMap = new HashMap<>();
+        Map<String,String> receiptSpecHashMap = new HashMap<>();
+        Map<String,String> supplierCodeHashMap = new HashMap<>();
+        Map<String,String> supplierLotHashMap = new HashMap<>();
+        Map<String,String> elottable02LotHashMap = new HashMap<>();
+        Map<String,String> lottable04HashMap = new HashMap<>();
+        Map<String,String> purchaseCodeHashMap = new HashMap<>();
 
         String receivedDate = null;
 
         checkMustInputWidget(receiptInfo);
 
-        for(HashMap<String,String> receiptDetail :receiptDetails){
+        for(Map<String,String> receiptDetail :receiptDetails){
 
-            HashMap<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey("RECEIPTYPE",receiptInfo.get("TYPE"));
+            Map<String, String> receiptTypeInfo = CodeLookup.getCodeLookupByKey("RECEIPTYPE",receiptInfo.get("TYPE"));
 
             if(UtilHelper.isEmpty(receiptDetail.get("TOID"))) {
 
@@ -70,7 +68,7 @@ public class ReceiptValidationHelper {
                 if(!CDReceiptType.enableExcessReceiving(receiptInfo.get("TYPE"))){
                     String originalQtyExpected = receiptDetail.get("QTYEXPECTED");
                     BigDecimal qtyExpectedAndReceived = new BigDecimal("0");
-                    for (HashMap<String, String> detail : receiptDetails) {
+                    for (Map<String, String> detail : receiptDetails) {
                         if(!UtilHelper.isEmpty(detail.get("ORIGINALLINENUMBER")) && detail.get("ORIGINALLINENUMBER").equals(receiptDetail.get("RECEIPTLINENUMBER"))){
                             qtyExpectedAndReceived = qtyExpectedAndReceived.add(new BigDecimal(detail.get("QTYEXPECTED")));
                             qtyExpectedAndReceived = qtyExpectedAndReceived.add(new BigDecimal(detail.get("QTYRECEIVED")));
@@ -88,7 +86,7 @@ public class ReceiptValidationHelper {
                         ExceptionHelper.throwRfFulfillLogicException("收货单中存在重复的容器条码" + receiptDetail.get("TOID"));
                     else {
                         //这里不对整单校验库存，在收货中进行校验，否则收货时会报错。
-//                    HashMap<String,String> record= LotxLocxId.findById(receiptDetail.get("TOID"),false);
+//                    Map<String,String> record= LotxLocxId.findById(receiptDetail.get("TOID"),false);
 //                    if(record!=null)  ExceptionHelper.throwRfFulfillLogicException("库存中已在重复的容器条码"+receiptDetail.get("TOID"));
                         existingLpnHashSet.add(receiptDetail.get("TOID"));
                     }
@@ -125,9 +123,9 @@ public class ReceiptValidationHelper {
                 ExceptionHelper.throwRfFulfillLogicException("收货行"+receiptDetail.get("RECEIPTLINENUMBER")+"的物料代码不允许为空");
 
             //check BUSR4 物料类型
-            List<HashMap<String,String>> skuLotConfList = CodeLookup.getCodeLookupList("SKULOTCONF");
+            List<Map<String,String>> skuLotConfList = CodeLookup.getCodeLookupList("SKULOTCONF");
 
-            HashMap<String,String> skuHashMap = SKU.findById(receiptDetail.get("SKU"),true);
+            Map<String,String> skuHashMap = SKU.findById(receiptDetail.get("SKU"),true);
 
             if(skuLotConfList!=null && skuLotConfList.size()>0) {
 
@@ -218,18 +216,18 @@ public class ReceiptValidationHelper {
         }
     }
 
-    public static void checkSerialNumberExistInInv( HashMap<String, String> receiptDetail) throws Exception {
+    public static void checkSerialNumberExistInInv( Map<String, String> receiptDetail) throws Exception {
 
         if(SKU.isSerialControl( receiptDetail.get("SKU")) ){
 
             //校验物料+唯一码在库存中不存在。
 
-            List<HashMap<String,String>> snList = LotxId.findDetailsByReceiptLineAndLpn( receiptDetail.get("RECEIPTKEY"),receiptDetail.get("RECEIPTLINENUMBER"),receiptDetail.get("TOID"),true);
+            List<Map<String,String>> snList = LotxId.findDetailsByReceiptLineAndLpn( receiptDetail.get("RECEIPTKEY"),receiptDetail.get("RECEIPTLINENUMBER"),receiptDetail.get("TOID"),true);
 
-            for(HashMap<String,String> snInfo : snList) {
+            for(Map<String,String> snInfo : snList) {
 
                 String sn = snInfo.get("SERIALNUMBERLONG");
-                HashMap<String, String> snHashMap = SerialInventory.findBySkuAndSN( receiptDetail.get("SKU"), sn, false);
+                Map<String, String> snHashMap = SerialInventory.findBySkuAndSN( receiptDetail.get("SKU"), sn, false);
                 if (snHashMap != null) ExceptionHelper.throwRfFulfillLogicException("箱号"+receiptDetail.get("TOID")+"中的唯一码" + sn + "在库存中已存在，不允许重复收货");
 
             }
@@ -242,10 +240,10 @@ public class ReceiptValidationHelper {
     //UDF3 中文名
     //UDF4 是否必填
 
-    private static void checkReceiptMandatoryFields(HashMap<String, String> receiptDetail, List<HashMap<String, String>> skuLotConfList) {
+    private static void checkReceiptMandatoryFields(Map<String, String> receiptDetail, List<Map<String, String>> skuLotConfList) {
 
         if(skuLotConfList!=null) {
-            for (HashMap<String, String> skuLotConf : skuLotConfList){
+            for (Map<String, String> skuLotConf : skuLotConfList){
 
                 if("Y".equalsIgnoreCase(skuLotConf.get("UDF4"))
                         && receiptDetail.containsKey(skuLotConf.get("UDF2"))
@@ -259,7 +257,7 @@ public class ReceiptValidationHelper {
 
 
     }
-    public static void checkMustInputWidget(HashMap<String, String> receiptInfo ){
+    public static void checkMustInputWidget(Map<String, String> receiptInfo ){
         String mustInputWidget=CodeLookup.getCodeLookupValue("RECEIPTYPE",receiptInfo.get("TYPE"),"UDF10","必输字段");
         if (!UtilHelper.isEmpty(mustInputWidget)){
             String[] mustInputWidgetArray;
@@ -285,7 +283,7 @@ public class ReceiptValidationHelper {
             }
     }   }
 
-    public static void checkASNReceiptCheckStatus(HashMap<String, String> receiptInfo){
+    public static void checkASNReceiptCheckStatus(Map<String, String> receiptInfo){
         String isCheck=CodeLookup.getCodeLookupValue("RECEIPTYPE",receiptInfo.get("TYPE"),"EXT_UDF_STR6","必输字段");
         if ("Y".equalsIgnoreCase(isCheck) &&!"3".equalsIgnoreCase(receiptInfo.get("RECEIPTCHECKSTATUS")))
             ExceptionHelper.throwRfFulfillLogicException("收货单未检查请检查后操作");

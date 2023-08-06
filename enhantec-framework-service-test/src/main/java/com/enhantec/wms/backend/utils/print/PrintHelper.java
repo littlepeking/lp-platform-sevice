@@ -12,18 +12,20 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 import com.enhantec.framework.common.utils.EHContextHelper;
+
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class PrintHelper {
 
     public static void printLPNByIDNotes( String id, String labelName, String printer, String copies, String notes) throws Exception {
 
-        HashMap<String, String> idNotes =  IDNotes.findById(id,true);
+        Map<String, String> idNotes =  IDNotes.findById(id,true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("IDNOTES.ID",id);
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         String labelSuffix = getLabelSuffixBySku( idNotes.get("SKU"));
 
@@ -51,13 +53,13 @@ public class PrintHelper {
 
     public static void printLPNByReceiptKey( String receiptKey,String labelName, String printer, String copies,String notes) throws Exception {
 
-        List<HashMap<String, String>> receiptDetails = Receipt.findReceiptDetails(receiptKey ,true);
+        List<Map<String, String>> receiptDetails = Receipt.findReceiptDetails(receiptKey ,true);
 
-        HashMap<String, String> printParams = new HashMap<>();
+        Map<String, String> printParams = new HashMap<>();
 
         printParams.put("RECEIPT.RECEIPTKEY", receiptKey);
 
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
         //采购收货的SKU相同
         String labelSuffix = getLabelSuffixBySku( receiptDetails.get(0).get("SKU"));
 
@@ -69,12 +71,12 @@ public class PrintHelper {
 
     public static void printLPNByReceiptLineNumber( String receiptKey,String receiptLineNumber ,String labelName, String printer, String copies,String notes) throws Exception {
 
-        HashMap<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
+        Map<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("RECEIPTDETAIL.RECEIPTKEY",receiptKey);
         printParams.put("RECEIPTDETAIL.RECEIPTLINENUMBER",receiptLineNumber);
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         String labelSuffix = getLabelSuffixBySku( receiptDetail.get("SKU"));
 
@@ -86,11 +88,11 @@ public class PrintHelper {
 
     public static void printSamplingLpnLabel( String orderKey,String labelName, String printer, String copies,String notes) throws Exception {
 
-        List<HashMap<String,String>>  orderDetails = Orders.findOrderDetailsByOrderKey( orderKey, true);
+        List<Map<String,String>>  orderDetails = Orders.findOrderDetailsByOrderKey( orderKey, true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("ORDERS.ORDERKEY",orderKey);
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         //取样单上的SKU和收货批次相同，取第一个即可
         String labelSuffix = getLabelSuffixBySku( orderDetails.get(0).get("SKU"));
@@ -112,13 +114,13 @@ public class PrintHelper {
     private static String getLabelSuffixBySku( String sku) throws Exception {
 
 
-        HashMap<String,String> skuHashMap = SKU.findById(sku,true);
+        Map<String,String> skuHashMap = SKU.findById(sku,true);
 
         String labelSuffix ="";
 
         if(!UtilHelper.isEmpty(skuHashMap.get("BUSR4"))) {
 
-            HashMap<String, String> codeLkup = CodeLookup.getCodeLookupByKey( "SKUTYPE1", skuHashMap.get("BUSR4"));
+            Map<String, String> codeLkup = CodeLookup.getCodeLookupByKey( "SKUTYPE1", skuHashMap.get("BUSR4"));
 
             labelSuffix = UtilHelper.isEmpty(codeLkup.get("UDF1")) ? "" : "_" + codeLkup.get("UDF1");
 
@@ -134,11 +136,11 @@ public class PrintHelper {
      * 根据箱号打印唯一码标签
      */
     public static void printSnByIdnotes(String id, String labelName, String printer, String printCopies,String notes) throws Exception {
-        HashMap<String, String> idNotes =  IDNotes.findById(id,true);
+        Map<String, String> idNotes =  IDNotes.findById(id,true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("IDNOTES.ID",id);
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         String labelSuffix = getLabelSuffixBySku( idNotes.get("SKU"));
 
@@ -151,12 +153,12 @@ public class PrintHelper {
      * 根据LPN打印最后一次收货的唯一码信息
      */
     public static void rePrintSnByLPN(String id,String labelName,String printer,String printCopies,String notes)throws Exception{
-        HashMap<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN( id, true);
+        Map<String, String> lastReceiptDetailByLPN = Receipt.findLastReceiptDetailByLPN( id, true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("RECEIPTDETAIL.TOID",id);
         printParams.put("RECEIPTDETAIL.RECEIPTKEY",lastReceiptDetailByLPN.get("RECEIPTKEY"));
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         String labelSuffix = getLabelSuffixBySku( lastReceiptDetailByLPN.get("SKU"));
 
@@ -169,12 +171,12 @@ public class PrintHelper {
      * 根据入库明细打印sn标签
      */
     public static void printSnByReceiptLineNumber(String receiptKey,String receiptLineNumber,String labelName,String printer,String printCopies,String notes)throws Exception{
-        HashMap<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
+        Map<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("RECEIPTDETAIL.RECEIPTKEY",receiptKey);
         printParams.put("RECEIPTDETAIL.RECEIPTLINENUMBER",receiptLineNumber);
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         String labelSuffix = getLabelSuffixBySku( receiptDetail.get("SKU"));
 
@@ -188,15 +190,15 @@ public class PrintHelper {
      * 根据收货行和唯一码打印唯一码收货标签
      */
     public static void printSnByReceiptLineNumberAndSn(String receiptKey,String receiptLineNumber,String serialNumber,String labelName,String printer,String printCopies,String notes)throws Exception{
-        HashMap<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
+        Map<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
         LotxId.findDetailByReceiptLineAndSn(receiptKey,receiptLineNumber,serialNumber,true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("RECEIPTDETAIL.RECEIPTKEY",receiptKey);
         printParams.put("RECEIPTDETAIL.RECEIPTLINENUMBER",receiptLineNumber);
         printParams.put("LOTXIDDETAIL.SERIALNUMBERLONG",serialNumber);
         printParams.put("LOTXIDDETAIL.IOFLAG","I");
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         String labelSuffix = getLabelSuffixBySku( receiptDetail.get("SKU"));
 
@@ -221,11 +223,11 @@ public class PrintHelper {
     }
 
     private static void updateTaskInfoById(String labelName,String id){
-        HashMap<String, String> idNotes =  IDNotes.findById(id,true);
+        Map<String, String> idNotes =  IDNotes.findById(id,true);
 
-        HashMap<String,String> printParams = new HashMap<>();
+        Map<String,String> printParams = new HashMap<>();
         printParams.put("IDNOTES.ID",id);
-        List<HashMap<String,String>> printData = PrintUtil.getData(labelName,printParams);
+        List<Map<String,String>> printData = PrintUtil.getData(labelName,printParams);
 
         StringBuffer printDataString = new StringBuffer();
         printDataString.append("[");

@@ -5,7 +5,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class ConfirmPoByUI extends LegacyBaseService {
     /**
@@ -21,7 +21,7 @@ public class ConfirmPoByUI extends LegacyBaseService {
     private static void checkConfirmUser(String poKey, String confirmUser){
         String SQL = "select * from WMS_PO where ISCONFIRMEDUSER1=?  " +
                 "and POKEY=?";
-        HashMap<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ confirmUser,poKey},"变更单");
+        Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ confirmUser,poKey},"变更单");
         if( record != null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"复核人，确认人不能为同一人");
     }
     private static void updateConfirmUserByChangeKey(String poKey, String confirmUser, String field,String confirmStatus){
@@ -39,7 +39,7 @@ public class ConfirmPoByUI extends LegacyBaseService {
             String poKey = serviceDataHolder.getInputDataAsMap().getString("POKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
             String SQL="SELECT * FROM WMS_PO WHERE  POKEY = ?  ";
-            HashMap<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
+            Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"未找到");
             String isConfirmedUser = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     esignatureKey

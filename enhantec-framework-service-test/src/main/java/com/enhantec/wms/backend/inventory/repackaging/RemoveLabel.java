@@ -9,7 +9,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -49,7 +49,7 @@ public class RemoveLabel extends LegacyBaseService {
             if (UtilHelper.isEmpty(id)) throw new Exception("待作废的标签号不能为空");
 
 
-            HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(receiptKey,true);
+            Map<String,String> receiptHashMap =  Receipt.findByReceiptKey(receiptKey,true);
 
             /*
                 RECEIPT.SUSR2 分装单关联的收货批次号
@@ -67,7 +67,7 @@ public class RemoveLabel extends LegacyBaseService {
 
 
 
-            HashMap<String,String> receiptDetailHashMap =  Receipt.findReceiptDetailByLPN(receiptKey,id,true);
+            Map<String,String> receiptDetailHashMap =  Receipt.findReceiptDetailByLPN(receiptKey,id,true);
 
             if(UtilHelper.equals(receiptDetailHashMap.get("STATUS"),"20"))
                 ExceptionHelper.throwRfFulfillLogicException("标签"+id+"已作废，无需再次作废");

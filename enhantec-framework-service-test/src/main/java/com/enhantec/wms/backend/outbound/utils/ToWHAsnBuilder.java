@@ -5,8 +5,8 @@ import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ToWHAsnBuilder {
@@ -31,7 +31,7 @@ public class ToWHAsnBuilder {
      */
     public String buildReceiptDetailInfo(String receiptKey,String sku,int seq,Map<String,String> fromIdnotesMap) throws Exception {
         String receiptLineNumber = LegecyUtilHelper.To_Char(seq, 5);
-        HashMap<String,String> receiptDetail = new LinkedHashMap<>();
+        Map<String,String> receiptDetail = new HashMap<>();
         receiptDetail.put("LOTTABLE01", fromIdnotesMap.get("LOTTABLE01"));
         receiptDetail.put("LOTTABLE02", fromIdnotesMap.get("LOTTABLE02"));
         receiptDetail.put("LOTTABLE03", fromIdnotesMap.get("LOTTABLE03"));
@@ -97,7 +97,7 @@ public class ToWHAsnBuilder {
 
     private String createReceiptLot(String sku) throws Exception
     {
-        HashMap<String,String> lotRuleCodelkup = DBHelper.getRecord(
+        Map<String,String> lotRuleCodelkup = DBHelper.getRecord(
                 "SELECT * FROM "+toWareHouseId+".CODELKUP WHERE LISTNAME = ? AND CODE = ?",
                 new Object[]{"SYSSET","WAREHOUSE"},"");
         if(!IdGenerationHelper.checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.WAREHOUSE配置不符合要求");
@@ -115,7 +115,7 @@ public class ToWHAsnBuilder {
      */
     public String buildReceiptHeadInfo(String isConfirmedUser1,String isConfirmedUser2) throws Exception {
         String receiptKey = getKeyCount("RECEIPT",10);
-        HashMap<String,String> receipt = new LinkedHashMap<>();
+        Map<String,String> receipt = new HashMap<>();
         receipt.put("RECEIPTKEY", receiptKey);
         receipt.put("EXTERNRECEIPTKEY", "WMS" + receiptKey);
         receipt.put("ADDWHO", userId);
@@ -155,7 +155,7 @@ public class ToWHAsnBuilder {
      */
     private String buildReceiptLotXIdHeaderInfo(String sku,  String id, String sourceKey, String sourceLineNumber) throws Exception {
         String lotxidKey = this.getKeyCount("LOTXIDHEADER",10);
-        HashMap<String,String> lotxIdHeaderHashMap = new LinkedHashMap<>();
+        Map<String,String> lotxIdHeaderHashMap = new HashMap<>();
         lotxIdHeaderHashMap.put("WHSEID", "@user");
         lotxIdHeaderHashMap.put("LOTXIDKEY", lotxidKey);
         lotxIdHeaderHashMap.put("STORERKEY", storerKey);
@@ -177,7 +177,7 @@ public class ToWHAsnBuilder {
      * 创建唯一码收货行
      */
     private void buildReceiptLotxIdDetailInfo(String  lotxidKey, String sku, String id, String sourceKey, String sourceLineNumber, String sn,String snWgt,String snUom, int seq) throws Exception {
-        HashMap<String, String> lotxIdDetail = DBHelper.getRecord(
+        Map<String, String> lotxIdDetail = DBHelper.getRecord(
                 "SELECT ID FROM "+toWareHouseId+".LOTXIDDETAIL WHERE SOURCEKEY = ? AND SERIALNUMBERLONG = ? AND IOFLAG ='I'",
                 new Object[]{ sourceKey, sn}, "唯一码", false );
         if(lotxIdDetail != null) ExceptionHelper.throwRfFulfillLogicException("唯一码" + sn + "已经存在于当前收货单的箱号" + lotxIdDetail.get("ID") + "中,添加失败");
@@ -186,7 +186,7 @@ public class ToWHAsnBuilder {
                 new Object[]{  sku,   sn}  ,Integer.class,"唯一码");
         if(count>0) ExceptionHelper.throwRfFulfillLogicException("唯一码" + sn + "已经存在于库存中,添加失败");
 
-        HashMap<String,String> lotxIdDetailHashMap = new LinkedHashMap<>();
+        Map<String,String> lotxIdDetailHashMap = new HashMap<>();
         lotxIdDetailHashMap.put("WHSEID", "@user");
         lotxIdDetailHashMap.put("LOTXIDKEY", lotxidKey);
         lotxIdDetailHashMap.put("SKU", sku);

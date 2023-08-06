@@ -3,8 +3,8 @@ package com.enhantec.wms.backend.utils.common;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 @Deprecated
 public class LegecyUtilHelper {
@@ -14,16 +14,10 @@ public class LegecyUtilHelper {
 	public final static char SqlSkipRecord=12;
 	
 	
-	public static void WmsPutOutDO(EXEDataObject theOutDO,String Key,String Value)
-	{
-		if (theOutDO!=null)
-		{
-			theOutDO.setAttribValue(Key, Value);
-		}
-	}
-//	public static HashMap<String,String> FindMap(String Key,String Value,List<HashMap<String,String>> aList)
+
+//	public static Map<String,String> FindMap(String Key,String Value,List<Map<String,String>> aList)
 //	{
-//		for(HashMap<String,String> mList:aList)
+//		for(Map<String,String> mList:aList)
 //		{
 //			if (LegecyUtilHelper.Nz(mList.get(Key),"").equals(LegecyUtilHelper.Nz(Value, ""))) return mList;
 //		}
@@ -48,7 +42,7 @@ public class LegecyUtilHelper {
 	}
 	
 	
-	public static String FindUdf(HashMap<String,String> mData,String vKey) throws Exception
+	public static String FindUdf(Map<String,String> mData,String vKey) throws Exception
 	{
 		if (mData==null) return null;
 		if (mData.isEmpty()) return null;
@@ -139,7 +133,7 @@ public class LegecyUtilHelper {
 	}
 
 
-	public static void PutByComp(HashMap<String,String> map, String Key, String PutStr, String CompStr)
+	public static void PutByComp(Map<String,String> map, String Key, String PutStr, String CompStr)
 	{
 		if (LegecyUtilHelper.isNull2(CompStr)){
 			map.put(Key, PutStr);

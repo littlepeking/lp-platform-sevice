@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class ClientReceivedStatus extends LegacyBaseService {
 
@@ -42,7 +42,7 @@ public class ClientReceivedStatus extends LegacyBaseService {
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-            HashMap<String, String>  ORDERSInfo = Orders.findByOrderKey( ORDERKEY, true);
+            Map<String, String>  ORDERSInfo = Orders.findByOrderKey( ORDERKEY, true);
             String status=ORDERSInfo.get("STATUS");
             if (!"95".equals(status)){
                 ExceptionHelper.throwRfFulfillLogicException("当前状态不能进行此操作");

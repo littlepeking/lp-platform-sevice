@@ -8,8 +8,8 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class BondedCheckByReceiptlot extends LegacyBaseService
 {
@@ -42,7 +42,7 @@ public class BondedCheckByReceiptlot extends LegacyBaseService
 			//String receiptLot=DBHelper.getValue("select  RECEIPTLOT from prreceiptcheck where SERIALKEY=?",new Object[]{serialkey)},"收货检查记录");;
 			String count = DBHelper.getValue("select COUNT(*) from prereceiptcheck where RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?)",new Object[]{serialkey},"收货检查记录");
 			if (Integer.parseInt(count)>1) {
-			HashMap<String, String> bondedCheck = DBHelper.getRecord( "SELECT BONDEDCHECK,BONDEDNOTES4,BONDEDRECQTY,BONDEDSTORES,BONDEDUOM,LOTTABLE10,MHLINENO,MHTASKKEY,RECEIPTLOT " +
+			Map<String, String> bondedCheck = DBHelper.getRecord( "SELECT BONDEDCHECK,BONDEDNOTES4,BONDEDRECQTY,BONDEDSTORES,BONDEDUOM,LOTTABLE10,MHLINENO,MHTASKKEY,RECEIPTLOT " +
 							" FROM PRERECEIPTCHECK WHERE RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?) and not(BONDEDSTORES is NULL)", new String[]{serialkey},"");
 			DBHelper.executeUpdate( "update prereceiptcheck set BONDEDCHECK=?,BONDEDRECQTY=?,BONDEDSTORES=?,BONDEDUOM=?," +
 							"LOTTABLE10=?,MHLINENO=?,MHTASKKEY=? " +

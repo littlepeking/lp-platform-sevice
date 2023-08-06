@@ -59,7 +59,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 //		    String sql="SELECT A.STORERKEY,A.SKU,C.DESCR,C.COMMODITYCLASS STORAGECONDITIONS, C.PACKKEY, C.BUSR8,P.PACKUOM3 UOM, I.BARRELDESCR , A.LOC,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.LOT,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.ELOTTABLE03,B.ELOTTABLE02,B.LOTTABLE01 "
 //		    		+ "FROM LOTXLOCXID A,V_LOTATTRIBUTE B,SKU C,PACK P,IDNOTES I WHERE A.LOT=B.LOT AND A.STORERKEY=C.STORERKEY AND A.SKU=C.SKU AND C.PACKKEY = P.PACKKEY"
 //		    		+ " AND A.ID=? AND A.ID =I.ID AND A.QTY>0";
-//		    HashMap<String,String> lpnInfo=XtSql.GetValueMap( sql, new String[]{lpn});
+//		    Map<String,String> lpnInfo=XtSql.GetValueMap( sql, new String[]{lpn});
 //		    if (lpnInfo.isEmpty()) throw new Exception("当前容器在库存帐面已无数量");
 //			String qtyAllocated=lpnInfo.get("QTYALLOCATED");
 //			String qtyPicked=lpnInfo.get("QTYPICKED");
@@ -69,7 +69,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 //				throw new Exception("当前容器已被拣货,不允许移动");
 
 			//获取箱或容器可用库存信息
-			HashMap<String, String> idHashMap = LotxLocxId.findFullAvailInvById(lpn,"未找到可用于上架的容器条码");
+			Map<String, String> idHashMap = LotxLocxId.findFullAvailInvById(lpn,"未找到可用于上架的容器条码");
 
 			String storerKey=idHashMap.get("STORERKEY");
 			String sku=idHashMap.get("SKU");
@@ -170,7 +170,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 					}
 
 					ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService( "RFPutawayMultiZones",
-						new ServiceDataHolder(new ServiceDataMap(new HashMap<String, Object>() {{
+						new ServiceDataHolder(new ServiceDataMap(new HashMap<String,Object>() {{
 								put("storerkey", storerKey);
 								put("sku", sku);
 								put("lot", lot);
@@ -200,7 +200,7 @@ public class GetPutawayByLPN extends LegacyBaseService {
 
 			}else {
 				ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService( "RFPutawayP1S1Wrapper",
-						new ServiceDataHolder(new ServiceDataMap(new HashMap<String, Object>() {{
+						new ServiceDataHolder(new ServiceDataMap(new HashMap<String,Object>() {{
 							put("storerkey", storerKey);
 							put("sku", sku);
 							put("lot", lot);

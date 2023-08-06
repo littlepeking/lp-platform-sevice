@@ -9,8 +9,8 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class CreateRelease  extends LegacyBaseService {
 
@@ -50,7 +50,7 @@ public class CreateRelease  extends LegacyBaseService {
             String STORERKEY= DBHelper.getValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
             
             //取批次的相关信息
-            HashMap<String,String> FromLot= DBHelper.getRecord( "SELECT A.BUSR4 SKUTYPE, A.SKU , LA.ELOTTABLE02, LA.ELOTTABLE04, LA.ELOTTABLE03 QUALITYSTATUS,LA.ELOTTABLE01,LA.ELOTTABLE19,LA.ELOTTABLE20,LA.ELOTTABLE07, " +
+            Map<String,String> FromLot= DBHelper.getRecord( "SELECT A.BUSR4 SKUTYPE, A.SKU , LA.ELOTTABLE02, LA.ELOTTABLE04, LA.ELOTTABLE03 QUALITYSTATUS,LA.ELOTTABLE01,LA.ELOTTABLE19,LA.ELOTTABLE20,LA.ELOTTABLE07, " +
               " LA.ELOTTABLE09 SUPPLIERLOT," +
               " LA.ELOTTABLE08 AS SUPPLIERCODE," +
               " FORMAT(ELOTTABLE05, 'yyyy-MM-dd HH:mm:ss') AS ELOTTABLE05, FORMAT(ELOTTABLE11,'yyyy-MM-dd HH:mm:ss') AS ELOTTABLE11 , A.DESCR" +
@@ -68,7 +68,7 @@ public class CreateRelease  extends LegacyBaseService {
             }
 
             //取库存的信息
-            HashMap<String,String> record= DBHelper.getRecord( "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
+            Map<String,String> record= DBHelper.getRecord( "SELECT COUNT(1) AS CNT,SUM(QTY) AS QTY FROM LOTXLOCXID A,V_LOTATTRIBUTE B"
                         + " WHERE A.LOT=B.LOT AND QTY>0 AND B.LOTTABLE06=?", new Object[]{LOTTABLE06},"库存明细");
 
                 String barrelNum = record.get("CNT"); //取库存桶数
@@ -77,7 +77,7 @@ public class CreateRelease  extends LegacyBaseService {
 
 
             //创建请检单
-            HashMap<String,String> mRELEASE=new HashMap<String,String>();
+            Map<String,String> mRELEASE=new HashMap<String,String>();
             mRELEASE.put("ADDWHO", userid);  //创建人
             mRELEASE.put("EDITWHO", userid);  //更新人
 

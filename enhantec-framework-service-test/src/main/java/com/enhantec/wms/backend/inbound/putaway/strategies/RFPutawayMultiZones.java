@@ -19,12 +19,13 @@
 package com.enhantec.wms.backend.inbound.putaway.strategies;
 
 import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 /**
@@ -66,7 +67,7 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 
 		for(String zone : searchZoneArray) {
 
-			List<HashMap<String,String>>  res = DBHelper.executeQuery(
+			List<Map<String,String>>  res = DBHelper.executeQuery(
 					" SELECT * FROM putawayzone WHERE putawayzone = ?",
 					Arrays.asList(zone)
 			);
@@ -95,7 +96,7 @@ public class RFPutawayMultiZones extends LegacyBaseService {
 
 
 	@Deprecated
-	public String getPutawayLoc( EXEDataObject pDO) {
+	public String getPutawayLoc( ServiceDataMap pDO) {
 		String result;
 		try {
 //			logger.debug("starting getPutawayLoc( EXEDataObject pDO)");

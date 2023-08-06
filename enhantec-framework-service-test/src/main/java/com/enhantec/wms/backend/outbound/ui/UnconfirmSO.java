@@ -8,7 +8,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class UnconfirmSO extends LegacyBaseService {
 
@@ -37,7 +37,7 @@ public class UnconfirmSO extends LegacyBaseService {
             String ORDERKEY = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
-            HashMap<String, String>  orderInfo =  Orders.findByOrderKey(ORDERKEY,true);
+            Map<String, String>  orderInfo =  Orders.findByOrderKey(ORDERKEY,true);
 
             //00	空订单			不存在明细
             //02	外部创建			订单已导入系统

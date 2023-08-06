@@ -3,7 +3,9 @@ package com.enhantec.wms.backend.outbound.picking;
 import com.enhantec.wms.backend.common.KeyGen;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.DBHelper;
@@ -82,14 +84,14 @@ public class ClusterPickingConfirm extends LegacyBaseService {
 
             synchronized (keyLocks.computeIfAbsent(taskdetailkey, k -> new Object())) {
 
-                HashMap<String, String> taskDetailRecord = getTaskInfo( taskdetailkey);
+                Map<String, String> taskDetailRecord = getTaskInfo( taskdetailkey);
 
                 String orderKey = taskDetailRecord.get("ORDERKEY");
                 String orderLineNumber = taskDetailRecord.get("ORDERLINENUMBER");
                 String pickdetailKey = taskDetailRecord.get("PICKDETAILKEY");
                 String orderType = taskDetailRecord.get("TYPE");
 
-                HashMap<String,String>  fromIdHashMap = LotxLocxId.findById(taskDetailRecord.get("FROMID"),true);
+                Map<String,String>  fromIdHashMap = LotxLocxId.findById(taskDetailRecord.get("FROMID"),true);
 
                 //检查状态，避免重复提交造成的死锁。
                 if(!taskDetailRecord.get("STATUS").equals("9")) {
@@ -141,7 +143,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                     //其他物料走正常的超拣短拣逻辑
                     //注意：固体物料虽然受短拣影响进行任务拆分，但和是否进行整容器发货是没有关系的。超拣和短拣都可能不是整容器发货。
                     //超拣短拣判断的是拣货量是否等于任务量，是否整托盘是看拣货量是否等于当前的LPN量
-                    HashMap<String, String> skuHashMap = SKU.findById( taskDetailRecord.get("SKU"), true);
+                    Map<String, String> skuHashMap = SKU.findById( taskDetailRecord.get("SKU"), true);
 
                     boolean isShortPick = stdQtyTobePicked.compareTo(taskQty) < 0;
                     if (CDOrderType.isSplitTaskAfterShortPick(orderType) && isShortPick) {
@@ -172,7 +174,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
 
                         toId = IDNotes.splitWgtById( stdGrossWgtDecimal, stdQtyTobePicked, stdTareWgtDecimal, grossWgt, netwgt, tarewgt, uom, taskDetailRecord.get("FROMID"),toId, taskDetailRecord.get("ORDERKEY"),false);
 
-                        HashMap<String,String> fieldsToBeUpdate = new LinkedHashMap<>();
+                        Map<String,String> fieldsToBeUpdate = new HashMap<>();
                         fieldsToBeUpdate.put("LASTSHIPPEDLOC", taskDetailRecord.get("FROMLOC")); //该ID最后一次的拣货自库位
 //                        fieldsToBeUpdate.put("LASTLOC", fromIdHashMap.get("LOC")); //该ID的上一个库位
                         fieldsToBeUpdate.put("LASTID", fromIdHashMap.get("ID")); //该ID的上一个ID
@@ -195,7 +197,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                         //(FULL LPN) AND ((NEW LPN IS NULL) OR (NEW LPN = OLD LPN))
 
                         //更新标签信息
-                        HashMap<String,String> fieldsToBeUpdate = new HashMap<String,String>();
+                        Map<String,String> fieldsToBeUpdate = new HashMap<String,String>();
 
                         fieldsToBeUpdate.put("GROSSWGTLABEL", grossWgt);//原毛重标签量
                         fieldsToBeUpdate.put("TAREWGTLABEL", tarewgt);//原皮重标签量
@@ -238,7 +240,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                     //context.theSQLMgr.transBeginIndependent();
 
                     //执行原生拣货
-                    EXEDataObject res = (EXEDataObject) ServiceHelper.executeService( "NSPRFTPK01C", serviceDataHolder);
+                    ServiceDataMap res = ServiceHelper.executeService( "NSPRFTPK01C", serviceDataHolder);
 
                     //唯一码LOTXID拣货逻辑(使用NSPRFTPK01C进行整容器拣货时，不需要手工更新唯一码库存)
                     if(!isPickFullLPN) {
@@ -246,7 +248,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                     }
                     //////////////////////////////////
                     //更新拣货明细的自定义字段1为开封，用于反馈赋码系统时确定是否使用箱号还是唯一码
-                    HashMap<String,String> toIDNotesHashMap = IDNotes.findById( toId,true);
+                    Map<String,String> toIDNotesHashMap = IDNotes.findById( toId,true);
                     DBHelper.executeUpdate( "UPDATE PICKDETAIL SET PDUDF1 = ? WHERE PICKDETAILKEY = ? "
                             , new Object[]{
                                     toIDNotesHashMap.get("ISOPENED"),
@@ -338,9 +340,9 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                 }
             }
 
-            EXEDataObject outDO = new EXEDataObject();
+            ServiceDataMap outDO = new ServiceDataMap();
 
-            HashMap<String, String> taskDetailHashMap = TaskDetail.findById( taskdetailkey, true);
+            Map<String, String> taskDetailHashMap = TaskDetail.findById( taskdetailkey, true);
             outDO.setAttribValue("status", taskDetailHashMap.get("STATUS"));
             outDO.setAttribValue("PRINTLABEL",printLabel);
             serviceDataHolder.setOutputData(outDO);
@@ -373,8 +375,8 @@ public class ClusterPickingConfirm extends LegacyBaseService {
             
             //*****************
 
-            HashMap<String, String> originalTaskDetailInfo = TaskDetail.findById( taskdetailkey, true);
-            HashMap<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey( originalTaskDetailInfo.get("PICKDETAILKEY"), true);
+            Map<String, String> originalTaskDetailInfo = TaskDetail.findById( taskdetailkey, true);
+            Map<String, String> originalPickDetailInfo = PickDetail.findByPickDetailKey( originalTaskDetailInfo.get("PICKDETAILKEY"), true);
 
             DBHelper.executeUpdate( "UPDATE PICKDETAIL SET QTY = ? , UOMQTY = ? WHERE PICKDETAILKEY = ?",
                     new Object[]{
@@ -487,7 +489,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
     }
 
 
-    private HashMap<String, String> getTaskInfo( String taskdetailkey) {
+    private Map<String, String> getTaskInfo( String taskdetailkey) {
         return DBHelper.getRecord(
                 "SELECT O.TYPE, TD.STATUS, TD.LOT,TD.QTY,TD.SKU,TD.STORERKEY,TD.FROMLOC,TD.FROMID,TD.TOID,TD.TOLOC,TD.CASEID,TD.UOM,P.CARTONGROUP ,P.CARTONTYPE ,P.PACKKEY, P.ORDERKEY,P.ORDERLINENUMBER, P.PICKDETAILKEY " +
                         " FROM TASKDETAIL TD, PICKDETAIL P,ORDERS O " +
@@ -529,10 +531,10 @@ public class ClusterPickingConfirm extends LegacyBaseService {
             int ordinstaged = 0;
             int ordloaded = 0;
 
-            List<HashMap<String,String>>  res = DBHelper.executeQuery( " SELECT a.status, b.locationtype, a.dropid, a.wavekey FROM PICKDETAIL a, LOC b WHERE b.Loc = a.Loc AND a.OrderKey = ? AND a.OrderLineNumber = ?",
+            List<Map<String,String>>  res = DBHelper.executeQuery( " SELECT a.status, b.locationtype, a.dropid, a.wavekey FROM PICKDETAIL a, LOC b WHERE b.Loc = a.Loc AND a.OrderKey = ? AND a.OrderLineNumber = ?",
                 new Object[]{ pOrderkey, pOrderLineNumber});
 
-                    for(HashMap<String,String> r : res) {
+                    for(Map<String,String> r : res) {
                         pickdetailstatus = r.get("status");
                         locType = r.get("locationtype");
                         dropid = r.get("dropid");
@@ -565,13 +567,13 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                 loaded=ordloaded;
 
 
-            HashMap<String,Object>  resStatus = DBHelper.getRawRecord(" SELECT SUM ( CASE WHEN b.status = '0' AND a.wavekey <> ' ' THEN 1 ELSE 0 END ) RELEASED, SUM ( CASE WHEN b.status >= '2' AND b.status <= '3' THEN 1 ELSE 0 END ) INPICKING FROM DEMANDALLOCATION a, TASKDETAIL b WHERE b.Sourcekey = a.DemandKey AND b.SourceType = 'DP' AND b.status = '0' AND a.OrderKey = ? AND a.OrderLineNumber = ?",
+            Map<String,Object>  resStatus = DBHelper.getRawRecord(" SELECT SUM ( CASE WHEN b.status = '0' AND a.wavekey <> ' ' THEN 1 ELSE 0 END ) RELEASED, SUM ( CASE WHEN b.status >= '2' AND b.status <= '3' THEN 1 ELSE 0 END ) INPICKING FROM DEMANDALLOCATION a, TASKDETAIL b WHERE b.Sourcekey = a.DemandKey AND b.SourceType = 'DP' AND b.status = '0' AND a.OrderKey = ? AND a.OrderLineNumber = ?",
                 new Object[]{pOrderkey, pOrderLineNumber});
 
             dpreleased = (int) resStatus.get("RELEASED");
             dpinpicking = (int) resStatus.get("RELEASED");
 
-            HashMap<String,Object>  resOrderLine = DBHelper.getRawRecord(" SELECT SHIPPEDQTY, OPENQTY, QTYPREALLOCATED, QTYALLOCATED, QTYPICKED, ISSUBSTITUTE, WPReleased, STATUS FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?",
+            Map<String,Object>  resOrderLine = DBHelper.getRawRecord(" SELECT SHIPPEDQTY, OPENQTY, QTYPREALLOCATED, QTYALLOCATED, QTYPICKED, ISSUBSTITUTE, WPReleased, STATUS FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?",
                new Object[]{ pOrderkey, pOrderLineNumber});
 
                     SHIPPEDQTY = (double) resOrderLine.get("SHIPPEDQTY");
@@ -699,14 +701,14 @@ public class ClusterPickingConfirm extends LegacyBaseService {
             String storerkey = null;
             String sku = null;
 
-            HashMap<String,String> resOrderLine2 = DBHelper.getRecord(" SELECT Status, Storerkey, SKU FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?",
+            Map<String,String> resOrderLine2 = DBHelper.getRecord(" SELECT Status, Storerkey, SKU FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?",
                 new Object[]{ pOrderkey,pOrderLineNumber});
 
                     orderdetailstatus = resOrderLine2.get("Status");
                     storerkey =  resOrderLine2.get("Storerkey");
                     sku =  resOrderLine2.get("SKU");
 
-            HashMap<String,String> resOrderstatussetup = DBHelper.getRecord(" SELECT MAX ( Code ) code FROM Orderstatussetup WHERE Orderflag = '1' AND Detailflag = '1' AND Enabled = '1' AND Code <= ?",
+            Map<String,String> resOrderstatussetup = DBHelper.getRecord(" SELECT MAX ( Code ) code FROM Orderstatussetup WHERE Orderflag = '1' AND Detailflag = '1' AND Enabled = '1' AND Code <= ?",
                 new Object[]{pNewStatus});
             maxcode = resOrderstatussetup.get("code");
 
@@ -724,7 +726,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                 PreparedStatement qqPrepStmt6 = null;
                 ResultSet qqResultSet6 = null;
 
-                HashMap<String,Object> resPackoutdetail = DBHelper.getRawRecord(" SELECT SUM(qtypicked) qtypicked FROM Packoutdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ?",
+                Map<String,Object> resPackoutdetail = DBHelper.getRawRecord(" SELECT SUM(qtypicked) qtypicked FROM Packoutdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ?",
                     new Object[]{pOrderkey,storerkey,sku} );
 
                 qtyPacked = (double) resPackoutdetail.get("qtypicked");
@@ -732,7 +734,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
 
                 if (qtyPacked > 0.0D) {
 
-                    HashMap<String,Object> resOrderDetail = DBHelper.getRawRecord(" SELECT sum(Openqty+SHIPPEDQTY) qty FROM Orderdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ? ",
+                    Map<String,Object> resOrderDetail = DBHelper.getRawRecord(" SELECT sum(Openqty+SHIPPEDQTY) qty FROM Orderdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ? ",
                             new Object[]{pOrderkey,storerkey,sku} );
 
                     qtyOrdered = (Integer) resOrderDetail.get("qty");
@@ -779,7 +781,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
             PreparedStatement qqPrepStmt = null;
             ResultSet qqResultSet = null;
 
-            HashMap<String,Object>  res = DBHelper.getRawRecord( " SELECT COUNT ( * ) count, MAX ( Status ) maxStatus, MIN ( Status ) minStatus FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' and ( openqty>0 or shippedqty>0 or qtypreallocated>0 or qtyallocated>0 or qtypicked>0 )",
+            Map<String,Object>  res = DBHelper.getRawRecord( " SELECT COUNT ( * ) count, MAX ( Status ) maxStatus, MIN ( Status ) minStatus FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' and ( openqty>0 or shippedqty>0 or qtypreallocated>0 or qtyallocated>0 or qtypicked>0 )",
                 new Object[]{ pOrderkey});
 
             orderDetailCount = (Integer) res.get("count");
@@ -883,7 +885,7 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                 ordDtZeroQtyCount = 0;
                 String zeroQtyMinStatus = null;
 
-                HashMap<String,String>  res1 = DBHelper.getRecord(" SELECT COUNT ( * ), MIN ( Status ) FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' ",
+                Map<String,String>  res1 = DBHelper.getRecord(" SELECT COUNT ( * ), MIN ( Status ) FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' ",
                     new Object[]{ pOrderkey});
 
                         ordDtZeroQtyCount = (Integer) DBHelper.getValue(qqResultSet, 1);
@@ -896,13 +898,13 @@ public class ClusterPickingConfirm extends LegacyBaseService {
                     pNewStatus = "00";
                 }
             } else {
-               HashMap<String,String>  res1 = DBHelper.getRecord("SELECT Status FROM Orders WHERE OrderKey = ?"
+               Map<String,String>  res1 = DBHelper.getRecord("SELECT Status FROM Orders WHERE OrderKey = ?"
                        ,new  Object[]{pOrderkey});
 
                pStatus =res1.get("Status");
 
 
-                HashMap<String,String>  res2 = DBHelper.getRecord( " SELECT MAX (code) code FROM Orderstatussetup WHERE Orderflag = '1' AND Headerflag = '1' AND Enabled = '1' AND Code <= ?",
+                Map<String,String>  res2 = DBHelper.getRecord( " SELECT MAX (code) code FROM Orderstatussetup WHERE Orderflag = '1' AND Headerflag = '1' AND Enabled = '1' AND Code <= ?",
                 new Object[]{maxOrderDetailStatus});
 
                 maxCode = res2.get("code");

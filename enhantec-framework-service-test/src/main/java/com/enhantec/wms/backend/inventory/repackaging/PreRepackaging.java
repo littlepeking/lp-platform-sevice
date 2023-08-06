@@ -10,7 +10,9 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+
 import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -74,9 +76,9 @@ public class PreRepackaging extends LegacyBaseService {
             if (UtilHelper.isEmpty(fromId)) throw new Exception("备货容器条码不能为空");
             if (UtilHelper.isEmpty(packLoc)) throw new Exception("分装间不能为空");
 
-            HashMap<String,String> lotxlocxidHashMap = LotxLocxId.findAvailInvById(fromId,true,true);
+            Map<String,String> lotxlocxidHashMap = LotxLocxId.findAvailInvById(fromId,true,true);
 
-            HashMap<String,String> orderLineHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
+            Map<String,String> orderLineHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
 
             String currentPackLoc = orderLineHashMap.get("SUSR3");
 
@@ -85,7 +87,7 @@ public class PreRepackaging extends LegacyBaseService {
                 if(!orderLineHashMap.get("SKU").equals(lotxlocxidHashMap.get("SKU")))
                     throw new Exception("备货物料"+lotxlocxidHashMap.get("SKU")+"和订单行物料"+orderLineHashMap.get("SKU")+"不符");
 
-                HashMap<String,String> skuHashMap = SKU.findById(orderLineHashMap.get("SKU"),true);
+                Map<String,String> skuHashMap = SKU.findById(orderLineHashMap.get("SKU"),true);
 
                 if(!skuHashMap.get("PACKKEY").equals(lotxlocxidHashMap.get("LOTTABLE01")))
                     throw new Exception("当前备货物料的包装为"+lotxlocxidHashMap.get("LOTTABLE01")+",而非正常包装"+skuHashMap.get("PACKKEY")+"，请选择其他容器备货");
@@ -94,7 +96,7 @@ public class PreRepackaging extends LegacyBaseService {
 
                     //检查分装间是否已被占用
                     String SQL="SELECT * FROM ORDERDETAIL OD WHERE OD.STATUS <> '95' AND OD.SUSR3 = ? ";
-                    HashMap<String,String> rec= DBHelper.getRecord( SQL, new Object[]{ packLoc},"",false);
+                    Map<String,String> rec= DBHelper.getRecord( SQL, new Object[]{ packLoc},"",false);
 
                     if(rec!=null) throw new Exception("分装间"+packLoc+"已被订单号:"+rec.get("ORDERKEY")+" 行号:"+rec.get("ORDERLINENUMBER")+" 使用");
 
@@ -125,7 +127,7 @@ public class PreRepackaging extends LegacyBaseService {
                                 lotxlocxidHashMap.get("LOC"), fromId
                         });
 
-                HashMap<String,Object> paramHashMap = new HashMap<String,Object>();
+                Map<String,Object> paramHashMap = new HashMap<String,Object>();
                 paramHashMap.put("OPNAME",opName);
                 paramHashMap.put("FROMID",fromId);
                 paramHashMap.put("FROMLOC",lotxlocxidHashMap.get("LOC"));
@@ -142,12 +144,12 @@ public class PreRepackaging extends LegacyBaseService {
                 if(lotxlocxidHashMap == null || !lotxlocxidHashMap.get("LOC").equals(currentPackLoc))
                     throw new Exception("分装间"+currentPackLoc+"未找到备货容器"+fromId);
 
-                HashMap<String,String> idnotesHashMap = IDNotes.findById(fromId,true);
+                Map<String,String> idnotesHashMap = IDNotes.findById(fromId,true);
                 if(UtilHelper.isEmpty(idnotesHashMap.get("LOCBEFOREPACK"))) throw new Exception("未找到容器备货前的存储库位，请使用移动功能将该容器移出分装间");
 
 
 
-                HashMap<String,Object> moveParamsHashMap = new HashMap<String,Object>();
+                Map<String,Object> moveParamsHashMap = new HashMap<String,Object>();
                 moveParamsHashMap.put("OPNAME",opName);
                 moveParamsHashMap.put("FROMID",fromId);
                 moveParamsHashMap.put("FROMLOC",currentPackLoc);

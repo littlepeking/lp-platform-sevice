@@ -15,10 +15,9 @@ import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+
+import java.util.*;
+import java.util.Map;
 
 /**
  * dz 20210524
@@ -44,18 +43,18 @@ public class LpnCreateSOShip extends LegacyBaseService {
 
         String esignatuerKey = "";
         try{
-            HashMap<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
+            Map<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
             if(LegecyUtilHelper.isNull(orderInfo)) throw new Exception("找不到发货订单："+orderKey);
             if(orderInfo.get("STATUS").equals("95")){
                 ExceptionHelper.throwRfFulfillLogicException("不能发运重复订单");
             }
 
-            List<HashMap<String,String>> orderDetails = DBHelper.executeQuery(
+            List<Map<String,String>> orderDetails = DBHelper.executeQuery(
                     "select ORDERLINENUMBER,STORERKEY,SKU,IDREQUIRED,LOTTABLE06,SUSR1,SUSR3,STATUS " +
                             ",ORIGINALQTY,OPENQTY,GROSSWGTEXPECTED,TAREWGTEXPECTED, SHIPPEDQTY,QTYPREALLOCATED,QTYALLOCATED,QTYPICKED,UOM,PACKKEY " +
                             "from orderdetail where orderkey=? and STATUS <>'95' order by orderlinenumber",
                     new String[]{orderKey});
-            for (HashMap<String,String> odHashMap : orderDetails) {
+            for (Map<String,String> odHashMap : orderDetails) {
                 String id = odHashMap.get("IDREQUIRED");
                 String netWgt = odHashMap.get("ORIGINALQTY");
                 String grossWgt = odHashMap.get("GROSSWGTEXPECTED");
@@ -75,7 +74,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
 
                 String idToBeShipped =  null;
 
-                HashMap<String,String> originalIdHashMap = LotxLocxId.getAvailInvById(id);
+                Map<String,String> originalIdHashMap = LotxLocxId.getAvailInvById(id);
 
                 //容器数量>拣货量并且拣货量>0，打印剩余量标签
                 if(UtilHelper.decimalStrCompare(originalIdHashMap.get("QTY"), netWgt)>0
@@ -85,7 +84,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
                     //插入拣货到容器的IDNOTES信息
                     idToBeShipped = IDNotes.splitWgtById( stdGrossWgtDecimal, stdNetWgtDecimal, stdTareWgtDecimal, grossWgt, netWgt, tareWgt, uom, id, "", orderKey,false);
 
-                    HashMap<String,String> fieldsToBeUpdate = new HashMap<String,String>();
+                    Map<String,String> fieldsToBeUpdate = new HashMap<>();
                     fieldsToBeUpdate.put("LASTSHIPPEDLOC", originalIdHashMap.get("LOC")); //该ID最后一次的拣货自库位
 //                    fieldsToBeUpdate.put("LASTLOC", originalIdHashMap.get("LOC")); //该ID的上一个库位
                     fieldsToBeUpdate.put("LASTID", originalIdHashMap.get("ID")); //该ID的上一个ID
@@ -103,7 +102,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
 
                     idToBeShipped = id;
 
-                    HashMap<String,String> fieldsToBeUpdate = new HashMap<String,String>();
+                    Map<String,String> fieldsToBeUpdate = new HashMap<String,String>();
 
                     fieldsToBeUpdate.put("GROSSWGTLABEL", grossWgt);//原毛重标签量
                     fieldsToBeUpdate.put("TAREWGTLABEL", tareWgt);//原皮重标签量
@@ -127,7 +126,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
                             add(idToBeShippedF);
                         }});
                 //:TODO:校验发运的IDNOTES库存余额应为0并移至历史表，否则报错
-                HashMap<String,String> shippedIdNotesHashMap = IDNotes.findById(id,true);
+                Map<String,String> shippedIdNotesHashMap = IDNotes.findById(id,true);
                 IDNotes.archiveIDNotes( shippedIdNotesHashMap);
 
 
@@ -159,7 +158,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
             else
                 throw new FulfillLogicException(e.getMessage());
         }
-        EXEDataObject theOutDO = new EXEDataObject();
+        ServiceDataMap theOutDO = new ServiceDataMap();
 //        theOutDO.clearDO();
 //        theOutDO.setRow(theOutDO.createRow());
 
@@ -192,7 +191,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
         allocateProcess.execute(serviceDataHolder);
 //        context.theEXEDataObjectStack.pop();
 
-        EXEDataObject shipDO = new EXEDataObject();
+        ServiceDataMap shipDO = new ServiceDataMap();
 
         shipDO.setAttribValue("orderkey", orderKey);
         shipDO.setAttribValue("TransactionStarted" , "true");
@@ -210,7 +209,7 @@ public class LpnCreateSOShip extends LegacyBaseService {
      */
     private void ship( String orderKey) {
 
-        EXEDataObject shipDO = new EXEDataObject();
+        ServiceDataMap shipDO = new ServiceDataMap();
         shipDO.setAttribValue("orderkey" , orderKey);
         shipDO.setAttribValue("TransactionStarted" , "true");
 

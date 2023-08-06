@@ -14,7 +14,9 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
 import java.util.List;
 
 /**
@@ -26,6 +28,9 @@ import java.util.List;
  **/
 
 //set JAVA_OPTS=%JAVA_OPTS% -agentlib:jdwp=transport=dt_socket,server=y,address=8787,suspend=n
+
+
+@Service
 public class ReceiveAll extends LegacyBaseService {
 
     @Override
@@ -33,9 +38,9 @@ public class ReceiveAll extends LegacyBaseService {
 
 
         String receiptkey= serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
-        List<HashMap<String, String>> receiptDetails = Receipt.findReceiptDetails(receiptkey,true);
+        List<Map<String, String>> receiptDetails = Receipt.findReceiptDetails(receiptkey,true);
 
-        HashMap<String, String> receipt = Receipt.findByReceiptKey( receiptkey, true);
+        Map<String, String> receipt = Receipt.findByReceiptKey( receiptkey, true);
 
         String eSignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
@@ -86,14 +91,14 @@ public class ReceiveAll extends LegacyBaseService {
 
 
         StringBuffer errormess = new StringBuffer();
-        for(HashMap<String,String> receiptDetail:receiptDetails){
+        for(Map<String,String> receiptDetail:receiptDetails){
 
             if(!receiptDetail.get("STATUS").equals("20")
                && !receiptDetail.get("STATUS").equals("9")
                && !receiptDetail.get("STATUS").equals("11")){ //过滤掉已取消、已收货和已结的收货行
                 try {
 
-                    HashMap<String,String> lotxLocxIdRecord = LotxLocxId.findById(receiptDetail.get("TOID"),false);
+                    Map<String,String> lotxLocxIdRecord = LotxLocxId.findById(receiptDetail.get("TOID"),false);
                     if(lotxLocxIdRecord!=null && !CDReceiptType.isReturnTypeWithInventory(receipt.get("TYPE"))){
                         ExceptionHelper.throwRfFulfillLogicException("此容器条码在库内仍有库存，不允许重复收货");
                     }

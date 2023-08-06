@@ -7,8 +7,8 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 public class UdtrnSaveTemp  extends LegacyBaseService
 {
@@ -74,13 +74,13 @@ public class UdtrnSaveTemp  extends LegacyBaseService
 			}
 			
 			String typename=type;
-			HashMap<String,String> mBIO= DBHelper.getRecord( "SELECT BIONAME, TABLENAME, SAVETYPE, DELTYPE, LOTFIELD, KEYFIELD, KEYFIELDLABEL FROM UDTRN_TABLE WHERE BIONAME=?", new String[] {bioname});
+			Map<String,String> mBIO= DBHelper.getRecord( "SELECT BIONAME, TABLENAME, SAVETYPE, DELTYPE, LOTFIELD, KEYFIELD, KEYFIELDLABEL FROM UDTRN_TABLE WHERE BIONAME=?", new String[] {bioname});
 			if (mBIO.isEmpty()) throw new Exception("BIO("+bioname+")未注册日志信息");
 			if (type.equals("SAVE")) typename=mBIO.get("SAVETYPE");
 			if (type.equals("DELETE")) typename=mBIO.get("DELTYPE");
 			
 			int count=0;
-			HashMap<String,String> tempUdtrn=null;
+			Map<String,String> tempUdtrn=null;
 			for(int i1=0;i1<aFieldName.length;i1++)
 			{
 				if ((!aFieldOld[i1].equals(aFieldNew[i1]))||(type.equals("DELETE")))
@@ -136,7 +136,7 @@ public class UdtrnSaveTemp  extends LegacyBaseService
 			if (tempUdtrn!=null) LegacyDBHelper.ExecInsert( "UDTRN_TEMP", tempUdtrn);
 			
 			/*
-			HashMap<String,String> mTRAN=new HashMap<String,String>();
+			Map<String,String> mTRAN=new HashMap<String,String>();
 			String SEQ_UDTRN=Integer.toString(XtSql.GetSeq( "SEQ_UDTRN"));
 			mTRAN.put("ADDWHO", userid);
 			mTRAN.put("EDITWHO", userid);

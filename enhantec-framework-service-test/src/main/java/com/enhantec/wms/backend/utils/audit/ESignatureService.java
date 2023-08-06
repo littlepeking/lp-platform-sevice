@@ -5,8 +5,8 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 import static com.enhantec.wms.backend.utils.audit.AuthService.authenticate;
 
@@ -76,7 +76,7 @@ public class ESignatureService extends LegacyBaseService
 
         authenticate(userid, password);
 
-        HashMap<String,String> Fields=new HashMap<String,String>();
+        Map<String,String> Fields=new HashMap<String,String>();
         String eSignatureKey = String.valueOf(IdGenerationHelper.getNCounter("ESIGNATURE"));
         Fields.put("SERIALKEY", eSignatureKey);
         Fields.put("SIGN", userid);

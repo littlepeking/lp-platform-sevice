@@ -4,13 +4,13 @@ import com.enhantec.wms.backend.common.Const;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class SNHistory {
 
-    public static HashMap<String, String> findBySkuAndSN( String sku, String serialNumber, boolean checkExist) {
+    public static Map<String, String> findBySkuAndSN( String sku, String serialNumber, boolean checkExist) {
 
-        HashMap<String,String> lpnHisInfo= DBHelper.getRecord(
+        Map<String,String> lpnHisInfo= DBHelper.getRecord(
                 " SELECT TOP 1 " + Const.commonSkuFieldsWithAlias+
                         ",ID.ID, ID.BARRELNUMBER, ID.TOTALBARREL, ID.BARRELDESCR BARRELDESCR, ID.PACKKEY, ID.UOM," +
                         "ID.ORIGINALGROSSWGT, ID.ORIGINALTAREWGT, ID.ORIGINALNETWGT,ID.REGROSSWGT,ID.PROJECTCODE, " +

@@ -11,8 +11,8 @@ import com.enhantec.wms.backend.utils.print.Labels;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import java.util.Map;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +27,7 @@ public class InventoryHelper {
      *  key:PRINT,value:是否需要重新打印标签
      * @throws Exception
      */
-    public static HashMap<String,String> doMove( String OPNAME, HashMap<String, String> fromIdHashMap, List<String> snList, String toId, String fromLoc, String toLoc, String toBeMovedNetWgt, String toBeMovedGrossWgt, String toBeMovedTareWgt, String tobeMovedUOM, String printer, boolean isSplitLpn) throws Exception {
+    public static Map<String,String> doMove( String OPNAME, Map<String, String> fromIdHashMap, List<String> snList, String toId, String fromLoc, String toLoc, String toBeMovedNetWgt, String toBeMovedGrossWgt, String toBeMovedTareWgt, String tobeMovedUOM, String printer, boolean isSplitLpn) throws Exception {
 
         String fromId = fromIdHashMap.get("ID");
 
@@ -100,7 +100,7 @@ public class InventoryHelper {
 
         if(snList.size()>0) {
             for (String sn: snList) {
-                HashMap<String,String> serialMove = new LinkedHashMap<>();
+                Map<String,String> serialMove = new HashMap<>();
                 serialMove.put("WHSEID", "@user");
                 serialMove.put("STORERKEY", CDSysSet.getStorerKey());
                 serialMove.put("SKU", fromIdHashMap.get("SKU"));
@@ -139,7 +139,7 @@ public class InventoryHelper {
             printOrUpdateTaskLPNByIDNotes(toId, Labels.LPN_UI_SY,printer,"","打印拆分至容器余量标签");
         }
 
-        HashMap<String, String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
         result.put("TOID",toId);
         result.put("PRINT",String.valueOf(printLabel));
         return result;
@@ -207,7 +207,7 @@ public class InventoryHelper {
         boolean locOnHold = false;
         if(!"".equalsIgnoreCase(loc)){
             String locQuery = "SELECT count(1) TOTALNUM FROM INVENTORYHOLD WHERE loc = ? AND Hold = '1'";
-            HashMap<String,String> record=DBHelper.getRecord( locQuery, new Object[]{ loc},"库存冻结");
+            Map<String,String> record=DBHelper.getRecord( locQuery, new Object[]{ loc},"库存冻结");
 
             if(!record.get("TOTALNUM").equals("0")){
                 locOnHold = true;
@@ -216,7 +216,7 @@ public class InventoryHelper {
         boolean lotOnHold = false;
         if(!"".equalsIgnoreCase(lot)){
             String lotQuery = "SELECT count(1) TOTALNUM FROM INVENTORYHOLD WHERE lot = ? AND Hold = '1'";
-            HashMap<String,String> record=DBHelper.getRecord( lotQuery, new Object[]{ lot},"库存冻结");
+            Map<String,String> record=DBHelper.getRecord( lotQuery, new Object[]{ lot},"库存冻结");
 
             if(!record.get("TOTALNUM").equals("0")){
                 lotOnHold = true;
@@ -228,7 +228,7 @@ public class InventoryHelper {
         boolean idOnHold = false;
         if(!"".equalsIgnoreCase(ID)){
             String idQuery = "SELECT count(1) TOTALNUM FROM INVENTORYHOLD WHERE id = ? AND Hold = '1'";
-            HashMap<String,String> record=DBHelper.getRecord( idQuery, new Object[]{ID},"库存冻结");
+            Map<String,String> record=DBHelper.getRecord( idQuery, new Object[]{ID},"库存冻结");
             if(!record.get("TOTALNUM").equals("0")){
                 idOnHold = true;
             }
@@ -240,7 +240,7 @@ public class InventoryHelper {
         return false;
     }
 
-    public static String getHoldStatus4Pick( HashMap<String,String> lotxLocxIdInfo)  {
+    public static String getHoldStatus4Pick( Map<String,String> lotxLocxIdInfo)  {
 
         List<String> holdStatuses = getHoldStatuses(lotxLocxIdInfo);
 
@@ -252,10 +252,10 @@ public class InventoryHelper {
     }
 
 
-    public static List<String> getHoldStatuses( HashMap<String,String> lotxLocxIdInfo)  {
+    public static List<String> getHoldStatuses( Map<String,String> lotxLocxIdInfo)  {
 
         String statusQuery = "SELECT STATUS FROM INVENTORYHOLD WHERE HOLD = 1 AND STATUS <> 'OK' AND (LOC =? OR ID = ? OR LOT = ?) ";
-        List<HashMap<String,String>>  statusList = DBHelper.executeQuery( statusQuery, new Object[]{
+        List<Map<String,String>>  statusList = DBHelper.executeQuery( statusQuery, new Object[]{
                 lotxLocxIdInfo.get("LOC"),
                 lotxLocxIdInfo.get("ID"),
                 lotxLocxIdInfo.get("LOT")});
@@ -269,7 +269,7 @@ public class InventoryHelper {
     public static void checkLocQuantityLimit( String loc) throws Exception {
         String locNumQuery = "select COUNT(*) from LOTXLOCXID l,idnotes i where l.LOC=? and i.id=l.ID and l.QTY>0";
         String  locNum = DBHelper.getValue( locNumQuery, new Object[]{loc},"库位LPN数量");
-        HashMap<String,String> locHash= Loc.findById(loc,true);
+        Map<String,String> locHash= Loc.findById(loc,true);
         String stackLimit = UtilHelper.isEmpty(locHash.get("STACKLIMIT"))?"0":locHash.get("STACKLIMIT");
         String footPrint = UtilHelper.isEmpty(locHash.get("FOOTPRINT"))?"0":locHash.get("FOOTPRINT");
         String maxLocQuantity =  (new BigDecimal(stackLimit).multiply(new BigDecimal(footPrint))).toPlainString();

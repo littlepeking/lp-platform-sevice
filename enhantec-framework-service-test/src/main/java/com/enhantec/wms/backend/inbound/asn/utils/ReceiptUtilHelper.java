@@ -10,7 +10,9 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 
 public class ReceiptUtilHelper {
@@ -25,9 +27,9 @@ public class ReceiptUtilHelper {
      * @param returnLotHashMap //当前RECEIPT的新老收货批次对应关系
      * @throws Exception
      */
-    public static void updateReturnReceiptlot( String RECEIPTYPE, List<HashMap<String, String>> receiptDetails, HashMap<String, String> returnLotHashMap) throws Exception {
+    public static void updateReturnReceiptlot( String RECEIPTYPE, List<Map<String, String>> receiptDetails, Map<String, String> returnLotHashMap) throws Exception {
 
-        HashMap<String,String>  receiptTypeInfo = CodeLookup.getCodeLookupByKey("RECEIPTYPE", RECEIPTYPE);
+        Map<String,String>  receiptTypeInfo = CodeLookup.getCodeLookupByKey("RECEIPTYPE", RECEIPTYPE);
 
         //0: 退货的批次号直接使用原收货批次号
         //1: 当容器开封时，退货的批次号为原批次号+R(A-Z)
@@ -40,7 +42,7 @@ public class ReceiptUtilHelper {
             //1: 当容器开封时，退货的批次号为原批次号+R(A-Z)
             if (receiptDetails != null && receiptDetails.size() > 0) {
 
-                for (HashMap<String, String> rd : receiptDetails) {
+                for (Map<String, String> rd : receiptDetails) {
 
                     if (("1").equals(rd.get("SUSR7"))) {//开封标记
                         String newRetLot = returnLotHashMap.get(rd.get("LOTTABLE06"));
@@ -66,7 +68,7 @@ public class ReceiptUtilHelper {
         }else if("2".equals(receiptTypeInfo.get("UDF6"))) {
             //2: 退货的批次号直接从系统获取下一新的收货批次号，且Elottable07生产批号+R(A-Z)
 
-            for (HashMap<String, String> rd : receiptDetails) {
+            for (Map<String, String> rd : receiptDetails) {
 
                 //获取下一新的收货批次号
                 String newRetLot = returnLotHashMap.get(rd.get("LOTTABLE06"));
@@ -78,7 +80,7 @@ public class ReceiptUtilHelper {
                 }
 
                 //Elottable07生产批号+R(A-Z)
-                HashMap<String, String> elottable07HashMap = new HashMap<>();
+                Map<String, String> elottable07HashMap = new HashMap<>();
                 String newELottable07 = elottable07HashMap.get(rd.get("ELOTTABLE07"));
 
                 if (newELottable07 == null) {

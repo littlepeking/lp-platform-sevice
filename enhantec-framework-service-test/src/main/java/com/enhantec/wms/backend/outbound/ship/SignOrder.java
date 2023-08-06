@@ -9,7 +9,7 @@ import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  --注册方法
@@ -36,7 +36,7 @@ public class SignOrder extends LegacyBaseService {
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderkey");
 
-            HashMap<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
+            Map<String, String> orderInfo = Orders.findByOrderKey( orderKey, true);
 
             if (!orderInfo.get("STATUS").equals("95")) {
                 ExceptionHelper.throwRfFulfillLogicException("不能签收未发运的订单");

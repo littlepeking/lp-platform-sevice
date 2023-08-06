@@ -7,7 +7,7 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  --注册方法
@@ -44,7 +44,7 @@ public class ReleasePackLoc extends LegacyBaseService {
             if (UtilHelper.isEmpty(orderLineNumber)) throw new Exception("订单行号不能为空");
             if (UtilHelper.isEmpty(esignatureKey)) throw new Exception("电子签名不能为空");
 
-            HashMap<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
+            Map<String,String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
 
             String repackReceiptKey = orderDetailHashMap.get("SUSR1");
 

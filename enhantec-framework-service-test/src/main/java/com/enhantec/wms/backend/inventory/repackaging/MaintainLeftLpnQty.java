@@ -13,6 +13,7 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +54,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
             if (UtilHelper.isEmpty(type)) throw new Exception("类型不能为空");
             if (UtilHelper.isEmpty(receiptKey)) throw new Exception("分装入库单号不能为空");
 
-            HashMap<String,String> receiptHashMap =  Receipt.findByReceiptKey(receiptKey,true);
+            Map<String,String> receiptHashMap =  Receipt.findByReceiptKey(receiptKey,true);
 
             /*
                 RECEIPT.SUSR2 分装单关联的收货批次号
@@ -67,7 +68,7 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
             String orderLineNumber = orderKeyStr.substring(10);
             boolean isInRepackProcess = RepackgingUtils.isInRepackProcess(orderKey,orderLineNumber);
 
-            List<HashMap<String,String>> leftLpnList = RepackgingUtils.getLeftLPNListFromStr(receiptHashMap.get("SUSR5"));
+            List<Map<String,String>> leftLpnList = RepackgingUtils.getLeftLPNListFromStr(receiptHashMap.get("SUSR5"));
 
             String LeftLpnStr = "";
 
@@ -80,15 +81,15 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
                 if (UtilHelper.isEmpty(leftQty) || UtilHelper.decimalStrCompare(leftQty,"0")<=0) throw new Exception("余料数量必须大于0");
                 if (UtilHelper.isEmpty(uom)) throw new Exception("余料计量单位不能为空");
 
-                Optional<HashMap<String, String>> optionalLeftLpnInfo = leftLpnList.stream().filter(x->x.get("ID").equals(id)).findFirst();
+                Optional<Map<String, String>> optionalLeftLpnInfo = leftLpnList.stream().filter(x->x.get("ID").equals(id)).findFirst();
 
 
-                HashMap<String,String> idHashMap = LotxLocxId.findAvailInvByLocId(receiptHashMap.get("SUSR3"),id,true,true);
+                Map<String,String> idHashMap = LotxLocxId.findAvailInvByLocId(receiptHashMap.get("SUSR3"),id,true,true);
 
                 if(!UtilHelper.equals(idHashMap.get("LOTTABLE06"),receiptHashMap.get("SUSR2")))
                     ExceptionHelper.throwRfFulfillLogicException("所选容器的批次非当前分装批次"+receiptHashMap.get("SUSR2"));
 
-                HashMap<String,String> skuHashMap = SKU.findById(idHashMap.get("SKU"),true);
+                Map<String,String> skuHashMap = SKU.findById(idHashMap.get("SKU"),true);
 
                 //检查分装间是否存在该容器且库存量>余料数量
 
@@ -99,11 +100,11 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
                 }
 
                 if(optionalLeftLpnInfo.isPresent()) {
-                    HashMap<String,String> leftLpnInfo = optionalLeftLpnInfo.get();
+                    Map<String,String> leftLpnInfo = optionalLeftLpnInfo.get();
                     leftLpnInfo.put("LEFTQTY",leftQty);
                     leftLpnInfo.put("UOM",uom);
                 }else {
-                    HashMap<String,String> leftLpnInfo = new HashMap<>();
+                    Map<String,String> leftLpnInfo = new HashMap<>();
                     leftLpnInfo.put("ID",id);
                     leftLpnInfo.put("LEFTQTY",leftQty);
                     leftLpnInfo.put("UOM",uom);
@@ -134,10 +135,10 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
 
                 if (UtilHelper.isEmpty(id)) throw new Exception("余料容器条码不能为空");
 
-                Optional<HashMap<String, String>> optionalLeftLpnInfo = leftLpnList.stream().filter(x->x.get("ID").equals(id)).findFirst();
+                Optional<Map<String, String>> optionalLeftLpnInfo = leftLpnList.stream().filter(x->x.get("ID").equals(id)).findFirst();
 
                 if(optionalLeftLpnInfo.isPresent()) {
-                    HashMap<String,String> LpnInfo =  optionalLeftLpnInfo.get();
+                    Map<String,String> LpnInfo =  optionalLeftLpnInfo.get();
                     leftLpnList.remove(LpnInfo);
                 }else {
                     ExceptionHelper.throwRfFulfillLogicException("未找到要删除的余料标签"+id);
@@ -173,11 +174,11 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
 
             if(leftLpnList.size()>0) {
 
-                HashMap<String,String> idHashMap = LotxLocxId.findById(leftLpnList.get(0).get("ID"),true);
+                Map<String,String> idHashMap = LotxLocxId.findById(leftLpnList.get(0).get("ID"),true);
 
-                HashMap<String,String> skuHashMap = SKU.findById(idHashMap.get("SKU"),true);
+                Map<String,String> skuHashMap = SKU.findById(idHashMap.get("SKU"),true);
 
-                for (HashMap<String, String> leftLpnInfo : leftLpnList) {
+                for (Map<String, String> leftLpnInfo : leftLpnList) {
                     BigDecimal lpnQty = UOM.UOMQty2StdQty( skuHashMap.get("PACKKEY"), leftLpnInfo.get("UOM"), new BigDecimal(leftLpnInfo.get("LEFTQTY")));
                     totalLeftQty = totalLeftQty.add(lpnQty);
                 }
@@ -208,11 +209,11 @@ public class MaintainLeftLpnQty extends LegacyBaseService {
 
     }
 
-    private String buildLeftLpnInfoStr(List<HashMap<String, String>> leftLpnList) {
+    private String buildLeftLpnInfoStr(List<Map<String, String>> leftLpnList) {
 
         StringBuffer leftLpnSB = new StringBuffer();
 
-        for(HashMap<String,String> lpnInfo : leftLpnList){
+        for(Map<String,String> lpnInfo : leftLpnList){
             leftLpnSB.append(lpnInfo.get("ID")).append("|")
                     .append(lpnInfo.get("LEFTQTY")).append("|")
                     .append(lpnInfo.get("UOM")).append(";");

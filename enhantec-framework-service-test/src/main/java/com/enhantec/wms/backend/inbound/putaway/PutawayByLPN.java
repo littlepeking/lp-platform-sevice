@@ -13,7 +13,7 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 
 public class PutawayByLPN extends LegacyBaseService {
 
@@ -49,7 +49,7 @@ public class PutawayByLPN extends LegacyBaseService {
 		    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 			//确保LPN没有被分配和拣货才允许移动。
-			HashMap<String, String> idHashMapWithLot = LotxLocxId.findFullAvailInvById( fromloc, fromid,"容器不存在或者已被分配或拣货，不允许上架");
+			Map<String, String> idHashMapWithLot = LotxLocxId.findFullAvailInvById( fromloc, fromid,"容器不存在或者已被分配或拣货，不允许上架");
 			InventoryValidationHelper.validateLocMix( fromid ,fromloc , toloc);
 			InventoryHelper.checkLocQuantityLimit(toloc);
 //	todo		super.execute(pObject);

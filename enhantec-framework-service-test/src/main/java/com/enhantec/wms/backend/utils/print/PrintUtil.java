@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Map;
 
@@ -18,11 +18,11 @@ public class PrintUtil {
 
 //    private static final ILogger SCE_LOGGER = SCELoggerFactory.getInstance(PrintUtil.class);
 
-    public static List<HashMap<String,String>> getData( String labelName, HashMap<String,String> sqlParams)  {
+    public static List<Map<String,String>> getData( String labelName, Map<String,String> sqlParams)  {
 
 //        SCE_LOGGER.info(" LabelName: {}", labelName);
 
-        List<HashMap<String,String>> labelData =new ArrayList<>();
+        List<Map<String,String>> labelData =new ArrayList<>();
 
         String tmpText = "";
 
@@ -71,7 +71,7 @@ public class PrintUtil {
     }
 
     //PRINTSTATUS -1 缓存后续打印 0 正在打印
-    public static void printLabel( String printer, String labelTempName, String labelName, String copies, String notes, List<HashMap<String,String>> data, String key) throws Exception {
+    public static void printLabel( String printer, String labelTempName, String labelName, String copies, String notes, List<Map<String,String>> data, String key) throws Exception {
         if(UtilHelper.isEmpty(printer)) throw new Exception("打印机不允许为空");
         //PRINTER=-1 不打印 PRINTER = 0 缓存打印 其他 = 直接打印
         if("-1".equals(printer)) return;

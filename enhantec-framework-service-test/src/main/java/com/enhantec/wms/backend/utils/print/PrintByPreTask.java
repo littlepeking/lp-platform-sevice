@@ -8,8 +8,9 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 public class PrintByPreTask extends LegacyBaseService
 {
@@ -58,7 +59,7 @@ public class PrintByPreTask extends LegacyBaseService
 				//labelSuffix += "_DEFAULT";
 			}
 
-			List<HashMap<String,String>> TASKS=DBHelper.executeQuery(
+			List<Map<String,String>> TASKS=DBHelper.executeQuery(
 					 "select TASKID from PRINT_TASK where PRINTWHO=? and PRINTSTATUS=? ORDER BY TASKID"
 					, new Object[]{USER, "-1"});
 			if (TASKS.size()==0) throw new Exception("未找到打印任务");

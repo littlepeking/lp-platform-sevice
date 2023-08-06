@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Timestamp;
-import java.util.HashMap;
+import java.util.Map;
 
 public class PostRelease extends LegacyBaseService {
 
@@ -49,7 +49,7 @@ public class PostRelease extends LegacyBaseService {
 					" FROMLOTTABLE05,FROMLOTTABLE11,ELOTTABLE02,LOTTABLE05, LOTTABLE11,INITIALRELEASE, PROCESSINGMODE,MANUFACTURERNAME" +
 					" , RELEASETYPE, NOTES,ELOTTABLE01,ELOTTABLE19,ELOTTABLE20,ELOTTABLE09,ELOTTABLE07,ELOTTABLE04"
 		    +" FROM RELEASE WHERE RELEASEKEY=?";
-		    HashMap<String,Object> mRelease= DBHelper.getRawRecord( SqlRelease, new Object[]{RELEASEKEY},"放行单");
+		    Map<String,Object> mRelease= DBHelper.getRawRecord( SqlRelease, new Object[]{RELEASEKEY},"放行单");
 		    if (mRelease.isEmpty()) throw new Exception("系统中无此放行单");
 		    if (!mRelease.get("STATUS").equals("0")) throw new Exception("放行单已做后续处理,不能继续操作");  //检查放行表是否已处理
 
@@ -102,7 +102,7 @@ public class PostRelease extends LegacyBaseService {
 			AuditService.doAudit(udtrn);
 
 		    //取批次当前状态
-//			HashMap<String,Object> laRecord = LotAttribute.findByLottable06(LOTTABLE06,true);
+//			Map<String,Object> laRecord = LotAttribute.findByLottable06(LOTTABLE06,true);
 //
 //		    String preQUALITYSTATUS=getString(laRecord.get("LOTTABLE03"));  //批次当前的质量状态
 //
