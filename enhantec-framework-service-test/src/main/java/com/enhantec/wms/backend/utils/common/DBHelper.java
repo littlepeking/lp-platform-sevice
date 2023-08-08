@@ -379,14 +379,37 @@ public class DBHelper {
 
     public static List<Map<String, Object>> executeQueryRawData(String statement, List<Object> params) {
 
-            return  EHContextHelper.getBean(EHSqlService.class).selectList(statement,params);
+        List<Map<String, Object>> tempRes =  EHContextHelper.getBean(EHSqlService.class).selectList(statement,params);
+
+        return convertKeysToUppercase(tempRes);
 
     }
 
     public static List<Map<String, Object>> executeQueryRawData(String dataSource, String statement, List<Object> params) {
 
-        return  EHContextHelper.getBean(EHSqlService.class).selectList(dataSource, statement,params);
+        List<Map<String, Object>> tempRes =  EHContextHelper.getBean(EHSqlService.class).selectList(dataSource, statement,params);
 
+         return convertKeysToUppercase(tempRes);
+
+    }
+
+    public static List<Map<String, Object>> convertKeysToUppercase(List<Map<String, Object>> originalList) {
+
+        List<Map<String, Object>> uppercaseKeysList = new ArrayList<>();
+
+        if(originalList != null && originalList.size()>0) {
+
+            for (Map<String, Object> originalMap : originalList) {
+                Map<String, Object> uppercaseKeysMap = new HashMap<>();
+                for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
+                    String uppercaseKey = entry.getKey().toUpperCase();
+                    uppercaseKeysMap.put(uppercaseKey, entry.getValue());
+                }
+                uppercaseKeysList.add(uppercaseKeysMap);
+            }
+        }
+
+        return uppercaseKeysList;
     }
 
     public static List<Map<String, Object>> executeQueryRawDataByOrgId(String orgId, String statement, List<Object> params) {
@@ -420,9 +443,4 @@ public class DBHelper {
 
     }
 
-
-
-    public static Object getValue(ResultSet qqResultSet, int i) {
-       throw new RuntimeException("not implement");
-    }
 }

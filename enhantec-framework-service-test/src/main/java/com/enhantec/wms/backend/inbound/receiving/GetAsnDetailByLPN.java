@@ -10,12 +10,15 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+import org.springframework.stereotype.Service;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr;
 
 
+@Service
 public class GetAsnDetailByLPN extends LegacyBaseService
 {
 
