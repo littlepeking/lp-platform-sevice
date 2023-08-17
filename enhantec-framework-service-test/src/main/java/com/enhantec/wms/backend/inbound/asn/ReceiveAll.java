@@ -6,14 +6,14 @@ import com.enhantec.wms.backend.common.base.code.CDReceiptType;
 import com.enhantec.wms.backend.common.base.code.CDSignatureConf;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
+
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -31,7 +31,7 @@ import java.util.List;
 
 
 @Service
-public class ReceiveAll extends LegacyBaseService {
+public class ReceiveAll extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

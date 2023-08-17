@@ -3,12 +3,11 @@ package com.enhantec.wms.backend.inventory.ui;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.inventory.VLotAttribute;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.List;
  */
 
 
-public class SplitReceiptLot extends com.enhantec.wms.backend.framework.LegacyBaseService {
+public class SplitReceiptLot extends WMSBaseService {
 
 
     private static final long serialVersionUID = 1L;

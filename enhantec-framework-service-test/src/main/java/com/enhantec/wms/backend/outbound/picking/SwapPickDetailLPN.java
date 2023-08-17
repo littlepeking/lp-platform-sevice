@@ -9,11 +9,10 @@ import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
@@ -30,7 +29,7 @@ import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr
 
  */
 
-public class SwapPickDetailLPN extends LegacyBaseService {
+public class SwapPickDetailLPN extends WMSBaseService {
 //
 //    private static ILogger logger = SCELoggerFactory.getInstance(SwapPickDetailLPN.class);
 

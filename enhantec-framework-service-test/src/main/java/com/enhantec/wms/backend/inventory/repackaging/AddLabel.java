@@ -5,7 +5,7 @@ import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -31,7 +31,7 @@ import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr
 
  **/
 
-public class AddLabel extends LegacyBaseService {
+public class AddLabel extends WMSBaseService {
 
     private static final long serialVersionUID = 1L;
 

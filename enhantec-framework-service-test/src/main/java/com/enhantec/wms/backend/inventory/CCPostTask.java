@@ -3,14 +3,13 @@ package com.enhantec.wms.backend.inventory;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.task.TaskDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 
 /**
@@ -24,7 +23,7 @@ import java.util.Map;
  **/
 
 
-public class CCPostTask extends LegacyBaseService {
+public class CCPostTask extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

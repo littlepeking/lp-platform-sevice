@@ -1,17 +1,16 @@
 package com.enhantec.wms.backend.inbound.po;
 
 import com.enhantec.wms.backend.utils.common.DBHelper;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.framework.*;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.LegecyUtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 
 
-public class ReceiptLotRefused  extends LegacyBaseService
+public class ReceiptLotRefused  extends WMSBaseService
 {
 
 

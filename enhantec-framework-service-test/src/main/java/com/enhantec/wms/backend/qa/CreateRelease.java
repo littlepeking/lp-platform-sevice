@@ -3,16 +3,15 @@ package com.enhantec.wms.backend.qa;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.HashMap;
 
-public class CreateRelease  extends LegacyBaseService {
+public class CreateRelease  extends WMSBaseService {
 
 
 /**

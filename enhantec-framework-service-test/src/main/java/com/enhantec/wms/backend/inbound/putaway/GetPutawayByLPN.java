@@ -2,7 +2,7 @@ package com.enhantec.wms.backend.inbound.putaway;
 
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr;
 
-public class GetPutawayByLPN extends LegacyBaseService {
+public class GetPutawayByLPN extends WMSBaseService {
 
 	/**
 	--注册方法

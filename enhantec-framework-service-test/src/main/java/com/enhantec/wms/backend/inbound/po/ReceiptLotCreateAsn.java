@@ -6,7 +6,7 @@ import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.code.CDQualityStatus;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inbound.asn.utils.ReceiptUtilHelper;
@@ -17,7 +17,6 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ import static com.enhantec.wms.backend.common.base.LotxId.buildReceiptLotxIdInfo
 import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr;
 
 
-public class ReceiptLotCreateAsn extends LegacyBaseService
+public class ReceiptLotCreateAsn extends WMSBaseService
 {
 
 

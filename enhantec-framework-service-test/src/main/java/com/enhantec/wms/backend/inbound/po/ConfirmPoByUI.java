@@ -1,13 +1,12 @@
 
 package com.enhantec.wms.backend.inbound.po;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 
-public class ConfirmPoByUI extends LegacyBaseService {
+public class ConfirmPoByUI extends WMSBaseService {
     /**
      * --注册方法
      delete from SCPRDMST.wmsadmin.sproceduremap where THEPROCNAME='ConfirmPoByUI'

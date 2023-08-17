@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.outbound.picking;
 import com.enhantec.wms.backend.common.KeyGen;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
@@ -34,7 +34,7 @@ import static com.enhantec.wms.backend.outbound.OutboundUtils.checkQtyIsAvailabl
 import static com.enhantec.wms.backend.outbound.picking.PickUtil.checkIfSplitTimesOverLimit;
 
 
-public class ClusterPickingConfirm extends LegacyBaseService {
+public class ClusterPickingConfirm extends WMSBaseService {
 
     /**
      * JOHN 20201115

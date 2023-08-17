@@ -1,10 +1,8 @@
 package com.enhantec.wms.backend.utils.audit;
 
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
-
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  --注册方法 只负责插入审计历史记录，不负责验证
@@ -15,7 +13,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
  */
 
 
-public class AuditService extends LegacyBaseService {
+public class AuditService extends WMSBaseService {
 
 
     @Deprecated

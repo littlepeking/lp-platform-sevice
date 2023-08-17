@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.inbound.asn;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -11,12 +11,9 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
-import org.springframework.stereotype.Service;
-
 import java.util.Map;
 
-public class ReceiptDetailDelete extends LegacyBaseService
+public class ReceiptDetailDelete extends WMSBaseService
 {
 
 

@@ -1,13 +1,12 @@
 package com.enhantec.wms.backend.outbound.picking;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;
+import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -20,7 +19,7 @@ import java.util.Map;
  values ('EHCancelPickTask', 'com.enhantec.sce.outbound.order.picking', 'enhantec', 'CancelPickTask', 'TRUE', 'JOHN',  'JOHN', 'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,taskdetailkey','0.10','0');
 
  */
-public class CancelPickTask  extends LegacyBaseService {
+public class CancelPickTask  extends WMSBaseService {
 //
 //    private static ILogger logger = SCELoggerFactory.getInstance(CancelPickTask.class);
 

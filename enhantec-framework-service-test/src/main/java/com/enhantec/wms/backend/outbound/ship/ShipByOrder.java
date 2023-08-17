@@ -1,11 +1,10 @@
 package com.enhantec.wms.backend.outbound.ship;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.*;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.inbound.asn.utils.ReceiptUtilHelper;
 import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.outbound.utils.ToWHAsnBuilder;
@@ -13,7 +12,6 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.List;
 
@@ -30,7 +28,7 @@ import static com.enhantec.wms.backend.utils.common.UtilHelper.trimZerosAndToStr
 
  */
 
-public class ShipByOrder extends LegacyBaseService {
+public class ShipByOrder extends WMSBaseService {
 //    private static ILogger log = SCELoggerFactory.getInstance(ShipByOrder.class);
 
     @Override

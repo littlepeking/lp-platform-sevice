@@ -3,13 +3,12 @@ package com.enhantec.wms.backend.outbound.ship;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.List;
 
@@ -24,7 +23,7 @@ import java.util.List;
 
  */
 
-public class ShipById extends LegacyBaseService {
+public class ShipById extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

@@ -5,7 +5,7 @@ import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -27,7 +27,7 @@ import java.util.Optional;
 
  **/
 
-public class MaintainLeftLpnQty extends LegacyBaseService {
+public class MaintainLeftLpnQty extends WMSBaseService {
 
     private static final long serialVersionUID = 1L;
 

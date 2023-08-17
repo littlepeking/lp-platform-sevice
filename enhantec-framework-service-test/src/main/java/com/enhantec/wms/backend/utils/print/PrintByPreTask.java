@@ -2,17 +2,15 @@ package com.enhantec.wms.backend.utils.print;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.List;
-import java.util.Map;
 
-public class PrintByPreTask extends LegacyBaseService
+public class PrintByPreTask extends WMSBaseService
 {
 
 	/**

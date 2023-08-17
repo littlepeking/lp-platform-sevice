@@ -3,14 +3,13 @@ package com.enhantec.wms.backend.inbound.receiving;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.List;
 
-public class GenerateReceiptLot extends LegacyBaseService {
+public class GenerateReceiptLot extends WMSBaseService {
 
 
     /**

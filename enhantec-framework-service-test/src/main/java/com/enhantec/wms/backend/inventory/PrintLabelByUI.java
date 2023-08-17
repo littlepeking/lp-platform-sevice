@@ -1,12 +1,10 @@
 package com.enhantec.wms.backend.inventory;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
-
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  --注册方法
@@ -19,7 +17,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
  **/
 
 
-public class PrintLabelByUI extends LegacyBaseService {
+public class PrintLabelByUI extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

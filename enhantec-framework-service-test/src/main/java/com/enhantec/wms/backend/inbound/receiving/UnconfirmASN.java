@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.inbound.receiving;
 
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.DBHelper;
@@ -13,7 +13,7 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 
-public class UnconfirmASN extends LegacyBaseService {
+public class UnconfirmASN extends WMSBaseService {
 
 
     /**

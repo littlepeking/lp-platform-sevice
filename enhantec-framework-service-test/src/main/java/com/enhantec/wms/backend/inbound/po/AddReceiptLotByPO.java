@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.inbound.po;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -16,7 +16,7 @@ import java.util.Map;
 import static com.enhantec.wms.backend.utils.common.LegecyUtilHelper.Nz;
 
 
-public class AddReceiptLotByPO extends LegacyBaseService
+public class AddReceiptLotByPO extends WMSBaseService
 {
 
 

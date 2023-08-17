@@ -1,12 +1,9 @@
 package com.enhantec.wms.backend.utils.audit;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.utils.common.LegecyUtilHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 
 /**

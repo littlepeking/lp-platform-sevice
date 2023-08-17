@@ -1,7 +1,6 @@
 package com.enhantec.wms.backend.qa;
 
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.AuditService;
@@ -12,7 +11,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Timestamp;
 import java.util.Map;
 
-public class PostRelease extends LegacyBaseService {
+public class PostRelease extends WMSBaseService {
 
 	/**
 	--注册方法  放行单提交

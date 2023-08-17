@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.inventory;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
-public class SplitLpn extends LegacyBaseService {
+public class SplitLpn extends WMSBaseService {
 	/**
 	--注册方法
 	 delete from SCPRDMST.wmsadmin.sproceduremap where THEPROCNAME = 'EHSplitLpn';

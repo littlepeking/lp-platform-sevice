@@ -1,13 +1,13 @@
 package com.enhantec.wms.backend.inbound.receiving;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 
-public class AbnormalCloseASN extends LegacyBaseService {
+public class AbnormalCloseASN extends WMSBaseService {
 
 
     /**

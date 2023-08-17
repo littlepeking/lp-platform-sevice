@@ -2,14 +2,13 @@ package com.enhantec.wms.backend.inventory;
 
 
 import com.enhantec.wms.backend.common.base.UOM;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  --注册方法
@@ -20,7 +19,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
  **/
 
 
-public class RandomCC extends LegacyBaseService {
+public class RandomCC extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

@@ -16,10 +16,10 @@
  *******************************************************************************/
 package com.enhantec.wms.core.inbound;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 
-public class ReceivingByLpn extends LegacyBaseService {
+public class ReceivingByLpn extends WMSBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
         

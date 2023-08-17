@@ -1,16 +1,13 @@
 package com.enhantec.wms.backend.outbound.picking;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ResetPendingTasks extends LegacyBaseService {
+public class ResetPendingTasks extends WMSBaseService {
 
     /**
      * JOHN 20201115

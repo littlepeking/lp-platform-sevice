@@ -5,14 +5,13 @@ import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.outbound.picking.PickUtil;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  **/
 
 
-public class RepackagingSuggestion extends LegacyBaseService {
+public class RepackagingSuggestion extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

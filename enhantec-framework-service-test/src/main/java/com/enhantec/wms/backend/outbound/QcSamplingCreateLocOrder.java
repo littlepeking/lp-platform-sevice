@@ -3,18 +3,16 @@ package com.enhantec.wms.backend.outbound;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashMap;
 
-public class QcSamplingCreateLocOrder  extends LegacyBaseService
+public class QcSamplingCreateLocOrder  extends WMSBaseService
 {
 
 

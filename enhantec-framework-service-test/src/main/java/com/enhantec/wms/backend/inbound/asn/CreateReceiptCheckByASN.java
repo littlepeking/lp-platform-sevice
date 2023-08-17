@@ -3,6 +3,7 @@ package com.enhantec.wms.backend.inbound.asn;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class CreateReceiptCheckByASN extends com.enhantec.wms.backend.framework.LegacyBaseService
+public class CreateReceiptCheckByASN extends WMSBaseService
 {
 
 

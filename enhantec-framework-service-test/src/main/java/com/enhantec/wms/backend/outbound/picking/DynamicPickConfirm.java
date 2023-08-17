@@ -6,13 +6,12 @@ import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.DemandAllocation;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Date;
 import java.util.*;
 
@@ -26,7 +25,7 @@ import java.util.*;
 
  **/
 
-public class DynamicPickConfirm extends LegacyBaseService {
+public class DynamicPickConfirm extends WMSBaseService {
 
     private static final long serialVersionUID = 1L;
 

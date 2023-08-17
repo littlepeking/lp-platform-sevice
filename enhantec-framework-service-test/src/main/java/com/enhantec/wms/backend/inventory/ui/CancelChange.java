@@ -2,17 +2,15 @@
 package com.enhantec.wms.backend.inventory.ui;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 
-public class CancelChange extends LegacyBaseService {
+public class CancelChange extends WMSBaseService {
 
 
     /**

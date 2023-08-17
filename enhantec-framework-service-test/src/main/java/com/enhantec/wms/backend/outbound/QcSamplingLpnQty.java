@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -15,7 +15,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.HashMap;
 
-public class QcSamplingLpnQty extends LegacyBaseService
+public class QcSamplingLpnQty extends WMSBaseService
 {
 
 

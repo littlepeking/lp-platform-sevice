@@ -1,13 +1,11 @@
 package com.enhantec.wms.backend.inventory.ui;
 
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
-
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 /**
  * --注册方法
@@ -17,7 +15,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
  , 'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,ESIGNATUREKEY','0.10','0');
  */
 
-public class GenerateCCReportID extends LegacyBaseService {
+public class GenerateCCReportID extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

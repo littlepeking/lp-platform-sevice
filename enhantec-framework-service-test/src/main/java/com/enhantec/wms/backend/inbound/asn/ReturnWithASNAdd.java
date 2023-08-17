@@ -6,7 +6,7 @@ import com.enhantec.wms.backend.common.base.*;
 import com.enhantec.wms.backend.common.base.code.CDReceiptType;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
@@ -14,7 +14,6 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
@@ -27,7 +26,7 @@ import java.util.HashMap;
  values ('EHReturnWithASNAdd', 'com.enhantec.sce.inbound.asn', 'enhantec', 'ReturnWithASNAdd', 'TRUE', 'john', 'john',
  'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,LPN,ORIGINLPN,RECEIPTKEY,RECEIPTLINENUMBER,RECTYPE,SKU,GROSSWGT,NETWGT,TAREWGT,REGROSSWGT,UOM,SNLIST,ISOPENED,ESIGNATUREKEY,PRINTER','0.10','0');
  */
-public class ReturnWithASNAdd extends LegacyBaseService {
+public class ReturnWithASNAdd extends WMSBaseService {
     private static final long serialVersionUID = 1L;
     //默认收货库位
     private static final String DEFAULT_RECEIPT_LOC = "STAGE";

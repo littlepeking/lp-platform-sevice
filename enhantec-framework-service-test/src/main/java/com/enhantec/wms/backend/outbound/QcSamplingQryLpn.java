@@ -4,15 +4,14 @@ import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
-import java.util.HashMap;
 
-public class QcSamplingQryLpn extends LegacyBaseService
+public class QcSamplingQryLpn extends WMSBaseService
 {
 
 

@@ -1,13 +1,9 @@
 package com.enhantec.wms.backend.inbound.receiving;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
-import com.enhantec.framework.common.utils.DSConstants;
-import com.enhantec.framework.config.EHRequestContextHolder;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inbound.asn.utils.ReceiptUtilHelper;
@@ -18,13 +14,12 @@ import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
 @Service
-public class CloseASN extends LegacyBaseService {
+public class CloseASN extends WMSBaseService {
 
 
     /**

@@ -1,8 +1,7 @@
 package com.enhantec.wms.backend.outbound;
 
 import com.enhantec.wms.backend.utils.common.DBHelper;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -24,7 +23,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 
 
 
-public class OrderReserveIds extends LegacyBaseService {
+public class OrderReserveIds extends WMSBaseService {
 
 
     private static final long serialVersionUID = 1L;

@@ -3,7 +3,7 @@ package com.enhantec.wms.backend.outbound.ship;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -11,13 +11,11 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-public class CloseSO extends LegacyBaseService {
+public class CloseSO extends WMSBaseService {
 
 
     /**

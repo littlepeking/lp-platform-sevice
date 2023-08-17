@@ -2,7 +2,7 @@ package com.enhantec.wms.backend.inbound.putaway;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
@@ -10,12 +10,10 @@ import com.enhantec.wms.backend.inventory.utils.InventoryValidationHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 
-public class PutawayByLPN extends LegacyBaseService {
+public class PutawayByLPN extends WMSBaseService {
 
 	/**
 	--注册方法

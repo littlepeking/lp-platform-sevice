@@ -12,7 +12,7 @@ import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inbound.asn.utils.ReceiptValidationHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
@@ -20,7 +20,6 @@ import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
  * 在有ASN的收货功能中创建收货明细并自动收货(CS)
  *
  */
-public class ReceivingWithSignature extends LegacyBaseService {
+public class ReceivingWithSignature extends WMSBaseService {
     private static final long serialVersionUID = 1L;
 
     public void execute(ServiceDataHolder serviceDataHolder) {

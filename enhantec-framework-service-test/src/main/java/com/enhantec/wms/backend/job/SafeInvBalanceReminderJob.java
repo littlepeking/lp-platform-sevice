@@ -1,17 +1,16 @@
 package com.enhantec.wms.backend.job;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.List;
 
-public class SafeInvBalanceReminderJob extends LegacyBaseService {
+public class SafeInvBalanceReminderJob extends WMSBaseService {
 
 	/**
 	 --注册方法

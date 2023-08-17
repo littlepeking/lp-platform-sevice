@@ -2,17 +2,14 @@ package com.enhantec.wms.backend.outbound.picking;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
@@ -28,7 +25,7 @@ import java.util.List;
 
  */
 
-public class LpnCreateSODelete extends LegacyBaseService {
+public class LpnCreateSODelete extends WMSBaseService {
 
 //    private static final long serialVersionUID = 1L;
 //

@@ -2,7 +2,7 @@ package com.enhantec.wms.backend.outbound.ui;
 
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
@@ -10,7 +10,7 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 
-public class ValidateSO extends LegacyBaseService {
+public class ValidateSO extends WMSBaseService {
 
     /**
      * --注册方法

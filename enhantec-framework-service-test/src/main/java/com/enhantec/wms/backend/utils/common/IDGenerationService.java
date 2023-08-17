@@ -1,6 +1,6 @@
 package com.enhantec.wms.backend.utils.common;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 
@@ -14,7 +14,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
  , 'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,KEYNAME,KEYLENGTH','0.10','0');
  */
 
-public class IDGenerationService extends LegacyBaseService {
+public class IDGenerationService extends WMSBaseService {
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {

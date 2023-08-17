@@ -1,6 +1,6 @@
 package com.enhantec.wms.backend.outbound.picking;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 import com.enhantec.wms.backend.common.base.IDNotes;
@@ -11,12 +11,10 @@ import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.task.TaskDetail;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClusterPicking extends LegacyBaseService {
+public class ClusterPicking extends WMSBaseService {
 
     /**
      * JOHN 20201115

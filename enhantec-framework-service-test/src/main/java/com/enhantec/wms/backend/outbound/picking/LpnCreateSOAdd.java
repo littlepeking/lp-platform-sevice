@@ -9,17 +9,15 @@ import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.outbound.utils.OrderValidationHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -31,7 +29,7 @@ import java.util.Map;
  values ('EHLpnCreateSOAdd', 'com.enhantec.sce.outbound.order.picking', 'enhantec', 'LpnCreateSOAdd', 'TRUE', 'dz', 'dz',
  'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,ORDERKEY,ORDERTYPE,SKU,LPNORSN,NETWGT,GROSSWGT,TAREWGT,UOM,ESIGNATUREKEY,PRINTER,PROJECTID','0.10','0');
  */
-public class LpnCreateSOAdd extends LegacyBaseService {
+public class LpnCreateSOAdd extends WMSBaseService {
     private static final long serialVersionUID = 1L;
 
     @Override

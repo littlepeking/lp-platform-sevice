@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
@@ -26,7 +26,7 @@ import java.util.Map;
 
  **/
 
-public class PreRepackaging extends LegacyBaseService {
+public class PreRepackaging extends WMSBaseService {
 
 
     private static final long serialVersionUID = 1L;

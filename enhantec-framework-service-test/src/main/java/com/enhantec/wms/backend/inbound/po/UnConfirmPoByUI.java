@@ -2,17 +2,16 @@
 package com.enhantec.wms.backend.inbound.po;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 
-public class UnConfirmPoByUI extends LegacyBaseService {
+public class UnConfirmPoByUI extends WMSBaseService {
 
 
     /**

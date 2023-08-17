@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.outbound.OutboundUtils;
 import com.enhantec.wms.backend.outbound.allocation.OrderProcessingP1S1;
@@ -14,7 +14,6 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 import java.util.*;
 import java.util.Map;
@@ -29,7 +28,7 @@ import java.util.Map;
     'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,ORDERKEY,PRINTER,ESIGNATUREKEY','0.10','0');
  */
 @Deprecated // BY JOHN
-public class LpnCreateSOShip extends LegacyBaseService {
+public class LpnCreateSOShip extends WMSBaseService {
 
     private static final long serialVersionUID = 1L;
 

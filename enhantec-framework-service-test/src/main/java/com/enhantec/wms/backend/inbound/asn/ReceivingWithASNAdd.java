@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.base.code.CDReceiptType;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -17,7 +17,6 @@ import com.enhantec.wms.backend.utils.print.PrintHelper;
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  *
@@ -27,7 +26,7 @@ import java.util.HashMap;
  values ('EHReceivingWithASNAdd', 'com.enhantec.sce.inbound.asn', 'enhantec', 'ReceivingWithASNAdd', 'TRUE', 'john', 'john',
  'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,LPN,RECEIPTKEY,RECEIPTLINENUMBER,GROSSWGT,NETWGT,TAREWGT,UOM,SNLIST,PRINTER','0.10','0');
  */
-public class ReceivingWithASNAdd extends LegacyBaseService {
+public class ReceivingWithASNAdd extends WMSBaseService {
     private static final long serialVersionUID = 1L;
 
     @Override

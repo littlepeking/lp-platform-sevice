@@ -5,7 +5,7 @@
 
 package com.enhantec.wms.backend.utils.common;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 
 /**
@@ -17,7 +17,7 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
  */
 
 
-public class TranslateService extends LegacyBaseService {
+public class TranslateService extends WMSBaseService {
 //    private static final ILogger SCE_LOGGER = SCELoggerFactory.getInstance("RFLookUpP1S1.class");
     private static final int VALUESPERPAGE = 7;
 

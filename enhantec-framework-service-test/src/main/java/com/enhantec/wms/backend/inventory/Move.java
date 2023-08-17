@@ -7,20 +7,19 @@ import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.SerialInventory;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Move extends LegacyBaseService {
+public class Move extends WMSBaseService {
 	/**
 	--注册方法
 	delete from wmsadmin.sproceduremap where THEPROCNAME = 'EHMove';

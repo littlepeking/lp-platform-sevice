@@ -3,19 +3,16 @@ package com.enhantec.wms.backend.inventory.ui;
 
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.inventory.VLotAttribute;
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.inventory.utils.ChangeByLotHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryValidationHelper;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 
-public class ExcuteChange extends LegacyBaseService {
+public class ExcuteChange extends WMSBaseService {
 
 
     /**

@@ -1,17 +1,14 @@
 package com.enhantec.wms.backend.inbound.po;
 
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
-import java.util.HashMap;
 
-public class BondedCheckByReceiptlot extends LegacyBaseService
+public class BondedCheckByReceiptlot extends WMSBaseService
 {
 
 

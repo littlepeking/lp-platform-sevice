@@ -5,7 +5,7 @@ import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
-import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
-public class QcSamplingPostOrder extends LegacyBaseService
+public class QcSamplingPostOrder extends WMSBaseService
 {
 
 

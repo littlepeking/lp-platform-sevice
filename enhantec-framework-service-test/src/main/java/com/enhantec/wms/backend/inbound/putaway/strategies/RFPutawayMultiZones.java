@@ -18,12 +18,10 @@
  *******************************************************************************/
 package com.enhantec.wms.backend.inbound.putaway.strategies;
 
-import com.enhantec.wms.backend.framework.LegacyBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
-import com.enhantec.framework.common.utils.EHContextHelper;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
@@ -34,7 +32,7 @@ import java.util.List;
  * @author $author$
  * @version $Revision: 1.18.2.1 $
  */
-public class RFPutawayMultiZones extends LegacyBaseService {
+public class RFPutawayMultiZones extends WMSBaseService {
 //
 //	private static Logger logger = Logger.getLogger(RFPutawayMultiZones.class);
 
