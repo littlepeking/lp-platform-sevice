@@ -14,26 +14,17 @@
  *             Email: john.wang_ca@hotmail.com
  * 
  *******************************************************************************/
-package com.enhantec.wms.backend.common;
+package com.enhantec.wms.core.inbound;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.wms.backend.framework.LegacyBaseService;
+import com.enhantec.wms.backend.framework.ServiceDataHolder;
 
-public class KeyGen {
-    public static String getKey( String lotxidheader) {
-
-        throw new RuntimeException("not implement");
-    }
-
-    public static String getKey( String keyName, int i, int i1) {
-
-        throw new RuntimeException("not implement");
-
-    }
-
-
-    public static String getKey( String keyName,int i) {
-
-        throw new RuntimeException("not implement");
-
+public class ReceivingByLpn extends LegacyBaseService {
+    @Override
+    public void execute(ServiceDataHolder serviceDataHolder) {
+        
+        
+        
+        
     }
 }
