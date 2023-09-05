@@ -40,7 +40,7 @@ public class ReceiptDetailDelete extends WMSBaseService
 
 			//if (!receiptHashMap.get("ISCONFIRMED").equals("0"))  throw new Exception("收货单已确认,不允许删除明细行");
 
-			Map<String,String> receiptDetailHashMap = Receipt.findReceiptDetailById(RECEIPTKEY,RECEIPTLINENUMBER,true);
+			Map<String,String> receiptDetailHashMap = Receipt.findReceiptDetailByLineNumber(RECEIPTKEY,RECEIPTLINENUMBER,true);
 
 			//开始收货的ASN不能删除，否则影响桶号的顺序性。如果极端情况发现SN重复导致收货报错，则关闭当前ASN重新建单收货。考虑性能，暂不增加库存校验在建单环节。
 			if (receiptDetailHashMap.get("STATUS").equals("5"))  throw new Exception("收货单行已开始收货,不允许删除");

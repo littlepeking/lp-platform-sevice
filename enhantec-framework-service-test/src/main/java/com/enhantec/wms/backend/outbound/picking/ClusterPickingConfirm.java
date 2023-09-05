@@ -1,6 +1,5 @@
 package com.enhantec.wms.backend.outbound.picking;
 
-import com.enhantec.wms.backend.common.KeyGen;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
 import com.enhantec.wms.backend.framework.WMSBaseService;
@@ -399,8 +398,8 @@ public class ClusterPickingConfirm extends WMSBaseService {
         BigDecimal qtyDiff = taskQty.subtract(stdQtyTobePicked);
 
 
-        String pickDetailKey = KeyGen.getKey("PICKDETAILKEY", 10);
-        String caseId = KeyGen.getKey("CARTONID", 10);
+        String pickDetailKey = IdGenerationHelper.getNCounterStrWithLength("PICKDETAILKEY", 10);
+        String caseId = IdGenerationHelper.getNCounterStrWithLength("CARTONID", 10);
 
 
         DBHelper.executeUpdate(" INSERT INTO PICKDETAIL ( PickDetailKey, CaseID, PickHeaderkey, OrderKey, OrderLineNumber, Lot, Storerkey, Sku, PackKey, UOM, UOMQty, Qty, Loc, ToLoc, ID, CartonGroup, CartonType, DoReplenish, ReplenishZone, DoCartonize, PickMethod, AddWho, EditWho, SeqNo, StatusRequired,fromloc, SelectedCartonType, SelectedCartonID, grosswgt, netwgt, tarewgt, PickContPlacement, status, wavekey) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,? )",
@@ -441,7 +440,7 @@ public class ClusterPickingConfirm extends WMSBaseService {
             , "1" //status: released
             , originalPickDetailInfo.get("WAVEKEY")});
 
-        String newTaskDetailKey = KeyGen.getKey("TASKDETAILKEY", 10);
+        String newTaskDetailKey = IdGenerationHelper.getNCounterStrWithLength("TASKDETAILKEY", 10);
 
             java.sql.Date currentDate = UtilHelper.getCurrentSqlDate();
             DBHelper.executeUpdate(" INSERT INTO TASKDETAIL ( TaskDetailKey, TaskType, StorerKey, Sku, Lot, UOM, UOMQTY, Qty, FromLoc, LogicalFromLoc, FromID, ToLoc, ToId, SourceType, SourceKey, WaveKey, CaseId, OrderKey, OrderLineNumber, PickDetailKey, PickMethod, AddWho, EditWho, Door, Route, Stop, Putawayzone,STATUS,USERKEY,REASONKEY,STARTTIME,ENDTIME, PICKCONTPLACEMENT ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,? )",

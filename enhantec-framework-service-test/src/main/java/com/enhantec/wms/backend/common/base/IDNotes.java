@@ -12,6 +12,7 @@ import com.enhantec.wms.backend.utils.common.*;
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -375,8 +376,8 @@ public class IDNotes {
         Map<String,String> idNotesHistory=new HashMap<>();
         idNotesHistory.put("ADDWHO", EHContextHelper.getUser().getUsername());
         idNotesHistory.put("EDITWHO", EHContextHelper.getUser().getUsername());
-        idNotesHistory.put("ADDDATE", "@date");
-        idNotesHistory.put("EDITDATE", "@date");
+        idNotesHistory.put("ADDDATE", LocalDateTime.now().toString());
+        idNotesHistory.put("EDITDATE", LocalDateTime.now().toString());
         String yyyyMMStr = new SimpleDateFormat("yyyyMM").format(new Date(Calendar.getInstance().getTimeInMillis()));
         idNotesHistory.put("ADDMONTH", yyyyMMStr);
         idNotesHistory.put("BARRELDESCR", shippedIdNotesHashMap.get("BARRELDESCR"));
@@ -433,8 +434,8 @@ public class IDNotes {
                 snHistory.put("SNUOM",sn.get("DATA2"));
                 snHistory.put("ADDWHO", EHContextHelper.getUser().getUsername());
                 snHistory.put("EDITWHO", EHContextHelper.getUser().getUsername());
-                snHistory.put("ADDDATE", "@date");
-                snHistory.put("EDITDATE", "@date");
+                snHistory.put("ADDDATE", LocalDateTime.now().toString());
+                snHistory.put("EDITDATE", LocalDateTime.now().toString());
                 snHistory.put("ADDMONTH", yyyyMMStr);
                 LegacyDBHelper.ExecInsert( "SNHISTORY", snHistory);
             }

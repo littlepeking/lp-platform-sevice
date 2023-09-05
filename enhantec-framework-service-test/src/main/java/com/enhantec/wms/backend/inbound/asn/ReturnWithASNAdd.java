@@ -63,7 +63,7 @@ public class ReturnWithASNAdd extends WMSBaseService {
 
 
             if(!UtilHelper.isEmpty(originalReceiptLineNumber)) {
-                Map<String, String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById( receiptKey, originalReceiptLineNumber, true);
+                Map<String, String> originalReceiptDetailHashMap = Receipt.findReceiptDetailByLineNumber( receiptKey, originalReceiptLineNumber, true);
                 if(!(new BigDecimal(originalReceiptDetailHashMap.get("QTYRECEIVED")).compareTo(new BigDecimal(0)) == 0))
                     ExceptionHelper.throwRfFulfillLogicException("收货指令行的已收货数量必须为0");
                 toLoc = originalReceiptDetailHashMap.get("TOLOC");

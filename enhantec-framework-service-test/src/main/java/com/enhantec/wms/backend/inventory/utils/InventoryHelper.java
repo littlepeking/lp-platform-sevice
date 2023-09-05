@@ -11,6 +11,8 @@ import com.enhantec.wms.backend.utils.print.Labels;
 
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
+
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -109,8 +111,8 @@ public class InventoryHelper {
                 serialMove.put("LOC", fromIdHashMap.get("LOC"));
                 serialMove.put("ADDWHO", EHContextHelper.getUser().getUsername());
                 serialMove.put("EDITWHO", EHContextHelper.getUser().getUsername());
-                serialMove.put("ADDDATE", "@date");
-                serialMove.put("EDITDATE", "@date");
+                serialMove.put("ADDDATE", LocalDateTime.now().toString());
+                serialMove.put("EDITDATE", LocalDateTime.now().toString());
                 serialMove.put("SERIALNUMBER",sn);
                 LegacyDBHelper.ExecInsert( "SERIALMOVE", serialMove);
             }

@@ -24,7 +24,7 @@ public class LegacyWMSServiceController {
 
         ServiceHelper.executeService(serviceName, serviceDataHolder);
 
-        return serviceDataHolder.getOutputDataAsMap().getData();
+        return serviceDataHolder.getOutputDataAsMap()==null ? null : serviceDataHolder.getOutputDataAsMap().getData();
     }
 
 

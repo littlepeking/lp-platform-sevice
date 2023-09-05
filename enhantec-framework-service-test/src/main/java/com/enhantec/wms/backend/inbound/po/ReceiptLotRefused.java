@@ -9,6 +9,8 @@ import com.enhantec.wms.backend.utils.common.LegecyUtilHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 
+import java.time.LocalDateTime;
+
 
 public class ReceiptLotRefused  extends WMSBaseService
 {
@@ -61,14 +63,14 @@ public class ReceiptLotRefused  extends WMSBaseService
 //			if ((!PACKCHECK.equals("2"))&&(!PACKCHECK.equals("1"))) canRefused=true;
 //			if ((!WEIGHTCHECK.equals("2"))&&(!WEIGHTCHECK.equals("1"))) canRefused=true;
 			//if (!canRefused) throw new Exception("检查全都通过,不允许拒收");
-			DBHelper.executeUpdate( "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"9",userid,"@date",RECEIPTLOT});
+			DBHelper.executeUpdate( "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"9",userid, LocalDateTime.now().toString(),RECEIPTLOT});
 
 			
 			String RECEIPTKEY= DBHelper.getValue( "SELECT RECEIPTKEY FROM RECEIPT WHERE STATUS=? AND EXTERNRECEIPTKEY=? AND TYPE=?", new String[]{"0",RECEIPTLOT,"101"}, "");
 			if (!LegecyUtilHelper.isNull(RECEIPTKEY))
 			{//关闭收货单
 				DBHelper.executeUpdate("update RECEIPT set status=?,editwho=?,editdate=? where RECEIPTKEY=?"
-						,new String[]{"20",userid,"@date",RECEIPTKEY});
+						,new String[]{"20",userid,LocalDateTime.now().toString(),RECEIPTKEY});
 			}
 			
 			Udtrn UDTRN=new Udtrn();

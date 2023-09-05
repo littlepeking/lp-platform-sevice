@@ -18,10 +18,12 @@ package com.enhantec.framework.common.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
+import com.enhantec.framework.common.utils.DBHelper;
 import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -38,6 +40,15 @@ public class EHSqlService {
     public List<Map<String, Object>> selectList(String statement, List<Object> params) {
         return SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
     }
+
+    @DS(DSConstants.DS_DEFAULT)
+    public long selectCount(String statement, List<Object> params) {
+        return SqlRunner.db().selectCount(convertQuestionMark2Index(statement),params.toArray());
+    }
+
+
+
+
 
     @DS(DSConstants.DS_PARAM)
     public Map<String, Object> selectOne(String dataSource, String statement, List<Object> params) {
@@ -67,6 +78,9 @@ public class EHSqlService {
     }
 
     private boolean doUpdate(String statement, List<Object> params) {
+
+        DBHelper.convertSqlParamListObj2String(params);
+
         if(statement.toLowerCase().startsWith("insert into"))
             return  SqlRunner.db().insert(convertQuestionMark2Index(statement),params.toArray());
         else  if(statement.toLowerCase().startsWith("update"))

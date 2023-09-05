@@ -203,24 +203,4 @@ public class LotxLocxId {
         return idHashMap;
     }
 
-    public static Map<String,String> getUnreceivedRDById( String id) throws Exception {
-
-        Map<String,String> record = IDNotes.findAvailInvById(id,false);
-        if(record!=null) throw new Exception("库存已在系统中存在，不允许重复收货");
-
-        Map<String,String> idHashMap = DBHelper.getRecord(
-                " SELECT A.TOID ID," + Const.commonSkuFieldsWithAlias + "," +
-                        " A.PACKKEY, A.UOM," +
-                        "A.GROSSWGTEXPECTED ORIGINALGROSSWGT, A.TAREWGTEXPECTED ORIGINALTAREWGT, A.QTYEXPECTED ORIGINALNETWGT, " +
-                        Const.receiptDetailLottableFields +", CONCAT(A.BARRELNUMBER,'/',A.TOTALBARRELNUMBER) AS BARRELDESCR " +
-                        " FROM SKU S,RECEIPTDETAIL A " +
-                        " WHERE  A.SKU = S.SKU and A.STATUS=0 and A.TOID=? "
-                , new Object[]{id},"待收货明细");
-
-        if (idHashMap == null) throw new Exception("未找到容器条码为"+id+"的待收货明细");
-
-        return idHashMap;
-
-    }
-
 }

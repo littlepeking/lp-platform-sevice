@@ -1,11 +1,9 @@
 package com.enhantec.wms.backend.utils.common;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Map;
-
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.common.KeyGen;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
@@ -218,31 +216,49 @@ public class IdGenerationHelper {
         else
         {
             DBHelper.executeUpdate( "UPDATE ENTERPRISE.NCOUNTER SET KEYCOUNT=KEYCOUNT+?,EDITWHO=?,EDITDATE=? WHERE KEYNAME=?"
-                    , new String[]{Integer.toString(LpnCount),UserID,"@date",name});
+                    , new String[]{Integer.toString(LpnCount),UserID, LocalDateTime.now().toString(),name});
             return Integer.parseInt(iCnt)+1;
         }
     }
 
 
+    public static String fillStringWithZero(int ID, int len)
+    {
+        String s1=Integer.toString(ID);
+        while (s1.length()<len) s1="0"+s1;
+        return s1;
+    }
 
-    public static int getNCounter(String KeyName) throws SQLException
+
+    public static String getNCounterStrWithLength(String KeyName, int len)
+    {
+        return fillStringWithZero(getNCounter("System",KeyName,1,1),len);
+    }
+
+    public static String getNCounterStr(String KeyName)
+    {
+        return String.valueOf(getNCounter("System",KeyName,1,1));
+    }
+
+
+    public static int getNCounter(String KeyName)
     {
         return getNCounter("System",KeyName,1,1);
     }
 
 
-    public static int getNCounter(String KeyName,int Count) throws SQLException
+    public static int getNCounter(String KeyName,int Count)
     {
         return getNCounter("System",KeyName,Count,1);
     }
 
 
-    public static int getNCounter(String KeyName,int Count,int FirstValue) throws SQLException
+    public static int getNCounter(String KeyName,int Count,int FirstValue)
     {
         return getNCounter("System",KeyName,Count,FirstValue);
     }
 
-    public static int getNCounter(String UserID,String KeyName,int Count,int FirstValue) throws SQLException
+    public static int getNCounter(String UserID,String KeyName,int Count,int FirstValue)
     {
 
             int result=0;
@@ -253,7 +269,7 @@ public class IdGenerationHelper {
 
             if (seqHashMap!=null)
             {
-                result=(int) seqHashMap.get("KeyCount")+1;
+                result=(int) seqHashMap.get("KEYCOUNT")+1;
                 DBHelper.executeUpdate("update ncounter set KeyCount=KeyCount+"+Integer.toString(Count)
                         +",EditWHo=?,EditDate=? where KeyName=?", new Object[]{UserID.toUpperCase()
                         , UtilHelper.getCurrentSqlDate11(), KeyName.toUpperCase()});
@@ -267,11 +283,6 @@ public class IdGenerationHelper {
             }
             return result;
 
-    }
-
-    public static String getNextKey(String keyName)
-    {
-        return KeyGen.getKey( keyName, 2, 10);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.enhantec.wms.backend.outbound.picking;
 
-import com.enhantec.wms.backend.common.KeyGen;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
@@ -194,14 +193,14 @@ public class SwapPickDetailLPN extends WMSBaseService {
 
 
 
-              String pickDetailKey = KeyGen.getKey( "PICKDETAILKEY", 10);
+              String pickDetailKey = IdGenerationHelper.getNCounterStrWithLength( "PICKDETAILKEY", 10);
 //              thePickDO.clearDO();
 //              thePickDO.setConstraintItem("pickdetailkey", pickDetailKey);
 //              thePickDO.setWhereClause(" WHERE PickDetailKey = :pickdetailkey");
 //              context.theEXEDataObjectStack.push(thePickDO);
 //              context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire();
 
-            String caseId = KeyGen.getKey( "CARTONID", 10);
+            String caseId = IdGenerationHelper.getNCounterStrWithLength( "CARTONID", 10);
 
             double grosswgt = 0.0D;
             double netwgt = 0.0D;
@@ -285,7 +284,7 @@ public class SwapPickDetailLPN extends WMSBaseService {
 
               Map<String, String> locInfo = Loc.findById( lotxLocxIdInfo.get("LOC"), true);
 
-              String newTaskDetailKey = KeyGen.getKey("TASKDETAILKEY", 10);
+              String newTaskDetailKey = IdGenerationHelper.getNCounterStrWithLength("TASKDETAILKEY", 10);
 
               java.sql.Date currentDate = UtilHelper.getCurrentSqlDate();
 

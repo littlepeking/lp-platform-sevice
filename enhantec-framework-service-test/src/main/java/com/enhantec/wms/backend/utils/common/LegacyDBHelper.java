@@ -8,6 +8,7 @@ import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public class LegacyDBHelper {
 	private static Logger sqlLogger = LoggerFactory.getLogger(LegacyDBHelper.class);
 
 
-	public static void ExecInsert( String TableName, Map<String,String> Fields) throws Exception
+	public static void ExecInsert( String TableName, Map<String,String> Fields)
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL1="insert into "+TableName+"(";
@@ -162,12 +163,20 @@ public class LegacyDBHelper {
 	}
 
 
-	public static void ExecSql(String Sql,List<String> Params) throws Exception
+	public static void ExecSql(String Sql,Object[] params)
 	{
-		String[] aParams=new String[Params.size()];
+		ExecSql( Sql, Arrays.asList(params));
+	}
+
+
+
+	public static void ExecSql(String Sql,List<Object> Params)
+	{
+		Object[] aParams=new Object[Params.size()];
 		for(int i1=0;i1<Params.size();i1++) aParams[i1]=Params.get(i1);
 		DBHelper.executeUpdate( Sql,aParams);
 	}
+
 
 
 //	public static int ExecSql(String Sql,String[] Params) throws Exception
@@ -820,7 +829,7 @@ public class LegacyDBHelper {
 	public static boolean isDateParam(String Param)
 	{
 		if (Param==null) return false;
-		if ((Param.length()>=5)&&(Param.substring(0,5).equals("@date")))
+		if ((Param.length()>=5)&&(Param.substring(0,5).equals(LocalDateTime.now().toString())))
 			return true;
 		else
 			return false;
@@ -830,7 +839,7 @@ public class LegacyDBHelper {
 //	{
 //		if (isDateParam(param))
 //		{
-//			if ((param.equals("@date"))||(param.equals("@date11")))
+//			if ((param.equals(LocalDateTime.now().toString()))||(param.equals("@date11")))
 //			{
 //				if (context!=null)
 //				{
@@ -864,7 +873,7 @@ public class LegacyDBHelper {
 //				else
 //				{
 //					Calendar c = Calendar.getInstance();
-//					if (param.equals("@date"))
+//					if (param.equals(LocalDateTime.now().toString()))
 //						c.add(Calendar.HOUR_OF_DAY, -8);
 //					else
 //					{

@@ -9,11 +9,15 @@ import org.mybatis.spring.SqlSessionTemplate;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.enhantec.framework.common.utils.DBHelper.convertSqlParamObj2String;
 
 //import static com.enhantec.sce.common.Const.DateTimeFormat;
 
@@ -98,17 +102,28 @@ public class DBHelper {
     }
 
 
-    public static Object getRawValue(String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
 
-        Map record = getRawRecord(sql,params, errorName);
+    public static Integer getIntValue(String sql, Object[] params) throws DBResourceException{
+
+        Map record = getRawRecord(sql,params, "");
         if(null == record) return null;
 
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
+        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
 
-        return record.values().toArray()[0];
+        return (Integer)record.values().toArray()[0];
 
     }
 
+    public static String getStringValue(String sql, Object[] params) throws DBResourceException{
+
+        Map record = getRawRecord(sql,params, "");
+        if(null == record) return null;
+
+        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
+
+        return (String) record.values().toArray()[0];
+
+    }
 
     /**
      * 返回一列多行的数据。
@@ -286,7 +301,6 @@ public class DBHelper {
 //
 //    }
 
-
     private static List<Map<String, String>> convertList(List<Map<String, Object>> originalList) {
         List<Map<String, String>> convertedList = new ArrayList<>();
 
@@ -300,11 +314,8 @@ public class DBHelper {
                 String key = entry.getKey();
                 Object value = entry.getValue();
 
-                // Convert the value from Object to String
-                String convertedValue = value ==null? null : value.toString();
-
                 // Add the converted key-value pair to the converted Map
-                convertedMap.put(key, convertedValue);
+                convertedMap.put(key, convertSqlParamObj2String(value));
             }
 
             // Add the converted Map to the converted list
@@ -374,8 +385,15 @@ public class DBHelper {
 //    }
 
 
+    public static long getCount(String statement, Object[] params) {
+        return getCount(statement, Arrays.asList(params));
 
+    }
 
+    public static long getCount(String statement, List<Object> params) {
+        return EHContextHelper.getBean(EHSqlService.class).selectCount(statement,params);
+
+    }
 
     public static List<Map<String, Object>> executeQueryRawData(String statement, List<Object> params) {
 
@@ -396,7 +414,6 @@ public class DBHelper {
     public static List<Map<String, Object>> convertKeysToUppercase(List<Map<String, Object>> originalList) {
 
         List<Map<String, Object>> uppercaseKeysList = new ArrayList<>();
-
         if(originalList != null && originalList.size()>0) {
 
             for (Map<String, Object> originalMap : originalList) {

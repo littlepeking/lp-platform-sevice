@@ -2,6 +2,7 @@ package com.enhantec.wms.backend.utils.common;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -180,6 +181,15 @@ public class UtilHelper {
         if (obj == null) return "";
         else return obj.toString();
     }
+
+
+    public static String getString(Object obj, String defaultStr) {
+        if (obj == null || StringUtils.isEmpty(obj.toString()))
+            return defaultStr;
+        else
+            return obj.toString();
+    }
+
 
 //    public static List<Map<String, String>> convertEXEDataObject2List(EXEDataObject res) {
 //

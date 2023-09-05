@@ -20,9 +20,9 @@
 package com.enhantec.framework.common.utils;
 
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.Map;
 
 public class DBHelper {
@@ -115,5 +115,30 @@ public class DBHelper {
         // return the result
         return result;
     }
+
+
+
+    public static void convertSqlParamListObj2String(List<Object> list){
+
+        for (int i = 0; i < list.size(); i++) {
+            list.set(i, convertSqlParamObj2String(list.get(i)));
+        }
+
+    }
+
+    /**
+     * resolve the issue of localDateTime conversion for default serializing format "yyy-MM-ddTHH:mm:ss"
+     * @param parameter
+     * @return
+     */
+    public static String convertSqlParamObj2String(Object parameter){
+
+        DateTimeFormatter dataTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return parameter == null ? null : parameter instanceof LocalDateTime ? ((LocalDateTime)parameter).format(dataTimeFormatter): parameter.toString();
+
+
+    }
+
 
 }

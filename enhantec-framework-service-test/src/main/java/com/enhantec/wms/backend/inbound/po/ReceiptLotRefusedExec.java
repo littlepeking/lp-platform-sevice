@@ -9,6 +9,8 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 
+import java.time.LocalDateTime;
+
 public class ReceiptLotRefusedExec  extends WMSBaseService
 {
 
@@ -50,7 +52,7 @@ public class ReceiptLotRefusedExec  extends WMSBaseService
 
 
 			DBHelper.executeUpdate( "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=?,REFUSEEXECWHO=?,REFUSEEXECDATE=? where RECEIPTLOT=?"
-					,  new String[]{"92",userid,"@date",userid,"@date",RECEIPTLOT});
+					,  new String[]{"92",userid, LocalDateTime.now().toString(),userid,LocalDateTime.now().toString(),RECEIPTLOT});
 			Udtrn UDTRN=new Udtrn();
 			UDTRN.EsignatureKey=ESIGNATUREKEY;
 			UDTRN.FROMTYPE="采购收货检查-拒收后续处理完成";

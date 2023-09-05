@@ -8,7 +8,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
-import com.enhantec.wms.backend.common.KeyGen;
+
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.outbound.OutboundUtils;
@@ -188,7 +188,7 @@ public class PickUtil {
                 DBHelper.executeUpdate( "UPDATE SERIALINVENTORY SET LOC = ?, ID = ? , LOT = ? WHERE  SERIALNUMBERLONG = ? AND SKU = ? ", new Object[]{
                         "PICKTO", toId, fromIdHashMap.get("LOT"), snList[i], fromIdHashMap.get("SKU")});
 
-                String itrnSerialKey = KeyGen.getKey("ITRNSERIALKEY", 2, 10);
+                String itrnSerialKey = IdGenerationHelper.getNCounterStrWithLength("ITRNSERIALKEY", 10);
 
                 Map<String,String> serialItrn = new HashMap<>();
                 serialItrn.put("SERIALNUMBERLONG", snList[i]);
@@ -373,7 +373,7 @@ public class PickUtil {
         //检查容器条码和订单质量状态匹配
         OrderValidationHelper.checkIdQualityStatusMatchOrderType(orderKey,lotxLocxIdInfo);
 
-        String pickDetailKey = IdGenerationHelper.getNextKey("PICKDETAILKEY");
+        String pickDetailKey = IdGenerationHelper.getNCounterStrWithLength("PICKDETAILKEY",10);
 //        thePickDO.clearDO();
 //        thePickDO.setConstraintItem("pickdetailkey", pickDetailKey);
 //        thePickDO.setWhereClause(" WHERE PickDetailKey = :pickdetailkey");
@@ -381,7 +381,7 @@ public class PickUtil {
 //        context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire();
 
 
-        String caseId = IdGenerationHelper.getNextKey("CARTONID");
+        String caseId =IdGenerationHelper.getNCounterStrWithLength("CARTONID",10);
 
 
         double grosswgt = 0.0D;

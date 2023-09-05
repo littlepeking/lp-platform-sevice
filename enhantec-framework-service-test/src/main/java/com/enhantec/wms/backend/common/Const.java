@@ -48,29 +48,6 @@ public class Const {
             "FORMAT(elot.LOTTABLE11, '"+DateTimeFormat+"') LOTTABLE11," +
             "FORMAT(elot.LOTTABLE12, '"+DateTimeFormat+"') LOTTABLE12" ;
 
-
-    public static final String elottableFieldsUsedInBoxInfoWithAlias =
-            "elot.ELOTTABLE02," +
-                    "elot.ELOTTABLE03," +
-                    "elot.ELOTTABLE05," +
-                    //"elot.LOTTABLE06," + 不使用LOTTABLE06的原因是避免GROUP BY时出现成品中相同生产批次（ELOTTABLE09）但是不同收货批次的情况导致数据不唯一
-                    "elot.ELOTTABLE07," +   "elot.ELOTTABLE08," +
-                    "elot.ELOTTABLE09," + //生产批次
-                    "FORMAT(elot.ELOTTABLE11, 'yyyyMMdd') ELOTTABLE11," +
-                    "FORMAT(elot.ELOTTABLE12, 'yyyyMMdd') ELOTTABLE12" ;
-
-    public static final String elottableFieldsUsedInBoxInfo =
-            "elot.ELOTTABLE02," +
-                    "elot.ELOTTABLE03," +
-                    "elot.ELOTTABLE05," +
-                    //"elot.LOTTABLE06," + 不使用LOTTABLE06的原因是避免GROUP BY时出现成品中相同生产批次（ELOTTABLE09）但是不同收货批次的情况导致数据不唯一
-                    "elot.ELOTTABLE07," +   "elot.ELOTTABLE08," +
-                    "elot.ELOTTABLE09," + //生产批次
-                    "FORMAT(elot.ELOTTABLE11, 'yyyyMMdd') ," +
-                    "FORMAT(elot.ELOTTABLE12, 'yyyyMMdd') " ;
-
-
-
     public static final String receiptDetailLottableFields = "A.LOTTABLE01,"  +   "A.ELOTTABLE02," +
             "A.ELOTTABLE03," +   "A.LOTTABLE04," +
             "A.ELOTTABLE05," +   "A.LOTTABLE06," +
@@ -79,25 +56,5 @@ public class Const {
             "FORMAT(A.ELOTTABLE11, 'yyyyMMdd') ELOTTABLE11," +
             "FORMAT(A.ELOTTABLE12, 'yyyyMMdd') ELOTTABLE12" ;
 
-
-    public static final String receiptDetailFieldsUsedInBoxInfoWithAlias =
-            "A.ELOTTABLE02," +
-                    "A.ELOTTABLE03," +
-                    "A.ELOTTABLE05," +
-                    "A.LOTTABLE06," +
-                    "A.ELOTTABLE07," +   "elot.ELOTTABLE08," +
-                    "A.ELOTTABLE09," + //生产批次
-                    "FORMAT(A.ELOTTABLE11, 'yyyyMMdd') ELOTTABLE11," +
-                    "FORMAT(A.ELOTTABLE12, 'yyyyMMdd') ELOTTABLE12" ;
-
-    public static final String receiptDetailFieldsUsedInBoxInfo =
-            "A.ELOTTABLE02," +
-                    "A.ELOTTABLE03," +
-                    "A.ELOTTABLE05," +
-                    "A.LOTTABLE06," +
-                    "A.ELOTTABLE07," +   "elot.ELOTTABLE08," +
-                    "A.ELOTTABLE09," + //生产批次
-                    "FORMAT(A.ELOTTABLE11, 'yyyyMMdd') ," +
-                    "FORMAT(A.ELOTTABLE12, 'yyyyMMdd') " ;
 
 }

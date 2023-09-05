@@ -9,6 +9,7 @@ import com.enhantec.wms.backend.utils.common.*;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class PostRelease extends WMSBaseService {
@@ -112,7 +113,7 @@ public class PostRelease extends WMSBaseService {
 
 		    //更新放行表的状态为已处理
 		    DBHelper.executeUpdate( "UPDATE RELEASE SET EDITWHO=?,EDITDATE=?,RELEASEWHO=?,RELEASEDATE=?,STATUS=? WHERE RELEASEKEY=?"
-				   , new String[]{userid,"@date",userid,"@date","1",RELEASEKEY});
+				   , new String[]{userid, LocalDateTime.now().toString(),userid,LocalDateTime.now().toString(),"1",RELEASEKEY});
 
 		    //更新库存批次对应的质量状态
 

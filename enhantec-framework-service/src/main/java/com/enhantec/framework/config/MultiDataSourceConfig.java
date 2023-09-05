@@ -78,6 +78,15 @@ public class MultiDataSourceConfig {
                 log.info("Loaded SQLServer datasource for admin");
                 ////////
 
+                //test wms ds
+
+                DataSourceProperty testProperty = new DataSourceProperty();
+                testProperty.setUsername("wmwhse1");
+                testProperty.setPassword("WMwhSqlWMwhSql1");
+                testProperty.setUrl("jdbc:sqlserver://192.168.4.253;databaseName=SCPRD");
+                testProperty.setDriverClassName(driverClassName);
+                map.put(DATA_SOURCE_ORG_PREFIX + "wmwhse01", testProperty);
+
                 //Add ORG datasources
                 ResultSet rs = statement.executeQuery("select * from EH_ORGANIZATION");
                 if(driverClassName.contains("sqlserver")){

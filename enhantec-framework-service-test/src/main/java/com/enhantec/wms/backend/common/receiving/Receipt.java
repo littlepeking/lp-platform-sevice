@@ -9,7 +9,6 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.util.HashMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,8 +42,35 @@ public class Receipt {
         return record;
     }
 
+    public static Map<String,String> findUnreceivedRDByLPN(String receiptKey, String lpn, boolean checkExist)  {
 
-    public static Map<String, String> findReceiptDetailById( String receiptKey, String receiptLineNumber, boolean checkExist) {
+        Map<String,String> record = IDNotes.findAvailInvById(lpn,false);
+        if(record!=null) throw new FulfillLogicException("库存已在系统中存在，不允许重复收货");
+
+        Map<String,String> idHashMap = DBHelper.getRecord(
+                " SELECT A.RECEIPTKEY, A.RECEIPTLINENUMBER, A.TOID," + Const.commonSkuFieldsWithAlias + "," +
+                        " A.PACKKEY, A.UOM," +
+                        "A.GROSSWGTEXPECTED ORIGINALGROSSWGT, A.TAREWGTEXPECTED ORIGINALTAREWGT, A.QTYEXPECTED, A.QTYEXPECTED ORIGINALNETWGT, " +
+                        Const.receiptDetailLottableFields +", CONCAT(A.BARRELNUMBER,'/',A.TOTALBARRELNUMBER) AS BARRELDESCR " +
+                        " FROM SKU S,RECEIPTDETAIL A " +
+                        " WHERE  A.SKU = S.SKU and A.STATUS=0 and A.RECEIPTKEY = ? and A.TOID = ? "
+                , new Object[]{receiptKey, lpn},"待收货明细");
+
+        if (checkExist == true && idHashMap == null) throw new FulfillLogicException("在收货单"+receiptKey+"中未找到容器条码为"+lpn+"的待收货明细");
+
+        return idHashMap;
+
+    }
+
+    public static Map<String, String> findUnreceivedRDByLineNumber( String receiptKey, String receiptLineNumber, boolean checkExist) {
+
+        String SQL="SELECT * FROM RECEIPTDETAIL WHERE status = 0 and receiptKey = ? and receiptLineNumber = ? ";
+        Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ receiptKey,receiptLineNumber},"收货明细");
+        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("收货单为"+receiptKey+receiptLineNumber+"的待收货明细未找到");
+        return record;
+    }
+
+    public static Map<String, String> findReceiptDetailByLineNumber(String receiptKey, String receiptLineNumber, boolean checkExist) {
 
         String SQL="SELECT * FROM RECEIPTDETAIL WHERE  receiptKey = ? and receiptLineNumber = ? ";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ receiptKey,receiptLineNumber},"收货明细");
@@ -503,7 +529,7 @@ public class Receipt {
      */
     public static void deleteReceiptDetail(String receiptKey,String receiptLineNumber)throws Exception{
 
-        Map<String,String> receiptDetailInfo = Receipt.findReceiptDetailById(receiptKey,receiptLineNumber,true);
+        Map<String,String> receiptDetailInfo = Receipt.findReceiptDetailByLineNumber(receiptKey,receiptLineNumber,true);
 
         if(!receiptDetailInfo.get("STATUS").equals("0"))  ExceptionHelper.throwRfFulfillLogicException("当前收货单行已经收货，不允许删除");
 

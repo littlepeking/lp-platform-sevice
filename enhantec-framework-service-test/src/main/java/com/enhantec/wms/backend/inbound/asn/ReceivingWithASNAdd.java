@@ -53,7 +53,7 @@ public class ReceivingWithASNAdd extends WMSBaseService {
                     || receiptHashMap.get("STATUS").equals("15") || receiptHashMap.get("STATUS").equals("20")
             )  throw new Exception("收货单行已收货完成,不允许修改");
 
-            Map<String,String> originalReceiptDetailHashMap = Receipt.findReceiptDetailById(receiptKey,originalReceiptLineNumber,true);
+            Map<String,String> originalReceiptDetailHashMap = Receipt.findReceiptDetailByLineNumber(receiptKey,originalReceiptLineNumber,true);
 
             if(!(new BigDecimal(originalReceiptDetailHashMap.get("QTYRECEIVED")).compareTo(new BigDecimal(0)) == 0)) ExceptionHelper.throwRfFulfillLogicException("收货指令行的已收货数量必须为0");
 

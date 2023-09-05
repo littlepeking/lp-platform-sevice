@@ -250,8 +250,8 @@ public class ClusterPickingConfirmV2  {
 //            BigDecimal qtyDiff = taskQty.subtract(stdQtyTobePicked);
 //
 //
-//            String pickDetailKey = KeyGen.getKey("PICKDETAILKEY", 10, context).getValue();
-//            String caseId = KeyGen.getKey("CARTONID", 10, context).getValue();
+//            String pickDetailKey == IdGenerationHelper.getNCounterStrWithLength("PICKDETAILKEY", 10, context).getValue();
+//            String caseId == IdGenerationHelper.getNCounterStrWithLength("CARTONID", 10, context).getValue();
 //
 //            new Object[]{ pickDetailKey);
 //            DBHelper.setValue(qqPrepStmt, 2, caseId);
@@ -292,7 +292,7 @@ public class ClusterPickingConfirmV2  {
 //
 //
 //            qqPrepStmt = DBHelper.executeUpdate(" INSERT INTO TASKDETAIL ( TaskDetailKey, TaskType, StorerKey, Sku, Lot, UOM, UOMQTY, Qty, FromLoc, LogicalFromLoc, FromID, ToLoc, ToId, SourceType, SourceKey, WaveKey, CaseId, OrderKey, OrderLineNumber, PickDetailKey, PickMethod, AddWho, EditWho, Door, Route, Stop, Putawayzone,STATUS,USERKEY,REASONKEY,STARTTIME,ENDTIME, PICKCONTPLACEMENT ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,? )");
-//            String newTaskDetailKey = KeyGen.getKey("TASKDETAILKEY", 10, context).getValue();
+//            String newTaskDetailKey == IdGenerationHelper.getNCounterStrWithLength("TASKDETAILKEY", 10, context).getValue();
 //            new Object[]{ newTaskDetailKey);
 //            DBHelper.setValue(qqPrepStmt, 2, "PK");
 //            DBHelper.setValue(qqPrepStmt, 3, originalTaskDetailInfo.get("STORERKEY"));

@@ -4,7 +4,6 @@ package com.enhantec.wms.backend.common.base;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
-import com.enhantec.wms.backend.common.KeyGen;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.utils.common.*;
 
@@ -128,7 +127,7 @@ public class LotxId {
     }
 
     public static String buildLotxIHeaderInfo( String sku, String ioFlag, String id, String sourceKey, String sourceLineNumber,String pickDetailKey,String lot) throws Exception {
-        String lotxidKey = KeyGen.getKey("LOTXIDHEADER");
+        String lotxidKey = IdGenerationHelper.getNCounterStr("LOTXIDHEADER");
 
         Map<String,String> lotxIdHeaderHashMap = new HashMap<>();
         lotxIdHeaderHashMap.put("WHSEID", "@user");

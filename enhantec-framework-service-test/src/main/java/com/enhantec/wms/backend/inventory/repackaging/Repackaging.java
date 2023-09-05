@@ -1,7 +1,7 @@
 package com.enhantec.wms.backend.inventory.repackaging;
 
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.wms.backend.common.KeyGen;
+
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.Orders;
@@ -368,7 +368,7 @@ public class Repackaging extends WMSBaseService {
             Map<String,String> lotxLocxIdInfo = LotxLocxId.findById(receiptDetail.get("TOID"),true);
 
 
-            String pickDetailKey = KeyGen.getKey("PICKDETAILKEY", 10);
+            String pickDetailKey = IdGenerationHelper.getNCounterStrWithLength("PICKDETAILKEY", 10);
 
 //            thePickDO.clearDO();
 //            thePickDO.setConstraintItem("pickdetailkey", pickDetailKey);
@@ -376,7 +376,7 @@ public class Repackaging extends WMSBaseService {
 //            context.theEXEDataObjectStack.push(thePickDO);
 //            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preInsertFire();
 
-            String caseId = KeyGen.getKey("CARTONID", 10);
+            String caseId = IdGenerationHelper.getNCounterStrWithLength("CARTONID", 10);
 
             double grosswgt = 0.0D;
             double netwgt = 0.0D;

@@ -17,6 +17,7 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -284,7 +285,7 @@ public class ReceiptLotCreateAsn extends WMSBaseService
 			String projectCodeListStr = UtilHelper.nvl(projectCodeHashSet.stream().collect(Collectors.joining(",")),"");
 
 			DBHelper.executeUpdate("update PRERECEIPTCHECK set status=?,editwho=?,editdate=? where RECEIPTLOT=?"
-					,new String[]{"1",userid,"@date",RECEIPTLOT});
+					,new String[]{"1",userid, LocalDateTime.now().toString(),RECEIPTLOT});
 			
 			Map<String,String> RECEIPT=new HashMap<String,String>();
 			if(ESignatureService.getUserByEsignaturkey(ESIGNATUREKEY).indexOf(':')==-1){
@@ -555,7 +556,7 @@ public class ReceiptLotCreateAsn extends WMSBaseService
 //		{
 //			XtSql.ExecSql(
 //					, "UPDATE ENTERPRISE.NCOUNTER SET KEYCOUNT=KEYCOUNT+?,EDITWHO=?,EDITDATE=? WHERE KEYNAME=?"
-//					, new String[]{Integer.toString(LpnCount),UserID,"@date",Lot});
+//					, new String[]{Integer.toString(LpnCount),UserID,LocalDateTime.now().toString(),Lot});
 //			return Integer.parseInt(iCnt)+1;
 //		}
 //	}

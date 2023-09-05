@@ -7,11 +7,9 @@ import com.enhantec.wms.backend.common.base.LotxId;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +69,7 @@ public class PrintHelper {
 
     public static void printLPNByReceiptLineNumber( String receiptKey,String receiptLineNumber ,String labelName, String printer, String copies,String notes) throws Exception {
 
-        Map<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
+        Map<String, String> receiptDetail =  Receipt.findReceiptDetailByLineNumber(receiptKey, receiptLineNumber ,true);
 
         Map<String,String> printParams = new HashMap<>();
         printParams.put("RECEIPTDETAIL.RECEIPTKEY",receiptKey);
@@ -171,7 +169,7 @@ public class PrintHelper {
      * 根据入库明细打印sn标签
      */
     public static void printSnByReceiptLineNumber(String receiptKey,String receiptLineNumber,String labelName,String printer,String printCopies,String notes)throws Exception{
-        Map<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
+        Map<String, String> receiptDetail =  Receipt.findReceiptDetailByLineNumber(receiptKey, receiptLineNumber ,true);
 
         Map<String,String> printParams = new HashMap<>();
         printParams.put("RECEIPTDETAIL.RECEIPTKEY",receiptKey);
@@ -190,7 +188,7 @@ public class PrintHelper {
      * 根据收货行和唯一码打印唯一码收货标签
      */
     public static void printSnByReceiptLineNumberAndSn(String receiptKey,String receiptLineNumber,String serialNumber,String labelName,String printer,String printCopies,String notes)throws Exception{
-        Map<String, String> receiptDetail =  Receipt.findReceiptDetailById(receiptKey, receiptLineNumber ,true);
+        Map<String, String> receiptDetail =  Receipt.findReceiptDetailByLineNumber(receiptKey, receiptLineNumber ,true);
         LotxId.findDetailByReceiptLineAndSn(receiptKey,receiptLineNumber,serialNumber,true);
 
         Map<String,String> printParams = new HashMap<>();
