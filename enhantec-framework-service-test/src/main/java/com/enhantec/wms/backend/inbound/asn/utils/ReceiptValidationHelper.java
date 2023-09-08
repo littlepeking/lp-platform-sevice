@@ -258,7 +258,7 @@ public class ReceiptValidationHelper {
 
     }
     public static void checkMustInputWidget(Map<String, String> receiptInfo ){
-        String mustInputWidget=CodeLookup.getCodeLookupValue("RECEIPTYPE",receiptInfo.get("TYPE"),"UDF10","必输字段");
+        String mustInputWidget=CodeLookup.getCodeLookupValue("RECEIPTYPE",receiptInfo.get("TYPE"),"UDF10","必输字段", false);
         if (!UtilHelper.isEmpty(mustInputWidget)){
             String[] mustInputWidgetArray;
             if (mustInputWidget.indexOf(":")>0){

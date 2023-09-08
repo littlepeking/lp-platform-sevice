@@ -37,14 +37,17 @@ public class CodeLookup {
 
     }
 
-
-
     public static String getCodeLookupValue( String listName, String key, String field,String errMsg) {
 
+        return getCodeLookupValue(listName, key, field, errMsg,false);
+
+    }
+
+    public static String getCodeLookupValue( String listName, String key, String field,String errMsg, boolean checkExist) {
 
         Map<String,String> map = getCodeLookupByKey(listName, key);
         if(map==null || map.isEmpty()) ExceptionHelper.throwRfFulfillLogicException("在系统代码中未找到"+errMsg+" 代码列表:"+listName+" 代码: "+key);
-        if(!map.containsKey(field)) ExceptionHelper.throwRfFulfillLogicException("在系统代码中未找到字段配置: "+field);
+        if(!map.containsKey(field) && checkExist) ExceptionHelper.throwRfFulfillLogicException("在系统代码中未找到字段配置: "+field);
         return map.get(field);
 
     }

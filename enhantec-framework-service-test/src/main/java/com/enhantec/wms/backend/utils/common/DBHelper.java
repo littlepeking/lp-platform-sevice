@@ -60,57 +60,79 @@ public class DBHelper {
 
     public static String getValue(String sql, Object[] params) throws DBResourceException{
 
-        Map<String,String> record = getRecord(sql,params);
+        if(sql.toLowerCase().contains("count("))
+            return String.valueOf(getCount(sql, params));
+        else {
+            Map<String, String> record = getRecord(sql, params);
 
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
+            if (record.values().size() != 1)
+                ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为" + record.size() + "列");
 
-        return  (String) record.values().toArray()[0];
+            return (String) record.values().toArray()[0];
+        }
 
     }
 
     public static String getValue(String sql, Object[] params,String errorName) throws DBResourceException{
 
-        Map<String,String> record = getRecord(sql,params, errorName,true);
+        if(sql.toLowerCase().contains("count("))
+            return String.valueOf(getCount(sql, params));
+        else {
+            Map<String, String> record = getRecord(sql, params, errorName, true);
 
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
+            if (record.values().size() != 1)
+                ExceptionHelper.throwRfFulfillLogicException("期望查询'" + errorName + "'结果为一列，当前为" + record.size() + "列");
 
-        return  (String) record.values().toArray()[0];
+            return (String) record.values().toArray()[0];
+        }
 
     }
 
     public static String getValue(String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
+        if(sql.toLowerCase().contains("count("))
+            return String.valueOf(getCount(sql, params));
+        else {
+            Map<String, String> record = getRecord(sql, params, errorName, checkExist);
+            if (null == record) return null;
 
-        Map<String,String> record = getRecord(sql,params, errorName,checkExist);
-        if(null == record) return null;
+            if (record.values().size() != 1)
+                ExceptionHelper.throwRfFulfillLogicException("期望查询'" + errorName + "'结果为一列，当前为" + record.size() + "列");
 
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询'"+errorName+"'结果为一列，当前为"+record.size()+"列");
-
-        return (String) record.values().toArray()[0];
+            return (String) record.values().toArray()[0];
+        }
 
     }
 
 
     public static Object getRawValue(String sql, Object[] params) throws DBResourceException{
+        if(sql.toLowerCase().contains("count("))
+            return getCount(sql, params);
+        else {
+            Map record = getRawRecord(sql, params, "");
+            if (null == record) return null;
 
-        Map record = getRawRecord(sql,params, "");
-        if(null == record) return null;
+            if (record.values().size() != 1)
+                ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为" + record.size() + "列");
 
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
-
-        return record.values().toArray()[0];
+            return record.values().toArray()[0];
+        }
 
     }
 
 
 
-    public static Integer getIntValue(String sql, Object[] params) throws DBResourceException{
+    public static Long getLongValue(String sql, Object[] params) throws DBResourceException{
+        if(sql.toLowerCase().contains("count("))
+            return getCount(sql, params);
+        else {
+            Map record = getRawRecord(sql, params, "");
+            if (null == record) return null;
 
-        Map record = getRawRecord(sql,params, "");
-        if(null == record) return null;
+            if (record.values().size() != 1)
+                ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为" + record.size() + "列");
 
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
-
-        return (Integer)record.values().toArray()[0];
+            return (Long) record.values().toArray()[0];
+        }
 
     }
 
@@ -327,7 +349,7 @@ public class DBHelper {
 
     public static List<Map<String, String>> executeQuery(String sql, List<Object> params) {
 
-        List<Map<String, Object>> res = executeQueryRawData(EHContextHelper.getCurrentDataSource(),sql,params);
+        List<Map<String, Object>> res = executeQueryRawData(sql,params);
         return convertList(res);
     }
 
@@ -403,13 +425,13 @@ public class DBHelper {
 
     }
 
-    public static List<Map<String, Object>> executeQueryRawData(String dataSource, String statement, List<Object> params) {
-
-        List<Map<String, Object>> tempRes =  EHContextHelper.getBean(EHSqlService.class).selectList(dataSource, statement,params);
-
-         return convertKeysToUppercase(tempRes);
-
-    }
+//    public static List<Map<String, Object>> executeQueryRawData(String dataSource, String statement, List<Object> params) {
+//
+//        List<Map<String, Object>> tempRes =  EHContextHelper.getBean(EHSqlService.class).selectList(dataSource, statement,params);
+//
+//         return convertKeysToUppercase(tempRes);
+//
+//    }
 
     public static List<Map<String, Object>> convertKeysToUppercase(List<Map<String, Object>> originalList) {
 
@@ -429,11 +451,11 @@ public class DBHelper {
         return uppercaseKeysList;
     }
 
-    public static List<Map<String, Object>> executeQueryRawDataByOrgId(String orgId, String statement, List<Object> params) {
-
-        return  EHContextHelper.getBean(EHSqlService.class).selectList(EHContextHelper.getDataSource(orgId), statement,params);
-
-    }
+//    public static List<Map<String, Object>> executeQueryRawDataByOrgId(String orgId, String statement, List<Object> params) {
+//
+//        return  EHContextHelper.getBean(EHSqlService.class).selectList(EHContextHelper.getDataSource(orgId), statement,params);
+//
+//    }
 
     public static void executeUpdate(String sql, Object[] params) throws DBResourceException {
 
@@ -444,20 +466,20 @@ public class DBHelper {
 
     public static void executeUpdate(String sql, List<Object> params) {
 
-        executeUpdate(EHContextHelper.getCurrentDataSource(),sql, params);
+        EHContextHelper.getBean(EHSqlService.class).executeUpdate(sql, params);
     }
 
 
-    public static boolean executeUpdate(String dataSourceKey, String statement, List<Object> params) {
-
-        return  EHContextHelper.getBean(EHSqlService.class).executeUpdate(dataSourceKey, statement,params);
-
-    }
-
-    public static boolean executeUpdateByOrgId(String orgId, String statement, List<Object> params) {
-
-        return  EHContextHelper.getBean(EHSqlService.class).executeUpdate(EHContextHelper.getDataSource(orgId), statement,params);
-
-    }
+//    public static boolean executeUpdate(String dataSourceKey, String statement, List<Object> params) {
+//
+//        return  EHContextHelper.getBean(EHSqlService.class).executeUpdate(dataSourceKey, statement,params);
+//
+//    }
+//
+//    public static boolean executeUpdateByOrgId(String orgId, String statement, List<Object> params) {
+//
+//        return  EHContextHelper.getBean(EHSqlService.class).executeUpdate(EHContextHelper.getDataSource(orgId), statement,params);
+//
+//    }
 
 }

@@ -14,6 +14,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LegacyWMSServiceController {
 
+    private  final ServiceHelper serviceHelper;
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{serviceName}")
     public Object execute(@NotNull @PathVariable String serviceName, @RequestBody HashMap params) {
@@ -22,7 +24,7 @@ public class LegacyWMSServiceController {
 
         ServiceDataHolder serviceDataHolder = new ServiceDataHolder(new ServiceDataMap(params));
 
-        ServiceHelper.executeService(serviceName, serviceDataHolder);
+        serviceHelper.executeService2(serviceName, serviceDataHolder);
 
         return serviceDataHolder.getOutputDataAsMap()==null ? null : serviceDataHolder.getOutputDataAsMap().getData();
     }

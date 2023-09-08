@@ -19,6 +19,7 @@
 
 package com.enhantec.framework.security.common.service;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.framework.security.common.model.EHUser;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
@@ -36,6 +39,8 @@ import java.util.Locale;
  */
 @Service
 @RequiredArgsConstructor
+@DS("admin")
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
 public class EHUserDetailsService implements UserDetailsService {
 
     private final EHUserService userService;

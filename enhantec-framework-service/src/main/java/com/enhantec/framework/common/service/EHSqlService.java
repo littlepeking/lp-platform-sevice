@@ -22,60 +22,68 @@ import com.enhantec.framework.common.utils.DBHelper;
 import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+/***
+ * Remove all multi datasource code as it should be specified by highest level services.
+ */
 public class EHSqlService {
 
-    @DS(DSConstants.DS_PARAM)
-    public List<Map<String, Object>> selectList(String dataSource, String statement, List<Object> params) {
-        return SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
-    }
-    @DS(DSConstants.DS_DEFAULT)
+//    @DS(DSConstants.DS_DEFAULT)
+//    @Transactional(propagation = Propagation.REQUIRED)
     public List<Map<String, Object>> selectList(String statement, List<Object> params) {
         return SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
     }
 
-    @DS(DSConstants.DS_DEFAULT)
+//    @DS(DSConstants.DS_PARAM)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    public List<Map<String, Object>> selectList(String dataSource, String statement, List<Object> params) {
+//        return SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
+//    }
+
+//    @DS(DSConstants.DS_DEFAULT)
+//    @Transactional(propagation = Propagation.REQUIRED)
     public long selectCount(String statement, List<Object> params) {
         return SqlRunner.db().selectCount(convertQuestionMark2Index(statement),params.toArray());
     }
 
+//    @DS(DSConstants.DS_PARAM)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    public long selectCount(String dataSource, String statement, List<Object> params) {
+//        return SqlRunner.db().selectCount(convertQuestionMark2Index(statement),params.toArray());
+//    }
 
-
-
-
-    @DS(DSConstants.DS_PARAM)
-    public Map<String, Object> selectOne(String dataSource, String statement, List<Object> params) {
-        return SqlRunner.db().selectOne(convertQuestionMark2Index(statement),params.toArray());
-    }
-
-    @DS(DSConstants.DS_DEFAULT)
+//    @DS(DSConstants.DS_DEFAULT)
     public Map<String, Object> selectOne(String statement, List<Object> params) {
         return SqlRunner.db().selectOne(convertQuestionMark2Index(statement),params.toArray());
     }
 
-    @DS(DSConstants.DS_PARAM)
-    public boolean executeUpdate(String dataSource, String statement, List<Object> params) {
-        return doUpdate(statement, params);
-    }
+//    @DS(DSConstants.DS_PARAM)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    public Map<String, Object> selectOne(String dataSource, String statement, List<Object> params) {
+//        return SqlRunner.db().selectOne(convertQuestionMark2Index(statement),params.toArray());
+//    }
 
 
-    @DS(DSConstants.DS_PARAM)
-    public boolean executeUpdateByOrgId(String orgId, String statement, List<Object> params) {
-        return executeUpdate(EHContextHelper.getDataSource(orgId), statement, params);
-    }
-
-
-    @DS(DSConstants.DS_DEFAULT)
+//    @DS(DSConstants.DS_DEFAULT)
     public boolean executeUpdate(String statement, List<Object> params) {
         return doUpdate(statement, params);
     }
+
+
+//    @DS(DSConstants.DS_PARAM)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+//    public boolean executeUpdate(String dataSource, String statement, List<Object> params) {
+//        return doUpdate(statement, params);
+//    }
 
     private boolean doUpdate(String statement, List<Object> params) {
 
@@ -90,7 +98,6 @@ public class EHSqlService {
         else
             throw new UnsupportedOperationException("本方法不支持除 insert/update/delete 外的操作");
     }
-
 
     private  static String convertQuestionMark2Index(String sql) {
         // Regular expression pattern to match question marks

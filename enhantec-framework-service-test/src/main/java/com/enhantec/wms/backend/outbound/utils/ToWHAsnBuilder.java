@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map;
 
+//todo: 改为使用多数据源@DS方式插入目标仓库，但要验证是否能保证事务的一致性
 public class ToWHAsnBuilder {
 
     private String toWareHouseId;
@@ -90,7 +91,7 @@ public class ToWHAsnBuilder {
         receiptDetail.put("EDITWHO", userId);
         receiptDetail.put("NOTES", fromIdnotesMap.get("NOTES"));
 
-        LegacyDBHelper.ExecInsert( toWareHouseId,"RECEIPTDETAIL", receiptDetail);
+        LegacyDBHelper.ExecInsertWithSchema( toWareHouseId,"RECEIPTDETAIL", receiptDetail);
 
         return receiptLineNumber;
     }

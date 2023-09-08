@@ -31,13 +31,13 @@ public class LegacyDBHelper {
 
 	public static void ExecInsert( String TableName, Map<String,String> Fields)
 	{
-		ArrayList<String> aParams=new ArrayList<String>();
+		ArrayList<Object> aParams=new ArrayList<>();
 		String SQL1="insert into "+TableName+"(";
 		String SQL2="values(";
 		int iLine=0;
 		for(Map.Entry<String, String> entry : Fields.entrySet()){
 			String mapKey = entry.getKey();
-			String mapValue = entry.getValue();
+			Object mapValue = entry.getValue();
 			if (iLine>0) SQL1+=",";
 			SQL1+=mapKey;
 			if (iLine>0) SQL2+=",";
@@ -55,10 +55,10 @@ public class LegacyDBHelper {
 		DBHelper.executeUpdate( SQL1+") "+SQL2+")",aParams.toArray());
 	}
 
-	public static void ExecInsert(String orgId, String TableName, Map<String,String> Fields) throws Exception
+	public static void ExecInsertWithSchema(String schemaId, String TableName, Map<String,String> Fields) throws Exception
 	{
 		List<Object> aParams=new ArrayList<Object>();
-		String SQL1="insert into "+TableName+"(";
+		String SQL1="insert into "+schemaId+"."+TableName+"(";
 		String SQL2="values(";
 		int iLine=0;
 		for(Map.Entry<String, String> entry : Fields.entrySet()){
@@ -78,7 +78,7 @@ public class LegacyDBHelper {
 			}
 			iLine++;
 		}
-		DBHelper.executeUpdateByOrgId(EHContextHelper.getDataSource(orgId), SQL1+") "+SQL2+")",aParams);
+		DBHelper.executeUpdate(SQL1+") "+SQL2+")",aParams);
 	}
 
 

@@ -17,7 +17,6 @@
 package com.enhantec.wms.core.inbound;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
-import com.enhantec.framework.common.utils.EHDateTimeHelper;
 import com.enhantec.wms.backend.common.receiving.Receipt;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -36,15 +35,18 @@ public class ReceivingByLpn extends WMSBaseService{
     public void execute(ServiceDataHolder serviceDataHolder){
 
         String receiptKey = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
-        String toId = serviceDataHolder.getInputDataAsMap().getString("TOID");
+        String lpn = serviceDataHolder.getInputDataAsMap().getString("LPN");
 
-        if(StringUtils.isEmpty(toId)) throw new FulfillLogicException("托盘号不能为空");
+        if(StringUtils.isEmpty(lpn)) throw new FulfillLogicException("托盘号不能为空");
 
-        Map<String,String> receiptHashMap = Receipt.findUnreceivedRDByLPN(receiptKey, toId, true);
+        Map<String,String> receiptHashMap = Receipt.findUnreceivedRDByLPN(receiptKey, lpn, true);
 
         String receiptLineNumber = receiptHashMap.get("RECEIPTLINENUMBER");
 
-        BigDecimal QTY = new BigDecimal(receiptHashMap.get("QTYEXPECTED"));
+        BigDecimal QTY = serviceDataHolder.getInputDataAsMap().getDecimalValue("QTY");
+
+        QTY = QTY != null && QTY.compareTo(BigDecimal.ZERO) > 0 ? QTY : new BigDecimal(receiptHashMap.get("QTYEXPECTED"));
+
         String STORERKEY=receiptHashMap.get("STORERKEY");
         String SKU=receiptHashMap.get("SKU");
         String TOLOT=receiptHashMap.get("TOLOT");
@@ -65,7 +67,7 @@ public class ReceivingByLpn extends WMSBaseService{
         //---写入LOT-----------------------------------------
         if (DBHelper.getCount("select count(1) from LOT where Lot=?",new Object[]{TOLOT})==0)
         {
-            LinkedHashMap<String,String> Lot=new LinkedHashMap<String,String>();
+            LinkedHashMap<String,String> Lot=new LinkedHashMap<>();
             Lot.put("addwho", EHContextHelper.getUser().getUsername());
             Lot.put("editwho", EHContextHelper.getUser().getUsername());
             Lot.put("LOT",  TOLOT);
@@ -86,7 +88,8 @@ public class ReceivingByLpn extends WMSBaseService{
         //---写入LOTXLOCXID-----------------------------------------
         if (DBHelper.getCount("select count(1) from lotxlocxid  where  Lot=? and Loc=? and ID=?",new Object[]{TOLOT,TOLOC,TOID})==0)
         {
-            LinkedHashMap<String,String> lotxlocxid = new LinkedHashMap<String,String>();
+
+            LinkedHashMap<String,String> lotxlocxid=new LinkedHashMap<>();
             lotxlocxid.put("addwho", EHContextHelper.getUser().getUsername());
             lotxlocxid.put("editwho", EHContextHelper.getUser().getUsername());
             lotxlocxid.put("LOT", TOLOT);
@@ -106,7 +109,7 @@ public class ReceivingByLpn extends WMSBaseService{
 //        //---写入ID-----------------------------------------
         if (DBHelper.getCount("select count(1) from ID where ID=?", new Object[]{TOID})==0)
         {
-            LinkedHashMap<String,String> id=new LinkedHashMap<String,String>();
+            LinkedHashMap<String,String> id=new LinkedHashMap<>();
             id.put("addwho", EHContextHelper.getUser().getUsername());
             id.put("editwho", EHContextHelper.getUser().getUsername());
             id.put("ID", TOID);
@@ -126,7 +129,7 @@ public class ReceivingByLpn extends WMSBaseService{
         {
             String LOCATIONTYPE=DBHelper.getStringValue( "SELECT LOCATIONTYPE FROM LOC WHERE LOC=?"
                     , new Object[]{TOLOC});
-            LinkedHashMap<String,String> SKUXLOC=new LinkedHashMap<String,String>();
+            LinkedHashMap<String,String> SKUXLOC=new LinkedHashMap<>();
             SKUXLOC.put("addwho", EHContextHelper.getUser().getUsername());
             SKUXLOC.put("editwho", EHContextHelper.getUser().getUsername());
             SKUXLOC.put("STORERKEY", STORERKEY);
@@ -147,7 +150,7 @@ public class ReceivingByLpn extends WMSBaseService{
                     , new Object[] {" "," ",TOID,CONDITIONCODE});
             if (HOLD.equals(""))
             {
-                LinkedHashMap<String,String> INVENTORYHOLD=new LinkedHashMap<String,String>();
+                LinkedHashMap<String,String> INVENTORYHOLD=new LinkedHashMap<>();
                 // COMMENTS, HOURSTOHOLD, AUTORELEASEDATE, ADDDATE, ADDWHO, EDITDATE, EDITWHO
                 INVENTORYHOLD.put("ADDWHO",EHContextHelper.getUser().getUsername());
                 INVENTORYHOLD.put("EDITWHO",EHContextHelper.getUser().getUsername());
@@ -240,7 +243,7 @@ public class ReceivingByLpn extends WMSBaseService{
     )
     {
         String LOT=IdGenerationHelper.getNCounterStrWithLength("LOT",10);
-        LinkedHashMap<String,String> mLOT=new LinkedHashMap<String,String>();
+        LinkedHashMap<String,String> mLOT=new LinkedHashMap<>();
         mLOT.put("ADDWHO",EHContextHelper.getUser().getUsername());
         mLOT.put("EDITWHO",EHContextHelper.getUser().getUsername());
         mLOT.put("LOT",LOT);

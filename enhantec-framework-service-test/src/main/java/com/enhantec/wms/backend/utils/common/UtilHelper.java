@@ -10,6 +10,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class UtilHelper {
+
+    public static boolean isEmpty(Object obj) {
+        return obj==null || isNull(obj.toString());
+    }
+
+
     public static boolean isEmpty(String str) {
         return (str == null) || str.trim().isEmpty() || isNull(str);
     }
@@ -173,7 +179,7 @@ public class UtilHelper {
     }
 
     public static String trim(String str) {
-        if (str == null) return "";
+        if (str == null) return null;
         else return str.trim();
     }
 

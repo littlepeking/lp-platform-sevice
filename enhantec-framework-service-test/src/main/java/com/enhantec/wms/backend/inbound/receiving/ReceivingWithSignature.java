@@ -18,6 +18,12 @@ import com.enhantec.wms.backend.inbound.asn.utils.ReceiptValidationHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
+import com.enhantec.wms.core.inbound.ReceivingByLpn;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -47,8 +53,14 @@ import java.util.stream.Collectors;
  * 在有ASN的收货功能中创建收货明细并自动收货(CS)
  *
  */
+
+@Service
+@RequiredArgsConstructor
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
 public class ReceivingWithSignature extends WMSBaseService {
     private static final long serialVersionUID = 1L;
+
+    private final ReceivingByLpn receivingByLpnService;
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
@@ -57,10 +69,15 @@ public class ReceivingWithSignature extends WMSBaseService {
         
         try {
 
-
-            String LPN = serviceDataHolder.getInputDataAsMap().getString("LPN");
             String RECEIPTKEY = serviceDataHolder.getInputDataAsMap().getString("RECEIPTKEY");
-            String LOC = serviceDataHolder.getInputDataAsMap().getString("LOC");
+            if(UtilHelper.isEmpty(RECEIPTKEY)) ExceptionHelper.throwRfFulfillLogicException("RECEIPTKEY不能为空");
+            String LPN = serviceDataHolder.getInputDataAsMap().getString("LPN");
+            if(UtilHelper.isEmpty(LPN)) ExceptionHelper.throwRfFulfillLogicException("容器条码不能为空");
+
+            Map<String, String> receiptDetailInfo =  Receipt.findReceiptDetailByLPN( RECEIPTKEY,LPN,true);
+
+            String LOC = receiptDetailInfo.get("TOLOC");
+
             String GROSSWGTRECEIVED = serviceDataHolder.getInputDataAsMap().getString("GROSSWGTRECEIVED");
             String TAREWGTRECEIVED = serviceDataHolder.getInputDataAsMap().getString("TAREWGTRECEIVED");
             String NETWGTRECEIVED = serviceDataHolder.getInputDataAsMap().getString("NETWGTRECEIVED");
@@ -70,7 +87,6 @@ public class ReceivingWithSignature extends WMSBaseService {
             try {
                 ReceiptValidationHelper.validateASN(RECEIPTKEY);
 
-                Map<String, String> receiptDetailInfo =  Receipt.findReceiptDetailByLPN( RECEIPTKEY,LPN,true);
                 //检查待收货行的是否唯一码已存在于库存
                 ReceiptValidationHelper.checkSerialNumberExistInInv(receiptDetailInfo);
                 InventoryHelper.checkLocQuantityLimit(LOC);
@@ -134,18 +150,24 @@ public class ReceivingWithSignature extends WMSBaseService {
         String cntLastLpn = DBHelper.getValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND TOID<>? AND QTYEXPECTED>0 AND STATUS=?"
                 , new String[]{RECEIPTKEY, LPN, "0"}, "0");
         //转换单位。
-        GROSSWGTRECEIVED = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
-                UtilHelper.isEmpty(GROSSWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(GROSSWGTRECEIVED)).toPlainString();
-        TAREWGTRECEIVED = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
-                UtilHelper.isEmpty(TAREWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(TAREWGTRECEIVED)).toPlainString();
-        NETWGTRECEIVED = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
-                UtilHelper.isEmpty(NETWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(NETWGTRECEIVED)).toPlainString();
+        BigDecimal grossStdQty = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
+                UtilHelper.isEmpty(GROSSWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(GROSSWGTRECEIVED));
+        BigDecimal tareStdQty = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
+                UtilHelper.isEmpty(TAREWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(TAREWGTRECEIVED));
+        BigDecimal netStdQty = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
+                UtilHelper.isEmpty(NETWGTRECEIVED) ? new BigDecimal("0") : new BigDecimal(NETWGTRECEIVED));
 
         DBHelper.executeUpdate( "update receiptdetail set lottable01 = ? where receiptkey=? and toid=?",
                 new String[]{receiptDetailInfo.get("PACKKEY"), RECEIPTKEY, LPN});
 
         //调用系统API进行收货操作.
-        this.execReceiving(serviceDataHolder,LOC,LPN,RECEIPTKEY,NETWGTRECEIVED,stdUom,receiptDetailInfo);
+        receivingByLpnService.execute(new ServiceDataHolder(new ServiceDataMap(
+                new HashMap(){{
+                    put("RECEIPTKEY",RECEIPTKEY);
+                    put("LPN",LPN);
+                    put("QTY",netStdQty);
+                }}
+        )));
         //新增idnotes
         this.populateIdNotes(LPN,userid,GROSSWGTRECEIVED,TAREWGTRECEIVED,NETWGTRECEIVED,REGROSSWGT,stdUom,receiptDetailInfo);
 
@@ -245,72 +267,6 @@ public class ReceivingWithSignature extends WMSBaseService {
         UDTRN.Insert( userid);
     }
 
-
-    /**
-     * 执行父类的方法进行收货
-     * @param LOC
-     * @param LPN
-     * @param RECEIPTKEY
-     * @param NETWGTRECEIVED
-     * @param stdUom
-     * @param receiptDetailInfo
-     */
-    private void execReceiving(ServiceDataHolder serviceDataHolder, String LOC, String LPN, String RECEIPTKEY, String NETWGTRECEIVED, String stdUom, Map<String,String> receiptDetailInfo){
-        serviceDataHolder.getInputDataAsMap().setAttribValue("loc", LOC);
-        serviceDataHolder.getInputDataAsMap().setAttribValue("id", LPN);
-        serviceDataHolder.getInputDataAsMap().setAttribValue("prokey", RECEIPTKEY);
-        serviceDataHolder.getInputDataAsMap().setAttribValue("qty", NETWGTRECEIVED);
-        serviceDataHolder.getInputDataAsMap().setAttribValue("uom", stdUom);
-
-        serviceDataHolder.getInputDataAsMap().setAttribValue("pokey", "NOPO");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("isrp", "N");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("other1", "01");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("printerID", "01");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("counter", "0");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("wgt", "0");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("RejectQty", "0");
-
-        serviceDataHolder.getInputDataAsMap().setAttribValue("storerkey", receiptDetailInfo.get("STORERKEY"));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("sku", receiptDetailInfo.get("SKU"));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("packkey", receiptDetailInfo.get("PACKKEY"));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable01", LegecyUtilHelper.Nz(receiptDetailInfo.get("PACKKEY"), " "));/*区分取样和正常入库包装类型*/
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable02", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE02"), " "));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable03", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE03"), " "));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable04", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE04"), ""));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable05", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE05"), ""));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable06", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE06"), " "));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable07", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE07"), " "));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable08", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE08"), " "));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable09", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE09"), " "));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable10", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE10"), " "));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable11", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE11"), ""));
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lottable12", LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE12"), ""));
-        /*-----------------------------------------------------------------------------*/
-
-        serviceDataHolder.getInputDataAsMap().setAttribValue("lot", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("hold", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("drid", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("other2", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("other3", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("reasoncode", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("PackingSlipQty", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("temperature1", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("transactionkey", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("usr1", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("usr2", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("usr3", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("usr4", "");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("usr5", "");
-
-
-//        processData.getInputDataMap().setAttribValue("receiptkey", "RECEIPTKEY");
-        serviceDataHolder.getInputDataAsMap().setAttribValue("receiptkey", RECEIPTKEY);
-        serviceDataHolder.getInputDataAsMap().setAttribValue("ReceiptLineNumber", receiptDetailInfo.get("RECEIPTLINENUMBER"));
-
-        //todo
-//        super.execute(pObject);
-    }
-
     /**
      * 更新或插入idnotes表
      * @param LPN 容器条码
@@ -344,7 +300,7 @@ public class ReceivingWithSignature extends WMSBaseService {
             IDNotes.update(LPN,updateFields);
         }else {
             //为零记录已归档至归档表，所有收货或者退货记录均需重新插入IDNOTES表
-            Map<String,String> IDNOTES = new HashMap<String,String>();
+            Map<String,String> IDNOTES = new HashMap<>();
             IDNOTES.put("AddWho", userid);
             IDNOTES.put("EditWho", userid);
             IDNOTES.put("ID", LPN);/*LPN*/
@@ -470,7 +426,7 @@ public class ReceivingWithSignature extends WMSBaseService {
             /*因为目前收货批次、复测期、有效期已经抽取到ELOTATTRIBUTE表中，当相同批号出现时直接使用已存在的批次号即可，该批次号使用的质量状态、复测期、有效期会自动通过ELOTATTRIBUTE表进行关联，不需要像原始版本一样需要手工更新LOTATTRIBUTE表。*/
         } else {
             //如果没有收货批次信息，则插入新的收货批次信息。信息来源为收货单
-            Map<String,String> eLot = new HashMap<String,String>();
+            Map<String,String> eLot = new HashMap<>();
             eLot.put("STORERKEY", receiptDetailInfo.get("STORERKEY"));
             eLot.put("SKU", receiptDetailInfo.get("SKU"));
             eLot.put("ELOT", receiptDetailInfo.get("LOTTABLE06"));

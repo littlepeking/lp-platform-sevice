@@ -87,6 +87,14 @@ public class MultiDataSourceConfig {
                 testProperty.setDriverClassName(driverClassName);
                 map.put(DATA_SOURCE_ORG_PREFIX + "wmwhse01", testProperty);
 
+
+                DataSourceProperty testProperty2= new DataSourceProperty();
+                testProperty2.setUsername("wmwhse2");
+                testProperty2.setPassword("WMwhSqlWMwhSql2");
+                testProperty2.setUrl("jdbc:sqlserver://192.168.4.253;databaseName=SCPRD");
+                testProperty2.setDriverClassName(driverClassName);
+                map.put(DATA_SOURCE_ORG_PREFIX + "wmwhse02", testProperty2);
+
                 //Add ORG datasources
                 ResultSet rs = statement.executeQuery("select * from EH_ORGANIZATION");
                 if(driverClassName.contains("sqlserver")){

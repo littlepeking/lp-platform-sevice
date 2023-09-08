@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class EHContextHelper {
+public class    EHContextHelper {
 
 
     private static ApplicationContext applicationContext;
