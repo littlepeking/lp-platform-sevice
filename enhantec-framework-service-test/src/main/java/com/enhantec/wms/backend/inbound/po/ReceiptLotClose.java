@@ -41,7 +41,7 @@ public class ReceiptLotClose  extends WMSBaseService
 		{
 			
 
-			String lot = DBHelper.getValue( "select STATUS from PRERECEIPTCHECK where RECEIPTLOT=?"
+			String lot = DBHelper.getStringValue( "select STATUS from PRERECEIPTCHECK where RECEIPTLOT=?"
 					, new String[]{RECEIPTLOT},String.format("收货批次(%1)未找到", RECEIPTLOT));
 			if (!lot.equals("0"))
 		        throw new FulfillLogicException("当前状态不支持此操作");

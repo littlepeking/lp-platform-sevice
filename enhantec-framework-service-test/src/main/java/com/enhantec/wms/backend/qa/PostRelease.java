@@ -129,7 +129,7 @@ public class PostRelease extends WMSBaseService {
 							,LOTTABLE06
 		    			});
 		    /*//elottable21 记录首次放行质量状态
-			String elotTable21=DBHelper.getValue("select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
+			String elotTable21=DBHelper.getStringValue("select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
 					LOTTABLE06)
 			},"批属性");
 			if (UtilHelper.isEmpty(elotTable21)){

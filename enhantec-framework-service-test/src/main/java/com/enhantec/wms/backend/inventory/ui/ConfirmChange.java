@@ -46,9 +46,9 @@ public class ConfirmChange extends WMSBaseService {
                 ChangeByLotHelper.checkSkuAttributeIsMatch(ehchangedetailHash.get("FROMSKU"),ehchangedetailHash.get("TOSKU"));
             }
 
-            String isConfirmedUser = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String isConfirmedUser = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     esignatureKey
-            }, String.class, "复核人");
+            }, "复核人");
             String status = record.get("STATUS");
             switch (status){
                 case "1":

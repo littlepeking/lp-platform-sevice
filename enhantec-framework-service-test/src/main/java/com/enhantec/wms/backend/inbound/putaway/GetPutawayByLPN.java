@@ -90,8 +90,8 @@ public class GetPutawayByLPN extends WMSBaseService {
 			String packKey=idHashMap.get("PACKKEY");
 
 
-			String toBePutawayCount = DBHelper.getValue( "SELECT COUNT(1) FROM LOTXLOCXID A,LOC C WHERE A.LOC=C.LOC AND A.QTY>0 AND C.PUTAWAYZONE='DOCK' AND A.LOT=?", new String[]{lot}, "0");
-			String allPutawayCount = DBHelper.getValue( "SELECT COUNT(1) FROM LOTXLOCXID A WHERE A.QTY>0 AND A.LOT=?", new String[]{lot}, "0");
+			String toBePutawayCount = DBHelper.getStringValue( "SELECT COUNT(1) FROM LOTXLOCXID A,LOC C WHERE A.LOC=C.LOC AND A.QTY>0 AND C.PUTAWAYZONE='DOCK' AND A.LOT=?", new String[]{lot}, "0");
+			String allPutawayCount = DBHelper.getStringValue( "SELECT COUNT(1) FROM LOTXLOCXID A WHERE A.QTY>0 AND A.LOT=?", new String[]{lot}, "0");
 			String totalText = toBePutawayCount + " / " + allPutawayCount;
 
 //			String[] IDs = XtSql.GetValueList( "select GROSSWGT,TAREWGT,NETWGT from IDNOTES where ID=?", new String[]{lpn});
@@ -119,7 +119,7 @@ public class GetPutawayByLPN extends WMSBaseService {
 			String TOZONELIST1 = "";
 
 			if ("Y".equals(isMultizones)) {
-				String count = (String) DBHelper.getValue( "SELECT COUNT(1) FROM LOC WHERE PUTAWAYZONE='DOCK' AND LOC=?", new Object[]{fromLoc}, "0");
+				String count = (String) DBHelper.getStringValue( "SELECT COUNT(1) FROM LOC WHERE PUTAWAYZONE='DOCK' AND LOC=?", new Object[]{fromLoc}, "0");
 				if (count.equals("0")) throw new Exception("未找到库房 " + fromLoc + "，请确认该库房隶属于待上架区（DOCK）");
 
 				//项目料不做上架建议
@@ -128,7 +128,7 @@ public class GetPutawayByLPN extends WMSBaseService {
 
 					List<String> searchZoneArray = null;
 					//Get SKU configured multiple zone list
-					String zones = DBHelper.getValue( "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
+					String zones = DBHelper.getStringValue( "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
 							, new String[]{storerKey, sku}, "");
 
 					if (UtilHelper.isEmpty(zones)) {
@@ -169,7 +169,7 @@ public class GetPutawayByLPN extends WMSBaseService {
 						candidateZoneList.add(putawayzone);
 					}
 
-					ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService( "RFPutawayMultiZones",
+					ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService( "rfPutawayMultiZones",
 						new ServiceDataHolder(new ServiceDataMap(new HashMap<String,Object>() {{
 								put("storerkey", storerKey);
 								put("sku", sku);
@@ -193,12 +193,12 @@ public class GetPutawayByLPN extends WMSBaseService {
 							TOZONELIST1 += ",";
 						}
 						TOZONELIST += candidateZoneList.get(i);
-						TOZONELIST1 += DBHelper.getValue( "SELECT DESCR FROM PUTAWAYZONE WHERE PUTAWAYZONE=?", new String[]{candidateZoneList.get(i)}, candidateZoneList.get(i));
+						TOZONELIST1 += DBHelper.getStringValue( "SELECT DESCR FROM PUTAWAYZONE WHERE PUTAWAYZONE=?", new String[]{candidateZoneList.get(i)}, candidateZoneList.get(i));
 					}
 
 				}
 
-			}else {
+			} else {
 				ServiceDataMap res = (ServiceDataMap) ServiceHelper.executeService( "RFPutawayP1S1Wrapper",
 						new ServiceDataHolder(new ServiceDataMap(new HashMap<String,Object>() {{
 							put("storerkey", storerKey);

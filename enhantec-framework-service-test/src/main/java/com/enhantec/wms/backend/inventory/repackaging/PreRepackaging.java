@@ -102,8 +102,8 @@ public class PreRepackaging extends WMSBaseService {
 
 
                     //在备货开始前不允许有剩余库存遗留在分装库位。必须将分装剩余库存移出后才允许开始为下一订单行进行备货。
-                    String locSkuIDCount = DBHelper.getValue( "SELECT COUNT(1) FROM LOTXLOCXID WHERE QTY>0 AND LOC = ? ",
-                            new Object[]{   packLoc},    String.class,null);
+                    String locSkuIDCount = DBHelper.getStringValue( "SELECT COUNT(1) FROM LOTXLOCXID WHERE QTY>0 AND LOC = ? ",
+                            new Object[]{   packLoc},null);
 
                     if(!locSkuIDCount.equals("0")) throw new Exception("分装间"+packLoc+"存在非当前订单行的剩余物料遗留在分装间，请将其移出后再进行分装");
 
@@ -160,11 +160,11 @@ public class PreRepackaging extends WMSBaseService {
                         new ServiceDataHolder(new ServiceDataMap(moveParamsHashMap)));
 
                 //检查是否分装间已没有备货容器，如果没有自动释放占用的分装间
-                String locSkuIDCount = DBHelper.getValue( "SELECT COUNT(1) FROM LOTXLOCXID WHERE LOC = ? AND SKU = ? AND QTY>0",
+                String locSkuIDCount = DBHelper.getStringValue( "SELECT COUNT(1) FROM LOTXLOCXID WHERE LOC = ? AND SKU = ? AND QTY>0",
                         new Object[]{
                                 currentPackLoc,
                                 orderLineHashMap.get("SKU")},
-                        String.class,null);
+                        null);
 
                 if(locSkuIDCount.equals("0")){
 

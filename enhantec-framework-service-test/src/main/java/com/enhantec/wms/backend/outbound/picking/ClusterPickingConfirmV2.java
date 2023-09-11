@@ -398,10 +398,10 @@ public class ClusterPickingConfirmV2  {
 //                DBHelper.setValue(qqPrepStmt, 2, pOrderLineNumber);
 //
 //                for(qqResultSet = qqPrepStmt.executeQuery(); qqResultSet.next(); ++qqRowCount) {
-//                    pickdetailstatus = DBHelper.getValue(qqResultSet, 1, pickdetailstatus);
-//                    locType = DBHelper.getValue(qqResultSet, 2, locType);
-//                    dropid = DBHelper.getValue(qqResultSet, 3, dropid);
-//                    waveKey = DBHelper.getValue(qqResultSet, 4, waveKey);
+//                    pickdetailstatus = DBHelper.getStringValue(qqResultSet, 1, pickdetailstatus);
+//                    locType = DBHelper.getStringValue(qqResultSet, 2, locType);
+//                    dropid = DBHelper.getStringValue(qqResultSet, 3, dropid);
+//                    waveKey = DBHelper.getStringValue(qqResultSet, 4, waveKey);
 //                    if (pickdetailstatus.equals("1") && waveKey != " ") {
 //                        ++ordreleased;
 //                    }
@@ -448,8 +448,8 @@ public class ClusterPickingConfirmV2  {
 //                DBHelper.setValue(qqPrepStmt5, 2, pOrderLineNumber);
 //                qqResultSet5 = qqPrepStmt5.executeQuery();
 //                if (qqResultSet5.next()) {
-//                    dpreleased = DBHelper.getValue(qqResultSet5, 1, dpreleased);
-//                    dpinpicking = DBHelper.getValue(qqResultSet5, 2, dpinpicking);
+//                    dpreleased = DBHelper.getStringValue(qqResultSet5, 1, dpreleased);
+//                    dpinpicking = DBHelper.getStringValue(qqResultSet5, 2, dpinpicking);
 //                }
 //            } catch (SQLException var279) {
 //                throw new DBResourceException(var279);
@@ -470,14 +470,14 @@ public class ClusterPickingConfirmV2  {
 //                DBHelper.setValue(qqPrepStmt1, 2, pOrderLineNumber);
 //                qqResultSet1 = qqPrepStmt1.executeQuery();
 //                if (qqResultSet1.next()) {
-//                    SHIPPEDQTY = DBHelper.getValue(qqResultSet1, 1, SHIPPEDQTY);
-//                    OPENQTY = DBHelper.getValue(qqResultSet1, 2, OPENQTY);
-//                    QTYPREALLOCATED = DBHelper.getValue(qqResultSet1, 3, QTYPREALLOCATED);
-//                    QTYALLOCATED = DBHelper.getValue(qqResultSet1, 4, QTYALLOCATED);
-//                    QTYPICKED = DBHelper.getValue(qqResultSet1, 5, QTYPICKED);
-//                    ISSUBSTITUTE = DBHelper.getValue(qqResultSet1, 6, ISSUBSTITUTE);
-//                    wpReleased = DBHelper.getValue(qqResultSet1, 7, wpReleased);
-//                    ODSTATUS = DBHelper.getValue(qqResultSet1, 8, ODSTATUS);
+//                    SHIPPEDQTY = DBHelper.getStringValue(qqResultSet1, 1, SHIPPEDQTY);
+//                    OPENQTY = DBHelper.getStringValue(qqResultSet1, 2, OPENQTY);
+//                    QTYPREALLOCATED = DBHelper.getStringValue(qqResultSet1, 3, QTYPREALLOCATED);
+//                    QTYALLOCATED = DBHelper.getStringValue(qqResultSet1, 4, QTYALLOCATED);
+//                    QTYPICKED = DBHelper.getStringValue(qqResultSet1, 5, QTYPICKED);
+//                    ISSUBSTITUTE = DBHelper.getStringValue(qqResultSet1, 6, ISSUBSTITUTE);
+//                    wpReleased = DBHelper.getStringValue(qqResultSet1, 7, wpReleased);
+//                    ODSTATUS = DBHelper.getStringValue(qqResultSet1, 8, ODSTATUS);
 //                    int var286 = qqRowCount1 + 1;
 //                }
 //            } catch (SQLException var273) {
@@ -612,9 +612,9 @@ public class ClusterPickingConfirmV2  {
 //                DBHelper.setValue(qqPrepStmt2, 2, pOrderLineNumber);
 //                qqResultSet2 = qqPrepStmt2.executeQuery();
 //                if (qqResultSet2.next()) {
-//                    orderdetailstatus = DBHelper.getValue(qqResultSet2, 1, orderdetailstatus);
-//                    storerkey = DBHelper.getValue(qqResultSet2, 2, storerkey);
-//                    sku = DBHelper.getValue(qqResultSet2, 3, sku);
+//                    orderdetailstatus = DBHelper.getStringValue(qqResultSet2, 1, orderdetailstatus);
+//                    storerkey = DBHelper.getStringValue(qqResultSet2, 2, storerkey);
+//                    sku = DBHelper.getStringValue(qqResultSet2, 3, sku);
 //                    var287 = qqRowCount2 + 1;
 //                }
 //            } catch (SQLException var281) {
@@ -635,7 +635,7 @@ public class ClusterPickingConfirmV2  {
 //                DBHelper.setValue(qqPrepStmt3, 1, pNewStatus);
 //                qqResultSet3 = qqPrepStmt3.executeQuery();
 //                if (qqResultSet3.next()) {
-//                    maxcode = DBHelper.getValue(qqResultSet3, 1, maxcode);
+//                    maxcode = DBHelper.getStringValue(qqResultSet3, 1, maxcode);
 //                    int var288 = qqRowCount3 + 1;
 //                }
 //            } catch (SQLException var271) {
@@ -690,7 +690,7 @@ public class ClusterPickingConfirmV2  {
 //                        DBHelper.setValue(qqPrepStmt7, 3, sku);
 //                        qqResultSet7 = qqPrepStmt7.executeQuery();
 //                        if (qqResultSet7.next()) {
-//                            qtyOrdered = DBHelper.getValue(qqResultSet7, 1, qtyOrdered);
+//                            qtyOrdered = DBHelper.getStringValue(qqResultSet7, 1, qtyOrdered);
 //                            int var297 = qqRowCount7 + 1;
 //                        }
 //                    } catch (SQLException var283) {
@@ -717,7 +717,7 @@ public class ClusterPickingConfirmV2  {
 //                DBHelper.setValue(qqPrepStmt4, 1, pNewStatus);
 //                qqResultSet4 = qqPrepStmt4.executeQuery();
 //                if (qqResultSet4.next()) {
-//                    pDetailHistoryFlag = DBHelper.getValue(qqResultSet4, 1, pDetailHistoryFlag);
+//                    pDetailHistoryFlag = DBHelper.getStringValue(qqResultSet4, 1, pDetailHistoryFlag);
 //                    int var290 = qqRowCount4 + 1;
 //                }
 //            } catch (SQLException var267) {
@@ -787,9 +787,9 @@ public class ClusterPickingConfirmV2  {
 //                new Object[]{ pOrderkey);
 //                qqResultSet = qqPrepStmt.executeQuery();
 //                if (qqResultSet.next()) {
-//                    orderDetailCount = DBHelper.getValue(qqResultSet, 1, orderDetailCount);
-//                    maxStatus = DBHelper.getValue(qqResultSet, 2, maxStatus);
-//                    minStatus = DBHelper.getValue(qqResultSet, 3, minStatus);
+//                    orderDetailCount = DBHelper.getStringValue(qqResultSet, 1, orderDetailCount);
+//                    maxStatus = DBHelper.getStringValue(qqResultSet, 2, maxStatus);
+//                    minStatus = DBHelper.getStringValue(qqResultSet, 3, minStatus);
 //                    ++qqRowCount;
 //                }
 //            } catch (SQLException var95) {
@@ -903,8 +903,8 @@ public class ClusterPickingConfirmV2  {
 //                    new Object[]{ pOrderkey);
 //                    qqResultSet = qqPrepStmt.executeQuery();
 //                    if (qqResultSet.next()) {
-//                        ordDtZeroQtyCount = DBHelper.getValue(qqResultSet, 1, ordDtZeroQtyCount);
-//                        zeroQtyMinStatus = DBHelper.getValue(qqResultSet, 2, zeroQtyMinStatus);
+//                        ordDtZeroQtyCount = DBHelper.getStringValue(qqResultSet, 1, ordDtZeroQtyCount);
+//                        zeroQtyMinStatus = DBHelper.getStringValue(qqResultSet, 2, zeroQtyMinStatus);
 //                        ++qqRowCount;
 //                    }
 //                } catch (SQLException var97) {
@@ -930,7 +930,7 @@ public class ClusterPickingConfirmV2  {
 //                    DBHelper.setValue(qqPrepStmt1, 1, pOrderkey);
 //                    qqResultSet1 = qqPrepStmt1.executeQuery();
 //                    if (qqResultSet1.next()) {
-//                        pStatus = DBHelper.getValue(qqResultSet1, 1, pStatus);
+//                        pStatus = DBHelper.getStringValue(qqResultSet1, 1, pStatus);
 //                        ordDtZeroQtyCount = qqRowCount1 + 1;
 //                    }
 //                } catch (SQLException var99) {
@@ -951,7 +951,7 @@ public class ClusterPickingConfirmV2  {
 //                    DBHelper.setValue(qqPrepStmt2, 1, maxOrderDetailStatus);
 //                    qqResultSet2 = qqPrepStmt2.executeQuery();
 //                    if (qqResultSet2.next()) {
-//                        maxCode = DBHelper.getValue(qqResultSet2, 1, maxCode);
+//                        maxCode = DBHelper.getStringValue(qqResultSet2, 1, maxCode);
 //                        int var106 = qqRowCount2 + 1;
 //                    }
 //                } catch (SQLException var93) {
@@ -984,7 +984,7 @@ public class ClusterPickingConfirmV2  {
 //                DBHelper.setValue(qqPrepStmt1, 1, pNewStatus);
 //                qqResultSet1 = qqPrepStmt1.executeQuery();
 //                if (qqResultSet1.next()) {
-//                    pLogHistory = DBHelper.getValue(qqResultSet1, 1, pLogHistory);
+//                    pLogHistory = DBHelper.getStringValue(qqResultSet1, 1, pLogHistory);
 //                    ordDtZeroQtyCount = qqRowCount1 + 1;
 //                }
 //            } catch (SQLException var101) {

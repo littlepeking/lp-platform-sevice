@@ -61,10 +61,10 @@ public class QcSamplingCreateLocOrder  extends WMSBaseService
         Map<String,String> samplePackInfo=null;
         try
         {
-            String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+            String STORERKEY= DBHelper.getStringValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
             //String LGPROJECT=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","LGPROJECT"}, "");
 
-            String lot= DBHelper.getValue( "select a.lot LOT from lotxlocxid a,v_lotattribute b where a.lot=b.lot and a.qty>0 and a.STORERKEY = ? and b.lottable06=? ", new String[]{STORERKEY, LOTTABLE06},"");
+            String lot= DBHelper.getStringValue( "select a.lot LOT from lotxlocxid a,v_lotattribute b where a.lot=b.lot and a.qty>0 and a.STORERKEY = ? and b.lottable06=? ", new String[]{STORERKEY, LOTTABLE06},"");
             if (UtilHelper.isEmpty(lot)) throw new Exception("当前批次在系统中无库存");
 
 
@@ -80,7 +80,7 @@ public class QcSamplingCreateLocOrder  extends WMSBaseService
                     " where s.SKU = a.SKU and c.PACKKEY = s.SUSR6 and a.STORERKEY = ? and a.lot=?",new Object[]{STORERKEY, lot},sku+"的取样包装配置",true);
 
 
-            String OldOrderKey= DBHelper.getValue( "select orderkey from orders where STORERKEY = ? and REFERENCENUM=? and type = ? and status<'90'", new String[]{STORERKEY, LOTTABLE06, ORDERTYPE}, "");
+            String OldOrderKey= DBHelper.getStringValue( "select orderkey from orders where STORERKEY = ? and REFERENCENUM=? and type = ? and status<'90'", new String[]{STORERKEY, LOTTABLE06, ORDERTYPE}, "");
             //if (!XtUtils.isNull(OldOrderKey)) throw new Exception("当前批次有未关闭的在库取样单("+OldOrderKey+")");
 
             if (LegecyUtilHelper.isNull(OldOrderKey)) {
@@ -140,8 +140,8 @@ public class QcSamplingCreateLocOrder  extends WMSBaseService
 //                    total1 = String.valueOf(mapList.stream().map(calcORIGINALQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //                    total2 = String.valueOf(mapList.stream().map(calcOPENQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //                }
-                total1= DBHelper.getValue( "SELECT SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
-                total3= DBHelper.getValue( "select sum(ORIGINALQTY) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
+                total1= DBHelper.getStringValue( "SELECT SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
+                total3= DBHelper.getStringValue( "select sum(ORIGINALQTY) from ORDERDETAIL where orderkey=?",new String[]{OrderKey},"0");
 
             }
 

@@ -89,9 +89,9 @@ public class ConfirmASN extends WMSBaseService {
 
             if(esignatureKey.indexOf(':')==-1) {
 
-                String isConfirmedUser = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         esignatureKey
-                }, String.class, "复核人");
+                }, "复核人");
 
                 //复核操作校验
                 if (!UtilHelper.isEmpty(receiptInfo.get("ISCONFIRMEDUSER"))) {
@@ -137,13 +137,13 @@ public class ConfirmASN extends WMSBaseService {
                 String eSignatureKey1=eSignatureKeys[0];
                 String eSignatureKey2=eSignatureKeys[1];
 
-                String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey1
-                }, String.class, "确认人");
+                }, "确认人");
 
-                String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser2 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey2
-                }, String.class, "复核人");
+                }, "复核人");
 
 
                 //确认操作

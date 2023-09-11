@@ -1,18 +1,15 @@
 package com.enhantec.wms.backend.utils.print;
 
 import com.alibaba.fastjson.JSON;
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
-import java.util.Map;
 
 public class PrintUtil {
 
@@ -30,7 +27,7 @@ public class PrintUtil {
 
           if(sqlParams==null || sqlParams.size()==0) ExceptionHelper.throwRfFulfillLogicException("标签SQL绑定参数不允许为空");
 
-          String dataSourceStr = String.valueOf(DBHelper.getValue(" SELECT DataSource FROM LabelConfig WHERE LabelName = ? ", new Object[]{labelName},"标签配置"+labelName));
+          String dataSourceStr = String.valueOf(DBHelper.getStringValue(" SELECT DataSource FROM LabelConfig WHERE LabelName = ? ", new Object[]{labelName},"标签配置"+labelName));
 
           if(UtilHelper.isEmpty(dataSourceStr)) ExceptionHelper.throwRfFulfillLogicException("请到标签配置中提供"+labelName+"标签数据源信息后再打印");
 

@@ -744,12 +744,12 @@ public class ClusterPickingConfirm extends WMSBaseService {
                 }
             }
 
-            pDetailHistoryFlag = DBHelper.getValue(" SELECT DetailHistoryFlag FROM ORDERSTATUSSETUP WHERE Code = ?",
+            pDetailHistoryFlag = DBHelper.getStringValue(" SELECT DetailHistoryFlag FROM ORDERSTATUSSETUP WHERE Code = ?",
                         new Object[]{pNewStatus});
 
 
             if ("95".equals(pNewStatus)) {
-                String isOrderRequireClose = DBHelper.getValue("SELECT REQUIREORDERCLOSE  FROM ORDERS WHERE OrderKey = ?",
+                String isOrderRequireClose = DBHelper.getStringValue("SELECT REQUIREORDERCLOSE  FROM ORDERS WHERE OrderKey = ?",
                         new Object[]{pOrderkey});
 
                 if (isOrderRequireClose != null && "1".equals(isOrderRequireClose)) {
@@ -919,7 +919,7 @@ public class ClusterPickingConfirm extends WMSBaseService {
                 pNewStatus = "00";
             }
 
-            pLogHistory = DBHelper.getValue( " SELECT Headerhistoryflag FROM ORDERSTATUSSETUP WHERE Code = ?",new Object[]{ pNewStatus});
+            pLogHistory = DBHelper.getStringValue( " SELECT Headerhistoryflag FROM ORDERSTATUSSETUP WHERE Code = ?",new Object[]{ pNewStatus});
 
             ServiceDataMap serviceDataMap = new ServiceDataMap();
             serviceDataMap.setAttribValue("status", pStatus);

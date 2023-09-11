@@ -18,9 +18,8 @@ import com.enhantec.wms.backend.inbound.asn.utils.ReceiptValidationHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
-import com.enhantec.wms.core.inbound.ReceivingByLpn;
+import com.enhantec.wms.core.inbound.ReceivingByLpnService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,9 +57,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
 public class ReceivingWithSignature extends WMSBaseService {
-    private static final long serialVersionUID = 1L;
 
-    private final ReceivingByLpn receivingByLpnService;
+    private final ReceivingByLpnService receivingByLpnServiceService;
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
@@ -147,7 +145,7 @@ public class ReceivingWithSignature extends WMSBaseService {
         this.processELottableInfo(receiptDetailInfo);
 
         String stdUom = UOM.getStdUOM( receiptDetailInfo.get("PACKKEY"));
-        String cntLastLpn = DBHelper.getValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND TOID<>? AND QTYEXPECTED>0 AND STATUS=?"
+        String cntLastLpn = DBHelper.getStringValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND TOID<>? AND QTYEXPECTED>0 AND STATUS=?"
                 , new String[]{RECEIPTKEY, LPN, "0"}, "0");
         //转换单位。
         BigDecimal grossStdQty = UOM.UOMQty2StdQty( receiptDetailInfo.get("PACKKEY"), receiptDetailInfo.get("UOM"),
@@ -161,7 +159,7 @@ public class ReceivingWithSignature extends WMSBaseService {
                 new String[]{receiptDetailInfo.get("PACKKEY"), RECEIPTKEY, LPN});
 
         //调用系统API进行收货操作.
-        receivingByLpnService.execute(new ServiceDataHolder(new ServiceDataMap(
+        receivingByLpnServiceService.execute(new ServiceDataHolder(new ServiceDataMap(
                 new HashMap(){{
                     put("RECEIPTKEY",RECEIPTKEY);
                     put("LPN",LPN);
@@ -194,10 +192,10 @@ public class ReceivingWithSignature extends WMSBaseService {
             }
         }
 
-        String sku = DBHelper.getValue( "select sku from receiptdetail where receiptkey=? and toid=?", new Object[]{RECEIPTKEY, LPN});
-        String cnt = DBHelper.getValue( "select count(1) as C1 from receiptdetail where receiptkey=? and sku=?  AND TOID IS NOT NULL AND TOID <>'' "
+        String sku = DBHelper.getStringValue( "select sku from receiptdetail where receiptkey=? and toid=?", new Object[]{RECEIPTKEY, LPN});
+        String cnt = DBHelper.getStringValue( "select count(1) as C1 from receiptdetail where receiptkey=? and sku=?  AND TOID IS NOT NULL AND TOID <>'' "
                 , new String[]{RECEIPTKEY, sku}, "");
-        String cnt1 = DBHelper.getValue( "select count(1) as C1 from receiptdetail where receiptkey=? and sku=? AND TOID IS NOT NULL AND TOID <>'' and status>0"
+        String cnt1 = DBHelper.getStringValue( "select count(1) as C1 from receiptdetail where receiptkey=? and sku=? AND TOID IS NOT NULL AND TOID <>'' and status>0"
                 , new String[]{RECEIPTKEY, sku}, "");
         String TOTAL = cnt1 + " / " + cnt;
         String RECALL = "N";

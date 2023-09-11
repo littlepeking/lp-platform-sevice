@@ -4,7 +4,6 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
@@ -82,7 +81,7 @@ public class CDSysSet {
 
     public static String getStorerKey() {
 
-        return String.valueOf(DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?",
+        return String.valueOf(DBHelper.getStringValue( "select UDF1 from Codelkup where ListName=? and Code=?",
                 new Object[]{"SYSSET","STORERKEY"}, "默认货主"));
 
     }

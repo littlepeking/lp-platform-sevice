@@ -45,7 +45,7 @@ public class GetReceiptLotByPO extends WMSBaseService
 		{
 		    String ReceiptLot= serviceDataHolder.getInputDataAsMap().getString("ReceiptLot");
 
-			String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+			String STORERKEY= DBHelper.getStringValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
 
 			List<Map<String,String>> r1 = DBHelper.executeQuery( "select FROMKEY,FROMLINENO,STATUS,FROMSKU,FROMSKUDESCR,SKU,FROMLOT,SUPPLIERCODE,MANUFACTURERCODE,PROCESSINGMODE,UOM,QTY,TOTALBARREL,ELOTTABLE11,RETESTDATE,PACKCHECK,FILECHECK,TRANSCHECK,MANUFACTURERDATE,ELOTTABLE07,PACKCOUNTCHECK,abnormalitymesg,abnormality,checkresult,expirydatecheck,supplieritem,qualifiedproducer,POSUPPLIERNAME,ISCOMMONPROJECT,PROJECTCODE from PRERECEIPTCHECK where RECEIPTLOT=? order by serialkey", new String[]{ ReceiptLot});
 			if (r1 == null) {
@@ -57,10 +57,10 @@ public class GetReceiptLotByPO extends WMSBaseService
 				Map<String,String> m1=r1.get(i1);
 				if (i1==0)
 				{
-					String SKUDESCR= DBHelper.getValue( "SELECT DESCR FROM SKU WHERE STORERKEY=? and SKU=?", new String[]{STORERKEY,m1.get("SKU")}, "");
+					String SKUDESCR= DBHelper.getStringValue( "SELECT DESCR FROM SKU WHERE STORERKEY=? and SKU=?", new String[]{STORERKEY,m1.get("SKU")}, "");
 					theOutDO.setAttribValue("STATUS", m1.get("STATUS"));
 					theOutDO.setAttribValue("SKU", m1.get("SKU"));
-					String SKU_BUSR14= DBHelper.getValue( "select BUSR14 from SKU where SKU=?", new String[]{m1.get("SKU")}, "");
+					String SKU_BUSR14= DBHelper.getStringValue( "select BUSR14 from SKU where SKU=?", new String[]{m1.get("SKU")}, "");
 					theOutDO.setAttribValue("SKU_BUSR14", SKU_BUSR14);
 					theOutDO.setAttribValue("SKUDESCR", SKUDESCR);
 					theOutDO.setAttribValue("FROMLOT", m1.get("FROMLOT"));

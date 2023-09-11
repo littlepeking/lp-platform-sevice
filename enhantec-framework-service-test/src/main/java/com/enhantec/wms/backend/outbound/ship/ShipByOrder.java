@@ -69,8 +69,8 @@ public class ShipByOrder extends WMSBaseService {
 //                ExceptionHelper.throwRfFulfillLogicException("订单未拣货完成不能发运");
 //            }
 
-            String unAllocatedODCount = DBHelper.getValue( "select count(1) unAllocatedODCount from orderdetail where OPENQTY - QTYPICKED - QTYALLOCATED > 0 and orderkey=?", new String[]{orderKey}, "0");
-            String unPickedCount = DBHelper.getValue( "select count(1) unPickedCount from pickdetail where ORDERKEY=? and status<5", new String[]{orderKey}, "0");
+            String unAllocatedODCount = DBHelper.getStringValue( "select count(1) unAllocatedODCount from orderdetail where OPENQTY - QTYPICKED - QTYALLOCATED > 0 and orderkey=?", new String[]{orderKey}, "0");
+            String unPickedCount = DBHelper.getStringValue( "select count(1) unPickedCount from pickdetail where ORDERKEY=? and status<5", new String[]{orderKey}, "0");
 
             if (!unAllocatedODCount.equals("0")
                     || !unPickedCount.equals("0")) throw new Exception("请确认订单数量已分配和拣货完毕");
@@ -219,19 +219,19 @@ public class ShipByOrder extends WMSBaseService {
                 String isConfirmedUser1 = "";
                 String isConfirmedUser2 = "";
                 if(esignatureKey.indexOf(":") == -1) {
-                    isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ",
-                            new Object[]{esignatureKey}, String.class, "确认人");
+                    isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ",
+                            new Object[]{esignatureKey}, "确认人");
                 }else{
                     String[] eSignatureKeys = esignatureKey.split(":");
                     String eSignatureKey1=eSignatureKeys[0];
                     String eSignatureKey2=eSignatureKeys[1];
-                    isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                    isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                             eSignatureKey1
-                    }, String.class, "确认人");
+                    }, "确认人");
 
-                    isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                    isConfirmedUser2 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                             eSignatureKey2
-                    }, String.class, "复核人");
+                    }, "复核人");
                 }
 
                 receiptKey = toWHAsnBuilder.buildReceiptHeadInfo(isConfirmedUser1,isConfirmedUser2);

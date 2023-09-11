@@ -65,10 +65,10 @@ public class CloseASN extends WMSBaseService {
             // if(receiptInfo.get("STATUS").equals("0")&& !("true").equalsIgnoreCase(allowAbnormalClose))
             // ExceptionHelper.throwRfFulfillLogicException("不允许正常关闭未收货的ASN单");
 
-            String notes = DBHelper.getValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
-                    esignatureKey},String.class,"电子签名");
+            String notes = DBHelper.getStringValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+                    esignatureKey},"电子签名");
 
-            ServiceHelper.executeService("NSPRECEIPTCLOSE",
+            ServiceHelper.executeService("closeASNService",
                     new ServiceDataHolder(
                             new ServiceDataMap(
                             new HashMap<String,Object>(){{

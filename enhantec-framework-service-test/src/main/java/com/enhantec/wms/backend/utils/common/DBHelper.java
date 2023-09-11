@@ -1,19 +1,10 @@
 package com.enhantec.wms.backend.utils.common;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.enhantec.framework.common.service.EHSqlService;
-import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.framework.common.utils.EHContextHelper;
-import org.mybatis.spring.SqlSessionTemplate;
 
 import java.math.BigDecimal;
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,86 +28,64 @@ public class DBHelper {
 //    }
 
 
-    public static <T> T getValue( String sql, Object[] params, Class<T> type, String errorName) throws DBResourceException {
+    public static <T> T getValue(String sql, Object[] params, Class<T> type, String errorName) throws DBResourceException {
 
         return getValue(sql,params, type, errorName,true);
 
     }
 
-    public static <T> T getValue(String sql, Object[] params, Class<T> type, String errorName,boolean checkExist) throws DBResourceException{
+    public static <T> T getValue(String sql, Object[] params, Class<T> type, String errorName, boolean checkExist) throws DBResourceException{
 
-        String val = getValue(sql,params, errorName,checkExist);
+       return (T) getRawValue(sql,params, errorName,checkExist);
 
-        if(val == null ) {
-            return null;
-        }else {
-            if (String.class.isAssignableFrom(type)) return (T) val;
-            else if (BigDecimal.class.isAssignableFrom(type)) return (T) new BigDecimal(val);
-            else if (Integer.class.isAssignableFrom(type)) return (T) Integer.valueOf(val);
-        }
-        ExceptionHelper.throwRfFulfillLogicException("不支持从字符串向"+type+"的类型转换");
-        return null;
+//        String val = getStringValue(sql,params, errorName,checkExist);
+//
+//        if(val == null ) {
+//            return null;
+//        }else {
+//            if (String.class.isAssignableFrom(type)) return (T) val;
+//            else if (BigDecimal.class.isAssignableFrom(type)) return (T) new BigDecimal(val);
+//            else if (Integer.class.isAssignableFrom(type)) return (T) Integer.valueOf(val);
+//        }
+//        ExceptionHelper.throwRfFulfillLogicException("不支持从字符串向"+type+"的类型转换");
+//        return null;
     }
 
-    public static String getValue(String sql, Object[] params) throws DBResourceException{
+    public static String getStringValue(String sql, Object[] params){
 
-        if(sql.toLowerCase().contains("count("))
-            return String.valueOf(getCount(sql, params));
-        else {
-            Map<String, String> record = getRecord(sql, params);
-
-            if (record.values().size() != 1)
-                ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为" + record.size() + "列");
-
-            return (String) record.values().toArray()[0];
-        }
+        return getStringValue(sql,params,"");
 
     }
 
-    public static String getValue(String sql, Object[] params,String errorName) throws DBResourceException{
+    public static String getStringValue(String sql, Object[] params, String errorName){
 
-        if(sql.toLowerCase().contains("count("))
-            return String.valueOf(getCount(sql, params));
-        else {
-            Map<String, String> record = getRecord(sql, params, errorName, true);
-
-            if (record.values().size() != 1)
-                ExceptionHelper.throwRfFulfillLogicException("期望查询'" + errorName + "'结果为一列，当前为" + record.size() + "列");
-
-            return (String) record.values().toArray()[0];
-        }
+        return getStringValue(sql,params,errorName,true);
 
     }
 
-    public static String getValue(String sql, Object[] params,String errorName,boolean checkExist) throws DBResourceException{
-        if(sql.toLowerCase().contains("count("))
-            return String.valueOf(getCount(sql, params));
-        else {
-            Map<String, String> record = getRecord(sql, params, errorName, checkExist);
-            if (null == record) return null;
+    public static String getStringValue(String sql, Object[] params, String errorName, boolean checkExist){
 
-            if (record.values().size() != 1)
-                ExceptionHelper.throwRfFulfillLogicException("期望查询'" + errorName + "'结果为一列，当前为" + record.size() + "列");
+     Object val = getRawValue(sql,params,errorName,checkExist);
 
-            return (String) record.values().toArray()[0];
-        }
+     return val == null ? null : val.toString();
 
     }
 
 
-    public static Object getRawValue(String sql, Object[] params) throws DBResourceException{
+    public static Object getRawValue(String sql, Object[] params,String errorName,boolean checkExist){
+
         if(sql.toLowerCase().contains("count("))
             return getCount(sql, params);
         else {
-            Map record = getRawRecord(sql, params, "");
-            if (null == record) return null;
-
-            if (record.values().size() != 1)
-                ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为" + record.size() + "列");
-
-            return record.values().toArray()[0];
+            try {
+                return EHContextHelper.getBean(EHSqlService.class).selectValue(sql, params);
+            }catch (Exception e){
+                if(checkExist) {
+                    ExceptionHelper.throwRfFulfillLogicException("期望查询" + errorName + "的结果为单个值:" + e.getMessage());
+                }else return null;
+            }
         }
-
+        return null;
     }
 
 
@@ -133,17 +102,6 @@ public class DBHelper {
 
             return (Long) record.values().toArray()[0];
         }
-
-    }
-
-    public static String getStringValue(String sql, Object[] params) throws DBResourceException{
-
-        Map record = getRawRecord(sql,params, "");
-        if(null == record) return null;
-
-        if(record.values().size()!=1) ExceptionHelper.throwRfFulfillLogicException("期望查询结果为一列，当前为"+record.size()+"列");
-
-        return (String) record.values().toArray()[0];
 
     }
 
@@ -440,9 +398,13 @@ public class DBHelper {
 
             for (Map<String, Object> originalMap : originalList) {
                 Map<String, Object> uppercaseKeysMap = new HashMap<>();
-                for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
-                    String uppercaseKey = entry.getKey().toUpperCase();
-                    uppercaseKeysMap.put(uppercaseKey, entry.getValue());
+                if(originalMap==null){
+
+                }else {
+                    for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
+                        String uppercaseKey = entry.getKey().toUpperCase();
+                        uppercaseKeysMap.put(uppercaseKey, entry.getValue());
+                    }
                 }
                 uppercaseKeysList.add(uppercaseKeysMap);
             }

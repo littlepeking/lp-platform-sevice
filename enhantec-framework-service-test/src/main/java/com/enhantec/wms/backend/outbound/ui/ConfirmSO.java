@@ -42,8 +42,8 @@ public class ConfirmSO extends WMSBaseService {
 
             Map<String, String>  ORDERSInfo = Orders.findByOrderKey( ORDERKEY, true);
 
-            String isTransferOrderType = DBHelper.getValue( "SELECT EXT_UDF_STR5 FROM CODELKUP WHERE LISTNAME = 'ORDERTYPE' AND CODE = ?",
-                    new Object[]{ORDERSInfo.get("TYPE")},String.class,"",false);
+            String isTransferOrderType = DBHelper.getStringValue( "SELECT EXT_UDF_STR5 FROM CODELKUP WHERE LISTNAME = 'ORDERTYPE' AND CODE = ?",
+                    new Object[]{ORDERSInfo.get("TYPE")},"",false);
 
             /**
              * 转仓出库类型校验
@@ -62,9 +62,9 @@ public class ConfirmSO extends WMSBaseService {
             //0：未确认 1：已确认 2：已复核
 
             if(esignatureKey.indexOf(':')==-1) {
-                String ISCONFIRMEDUSER = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String ISCONFIRMEDUSER = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         esignatureKey
-                }, String.class, "复核人");
+                }, "复核人");
 
                 //复核操作校验
                 if (!UtilHelper.isEmpty(ORDERSInfo.get("ISCONFIRMEDUSER"))) {
@@ -110,13 +110,13 @@ public class ConfirmSO extends WMSBaseService {
                 String eSignatureKey1=eSignatureKeys[0];
                 String eSignatureKey2=eSignatureKeys[1];
 
-                String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey1
-                }, String.class, "确认人");
+                }, "确认人");
 
-                String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser2 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey2
-                }, String.class, "复核人");
+                }, "复核人");
 
                 //复核操作
                 DBHelper.executeUpdate( "UPDATE ORDERS SET ISCONFIRMEDUSER = ? ,ISCONFIRMEDUSER2 = ? , ISCONFIRMED = 2 WHERE ORDERKEY = ? ",

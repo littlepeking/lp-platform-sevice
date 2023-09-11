@@ -7,7 +7,6 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.utils.common.*;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
@@ -196,8 +195,8 @@ public class LotxId {
         lotxIdDetailHashMap.put("OQTY", "1");
         lotxIdDetailHashMap.put("Wgt","0");
         if (ioFlag.equals("O")&&CDSysSet.enableSNwgt()){
-            String wgt = DBHelper.getValue( "SELECT NETWEIGHT as WGT FROM SERIALINVENTORY WHERE SKU = ? and SERIALNUMBERLONG = ? AND ID = ? ",
-                    new Object[]{ sku, sn, fromId}  ,String.class,"唯一码");
+            String wgt = DBHelper.getStringValue( "SELECT NETWEIGHT as WGT FROM SERIALINVENTORY WHERE SKU = ? and SERIALNUMBERLONG = ? AND ID = ? ",
+                    new Object[]{ sku, sn, fromId}  ,"唯一码");
             lotxIdDetailHashMap.put("Wgt",UtilHelper.isEmpty(wgt)?"0":wgt);
         }
         lotxIdDetailHashMap.put("LOTXIDLINENUMBER", LegecyUtilHelper.To_Char(seq, 5));

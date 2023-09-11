@@ -1,12 +1,9 @@
 package com.enhantec.wms.backend.common.inventory;
 
 import com.enhantec.wms.backend.common.Const;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
-import com.enhantec.wms.backend.common.base.IDNotes;
 
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
@@ -34,7 +31,7 @@ public class LotxLocxId {
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ FROMLOC, FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到可用库存");
 
-        int holdRecords = Integer.parseInt(DBHelper.getValue("SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
+        int holdRecords = Integer.parseInt(DBHelper.getStringValue("SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
                 new Object[]{record.get("LOT"), FROMLOC, FROMID},
                 "").toString());
 
@@ -76,7 +73,7 @@ public class LotxLocxId {
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到ID为"+FROMID+"的可用库存");
 
-        int holdRecords = Integer.parseInt(DBHelper.getValue("SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
+        int holdRecords = Integer.parseInt(DBHelper.getStringValue("SELECT count(1) from inventoryhold where hold = '1' and (lot = ? or loc = ? or id = ?) ",
                 new Object[]{record.get("LOT"),record.get("LOC"), FROMID},
                 "").toString());
 

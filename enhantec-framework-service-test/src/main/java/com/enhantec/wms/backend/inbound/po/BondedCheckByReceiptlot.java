@@ -36,8 +36,8 @@ public class BondedCheckByReceiptlot extends WMSBaseService
 		try
 		{
 		    String serialkey= serviceDataHolder.getInputDataAsMap().getString("SERIALKEY");
-			//String receiptLot=DBHelper.getValue("select  RECEIPTLOT from prreceiptcheck where SERIALKEY=?",new Object[]{serialkey)},"收货检查记录");;
-			String count = DBHelper.getValue("select COUNT(*) from prereceiptcheck where RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?)",new Object[]{serialkey},"收货检查记录");
+			//String receiptLot=DBHelper.getStringValue("select  RECEIPTLOT from prreceiptcheck where SERIALKEY=?",new Object[]{serialkey)},"收货检查记录");;
+			String count = DBHelper.getStringValue("select COUNT(*) from prereceiptcheck where RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?)",new Object[]{serialkey},"收货检查记录");
 			if (Integer.parseInt(count)>1) {
 			Map<String, String> bondedCheck = DBHelper.getRecord( "SELECT BONDEDCHECK,BONDEDNOTES4,BONDEDRECQTY,BONDEDSTORES,BONDEDUOM,LOTTABLE10,MHLINENO,MHTASKKEY,RECEIPTLOT " +
 							" FROM PRERECEIPTCHECK WHERE RECEIPTLOT in (select  RECEIPTLOT from prereceiptcheck where SERIALKEY=?) and not(BONDEDSTORES is NULL)", new String[]{serialkey},"");

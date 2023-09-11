@@ -109,12 +109,12 @@ public class GetAsnDetailByLPN extends WMSBaseService
 			String uom=lpnInfo.get("UOM");
 			String packkey=lpnInfo.get("PACKKEY");
 			String receiptType=lpnInfo.get("TYPE");
-			String totalCount= DBHelper.getValue( "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0"
+			String totalCount= DBHelper.getStringValue( "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0"
 					, new String[]{receiptKey,sku}, "0");
-			int receivedCount= (int) DBHelper.getRawValue( "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0 AND STATUS>0"
+			long receivedCount= DBHelper.getCount( "SELECT COUNT(1) AS C1 FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND TOID IS NOT NULL AND TOID <>'' AND QTYEXPECTED>0 AND STATUS>0"
 					, new Object[]{receiptKey,sku});
 
-			String lastReceivedLoc = DBHelper.getValue( "SELECT TOP 1 TOLOC AS LOC FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND QTYEXPECTED>0 AND STATUS>0 order by editdate desc"
+			String lastReceivedLoc = DBHelper.getStringValue( "SELECT TOP 1 TOLOC AS LOC FROM RECEIPTDETAIL WHERE RECEIPTKEY=? AND SKU=? AND QTYEXPECTED>0 AND STATUS>0 order by editdate desc"
 					, new String[]{receiptKey,sku});
 
 			String total = receivedCount +" / "+totalCount;
@@ -134,7 +134,7 @@ public class GetAsnDetailByLPN extends WMSBaseService
 			if ("MULTIZONES".equals(skuPutawayStrategyKey)){
 				List<String> searchZoneArray=null;
 				//Get SKU configured multiple zone list
-				String zones= DBHelper.getValue( "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
+				String zones= DBHelper.getStringValue( "SELECT SUSR7 FROM SKU WHERE storerKey=? AND SKU=?"
 						, new String[] {storerKey,sku}, "");
 
 				if(UtilHelper.isEmpty(zones)){

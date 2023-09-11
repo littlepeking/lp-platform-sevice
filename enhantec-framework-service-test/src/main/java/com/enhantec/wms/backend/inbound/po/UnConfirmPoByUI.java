@@ -45,9 +45,9 @@ public class UnConfirmPoByUI extends WMSBaseService {
             Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"未找到");
             
-            String user = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String user = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     esignatureKey
-            }, String.class, "复核人");
+            }, "复核人");
             DBHelper.executeUpdate( "UPDATE WMS_PO SET CONFIRMSTATUS = ?,ISCONFIRMEDUSER1 ='',ISCONFIRMEDUSER2 = '' WHERE POKEY = ? ",
                     new Object[]{"0",poKey});
             Udtrn UDTRN = new Udtrn();

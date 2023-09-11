@@ -4,10 +4,9 @@ import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.*;
-import com.enhantec.framework.common.utils.EHContextHelper;
+
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Map;
 
 //todo: 改为使用多数据源@DS方式插入目标仓库，但要验证是否能保证事务的一致性
 public class ToWHAsnBuilder {
@@ -103,8 +102,8 @@ public class ToWHAsnBuilder {
                 new Object[]{"SYSSET","WAREHOUSE"},"");
         if(!IdGenerationHelper.checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.WAREHOUSE配置不符合要求");
         String warehouseCode = UtilHelper.nvl(lotRuleCodelkup.get("UDF1"),"");
-        String skuTypeCode= DBHelper.getValue( "select udf4 from "+toWareHouseId+".codelkup a,sku s where a.listname=? and a.code=s.busr4 and s.sku=?", new String[]{"SKUTYPE1",sku}, "");//根据sku获批号是sm||sc
-        String CurDate= DBHelper.getValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
+        String skuTypeCode= DBHelper.getStringValue( "select udf4 from "+toWareHouseId+".codelkup a,sku s where a.listname=? and a.code=s.busr4 and s.sku=?", new String[]{"SKUTYPE1",sku}, "");//根据sku获批号是sm||sc
+        String CurDate= DBHelper.getStringValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
         String prefix = warehouseCode+skuTypeCode+CurDate;
         String num = String.valueOf(getKeyCount(prefix,1));
         while (num.length()<Integer.parseInt(lotRuleCodelkup.get("UDF3"))) num="0"+num;
@@ -134,7 +133,7 @@ public class ToWHAsnBuilder {
 
     private String getKeyCount(String keyName,int length){
         String result;
-        result = DBHelper.getValue( "SELECT KEYCOUNT FROM " + toWareHouseId + ".NCOUNTER WHERE KEYNAME = ?",
+        result = DBHelper.getStringValue( "SELECT KEYCOUNT FROM " + toWareHouseId + ".NCOUNTER WHERE KEYNAME = ?",
                 new Object[]{keyName}, "",false);
         if(UtilHelper.isEmpty(result)){
             DBHelper.executeUpdate(

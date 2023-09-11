@@ -1,20 +1,18 @@
 package com.enhantec.wms.backend.framework;
 
-import com.enhantec.wms.backend.utils.common.ServiceHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/wms-services")
 @RequiredArgsConstructor
 public class LegacyWMSServiceController {
 
-    private  final ServiceHelper serviceHelper;
+    private  final WMSCommonService wmsCommonService;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{serviceName}")
@@ -24,7 +22,7 @@ public class LegacyWMSServiceController {
 
         ServiceDataHolder serviceDataHolder = new ServiceDataHolder(new ServiceDataMap(params));
 
-        serviceHelper.executeService2(serviceName, serviceDataHolder);
+        wmsCommonService.execute(serviceName, serviceDataHolder);
 
         return serviceDataHolder.getOutputDataAsMap()==null ? null : serviceDataHolder.getOutputDataAsMap().getData();
     }

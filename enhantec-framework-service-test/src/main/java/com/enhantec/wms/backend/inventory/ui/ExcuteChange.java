@@ -95,7 +95,7 @@ public class ExcuteChange extends WMSBaseService {
 
         String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName( EHContextHelper.getUser().getUsername(),"EHTRANSFER",9);
 
-        String storerKey = String.valueOf(DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?",
+        String storerKey = String.valueOf(DBHelper.getStringValue( "select UDF1 from Codelkup where ListName=? and Code=?",
                 new Object[]{"SYSSET","STORERKEY"}, "默认货主"));
 
         String totalOpenQty = "0";

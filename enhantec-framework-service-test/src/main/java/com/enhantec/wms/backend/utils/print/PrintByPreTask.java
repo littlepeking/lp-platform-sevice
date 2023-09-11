@@ -42,7 +42,7 @@ public class PrintByPreTask extends WMSBaseService
 		{
 			if (PRINTER.equals("0")) throw new Exception("不能选择缓存打印机");
 
-			int i0= Integer.valueOf(DBHelper.getValue( "select count(1) from LABELPRINTER where PRINTERNAME=?",
+			int i0= Integer.valueOf(DBHelper.getStringValue( "select count(1) from LABELPRINTER where PRINTERNAME=?",
 					new Object[]{PRINTER},"打印机配置").toString());
 
 			if (i0==0)  throw new Exception("系统未注册您选择的打印机");

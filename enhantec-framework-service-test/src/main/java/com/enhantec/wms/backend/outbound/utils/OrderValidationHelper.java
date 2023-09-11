@@ -7,11 +7,9 @@ import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -199,7 +197,7 @@ public class OrderValidationHelper {
             repackOrderType = repackOrdTypeHashMap.get("UDF1");
         }
 
-        String orderType = DBHelper.getValue(
+        String orderType = DBHelper.getStringValue(
                 "SELECT TYPE FROM ORDERS WHERE ORDERKEY = ? ",
                 new Object[]{orderKey},"订单类型");
 
@@ -214,7 +212,7 @@ public class OrderValidationHelper {
 
     public static boolean isRepackSku(String sku){
 
-        String isRepackSku = DBHelper.getValue(
+        String isRepackSku = DBHelper.getStringValue(
                 "SELECT CODELKUP.UDF1 FROM SKU,CODELKUP WHERE CODELKUP.LISTNAME ='SOLIDLIQUI' AND SKU.ITEMCHARACTERISTIC2 = CODELKUP.CODE AND SKU = ? ",
                 new Object[]{sku},"是否分装物料标志",false);
 
@@ -226,10 +224,10 @@ public class OrderValidationHelper {
 
         
 
-        String repackOrderType = DBHelper.getValue( "select udf1 from codelkup where listname='SYSSET' and code='REPACKORDT'"
+        String repackOrderType = DBHelper.getStringValue( "select udf1 from codelkup where listname='SYSSET' and code='REPACKORDT'"
         ,new Object[]{},"分装出库单类型代码未设置").toString();
 
-        String orderType = DBHelper.getValue( "select TYPE from ORDERS where ORDERKEY = ? "
+        String orderType = DBHelper.getStringValue( "select TYPE from ORDERS where ORDERKEY = ? "
                 ,new Object[]{orderKey},"订单类型").toString();
 
         return orderType.equals(repackOrderType);

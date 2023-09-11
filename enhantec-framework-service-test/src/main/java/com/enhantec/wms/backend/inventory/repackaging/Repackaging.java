@@ -87,7 +87,7 @@ public class Repackaging extends WMSBaseService {
 
                 String STORERKEY = orderDetailHashMap.get("STORERKEY");
                 //String repackReceiptType= XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKRECT"}, "");
-                String repackOrderType = DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "REPACKORDT"}, "");
+                String repackOrderType = DBHelper.getStringValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "REPACKORDT"}, "");
                 if (UtilHelper.isEmpty(repackOrderType)) ExceptionHelper.throwRfFulfillLogicException("分装出库单类型代码未设置");
 
                 String projectCode = orderHashMap.get("NOTES");
@@ -164,7 +164,7 @@ public class Repackaging extends WMSBaseService {
                         if (idUsedStdQty.compareTo(BigDecimal.ZERO) > 0) {
 
                             ///////生成分装出库单行号
-                            Object preOrderLineNumberObj = DBHelper.getValue( "SELECT MAX(ORDERLINENUMBER) FROM ORDERDETAIL WHERE ORDERKEY = ?",
+                            Object preOrderLineNumberObj = DBHelper.getStringValue( "SELECT MAX(ORDERLINENUMBER) FROM ORDERDETAIL WHERE ORDERKEY = ?",
                                     new Object[]{rePackOrderKey}, "");
 
                             int orderLineNumberInt = preOrderLineNumberObj == null ? 1 : Integer.parseInt(preOrderLineNumberObj.toString()) + 1;

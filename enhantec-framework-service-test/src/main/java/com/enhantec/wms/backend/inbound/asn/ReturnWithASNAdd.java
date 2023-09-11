@@ -228,7 +228,7 @@ public class ReturnWithASNAdd extends WMSBaseService {
                 newReceiptHashMap.put("ISCONFIRMED", "0"); //完成收货信息采集后，进行签名后改为2。
             }
 
-            String STORERKEY = DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "STORERKEY"}, "");
+            String STORERKEY = DBHelper.getStringValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET", "STORERKEY"}, "");
             newReceiptHashMap.put("STORERKEY", STORERKEY);
             LegacyDBHelper.ExecInsert( "RECEIPT", newReceiptHashMap);
 

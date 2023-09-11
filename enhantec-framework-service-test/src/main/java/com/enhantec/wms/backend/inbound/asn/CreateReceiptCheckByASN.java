@@ -62,13 +62,13 @@ public class CreateReceiptCheckByASN extends WMSBaseService
             String[] eSignatureKeys = esignaturekey.split(":");
             String eSignatureKey1=eSignatureKeys[0];
             String eSignatureKey2=eSignatureKeys[1];
-            String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     eSignatureKey1
-            }, String.class, "确认人");
+            }, "确认人");
 
-            String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String isConfirmedUser2 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     eSignatureKey2
-            }, String.class, "复核人");
+            }, "复核人");
 
                 Udtrn UDTRN=new Udtrn();
                 UDTRN.FROMTYPE="ASN收货检查";

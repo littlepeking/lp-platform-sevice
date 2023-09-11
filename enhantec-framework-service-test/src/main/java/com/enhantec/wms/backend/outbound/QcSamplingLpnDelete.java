@@ -53,7 +53,7 @@ public class QcSamplingLpnDelete extends WMSBaseService
 			String TOTAL3="";
 			
 			
-			String Status= DBHelper.getValue(
+			String Status= DBHelper.getStringValue(
 					 "select Status from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE}, "");
 			if (LegecyUtilHelper.isNull(Status)) throw new Exception("未找到在库取样单("+ORDERKEY+")");
 			if (Status.compareTo("09")>0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭或扣量,不能继续操作");
@@ -84,8 +84,8 @@ public class QcSamplingLpnDelete extends WMSBaseService
 			
 				
 			//----------------
-			TOTAL1= DBHelper.getValue( "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
-			TOTAL3= DBHelper.getValue( "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL1= DBHelper.getStringValue( "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL3= DBHelper.getStringValue( "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
 
 
 			ServiceDataMap theOutDO = new ServiceDataMap();

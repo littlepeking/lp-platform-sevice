@@ -49,19 +49,19 @@ public class ReceiveAll extends WMSBaseService {
             String isConfirmedUser2 = "";
             if(UtilHelper.isEmpty(eSignatureKey)){
             } else if(eSignatureKey.indexOf(":") == -1){
-                isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey
-                }, String.class, "确认人");
+                }, "确认人");
             }else{
                 String[] split = eSignatureKey.split(":");
                 String eSignatureKey1 = split[0];
                 String eSignatureKey2 = split[1];
-                isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey1
-                }, String.class, "确认人");
-                isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                }, "确认人");
+                isConfirmedUser2 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey2
-                }, String.class, "复核人");
+                }, "复核人");
             }
             String sql = "UPDATE RECEIPT SET ISCONFIRMED = ? ,ISCONFIRMEDUSER = ?,ISCONFIRMEDUSER2 = ? WHERE RECEIPTKEY = ?";
             DBHelper.executeUpdate(sql,new Object[]{
@@ -113,12 +113,12 @@ public class ReceiveAll extends WMSBaseService {
                         ServiceDataMap dataMap =  new ServiceDataMap() ;
                         dataMap.setAttribValue("LPN", receiptDetail.get("TOID"));
                         dataMap.setAttribValue("RECEIPTKEY", receiptDetail.get("RECEIPTKEY"));
-                        dataMap.setAttribValue("LOC", receiptDetail.get("TOLOC"));
+//                        dataMap.setAttribValue("LOC", receiptDetail.get("TOLOC"));
                         dataMap.setAttribValue("GROSSWGTRECEIVED", grossWgtUomQty.toPlainString());//毛量 GROSSWGTEXPECTED
                         dataMap.setAttribValue("TAREWGTRECEIVED", tareWgtUomQty.toPlainString());//皮重 TAREWGTEXPECTED
                         dataMap.setAttribValue("NETWGTRECEIVED", netWgtUomQty.toPlainString());
                         dataMap.setAttribValue("ESIGNATUREKEY", "PL");//ESIGNATUREKEY
-                        ServiceHelper.executeService( "ReceivingWithSignature",new ServiceDataHolder(dataMap));
+                        ServiceHelper.executeService( "receivingWithSignature",new ServiceDataHolder(dataMap));
                     }
                 } catch (Exception e) {
                     errormess.append(" 容器条码为" + receiptDetail.get("TOID") + "收货失败 失败原因:" + e.getMessage());

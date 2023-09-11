@@ -32,7 +32,7 @@ public class AbnormalCloseASN extends WMSBaseService {
         try {
 
             serviceDataHolder.getInputDataAsMap().setAttribValue("ALLOWABNORMALCLOSE","true");
-            ServiceHelper.executeService("EHCloseASN", serviceDataHolder);
+            ServiceHelper.executeService("closeASN", serviceDataHolder);
           
 
         }catch (Exception e){

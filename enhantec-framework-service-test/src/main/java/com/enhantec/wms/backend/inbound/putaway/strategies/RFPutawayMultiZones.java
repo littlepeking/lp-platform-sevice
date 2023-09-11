@@ -21,6 +21,7 @@ package com.enhantec.wms.backend.inbound.putaway.strategies;
 import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,6 +33,7 @@ import java.util.List;
  * @author $author$
  * @version $Revision: 1.18.2.1 $
  */
+@Service("rfPutawayMultiZones")
 public class RFPutawayMultiZones extends WMSBaseService {
 //
 //	private static Logger logger = Logger.getLogger(RFPutawayMultiZones.class);

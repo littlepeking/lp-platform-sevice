@@ -24,7 +24,7 @@ public class RandomCC extends WMSBaseService {
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
 
-        String storerKey= DBHelper.getValue("SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?",new Object[]{
+        String storerKey= DBHelper.getStringValue("SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?",new Object[]{
                 "SYSSET","STORERKEY"},"");
 
         try {

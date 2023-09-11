@@ -134,8 +134,8 @@ public class LpnCreateSOShip extends WMSBaseService {
             //扣系统库存
             allocateAndShip(orderKey);
 
-            String status = DBHelper.getValue(
-                    "select status from orders where orderkey = ? ", new Object[]{orderKey},String.class,"订单");
+            String status = DBHelper.getStringValue(
+                    "select status from orders where orderkey = ? ", new Object[]{orderKey},"订单");
 
             if(!"95".equals(status)) ExceptionHelper.throwRfFulfillLogicException("出库失败，请检查库存是否可用!");
 

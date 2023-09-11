@@ -63,12 +63,12 @@ public class QcSamplingPostOrder extends WMSBaseService
 
 			String storerKey = orderHashMap.get("STORERKEY");
 
-			String iPrint= DBHelper.getValue( "select count(1) from orderdetail where orderkey=? and openqty<>0", new String[]{ORDERKEY}, "0");
+			String iPrint= DBHelper.getStringValue( "select count(1) from orderdetail where orderkey=? and openqty<>0", new String[]{ORDERKEY}, "0");
 			if (!iPrint.equals("0"))
 				if (LegecyUtilHelper.isNull(PRINTER))
 					 throw new Exception("有扣减数量,必须选择打印机");
 
-			String totalOriginalQty= DBHelper.getValue( "select SUM(CONVERT(decimal(11,5), SUSR1))  from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			String totalOriginalQty= DBHelper.getStringValue( "select SUM(CONVERT(decimal(11,5), SUSR1))  from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
 
 			if(UtilHelper.decimalStrCompare(KEEPQTY,
 					totalOriginalQty)>0) throw new Exception("留样量不允许大于取样量");

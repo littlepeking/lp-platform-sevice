@@ -23,6 +23,8 @@ import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,7 +32,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
-public class ReceivingByLpn extends WMSBaseService{
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
+public class ReceivingByLpnService extends WMSBaseService{
 
     public void execute(ServiceDataHolder serviceDataHolder){
 

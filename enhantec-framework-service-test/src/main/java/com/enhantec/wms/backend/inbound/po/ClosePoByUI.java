@@ -45,9 +45,9 @@ public class ClosePoByUI extends WMSBaseService {
             Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"未找到");
             
-            String user = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String user = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     esignatureKey
-            }, String.class, "关闭人");
+            }, "关闭人");
             DBHelper.executeUpdate( "UPDATE WMS_PO SET STATUS = ? WHERE POKEY = ? ",
                     new Object[]{"11",poKey});
             DBHelper.executeUpdate( "UPDATE WMS_PO_DETAIL SET STATUS = ? WHERE POKEY = ? ",

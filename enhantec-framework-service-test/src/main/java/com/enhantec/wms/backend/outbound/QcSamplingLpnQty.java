@@ -70,7 +70,7 @@ public class QcSamplingLpnQty extends WMSBaseService
 
 			//String STORERKEY=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
 
-			String Status= DBHelper.getValue( "select Status from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE}, "");
+			String Status= DBHelper.getStringValue( "select Status from orders where orderkey=? and ohtype=?", new String[]{ORDERKEY,ORDERTYPE}, "");
 			if (LegecyUtilHelper.isNull(Status)) throw new Exception("未找到在库取样单("+ORDERKEY+")");
 			if (Status.compareTo("90")>=0)  throw new Exception("在库取样单("+ORDERKEY+")已关闭,不能继续操作");
 
@@ -104,7 +104,7 @@ public class QcSamplingLpnQty extends WMSBaseService
 			BigDecimal baseUomOpenQty= UOM.UOMQty2StdQty( packKey, uom,bOpenQty);
 
 			if (baseUomOpenQty.compareTo(availableQty)>0) throw new Exception("扣样量不允许大于可用库存");
-			orderlinenumber= DBHelper.getValue( "select max(orderlinenumber) from orderdetail where orderkey=?"
+			orderlinenumber= DBHelper.getStringValue( "select max(orderlinenumber) from orderdetail where orderkey=?"
 					,new String[]{ORDERKEY}, "0");
 			orderlinenumber=Integer.toString(Integer.parseInt(orderlinenumber)+1);
 			while (orderlinenumber.length()<5) orderlinenumber="0"+orderlinenumber;
@@ -190,8 +190,8 @@ public class QcSamplingLpnQty extends WMSBaseService
 //				TOTAL2 = String.valueOf(mapList.stream().map(calcOPENQTY).reduce(BigDecimal.ZERO, (BigDecimal subtotal, BigDecimal element) -> subtotal.add(element)));
 //			}
 
-			TOTAL1= DBHelper.getValue( "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
-			TOTAL3= DBHelper.getValue( "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL1= DBHelper.getStringValue( "select SUM(CONVERT(decimal(11,5), SUSR1)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
+			TOTAL3= DBHelper.getStringValue( "SELECT SUM(CONVERT(decimal(11,5), OPENQTY)) from ORDERDETAIL where orderkey=?",new String[]{ORDERKEY},"0");
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 			theOutDO.setAttribValue("TOTAL1", TOTAL1);//取样量合计

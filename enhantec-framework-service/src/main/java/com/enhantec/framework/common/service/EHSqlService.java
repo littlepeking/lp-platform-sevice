@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -65,6 +66,17 @@ public class EHSqlService {
     public Map<String, Object> selectOne(String statement, List<Object> params) {
         return SqlRunner.db().selectOne(convertQuestionMark2Index(statement),params.toArray());
     }
+
+    public Object selectValue(String statement, List<Object> params) {
+        return SqlRunner.db().selectObj(convertQuestionMark2Index(statement),params.toArray());
+    }
+
+    public Object selectValue(String statement, Object[] params) {
+        return selectValue(statement, Arrays.asList(params));
+    }
+
+
+
 
 //    @DS(DSConstants.DS_PARAM)
 //    @Transactional(propagation = Propagation.REQUIRES_NEW)

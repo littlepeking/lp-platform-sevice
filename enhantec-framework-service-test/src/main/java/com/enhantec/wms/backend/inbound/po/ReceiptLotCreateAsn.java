@@ -154,7 +154,7 @@ public class ReceiptLotCreateAsn extends WMSBaseService
 			
 			
 			
-			String STORERKEY= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+			String STORERKEY= DBHelper.getStringValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
 
 			//ASN由小到大扣减PO库存
 			List<Map<String,String>> aPOKEY= DBHelper.executeQuery(

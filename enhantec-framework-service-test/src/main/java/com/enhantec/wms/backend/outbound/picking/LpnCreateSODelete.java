@@ -43,7 +43,7 @@ public class LpnCreateSODelete extends WMSBaseService {
             String lpn = serviceDataHolder.getInputDataAsMap().getString("lpn");
             String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString( "ESIGNATUREKEY");
 
-            String status = DBHelper.getValue("select status from orders where orderKey = ?",
+            String status = DBHelper.getStringValue("select status from orders where orderKey = ?",
                     new String[]{orderKey},"");
             if(LegecyUtilHelper.isNull(status)) throw new Exception("未找到发货订单"+orderKey);
 //            if(status.compareTo("09")>0) throw new Exception("发货订单"+orderKey+"已经关闭或发货，不能继续操作");
@@ -82,7 +82,7 @@ public class LpnCreateSODelete extends WMSBaseService {
             DBHelper.executeUpdate("DELETE ORDERDETAIL WHERE ORDERKEY = ? and ORDERLINENUMBER=?",
                     new Object[]{orderKey, orderLineNumber});
 
-            String linesCount = DBHelper.getValue("SELECT COUNT(1) FROM ORDERDETAIL WHERE ORDERKEY = ? ",
+            String linesCount = DBHelper.getStringValue("SELECT COUNT(1) FROM ORDERDETAIL WHERE ORDERKEY = ? ",
                     new Object[]{orderKey},"订单行数").toString();
 
 

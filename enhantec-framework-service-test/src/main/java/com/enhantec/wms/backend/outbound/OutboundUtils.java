@@ -1,7 +1,5 @@
 package com.enhantec.wms.backend.outbound;
 
-import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
@@ -80,7 +78,7 @@ public class OutboundUtils {
 //        shipProcess.execute();
 //        context.theEXEDataObjectStack.pop();
 
-        String status = DBHelper.getValue( "select status from orders where orderkey = ? ", new Object[]{orderKey}, String.class, "订单");
+        String status = DBHelper.getStringValue( "select status from orders where orderkey = ? ", new Object[]{orderKey}, "订单");
 
         if (!"95".equals(status))
             ExceptionHelper.throwRfFulfillLogicException("订单" + orderKey + "发运失败，请确认可用库存量大于订单量");

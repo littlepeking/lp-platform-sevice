@@ -66,7 +66,7 @@ public class ReceiptLotRefused  extends WMSBaseService
 			DBHelper.executeUpdate( "update PRERECEIPTCHECK set STATUS=?,editwho=?,editdate=? where RECEIPTLOT=?",  new String[]{"9",userid, LocalDateTime.now().toString(),RECEIPTLOT});
 
 			
-			String RECEIPTKEY= DBHelper.getValue( "SELECT RECEIPTKEY FROM RECEIPT WHERE STATUS=? AND EXTERNRECEIPTKEY=? AND TYPE=?", new String[]{"0",RECEIPTLOT,"101"}, "");
+			String RECEIPTKEY= DBHelper.getStringValue( "SELECT RECEIPTKEY FROM RECEIPT WHERE STATUS=? AND EXTERNRECEIPTKEY=? AND TYPE=?", new String[]{"0",RECEIPTLOT,"101"}, "");
 			if (!LegecyUtilHelper.isNull(RECEIPTKEY))
 			{//关闭收货单
 				DBHelper.executeUpdate("update RECEIPT set status=?,editwho=?,editdate=? where RECEIPTKEY=?"

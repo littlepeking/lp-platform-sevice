@@ -64,7 +64,7 @@ public class ReceiptDetailDelete extends WMSBaseService
 			UDTRN.TITLE03="容器条码/箱号";    UDTRN.CONTENT03=receiptDetailHashMap.get("TOID");
 			UDTRN.Insert( userid);
 
-			String totalLines = DBHelper.getValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? ",new String[]{RECEIPTKEY},"0");
+			String totalLines = DBHelper.getStringValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? ",new String[]{RECEIPTKEY},"0");
 
 
 			ServiceDataMap theOutDO = new ServiceDataMap();

@@ -135,12 +135,12 @@ CODE	DESCRIPTION
                 throw new FulfillLogicException("采购订单(%1),物料代码(%2)无有效记录",PoKey,Sku);
 
 
-            String STORERKEY= DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","STORERKEY"}, null);
-            String WAREHOUSECODE= DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","WAREHOUSE"}, null);
-            SKUDESCR= DBHelper.getValue( "SELECT DESCR FROM SKU WHERE STORERKEY=? AND SKU=?", new String[]{STORERKEY,Sku}, "");
+            String STORERKEY= DBHelper.getStringValue( "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","STORERKEY"}, null);
+            String WAREHOUSECODE= DBHelper.getStringValue( "select UDF1 from Codelkup where ListName=? and Code=?", new String[]{"SYSSET","WAREHOUSE"}, null);
+            SKUDESCR= DBHelper.getStringValue( "SELECT DESCR FROM SKU WHERE STORERKEY=? AND SKU=?", new String[]{STORERKEY,Sku}, "");
 
-            String CurDate= DBHelper.getValue( " select FORMAT(getdate(), 'yyMMdd')", new String[]{}, null);
-            String CurLot= DBHelper.getValue( "select RECEIPTLOT from PRERECEIPTCHECK where RECEIPTLOT like '"+WAREHOUSECODE+CurDate+"%' and STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=?", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
+            String CurDate= DBHelper.getStringValue( " select FORMAT(getdate(), 'yyMMdd')", new String[]{}, null);
+            String CurLot= DBHelper.getStringValue( "select RECEIPTLOT from PRERECEIPTCHECK where RECEIPTLOT like '"+WAREHOUSECODE+CurDate+"%' and STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=?", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
             if (CurLot!=null)
             {
                 ResultType="Load";
@@ -148,7 +148,7 @@ CODE	DESCRIPTION
             }
             if (ResultType==null)
             {
-                String OldLot= DBHelper.getValue( "select RECEIPTLOT from PRERECEIPTCHECK where STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=? order by RECEIPTLOT", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
+                String OldLot= DBHelper.getStringValue( "select RECEIPTLOT from PRERECEIPTCHECK where STATUS=? and FROMSKU=? and FROMLOT=? AND POSUPPLIERCODE=? order by RECEIPTLOT", new String[]{"0",Sku,FromLot,mPO.get("SUPPLIER")}, null);
                 if (OldLot!=null)
                 {
                     if (!LegecyUtilHelper.CheckYesNo(ForceNew))
@@ -224,13 +224,13 @@ CODE	DESCRIPTION
                 String[] eSignatureKeys = ESIGNATUREKEY.split(":");
                 String eSignatureKey1=eSignatureKeys[0];
                 String eSignatureKey2=eSignatureKeys[1];
-                String isConfirmedUser1 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser1 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey1
-                }, String.class, "确认人");
+                }, "确认人");
 
-                String isConfirmedUser2 = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+                String isConfirmedUser2 = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                         eSignatureKey2
-                }, String.class, "复核人");
+                }, "复核人");
                 UDTRN.FROMTYPE="采购收货检查-创建批次";
                 UDTRN.FROMTABLENAME="PRERECEIPTCHECK";
                 UDTRN.FROMKEY=ReceiptLot;

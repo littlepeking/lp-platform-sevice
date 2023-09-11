@@ -92,8 +92,8 @@ public class ESignatureService extends WMSBaseService
      */
     public static String getUserByEsignaturkey(String ESIGNATUREKEY) throws Exception{
         if(ESIGNATUREKEY.indexOf(':')==-1){
-            return DBHelper.getValue("select SIGN FROM ESIGNATURE where SERIALKEY =?",
-                    new Object[]{ESIGNATUREKEY},String.class,null);
+            return DBHelper.getStringValue("select SIGN FROM ESIGNATURE where SERIALKEY =?",
+                    new Object[]{ESIGNATUREKEY},null);
         }else {
             String[] eSignatureKeys = ESIGNATUREKEY.split(":");
             String User1=getUserByEsignaturkey(eSignatureKeys[0]);

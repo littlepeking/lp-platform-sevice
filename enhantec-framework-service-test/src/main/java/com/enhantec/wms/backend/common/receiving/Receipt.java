@@ -245,7 +245,7 @@ public class Receipt {
         String receiptDetailSql="SELECT A.RECEIPTKEY " +
                 " FROM RECEIPT A,RECEIPTDETAIL B " +
                 "WHERE A.RECEIPTKEY=B.RECEIPTKEY AND B.QTYEXPECTED>0 AND A.STATUS IN ('0','5') AND B.STATUS='0' AND B.TOID=? ";
-        String receiptKey = DBHelper.getValue( receiptDetailSql, new Object[]{newLpn}, "", false);
+        String receiptKey = DBHelper.getStringValue( receiptDetailSql, new Object[]{newLpn}, "", false);
         if(!UtilHelper.isEmpty(receiptKey)){
             throw new Exception("容器条码/箱号"+newLpn+"在收货单"+receiptKey+"中已存在待收货明细");
         }
@@ -254,7 +254,7 @@ public class Receipt {
 
         Map<String,String> newReceiptDetail = new HashMap<>();
 
-        String storerKey = java.lang.String.valueOf(DBHelper.getValue( "select UDF1 from Codelkup where ListName=? and Code=?",
+        String storerKey = java.lang.String.valueOf(DBHelper.getStringValue( "select UDF1 from Codelkup where ListName=? and Code=?",
                 new Object[]{"SYSSET","STORERKEY"}, "默认货主"));
         newReceiptDetail.put("STORERKEY", storerKey);
         newReceiptDetail.put("TYPE", receiptHashMap.get("TYPE"));
@@ -318,7 +318,7 @@ public class Receipt {
         newReceiptDetail.put("CONDITIONCODE", "OK");
         newReceiptDetail.put("QTYRECEIVED", "0");
 
-        String thisReceiptLineNumber = DBHelper.getValue( "SELECT CASE WHEN MAX(RECEIPTLINENUMBER) IS NULL THEN 0 ELSE MAX(RECEIPTLINENUMBER) END FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
+        String thisReceiptLineNumber = DBHelper.getStringValue( "SELECT CASE WHEN MAX(RECEIPTLINENUMBER) IS NULL THEN 0 ELSE MAX(RECEIPTLINENUMBER) END FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
                 new Object[]{receiptHashMap.get("RECEIPTKEY")}, "").toString();
         String newReceiptLineNumber = LegecyUtilHelper.To_Char(new Integer(thisReceiptLineNumber) + 1, 5);
         newReceiptDetail.put("RECEIPTLINENUMBER", newReceiptLineNumber);
@@ -452,7 +452,7 @@ public class Receipt {
         newReceiptDetail.put("SUSR7", isOpened);//是否开封
         newReceiptDetail.put("SUSR6", originalReceiptLineHashMap.get("SUSR6"));
 
-        String maxBarrelNumber = DBHelper.getValue( "SELECT CASE WHEN MAX(BARRELNUMBER) IS NULL THEN 0 ELSE MAX(BARRELNUMBER) END FROM RECEIPTDETAIL WHERE ORIGINALLINENUMBER IS NOT NULL AND RECEIPTKEY = ? ",
+        String maxBarrelNumber = DBHelper.getStringValue( "SELECT CASE WHEN MAX(BARRELNUMBER) IS NULL THEN 0 ELSE MAX(BARRELNUMBER) END FROM RECEIPTDETAIL WHERE ORIGINALLINENUMBER IS NOT NULL AND RECEIPTKEY = ? ",
                 new Object[]{originalReceiptLineHashMap.get("RECEIPTKEY")}, "").toString();
         String nextBarrelNumber = LegecyUtilHelper.To_Char(new Integer(maxBarrelNumber) + 1, 3);
         newReceiptDetail.put("BARRELNUMBER", nextBarrelNumber); //桶号
@@ -501,7 +501,7 @@ public class Receipt {
         newReceiptDetail.put("CONDITIONCODE", "OK");
         newReceiptDetail.put("QTYRECEIVED", "0");
 
-        String thisReceiptLineNumber = DBHelper.getValue( "SELECT CASE WHEN MAX(RECEIPTLINENUMBER) IS NULL THEN 0 ELSE MAX(RECEIPTLINENUMBER) END FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
+        String thisReceiptLineNumber = DBHelper.getStringValue( "SELECT CASE WHEN MAX(RECEIPTLINENUMBER) IS NULL THEN 0 ELSE MAX(RECEIPTLINENUMBER) END FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
                 new Object[]{originalReceiptLineHashMap.get("RECEIPTKEY")}, "").toString();
         String newReceiptLineNumber = LegecyUtilHelper.To_Char(new Integer(thisReceiptLineNumber) + 1, 5);
         newReceiptDetail.put("RECEIPTLINENUMBER", newReceiptLineNumber);
@@ -576,7 +576,7 @@ public class Receipt {
         //调用API执行收货。
         serviceDataHolder.getInputDataAsMap().setAttribValue("LPN", insertedReceiptDetail.get("TOID"));//箱号
         serviceDataHolder.getInputDataAsMap().setAttribValue("RECEIPTKEY", insertedReceiptDetail.get("RECEIPTKEY"));//ASN收货单号
-        serviceDataHolder.getInputDataAsMap().setAttribValue("LOC", insertedReceiptDetail.get("TOLOC"));
+//        serviceDataHolder.getInputDataAsMap().setAttribValue("LOC", insertedReceiptDetail.get("TOLOC"));
         //收货时需要传入UOMQTY，非STD QTY
         serviceDataHolder.getInputDataAsMap().setAttribValue("GROSSWGTRECEIVED", grossWgt);//毛量
         serviceDataHolder.getInputDataAsMap().setAttribValue("TAREWGTRECEIVED", tareWgt);//皮重
@@ -584,7 +584,7 @@ public class Receipt {
         /////
         serviceDataHolder.getInputDataAsMap().setAttribValue("REGROSSWGT", "");//复称重量
         serviceDataHolder.getInputDataAsMap().setAttribValue("ESIGNATUREKEY", "PL");//ESIGNATUREKEY
-        ServiceHelper.executeService( "ReceivingWithSignature", serviceDataHolder);
+        ServiceHelper.executeService( "receivingWithSignature", serviceDataHolder);
 
 
         Map<String,String> receiptTypeHashMap = CodeLookup.getCodeLookupByKey( "RECEIPTYPE", insertedReceiptDetail.get("TYPE"));
@@ -614,8 +614,8 @@ public class Receipt {
                 new Object[]{receiptKey});
         for (Map<String, String> record : records) {
             //当明细收货行>=汇总行的数量时，汇总行应更新已接收
-            String qtyExpected = DBHelper.getValue( "SELECT QTYEXPECTED FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ?",
-                    new Object[]{receiptKey, record.get("ORIGINALLINENUMBER")}, String.class, "");
+            String qtyExpected = DBHelper.getStringValue( "SELECT QTYEXPECTED FROM RECEIPTDETAIL WHERE RECEIPTKEY = ? AND RECEIPTLINENUMBER = ?",
+                    new Object[]{receiptKey, record.get("ORIGINALLINENUMBER")}, "");
             //收货量已达到汇总行要求并且该汇总行下没有未收货的收货行
             if(UtilHelper.decimalStrCompare(qtyExpected,record.get("QTYRECEIVED")) <= 0 && !record.get("STATUS").equals("0")){
                 Receipt.updateReceiptDetailStatus(receiptKey,record.get("ORIGINALLINENUMBER"),"9");
@@ -648,8 +648,8 @@ public class Receipt {
 
     public static String getProjectCodeByOrderKey(String orderKey){
         if (UtilHelper.isEmpty(orderKey))return " ";
-        String projectCodeByOrderKey = DBHelper.getValue( "SELECT NOTES FROM ORDERS WHERE ORDERKEY = ? ",
-                new Object[]{orderKey}, String.class, "");
+        String projectCodeByOrderKey = DBHelper.getStringValue( "SELECT NOTES FROM ORDERS WHERE ORDERKEY = ? ",
+                new Object[]{orderKey}, "");
         return projectCodeByOrderKey;
     }
 }

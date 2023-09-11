@@ -119,8 +119,8 @@ public class LpnCreateSOAdd extends WMSBaseService {
             udtrn.CONTENT03 = lpnOrSN;
             udtrn.Insert(userId);
 
-            orderDetailCount = DBHelper.getValue( "SELECT COUNT(ORDERKEY) FROM ORDERDETAIL WHERE ORDERKEY = ?",
-                    new Object[]{orderHashMap.get("ORDERKEY")}, String.class, "");
+            orderDetailCount = DBHelper.getStringValue( "SELECT COUNT(ORDERKEY) FROM ORDERDETAIL WHERE ORDERKEY = ?",
+                    new Object[]{orderHashMap.get("ORDERKEY")}, "");
 
 
             ServiceDataMap theOutDO = new ServiceDataMap();
@@ -181,7 +181,7 @@ public class LpnCreateSOAdd extends WMSBaseService {
 
         String userId = EHContextHelper.getUser().getUsername();
 
-        String orderLineNumber = DBHelper.getValue( "select max(orderlinenumber) from orderdetail where orderkey=?"
+        String orderLineNumber = DBHelper.getStringValue( "select max(orderlinenumber) from orderdetail where orderkey=?"
                 ,new String[]{orderKey}, "0");
         orderLineNumber=Integer.toString(Integer.parseInt(orderLineNumber)+1);
         while (orderLineNumber.length()<5) orderLineNumber="0"+orderLineNumber;

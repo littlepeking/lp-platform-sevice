@@ -46,7 +46,7 @@ public class CreateRelease  extends WMSBaseService {
             //放行单号
             String RELEASEKEY= LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter( "QA_RELEASE"),10);  //获取新的请检单号
 
-            String STORERKEY= DBHelper.getValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
+            String STORERKEY= DBHelper.getStringValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
             
             //取批次的相关信息
             Map<String,String> FromLot= DBHelper.getRecord( "SELECT A.BUSR4 SKUTYPE, A.SKU , LA.ELOTTABLE02, LA.ELOTTABLE04, LA.ELOTTABLE03 QUALITYSTATUS,LA.ELOTTABLE01,LA.ELOTTABLE19,LA.ELOTTABLE20,LA.ELOTTABLE07, " +
@@ -62,7 +62,7 @@ public class CreateRelease  extends WMSBaseService {
 
             if(!UtilHelper.isEmpty(FromLot.get("ELOTTABLE08"))) {
 
-                SUPPLIERNAME = DBHelper.getValue( "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{FromLot.get("ELOTTABLE08")}," ");
+                SUPPLIERNAME = DBHelper.getStringValue( "SELECT s.COMPANY SUPPLIERNAME FROM STORER s WHERE s.[TYPE] = 5 AND s.STORERKEY = ? ", new String[]{FromLot.get("ELOTTABLE08")}," ");
 
             }
 

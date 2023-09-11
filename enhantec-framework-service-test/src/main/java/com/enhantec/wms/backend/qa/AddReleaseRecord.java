@@ -59,7 +59,7 @@ public class AddReleaseRecord extends WMSBaseService {
             //放行单号
             String releaseKey = LegecyUtilHelper.To_Char(IdGenerationHelper.getNCounter( "QA_RELEASE"),10);  //获取新的请检单号
 
-            String STORERKEY= DBHelper.getValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
+            String STORERKEY= DBHelper.getStringValue( "SELECT UDF1 FROM CODELKUP WHERE LISTNAME=? AND CODE=?", new String[]{"SYSSET","STORERKEY"}, ""); //取仓库默认货主
 
 
             Map<String,String> skuHashMap = SKU.findById(mapJson.get("SKU"),true);
@@ -130,7 +130,7 @@ public class AddReleaseRecord extends WMSBaseService {
             DBHelper.executeUpdate( "UPDATE ENTERPRISE.ELOTATTRIBUTE SET ELOTTABLE13=ELOTTABLE13 + ?  WHERE ELOT=? "
                     , new Object[]{mapJson.get("ISRETESTRELEASE"),lottable06});
          /*   //elottable21 记录首次放行质量状态
-            String elotTable21=DBHelper.getValue("select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
+            String elotTable21=DBHelper.getStringValue("select ELOTTABLE21 from ENTERPRISE.ELOTATTRIBUTE where ELOT=?",new Object[]{
                     lottable06)
             },"批属性");
             if (UtilHelper.isEmpty(elotTable21)){

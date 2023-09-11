@@ -19,9 +19,7 @@
 
 package com.enhantec.framework.common.utils;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 
 public class EHDateTimeHelper {
 
@@ -33,5 +31,17 @@ public class EHDateTimeHelper {
         } else {
             return null;
         }
+    }
+
+    public static String getCurrentDateStr(){
+        return LocalDateTime.now().toString();
+    }
+
+    public static LocalDateTime getCurrentDate(){
+        return LocalDateTime.now();
+    }
+
+    public static LocalDateTime getCurrentDate11AM(){
+        return LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0));
     }
 }

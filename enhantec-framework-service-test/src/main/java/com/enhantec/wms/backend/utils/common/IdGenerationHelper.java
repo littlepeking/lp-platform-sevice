@@ -1,6 +1,5 @@
 package com.enhantec.wms.backend.utils.common;
 
-import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Map;
@@ -45,8 +44,8 @@ public class IdGenerationHelper {
         Map<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
         if(!checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.WAREHOUSE配置不符合要求");
         String warehouseCode = UtilHelper.nvl(lotRuleCodelkup.get("UDF1"),"");
-        String skuTypeCode= DBHelper.getValue( "select udf4 from codelkup a,sku s where a.listname=? and a.code=s.busr4 and s.sku=?", new String[]{"SKUTYPE1",sku}, "");//根据sku获批号是sm||sc
-        String CurDate= DBHelper.getValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
+        String skuTypeCode= DBHelper.getStringValue( "select udf4 from codelkup a,sku s where a.listname=? and a.code=s.busr4 and s.sku=?", new String[]{"SKUTYPE1",sku}, "");//根据sku获批号是sm||sc
+        String CurDate= DBHelper.getStringValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
         String prefix = warehouseCode+skuTypeCode+CurDate;
         String num = String.valueOf(getNCounter( prefix));
         while (num.length()<Integer.parseInt(lotRuleCodelkup.get("UDF3"))) num="0"+num;
@@ -57,7 +56,7 @@ public class IdGenerationHelper {
         Map<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","WAREHOUSE");
         if(!checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.WAREHOUSE配置不符合要求");
         String warehouseCode = UtilHelper.nvl(lotRuleCodelkup.get("UDF1"),"");
-        String CurDate= DBHelper.getValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
+        String CurDate= DBHelper.getStringValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
         String prefix = warehouseCode+CurDate;
         String num = String.valueOf(getNCounter( prefix));
 
@@ -81,7 +80,7 @@ public class IdGenerationHelper {
         Map<String,String> lotRuleCodelkup= CodeLookup.getCodeLookupByKey("SYSSET","SNPREFIX");
         if(!checkWareHouseOrBoxPrefixConf(lotRuleCodelkup)) throw new Exception("SYSSET.SNPREFIX配置不符合要求");
         String warehouseCode = UtilHelper.nvl(lotRuleCodelkup.get("UDF1"),"");
-        String CurDate= DBHelper.getValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
+        String CurDate= DBHelper.getStringValue( " select FORMAT(getdate(), ?)", new String[]{UtilHelper.nvl(lotRuleCodelkup.get("UDF2")," ")}, "");
         String prefix = warehouseCode+CurDate;
         String num = String.valueOf(getNCounter( prefix));
         while (num.length()<Integer.parseInt(lotRuleCodelkup.get("UDF3"))) num="0"+num;
@@ -206,7 +205,7 @@ public class IdGenerationHelper {
 
     public static int getEnterpriseNCounter( String UserID, String name, int LpnCount) throws Exception
     {
-        String iCnt= DBHelper.getValue( "SELECT KEYCOUNT FROM ENTERPRISE.NCOUNTER WHERE KEYNAME=?", new String[]{name}, null);
+        String iCnt= DBHelper.getStringValue( "SELECT KEYCOUNT FROM ENTERPRISE.NCOUNTER WHERE KEYNAME=?", new String[]{name}, null);
         if (iCnt==null)
         {
             DBHelper.executeUpdate( "INSERT INTO ENTERPRISE.NCOUNTER(KEYNAME,KEYCOUNT,ADDWHO,EDITWHO) VALUES(?,?,?,?)"

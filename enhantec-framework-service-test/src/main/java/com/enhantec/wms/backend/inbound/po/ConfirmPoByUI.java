@@ -40,9 +40,9 @@ public class ConfirmPoByUI extends WMSBaseService {
             String SQL="SELECT * FROM WMS_PO WHERE  POKEY = ?  ";
             Map<String, String>  record = DBHelper.getRecord( SQL, new Object[]{ poKey},"变更单");
             if( record == null ) ExceptionHelper.throwRfFulfillLogicException("调拨单为"+poKey+"未找到");
-            String isConfirmedUser = DBHelper.getValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
+            String isConfirmedUser = DBHelper.getStringValue( "SELECT SIGN FROM ESIGNATURE e WHERE SERIALKEY = ? ", new Object[]{
                     esignatureKey
-            }, String.class, "复核人");
+            }, "复核人");
             String status = record.get("CONFIRMSTATUS");
             switch (status){
                 case "0":

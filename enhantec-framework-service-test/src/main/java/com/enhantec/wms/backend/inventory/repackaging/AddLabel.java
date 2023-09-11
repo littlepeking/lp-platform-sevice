@@ -90,8 +90,8 @@ public class AddLabel extends WMSBaseService {
 
             if(UtilHelper.isEmpty(currentPackLoc)) ExceptionHelper.throwRfFulfillLogicException("数据异常，找不到订单行关联的分装间");
 
-            String storerKey= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
-            String repackReceiptType= DBHelper.getValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKRECT"}, "");
+            String storerKey= DBHelper.getStringValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","STORERKEY"}, "");
+            String repackReceiptType= DBHelper.getStringValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKRECT"}, "");
             // String repackOrderType= XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"SYSSET","REPACKORDT"}, "");
             if(UtilHelper.isEmpty(repackReceiptType)) ExceptionHelper.throwRfFulfillLogicException("分装入库单类型代码未设置");
 
@@ -127,7 +127,7 @@ public class AddLabel extends WMSBaseService {
             }
 
             //分装入库单行号
-            Object preReceiptLineNumberObj = DBHelper.getValue("SELECT MAX(RECEIPTLINENUMBER) FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
+            Object preReceiptLineNumberObj = DBHelper.getStringValue("SELECT MAX(RECEIPTLINENUMBER) FROM RECEIPTDETAIL WHERE RECEIPTKEY = ?",
                 new Object[]{currentRepackReceiptKey},"");
 
             int receiptLineNumberInt = preReceiptLineNumberObj == null ? 1 : Integer.parseInt(preReceiptLineNumberObj.toString())+1;

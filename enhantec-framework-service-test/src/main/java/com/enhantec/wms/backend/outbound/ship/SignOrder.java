@@ -44,8 +44,8 @@ public class SignOrder extends WMSBaseService {
 
             String esignaturekey = serviceDataHolder.getInputDataAsMap().getString("esignaturekey");
 
-            String signedUser = DBHelper.getValue("SELECT SIGN FROM Esignature WHERE SERIALKEY = ?",new Object[]{
-                    esignaturekey},String.class, "电子签名");
+            String signedUser = DBHelper.getStringValue("SELECT SIGN FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+                    esignaturekey}, "电子签名");
 
             DBHelper.executeUpdate( "UPDATE orders SET SUSR5 = ? where orderkey = ? ",
                     new Object[]{signedUser, orderKey});

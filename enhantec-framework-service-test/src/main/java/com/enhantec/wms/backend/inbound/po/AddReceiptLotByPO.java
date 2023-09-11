@@ -56,7 +56,7 @@ public class AddReceiptLotByPO extends WMSBaseService
 		    String POLINENUMBER=POKEY.substring(iPoKey+1);
 		    POKEY=POKEY.substring(0,iPoKey);
 
-			int Cnt= (int) DBHelper.getRawValue( "SELECT COUNT(1) FROM PRERECEIPTCHECK WHERE FROMKEY=? AND FROMLINENO=? AND RECEIPTLOT=?"
+			long Cnt = DBHelper.getCount( "SELECT COUNT(1) FROM PRERECEIPTCHECK WHERE FROMKEY=? AND FROMLINENO=? AND RECEIPTLOT=?"
 					, new Object[]{POKEY,POLINENUMBER,RECEIPTLOT});
 			if (Cnt>0)
 		        throw new FulfillLogicException("记录已存在,不能重复生成");

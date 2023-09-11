@@ -45,7 +45,7 @@ public class ReceiptLotRefusedExec  extends WMSBaseService
 		    String ESIGNATUREKEY= serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
 
 
-			String lot = DBHelper.getValue( "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
+			String lot = DBHelper.getStringValue( "select STATUS,PROCESSINGMODE from PRERECEIPTCHECK where RECEIPTLOT=?"
 					, new String[]{RECEIPTLOT},String.format("收货批次(%1)未找到",RECEIPTLOT));
 			if (!lot.equals("91"))
 		        throw new FulfillLogicException("当前状态不支持此操作");
@@ -63,7 +63,7 @@ public class ReceiptLotRefusedExec  extends WMSBaseService
 		    UDTRN.FROMKEY3="";
 		    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
 		    UDTRN.TITLE02="处理方式";    UDTRN.CONTENT02=lot;
-		    UDTRN.TITLE03="处理方式名称";    UDTRN.CONTENT03= DBHelper.getValue( "select description from codelkup where listname=? and code=?", new String[]{"PROCEMODE",lot}, "") ;
+		    UDTRN.TITLE03="处理方式名称";    UDTRN.CONTENT03= DBHelper.getStringValue( "select description from codelkup where listname=? and code=?", new String[]{"PROCEMODE",lot}, "") ;
 		    UDTRN.Insert( userid);
 			
 			//String STORERKEY=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");

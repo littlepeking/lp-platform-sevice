@@ -43,8 +43,8 @@ public class CloseSO extends WMSBaseService {
 
             String orderKey = serviceDataHolder.getInputDataAsMap().getString("ORDERKEY");
             String esignatureKey = serviceDataHolder.getInputDataAsMap().getString("ESIGNATUREKEY");
-            String notes = DBHelper.getValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
-                    esignatureKey},String.class,"电子签名");
+            String notes = DBHelper.getStringValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
+                    esignatureKey},"电子签名");
 
             Map<String, String>  orderInfo = Orders.findByOrderKey(orderKey,true);
 

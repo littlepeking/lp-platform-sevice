@@ -10,7 +10,6 @@ import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.wms.backend.utils.print.Labels;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -270,7 +269,7 @@ public class InventoryHelper {
     }
     public static void checkLocQuantityLimit( String loc) throws Exception {
         String locNumQuery = "select COUNT(*) from LOTXLOCXID l,idnotes i where l.LOC=? and i.id=l.ID and l.QTY>0";
-        String  locNum = DBHelper.getValue( locNumQuery, new Object[]{loc},"库位LPN数量");
+        String  locNum = DBHelper.getStringValue( locNumQuery, new Object[]{loc},"库位LPN数量");
         Map<String,String> locHash= Loc.findById(loc,true);
         String stackLimit = UtilHelper.isEmpty(locHash.get("STACKLIMIT"))?"0":locHash.get("STACKLIMIT");
         String footPrint = UtilHelper.isEmpty(locHash.get("FOOTPRINT"))?"0":locHash.get("FOOTPRINT");
