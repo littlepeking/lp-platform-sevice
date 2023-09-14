@@ -138,6 +138,55 @@ public class LotxLocxId {
 
 
     /**
+     * 目前仅用于收货后回填IDNOTES.LOT
+     * @param storerKey
+     * @param fromId
+     * @param checkExist
+     * @return
+     */
+    public static Map<String, String> findWithoutCheckIDNotes(String storerKey, String fromId, boolean checkExist) {
+
+        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
+                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
+                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
+                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",b.LOTTABLE01 PACKKEY"
+                + " from  lotxlocxid a,v_lotattribute b "
+                + " where a.lot=b.lot and a.qty>0 and a.STORERKEY = ？ and a.ID = ? ";
+        Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{storerKey, fromId},"库存明细");
+        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("在货主"+storerKey+"下未找到容器条码"+fromId);
+        return record;
+    }
+
+    /**
+     * 目前仅用于收货后回填IDNOTES.LOT
+     * @param storerKey
+     * @param fromId
+     * @param checkExist
+     * @return
+     */
+    public static Map<String, Object> findRawRecordWithoutCheckIDNotes(String storerKey, String fromId, boolean checkExist) {
+
+        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
+                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
+                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
+                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",b.LOTTABLE01 PACKKEY"
+                + " from  lotxlocxid a,v_lotattribute b "
+                + " where a.lot=b.lot and a.qty>0 and a.STORERKEY = ？ and a.ID = ? ";
+        Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{storerKey, fromId},"库存明细");
+        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("在货主"+storerKey+"下未找到容器条码"+fromId);
+        return record;
+    }
+
+
+    /**
      * 查找待发运明细
 
 

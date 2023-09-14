@@ -38,6 +38,10 @@ public class ServiceDataMap {
         return data.get(paramName) != null ? (BigDecimal) data.get(paramName) : defaultValue;
     }
 
+    public Boolean getBoolean(String paramName){
+        Object val = data.get(paramName);
+        return val != null ? val instanceof Boolean ? (Boolean) val: Boolean.valueOf(val.toString()): false;
+    }
 
 
     public Object getAttribValue(String paramName){

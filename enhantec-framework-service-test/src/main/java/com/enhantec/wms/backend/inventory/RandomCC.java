@@ -32,7 +32,7 @@ public class RandomCC extends WMSBaseService {
             String rfccKey = serviceDataHolder.getInputDataAsMap().getString("CCKEY");
             if ("".equals(rfccKey)) {
                 try {
-                    String cckey = IdGenerationHelper.generateID( "", "M", 9);
+                    String cckey = IdGenerationHelper.generateID(  "M", 9);
                     DBHelper.executeUpdate( "insert into CC(whseid,cckey,storerkey,SKU,LOC,ADDWHO,EDITWHO,status)\n" +
                             "           values(?,?,?,?,?,?,?,'9')", new Object[]{serviceDataHolder.getInputDataAsMap().getString("whseid"),
                             cckey,
@@ -47,7 +47,7 @@ public class RandomCC extends WMSBaseService {
                 }
             } else if ("1".equals(serviceDataHolder.getInputDataAsMap().getString("EXISTIN"))) {
                 try {
-                    String ccdetilkey = IdGenerationHelper.generateID( "", "MD", 8);
+                    String ccdetilkey = IdGenerationHelper.generateID( "MD", 8);
                     String packkey = serviceDataHolder.getInputDataAsMap().getString("PACKKEY");
                     String uom = serviceDataHolder.getInputDataAsMap().getString("UOM");
                     BigDecimal CCQTY = UOM.UOMQty2StdQty( packkey, uom, new BigDecimal(serviceDataHolder.getInputDataAsMap().getString("CCQTY")));
@@ -73,7 +73,7 @@ public class RandomCC extends WMSBaseService {
                 }
             } else if ("0".equals(serviceDataHolder.getInputDataAsMap().getString("EXISTIN"))) {
                 try {
-                    String ccdetilkey = IdGenerationHelper.generateID( "", "MD", 8);
+                    String ccdetilkey = IdGenerationHelper.generateID( "MD", 8);
                     BigDecimal Qty = new BigDecimal(serviceDataHolder.getInputDataAsMap().getString("CCQTY")).subtract(new BigDecimal(serviceDataHolder.getInputDataAsMap().getString("NETWGT")));
                     //LPN,LOC,BARRELDESCR,SKU,LOT,NETWGT,NOTES,CCKEY,WHSEID,STORERKEY,CCQTY,EXISTIN
                     DBHelper.executeUpdate( "insert into CCDETAIL " +

@@ -226,7 +226,7 @@ public class QcSamplingPostOrder extends WMSBaseService
 			 */
 			Map<String,String> sampleLpnPrefix = CodeLookup.getCodeLookupByKey( "SYSSET","SAMPLEPRE");
 			String prefix = sampleLpnPrefix.get("UDF1");
-			String ypLpn = IdGenerationHelper.generateID(userid,prefix,1);
+			String ypLpn = IdGenerationHelper.generateID(prefix,1);
 
 
 			//插入样品标签，会插入一个无重量的样品标签

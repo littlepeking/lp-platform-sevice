@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.utils.common;
 
+import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.service.EHSqlService;
 import com.enhantec.framework.common.utils.EHContextHelper;
 
@@ -103,6 +104,10 @@ public class DBHelper {
             return (Long) record.values().toArray()[0];
         }
 
+    }
+
+    public static BigDecimal getDecimalValue(String sql, Object[] params) throws DBResourceException{
+               return (BigDecimal) getRawValue(sql,params,"",true);
     }
 
     /**
@@ -419,16 +424,16 @@ public class DBHelper {
 //
 //    }
 
-    public static void executeUpdate(String sql, Object[] params) throws DBResourceException {
+    public static boolean executeUpdate(String sql, Object[] params) throws DBResourceException {
 
         List<Object> paramList = Arrays.asList(params);
-        executeUpdate(sql,paramList);
+        return executeUpdate(sql,paramList);
 
     }
 
-    public static void executeUpdate(String sql, List<Object> params) {
+    public static boolean executeUpdate(String sql, List<Object> params) {
 
-        EHContextHelper.getBean(EHSqlService.class).executeUpdate(sql, params);
+       return EHContextHelper.getBean(EHSqlService.class).executeUpdate(sql, params);
     }
 
 
@@ -443,5 +448,49 @@ public class DBHelper {
 //        return  EHContextHelper.getBean(EHSqlService.class).executeUpdate(EHContextHelper.getDataSource(orgId), statement,params);
 //
 //    }
+
+
+    // New insert function
+    public static boolean insert(String tableName, Map<String, Object> fields) {
+        if (tableName == null || tableName.isEmpty() || fields == null || fields.isEmpty()) {
+            // Handle invalid input
+            throw new EHApplicationException("Invalid input for insert row without table name and fields information.");
+        }
+
+        StringBuilder sqlBuilder = new StringBuilder("INSERT INTO ");
+        sqlBuilder.append(tableName).append(" (");
+
+        List<Object> paramsList = new ArrayList<>();
+
+        boolean firstField = true;
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
+            String fieldName = entry.getKey();
+            Object value = entry.getValue();
+
+            if (!firstField) {
+                sqlBuilder.append(", ");
+            } else {
+                firstField = false;
+            }
+
+            sqlBuilder.append(fieldName);
+            paramsList.add(value);
+        }
+
+        sqlBuilder.append(") VALUES (");
+        for (int i = 0; i < paramsList.size(); i++) {
+            if (i > 0) {
+                sqlBuilder.append(", ");
+            }
+            sqlBuilder.append("?");
+        }
+        sqlBuilder.append(")");
+
+        String sql = sqlBuilder.toString();
+        Object[] params = paramsList.toArray();
+
+        return executeUpdate(sql, params);
+
+    }
 
 }

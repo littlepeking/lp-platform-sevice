@@ -6,7 +6,9 @@ import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AbnormalCloseASN extends WMSBaseService {
 
 

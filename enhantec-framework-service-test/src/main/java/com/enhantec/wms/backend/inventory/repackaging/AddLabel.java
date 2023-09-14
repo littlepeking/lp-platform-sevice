@@ -104,7 +104,7 @@ public class AddLabel extends WMSBaseService {
                 RECEIPT.put("EDITWHO", userid);
                 RECEIPT.put("RECEIPTKEY", currentRepackReceiptKey);
                 //生成分装单号
-                String repackExternReceiptKey = IdGenerationHelper.generateID( userid,orderKey+"F",2);
+                String repackExternReceiptKey = IdGenerationHelper.generateID( orderKey+"F",2);
                 RECEIPT.put("EXTERNRECEIPTKEY", repackExternReceiptKey);
                 RECEIPT.put("STATUS", "0");
                 RECEIPT.put("ALLOWAUTORECEIPT", "0");

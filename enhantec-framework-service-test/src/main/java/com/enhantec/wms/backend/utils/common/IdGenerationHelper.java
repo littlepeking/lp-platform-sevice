@@ -96,7 +96,7 @@ public class IdGenerationHelper {
         return  prefix + num;
     }
 
-    public static String generateID( String UserID, String prefix, int sequenceLength) throws Exception
+    public static String generateID(String prefix, int sequenceLength)
     {
         String num = String.valueOf(getNCounter( prefix));
 
@@ -105,7 +105,7 @@ public class IdGenerationHelper {
         return  prefix + num;
     }
 
-    public static String generateIDByKeyName( String UserID, String keyName, int sequenceLength) throws Exception
+    public static String generateIDByKeyName(String keyName, int sequenceLength)
     {
         String num = String.valueOf(getNCounter( keyName));
 
@@ -114,7 +114,7 @@ public class IdGenerationHelper {
         return  num;
     }
 
-    public static String createLpnOrBoxIdFromExistingLpn( String lpn) throws Exception {
+    public static String createLpnOrBoxIdFromExistingLpn( String lpn) {
         //该LPN下，生成下一个分装桶的字母
         int alphabetOffset = getNCounter( lpn)-1;
         if(alphabetOffset>1000) ExceptionHelper.throwRfFulfillLogicException("分装最多允许1000次");
@@ -133,7 +133,7 @@ public class IdGenerationHelper {
         return  lpn + nextString;
     }
 
-    public static String createSubReceiptLot( String receiptLot, String lotTypePrefix) throws Exception
+    public static String createSubReceiptLot( String receiptLot, String lotTypePrefix)
     {
         if(UtilHelper.isEmpty(lotTypePrefix)) ExceptionHelper.throwRfFulfillLogicException("子批次前缀不能为空，否则会和容器条码的NCOUNTER使用的号段冲突");
         int alphabetOffset = getNCounter( receiptLot+lotTypePrefix)-1;

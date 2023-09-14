@@ -25,7 +25,7 @@ public class GenerateCCReportID extends WMSBaseService {
         try {
 
 
-            String reportKey = IdGenerationHelper.generateID( "CCREPORTKEY", "", 10);
+            String reportKey = IdGenerationHelper.generateID( "CCREPORTKEY",  10);
 
             DBHelper.executeUpdate( "update cc set REPORTKEY = ? where REPORTKEY is null ", new Object[]{
                     reportKey});

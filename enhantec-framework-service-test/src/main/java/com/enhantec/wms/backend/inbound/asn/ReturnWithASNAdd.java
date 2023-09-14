@@ -214,7 +214,7 @@ public class ReturnWithASNAdd extends WMSBaseService {
             newReceiptHashMap.put("EDITWHO", userid);
             newReceiptHashMap.put("RECEIPTKEY", receiptKey);
             //生成退货单号
-            exReceiptKey = IdGenerationHelper.generateID( userid, "RET", 10);
+            exReceiptKey = IdGenerationHelper.generateID( "RET", 10);
             newReceiptHashMap.put("EXTERNRECEIPTKEY", exReceiptKey);
             newReceiptHashMap.put("STATUS", "0");
             newReceiptHashMap.put("ALLOWAUTORECEIPT", "0");

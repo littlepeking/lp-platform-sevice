@@ -457,7 +457,7 @@ public class Repackaging extends WMSBaseService {
 
             //更新拣货明细为已拣货
 //            context.theSQLMgr.searchTriggerLibrary("PickDetail")).preUpdateFire();
-            DBHelper.executeQuery("UPDATE PICKDETAIL SET LOC = ?, TOLOC = ?, STATUS = ? WHERE PICKDETAILKEY = ? ",
+            DBHelper.executeUpdate("UPDATE PICKDETAIL SET LOC = ?, TOLOC = ?, STATUS = ? WHERE PICKDETAILKEY = ? ",
             new Object[]{ "PICKTO"
             , "PICKTO"
             , "5" //status: 拣货完成

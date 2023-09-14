@@ -149,9 +149,9 @@ public class InventoryHelper {
 
     private static ServiceDataMap buildParams( String STORERKEY, String SKU, String LOT, String status, String FROMID, String TOID, String FROMLOC, String TOLOC, String TOBEMOVEDQTY) {
         ServiceDataMap moveDO = new ServiceDataMap();
-        Object nullData = "null";
-        String zeroData = "0";
-        moveDO.setAttribValue("ItrnSysId",nullData);
+//        Object nullData = "null";
+//        String zeroData = "0";
+//        moveDO.setAttribValue("ItrnSysId",nullData);
         moveDO.setAttribValue("StorerKey",STORERKEY);
         moveDO.setAttribValue("Sku",SKU);
         moveDO.setAttribValue("Lot",LOT);
@@ -159,6 +159,7 @@ public class InventoryHelper {
         moveDO.setAttribValue("FromLoc",FROMLOC);
         moveDO.setAttribValue("ToLoc",TOLOC);
         moveDO.setAttribValue("ToID",TOID);
+        moveDO.setAttribValue("Qty",TOBEMOVEDQTY);
 
         if(isOnlyLocOnHold(FROMLOC,LOT,FROMID)){
             moveDO.setAttribValue("Status","OK");
@@ -166,37 +167,36 @@ public class InventoryHelper {
             moveDO.setAttribValue("Status",status);
         }
 
-        moveDO.setAttribValue("lottable01",nullData);
-        moveDO.setAttribValue("lottable02",nullData);
-        moveDO.setAttribValue("lottable03",nullData);
-        moveDO.setAttribValue("lottable04",nullData);
-        moveDO.setAttribValue("lottable05",nullData);
-        moveDO.setAttribValue("lottable06",nullData);
-        moveDO.setAttribValue("lottable07",nullData);
-        moveDO.setAttribValue("lottable08",nullData);
-        moveDO.setAttribValue("lottable09",nullData);
-        moveDO.setAttribValue("lottable10",nullData);
-        moveDO.setAttribValue("casecnt",zeroData);
-        moveDO.setAttribValue("innerpack",zeroData);
-        moveDO.setAttribValue("Qty",TOBEMOVEDQTY);
-        moveDO.setAttribValue("pallet",zeroData);
-        moveDO.setAttribValue("cube",zeroData);
-        moveDO.setAttribValue("grosswgt",zeroData);
-        moveDO.setAttribValue("netwgt",zeroData);
-        moveDO.setAttribValue("otherunit1",zeroData);
-        moveDO.setAttribValue("otherunit2",zeroData);
-        moveDO.setAttribValue("SourceKey","");
-        moveDO.setAttribValue("SourceType","Console Move");
-        moveDO.setAttribValue("PackKey","");
-        moveDO.setAttribValue("UOM","");
-        moveDO.setAttribValue("UOMCalc","1");
-        moveDO.setAttribValue("EffectiveDate",nullData);
-        moveDO.setAttribValue("Dummy1",nullData);
-        moveDO.setAttribValue("Dummy2",nullData);
-        moveDO.setAttribValue("Dummy3",nullData);
-        moveDO.setAttribValue("TOGROSSWT","0");
-        moveDO.setAttribValue("TONETWT","0");
-        moveDO.setAttribValue("TOTAREWT","0");
+//        moveDO.setAttribValue("lottable01",nullData);
+//        moveDO.setAttribValue("lottable02",nullData);
+//        moveDO.setAttribValue("lottable03",nullData);
+//        moveDO.setAttribValue("lottable04",nullData);
+//        moveDO.setAttribValue("lottable05",nullData);
+//        moveDO.setAttribValue("lottable06",nullData);
+//        moveDO.setAttribValue("lottable07",nullData);
+//        moveDO.setAttribValue("lottable08",nullData);
+//        moveDO.setAttribValue("lottable09",nullData);
+//        moveDO.setAttribValue("lottable10",nullData);
+//        moveDO.setAttribValue("casecnt",zeroData);
+//        moveDO.setAttribValue("innerpack",zeroData);
+//        moveDO.setAttribValue("pallet",zeroData);
+//        moveDO.setAttribValue("cube",zeroData);
+//        moveDO.setAttribValue("grosswgt",zeroData);
+//        moveDO.setAttribValue("netwgt",zeroData);
+//        moveDO.setAttribValue("otherunit1",zeroData);
+//        moveDO.setAttribValue("otherunit2",zeroData);
+//        moveDO.setAttribValue("SourceKey","");
+//        moveDO.setAttribValue("SourceType","Console Move");
+//        moveDO.setAttribValue("PackKey","");
+//        moveDO.setAttribValue("UOM","");
+//        moveDO.setAttribValue("UOMCalc","1");
+//        moveDO.setAttribValue("EffectiveDate",nullData);
+//        moveDO.setAttribValue("Dummy1",nullData);
+//        moveDO.setAttribValue("Dummy2",nullData);
+//        moveDO.setAttribValue("Dummy3",nullData);
+//        moveDO.setAttribValue("TOGROSSWT","0");
+//        moveDO.setAttribValue("TONETWT","0");
+//        moveDO.setAttribValue("TOTAREWT","0");
 
 
         return  moveDO;
