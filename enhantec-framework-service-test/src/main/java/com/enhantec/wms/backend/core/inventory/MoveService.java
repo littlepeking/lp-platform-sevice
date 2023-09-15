@@ -15,7 +15,7 @@
  *
  *******************************************************************************/
 
-package com.enhantec.wms.core.inventory;
+package com.enhantec.wms.backend.core.inventory;
 
 
 import com.enhantec.framework.common.exception.EHApplicationException;
@@ -34,7 +34,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.HashMap;
 
-@Service
+@Service("core.inventory.move")
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class MoveService extends WMSBaseService {
 

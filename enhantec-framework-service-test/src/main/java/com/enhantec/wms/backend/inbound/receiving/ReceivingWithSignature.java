@@ -18,7 +18,7 @@ import com.enhantec.wms.backend.inbound.asn.utils.ReceiptValidationHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
-import com.enhantec.wms.core.inbound.ReceivingByLpnService;
+import com.enhantec.wms.backend.core.inbound.ReceivingByIdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
 public class ReceivingWithSignature extends WMSBaseService {
 
-    private final ReceivingByLpnService receivingByLpnServiceService;
+    private final ReceivingByIdService receivingByIdService;
 
     public void execute(ServiceDataHolder serviceDataHolder) {
 
@@ -159,7 +159,7 @@ public class ReceivingWithSignature extends WMSBaseService {
                 new String[]{receiptDetailInfo.get("PACKKEY"), RECEIPTKEY, LPN});
 
         //调用系统API进行收货操作.
-        receivingByLpnServiceService.execute(new ServiceDataHolder(new ServiceDataMap(
+        receivingByIdService.execute(new ServiceDataHolder(new ServiceDataMap(
                 new HashMap(){{
                     put("RECEIPTKEY",RECEIPTKEY);
                     put("LPN",LPN);

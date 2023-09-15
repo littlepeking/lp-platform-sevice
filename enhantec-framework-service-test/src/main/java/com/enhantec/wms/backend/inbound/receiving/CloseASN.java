@@ -3,6 +3,7 @@ package com.enhantec.wms.backend.inbound.receiving;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.receiving.Receipt;
+import com.enhantec.wms.backend.core.ServiceNames;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
@@ -68,7 +69,7 @@ public class CloseASN extends WMSBaseService {
             String notes = DBHelper.getStringValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignatureKey},"电子签名");
 
-            ServiceHelper.executeService("closeASNService",
+            ServiceHelper.executeService(ServiceNames.CORE_INBOUND_CLOSE_ASN,
                     new ServiceDataHolder(
                             new ServiceDataMap(
                             new HashMap<String,Object>(){{

@@ -15,7 +15,7 @@
  *
  *******************************************************************************/
 
-package com.enhantec.wms.core.inbound;
+package com.enhantec.wms.backend.core.inbound;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHDateTimeHelper;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
-@Service
+@Service("core.inbound.closeASN")
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class CloseASNService extends WMSBaseService {
 

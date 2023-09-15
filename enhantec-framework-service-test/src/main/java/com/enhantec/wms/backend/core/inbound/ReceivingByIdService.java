@@ -14,7 +14,7 @@
  *             Email: john.wang_ca@hotmail.com
  * 
  *******************************************************************************/
-package com.enhantec.wms.core.inbound;
+package com.enhantec.wms.backend.core.inbound;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.receiving.Receipt;
@@ -31,9 +31,9 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Service
+@Service("core.inbound.receivingById")
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
-public class ReceivingByLpnService extends WMSBaseService{
+public class ReceivingByIdService extends WMSBaseService{
 
     public void execute(ServiceDataHolder serviceDataHolder){
 

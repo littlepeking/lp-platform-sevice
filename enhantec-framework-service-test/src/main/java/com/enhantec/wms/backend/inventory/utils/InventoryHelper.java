@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inventory.utils;
 
+import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.UOM;
@@ -8,6 +9,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.wms.backend.utils.print.Labels;
+import com.enhantec.wms.backend.core.ServiceNames;
 
 import java.math.BigDecimal;
 
@@ -117,14 +119,9 @@ public class InventoryHelper {
             }
         }
 
-        ServiceDataMap moveDO = buildParams( fromIdHashMap.get("STORERKEY"), fromIdHashMap.get("SKU"), fromIdHashMap.get("LOT"), status, fromId, toId, fromLoc, toLoc, deltaNetWgt.toPlainString());
+        ServiceDataMap moveDO = buildParams( fromIdHashMap.get("STORERKEY"), fromId, toId,  toLoc, deltaNetWgt);
 
-        //todo
-//        context.theEXEDataObjectStack.push(moveDO);
-//        Process rfMove = context.searchObjectLibrary("NSPITRNADDMOVE"));
-//        rfMove.execute();
-//        context.theEXEDataObjectStack.pop();
-
+        ServiceHelper.executeService(ServiceNames.CORE_INV_MOVE,new ServiceDataHolder(moveDO));
 
         if (!toId.equalsIgnoreCase(fromId)){//拆分SN时 不一致
             ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(fromIdHashMap.get("SKU"),toId,fromId);
@@ -147,57 +144,16 @@ public class InventoryHelper {
 
     }
 
-    private static ServiceDataMap buildParams( String STORERKEY, String SKU, String LOT, String status, String FROMID, String TOID, String FROMLOC, String TOLOC, String TOBEMOVEDQTY) {
+    private static ServiceDataMap buildParams( String storerKey, String fromId, String toId, String toLoc, BigDecimal qtyToBeMoved) {
         ServiceDataMap moveDO = new ServiceDataMap();
-//        Object nullData = "null";
-//        String zeroData = "0";
-//        moveDO.setAttribValue("ItrnSysId",nullData);
-        moveDO.setAttribValue("StorerKey",STORERKEY);
-        moveDO.setAttribValue("Sku",SKU);
-        moveDO.setAttribValue("Lot",LOT);
-        moveDO.setAttribValue("FromID",FROMID);
-        moveDO.setAttribValue("FromLoc",FROMLOC);
-        moveDO.setAttribValue("ToLoc",TOLOC);
-        moveDO.setAttribValue("ToID",TOID);
-        moveDO.setAttribValue("Qty",TOBEMOVEDQTY);
-
-        if(isOnlyLocOnHold(FROMLOC,LOT,FROMID)){
-            moveDO.setAttribValue("Status","OK");
-        }else{
-            moveDO.setAttribValue("Status",status);
-        }
-
-//        moveDO.setAttribValue("lottable01",nullData);
-//        moveDO.setAttribValue("lottable02",nullData);
-//        moveDO.setAttribValue("lottable03",nullData);
-//        moveDO.setAttribValue("lottable04",nullData);
-//        moveDO.setAttribValue("lottable05",nullData);
-//        moveDO.setAttribValue("lottable06",nullData);
-//        moveDO.setAttribValue("lottable07",nullData);
-//        moveDO.setAttribValue("lottable08",nullData);
-//        moveDO.setAttribValue("lottable09",nullData);
-//        moveDO.setAttribValue("lottable10",nullData);
-//        moveDO.setAttribValue("casecnt",zeroData);
-//        moveDO.setAttribValue("innerpack",zeroData);
-//        moveDO.setAttribValue("pallet",zeroData);
-//        moveDO.setAttribValue("cube",zeroData);
-//        moveDO.setAttribValue("grosswgt",zeroData);
-//        moveDO.setAttribValue("netwgt",zeroData);
-//        moveDO.setAttribValue("otherunit1",zeroData);
-//        moveDO.setAttribValue("otherunit2",zeroData);
-//        moveDO.setAttribValue("SourceKey","");
-//        moveDO.setAttribValue("SourceType","Console Move");
-//        moveDO.setAttribValue("PackKey","");
-//        moveDO.setAttribValue("UOM","");
-//        moveDO.setAttribValue("UOMCalc","1");
-//        moveDO.setAttribValue("EffectiveDate",nullData);
-//        moveDO.setAttribValue("Dummy1",nullData);
-//        moveDO.setAttribValue("Dummy2",nullData);
-//        moveDO.setAttribValue("Dummy3",nullData);
-//        moveDO.setAttribValue("TOGROSSWT","0");
-//        moveDO.setAttribValue("TONETWT","0");
-//        moveDO.setAttribValue("TOTAREWT","0");
-
+        moveDO.setAttribValue("storerKey",storerKey);
+//        moveDO.setAttribValue("Sku",SKU);
+//        moveDO.setAttribValue("Lot",LOT);
+//        moveDO.setAttribValue("FromLoc",FROMLOC);
+        moveDO.setAttribValue("fromId",fromId);
+        moveDO.setAttribValue("toLoc",toLoc);
+        moveDO.setAttribValue("toId",toId);
+        moveDO.setAttribValue("qty",qtyToBeMoved);
 
         return  moveDO;
     }
