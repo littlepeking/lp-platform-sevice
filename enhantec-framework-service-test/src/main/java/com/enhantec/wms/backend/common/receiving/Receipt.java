@@ -206,7 +206,7 @@ public class Receipt {
                 lpnHisInfo.put("ISOPENED","1");//根据唯一码进行收货，说明箱子已经拆封
                 singleSerialNumber = snList[0];
 
-                newLpn = IdGenerationHelper.generateIDByKeyName(EHContextHelper.getUser().getUsername(), "WMSBOX",10);
+                newLpn = IdGenerationHelper.generateIDByKeyName( "WMSBOX",10);
             }
 
         }else{

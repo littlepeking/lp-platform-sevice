@@ -93,7 +93,7 @@ public class ExcuteChange extends WMSBaseService {
 
     private void doTransfer( String fromLottable06,String toSku,String toLottable06) throws Exception {
 
-        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName( EHContextHelper.getUser().getUsername(),"EHTRANSFER",9);
+        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName("EHTRANSFER",9);
 
         String storerKey = String.valueOf(DBHelper.getStringValue( "select UDF1 from Codelkup where ListName=? and Code=?",
                 new Object[]{"SYSSET","STORERKEY"}, "默认货主"));

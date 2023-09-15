@@ -26,7 +26,7 @@ public class IDGenerationService extends WMSBaseService {
             String keylength = serviceDataHolder.getInputDataAsMap().getString("KEYLENGTH");
 
             String userid = EHContextHelper.getUser().getUsername();
-            String key = IdGenerationHelper.generateIDByKeyName( userid, keyName, Integer.parseInt(keylength));
+            String key = IdGenerationHelper.generateIDByKeyName( keyName, Integer.parseInt(keylength));
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             theOutDO.setAttribValue("Key", key);

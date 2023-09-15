@@ -134,7 +134,6 @@ public class MoveService extends WMSBaseService {
             qtyPickChangeFromId = BigDecimal.ZERO;
             qtyAllocChangeToId = BigDecimal.ZERO;
 
-
             BigDecimal maxPickQty = pdQty.add(qtyAvailableInFromId);
             if(qtyToBeMoved.compareTo(maxPickQty)>0){
                 throw new EHApplicationException("拣货量" + qtyToBeMoved + "大于当前拣货容器" + fromId + "的最大可拣货量(分配量+可用量)"+ maxPickQty);
@@ -227,15 +226,14 @@ public class MoveService extends WMSBaseService {
         if (DBHelper.getCount("SELECT COUNT(1) FROM ID WHERE ID = ?", new String[]{toId})==0)
         {
             Map<String,Object> id = new HashMap<>();
-            id.put("addwho", EHContextHelper.getUser().getUsername());
-            id.put("editwho", EHContextHelper.getUser().getUsername());
+            id.put("ADDWHO", EHContextHelper.getUser().getUsername());
+            id.put("EDITWHO", EHContextHelper.getUser().getUsername());
             id.put("ID", toId);
             id.put("QTY", qtyToBeMoved);
             id.put("STATUS", toIdStatus);
             id.put("PACKKEY", fromIdHashMap.get("PACKKEY"));
             DBHelper.insert("ID", id);
-        }
-        else{
+        } else {
             DBHelper.executeUpdate( "UPDATE ID SET QTY=QTY+?,EDITWHO=?,EDITDATE=? WHERE ID=?",
                     new Object[]{qtyToBeMoved,EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),toId});
         }
@@ -279,8 +277,8 @@ public class MoveService extends WMSBaseService {
         if (fromIdStatus != toIdStatus)
         {
             //TODO: 当前实现性能上不是最优，后续应改为直接根据fromid-toid的数量并考虑fromIdStatus、toIdStatus来更新冻结数量
-            BigDecimal QtyOnHold = DBHelper.getDecimalValue("SELECT SUM(QTY) FROM LOTXLOCXID WHERE STATUS='HOLD' AND LOT=?", new Object[]{lot});
-            DBHelper.executeUpdate("UPDATE LOT SET QTYONHOLD=?,EDITWHO=?,EDITDATE=? WHERE LOT=?", new Object[]{QtyOnHold,EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),lot});
+            BigDecimal qtyOnHold = DBHelper.getDecimalValue("SELECT SUM(QTY) FROM LOTXLOCXID WHERE STATUS='HOLD' AND LOT=?", new Object[]{lot});
+            DBHelper.executeUpdate("UPDATE LOT SET QTYONHOLD=?,EDITWHO=?,EDITDATE=? WHERE LOT=?", new Object[]{qtyOnHold,EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),lot});
         }
     }
 }

@@ -205,7 +205,7 @@ public class IDNotes {
                     //问题:在多个唯一码不绑定箱号拣货的情况下，多个sn会绑定到一个流水箱号的拣货明细上，考虑到灵活性今后可改为每个SN单独生成一个拣货明细。因为如果需要删除拣货明细，目前会删除该流水箱号下的所有SN。
                     //解决方案：目前前台对于不绑定箱号的情况，扫描唯一码会直接提交当前唯一码给后台进行拣货操作，此时ORDERTYPE UDF2应该选择3短拣后拣货明细自动拆分为两条,以保证当前任务剩下的待拣货数量可以持续完成。
                     //带来的问题：由于短拣配置是在订单类型级别配置，因此对于非唯一码管理的物料也必须是拆分任务的方式，需要在RF手工删除多余的任务，但这个问题对现场操作影响不大，暂不改为订单类型+是否唯一码进行短拣配置。
-                    toid = IdGenerationHelper.generateIDByKeyName( EHContextHelper.getUser().getUsername(), "WMSBOX", 11);
+                    toid = IdGenerationHelper.generateIDByKeyName( "WMSBOX", 11);
                     barrelNumber = fromIDNotes.get("BARRELNUMBER");
                 }
             } else {
@@ -221,7 +221,7 @@ public class IDNotes {
                         }
                     }else {
                         //如果直接移动唯一码，则箱号使用流水码
-                        toid = IdGenerationHelper.generateIDByKeyName( EHContextHelper.getUser().getUsername(), "WMSBOX", 10);
+                        toid = IdGenerationHelper.generateIDByKeyName( "WMSBOX", 10);
                     }
                     barrelNumber = fromIDNotes.get("BARRELNUMBER");//箱号暂时赋值为原箱号，因为对唯一码意义并不大
                 }else {//批次管理物料

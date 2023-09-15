@@ -131,7 +131,7 @@ public class SplitReceiptLot extends WMSBaseService {
 
     private void doReceiptLotTransfer( String  lottable06Splitted, String[] idArray) throws Exception {
 
-        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName( EHContextHelper.getUser().getUsername(),"EHTRANSFER",9);
+        String newTransferKey = "S"+IdGenerationHelper.generateIDByKeyName("EHTRANSFER",9);
 
         String storerKey = String.valueOf(DBHelper.getStringValue( "select UDF1 from Codelkup where ListName=? and Code=?",
                             new Object[]{"SYSSET","STORERKEY"}, "默认货主"));
