@@ -17,7 +17,7 @@
 
 package com.enhantec.wms.backend.core;
 
-public class ServiceNames {
+public class WMSCoreServiceNames {
     public static final String CORE_INBOUND_CLOSE_ASN =  "core.inbound.closeASNService";
     public static final String CORE_INBOUND_RECEIVING_BY_ID =  "core.inbound.receivingById";
     public static final String CORE_INV_MOVE = "core.inventory.move";

@@ -220,7 +220,6 @@ public class UtilHelper {
 //    }
 
 
-
     public static BigDecimal str2Decimal(Object num, String errMsgPrefix, boolean allowEmpty) {
 
         if ((num == null || UtilHelper.isEmpty(num.toString())) && !allowEmpty) {

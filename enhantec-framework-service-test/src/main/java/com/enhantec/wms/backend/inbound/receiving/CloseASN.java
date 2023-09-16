@@ -1,9 +1,10 @@
 package com.enhantec.wms.backend.inbound.receiving;
 
+import com.enhantec.wms.backend.common.WMSServiceNames;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.receiving.Receipt;
-import com.enhantec.wms.backend.core.ServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
@@ -14,12 +15,15 @@ import com.enhantec.wms.backend.utils.common.*;
 import java.math.BigDecimal;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
-@Service
+@Service(WMSServiceNames.EHCloseASN)
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class CloseASN extends WMSBaseService {
 
 
@@ -69,7 +73,7 @@ public class CloseASN extends WMSBaseService {
             String notes = DBHelper.getStringValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignatureKey},"电子签名");
 
-            ServiceHelper.executeService(ServiceNames.CORE_INBOUND_CLOSE_ASN,
+            ServiceHelper.executeService(WMSCoreServiceNames.CORE_INBOUND_CLOSE_ASN,
                     new ServiceDataHolder(
                             new ServiceDataMap(
                             new HashMap<String,Object>(){{

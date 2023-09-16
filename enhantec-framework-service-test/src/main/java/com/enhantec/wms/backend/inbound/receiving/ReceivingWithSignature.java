@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.inbound.receiving;
 
+import com.enhantec.wms.backend.common.WMSServiceNames;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.Const;
 import com.enhantec.wms.backend.common.base.CodeLookup;
@@ -53,9 +54,9 @@ import java.util.stream.Collectors;
  *
  */
 
-@Service
+@Service(WMSServiceNames.ReceivingWithSignature)
 @RequiredArgsConstructor
-@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRES_NEW)
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class ReceivingWithSignature extends WMSBaseService {
 
     private final ReceivingByIdService receivingByIdService;

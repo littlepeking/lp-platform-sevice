@@ -1,5 +1,7 @@
 package com.enhantec.wms.backend.framework;
 
+import com.enhantec.wms.backend.utils.common.UtilHelper;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +37,9 @@ public class ServiceDataMap {
     }
 
     public BigDecimal getDecimalValue(String paramName,BigDecimal defaultValue){
-        return data.get(paramName) != null ? (BigDecimal) data.get(paramName) : defaultValue;
+        return data.get(paramName) != null ? UtilHelper.str2Decimal(data.get(paramName),"服务参数",false) : defaultValue;
     }
+
 
     public Boolean getBoolean(String paramName){
         Object val = data.get(paramName);

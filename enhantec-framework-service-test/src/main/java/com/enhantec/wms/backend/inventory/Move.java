@@ -1,6 +1,7 @@
 package com.enhantec.wms.backend.inventory;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.wms.backend.common.WMSServiceNames;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
@@ -13,12 +14,18 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.inventory.utils.InventoryHelper;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+@Service(WMSServiceNames.EHMove)
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class Move extends WMSBaseService {
 	/**
 	--注册方法
@@ -27,12 +34,6 @@ public class Move extends WMSBaseService {
 	values ('EHMove', 'com.enhantec.sce.inventory', 'enhantec', 'Move','TRUE','JOHN','JOHN'
 	, 'sendDelimiter,ptcid,userid,taskId,databasename,appflag,recordType,server,SKU,FROMID,TOID,FROMLOC,TOLOC,TOBEMOVEDQTY, ESIGNATUREKEY','0.10','0');
     **/
-
-	private static final long serialVersionUID = 1L;
-
-	public Move()
-	{
-	}
 
 	public void execute(ServiceDataHolder serviceDataHolder){
 		String userid = EHContextHelper.getUser().getUsername();

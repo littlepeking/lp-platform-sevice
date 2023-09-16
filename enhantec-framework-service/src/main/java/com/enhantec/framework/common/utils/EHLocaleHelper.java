@@ -19,6 +19,7 @@
 
 package com.enhantec.framework.common.utils;
 
+import com.enhantec.framework.common.exception.EHApplicationException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceAware;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -37,7 +38,13 @@ public class EHLocaleHelper implements MessageSourceAware {
     }
 
     public static String getMsg(String msgKey, String... args) {
+
+        try {
             return messageSource.getMessage(msgKey, args, LocaleContextHolder.getLocale());
+        }catch (Exception e){
+            //Only used in WMS now
+            return String.format(msgKey, args);
+        }
     }
 
     @Deprecated

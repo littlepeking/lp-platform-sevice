@@ -7,8 +7,11 @@ import com.enhantec.wms.backend.utils.common.ServiceHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Service("EHAbnormalCloseASN")
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class AbnormalCloseASN extends WMSBaseService {
 
 
