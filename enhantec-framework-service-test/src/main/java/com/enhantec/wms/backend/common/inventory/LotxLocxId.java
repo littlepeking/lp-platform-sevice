@@ -201,22 +201,6 @@ public class LotxLocxId {
         return record;
     }
 
-    public static Map<String, Object> findRawRecordWithoutCheckIDNotesAngQty(String storerKey, String loc, String id, boolean checkExist) {
-
-        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
-                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
-                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                + ",b.LOTTABLE01 PACKKEY"
-                + " FROM  LOTXLOCXID a,V_LOTATTRIBUTE b "
-                + " WHERE a.LOT=b.LOT AND a.STORERKEY = ? AND a.LOC = ? AND a.ID = ? ";
-        Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{storerKey, loc, id},"库存明细",checkExist);
-        return record;
-    }
-
 
     /**
      * 查找待发运明细
@@ -279,6 +263,17 @@ public class LotxLocxId {
         if(idHashMap==null) throw new Exception("未找容器条码"+id+"的可用库存");
 
         return idHashMap;
+    }
+
+
+    /**
+     * 清除0库存的ID记录（为兼容INFOR WMS）
+     */
+    public static boolean removeZeroQtyId(String storerKey, String id) {
+
+        return DBHelper.executeUpdate(
+                "DELETE FROM LOTXLOCXID A WHERE A.STORERKEY = ? AND A.QTY = 0 and A.ID = ? "
+                , new Object[]{storerKey, id});
     }
 
 }

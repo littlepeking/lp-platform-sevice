@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 @Service("core.inventory.move")
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
@@ -93,11 +94,18 @@ public class MoveService extends WMSBaseService {
             throw new EHApplicationException("容器已在目标库位，不需要移动");
 
 
-        Map<String,Object> toIdHashMap = toId == null ? null : LotxLocxId.findRawRecordWithoutCheckIDNotesAngQty(storerKey, toLoc, toId,false);
+        //清除数量为0的ID记录及相关的冻结记录。
+        if(LotxLocxId.removeZeroQtyId(storerKey,  toId)){
+            //TODO: 冻结表增加根据STORERKEY进行筛选的条件，因为可能不同货主或者客户使用到了相同的LPN，比如用客户出厂时就已定义好的箱号作为LPN的情况，但目前的INVENTORYHOLD表并没有做区分
+            DBHelper.executeUpdate("DELETE FROM INVENTORYHOLD WHERE ID = ? ", new Object[]{toId});
+
+            DBHelper.executeUpdate("DELETE FROM ID WHERE ID = ? ", new Object[]{toId});
+        }
+
+        Map<String,Object> toIdHashMap = LotxLocxId.findRawRecordWithoutCheckIDNotes(storerKey, toLoc, toId,false);
 
         if(!fromId.equals(toId) && toIdHashMap != null && !toIdHashMap.get("LOT").equals(fromIdHashMap.get("LOT"))){
             throw new EHApplicationException("目标容器的批和待移动的容器批次不同，不允许移动");
-
         }
 
         boolean isFromIdHold = 0 < DBHelper.getCount("SELECT COUNT(1) FROM INVENTORYHOLD WHERE HOLD = 1 AND ID = ? ", new Object[]{fromId});
@@ -189,15 +197,11 @@ public class MoveService extends WMSBaseService {
         }
 
         //更新LOTCLOCXID表中的库存数据
-        DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTY = QTY - ?, QTYALLOCATED = QTYALLOCATED - ?,QTYPICKED = QTYPICKED - ?,EDITWHO = ?,EDITDATE = ? WHERE STORERKEY = ? AND Loc = ? AND ID = ?"
-                , new Object[]{qtyToBeMoved, qtyAllocChangeFromId, qtyPickChangeFromId, EHContextHelper.getUser().getUsername(), EHDateTimeHelper.getCurrentDate(), storerKey, fromLoc, fromId});
+        DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTY = QTY - ?, QTYALLOCATED = QTYALLOCATED - ?,QTYPICKED = QTYPICKED - ?,EDITWHO = ?,EDITDATE = ? WHERE STORERKEY = ? AND  Loc = ? AND ID = ?"
+                , new Object[]{qtyToBeMoved, qtyAllocChangeFromId, qtyPickChangeFromId, EHContextHelper.getUser().getUsername(), EHDateTimeHelper.getCurrentDate(), storerKey,fromLoc, fromId});
 
         //如果目标容器不存在使用原容器、库位、批次冻结状态来计算，否则使用已存在的状态。
-        String toIdStatus = toIdHashMap != null &&
-                new BigDecimal(toIdHashMap.get("QTY").toString()).compareTo(BigDecimal.ZERO)!=0 ?
-                toIdHashMap.get("STATUS").toString() : isFromIdHold || isToLocHold || isLotHold ? "HOLD" : "OK";
-
-        //todo isFromIdHold== true and toid!=fromid, insert into holdinventory table if toid is not exist in this table
+        String toIdStatus = toIdHashMap != null ? toIdHashMap.get("STATUS").toString() : isFromIdHold || isToLocHold || isLotHold ? "HOLD" : "OK";
 
         if (toIdHashMap == null) {
             Map<String,Object> lotxlocxid = new HashMap<>();
@@ -206,20 +210,43 @@ public class MoveService extends WMSBaseService {
             lotxlocxid.put("LOC", toLoc);
             lotxlocxid.put("ID", toId);
             lotxlocxid.put("SKU", sku);
-            lotxlocxid.put("QTY", BigDecimal.ZERO);
-            lotxlocxid.put("QTYALLOCATED", BigDecimal.ZERO);
-            lotxlocxid.put("QTYPICKED", BigDecimal.ZERO);
+            lotxlocxid.put("QTY", qtyToBeMoved);
+            lotxlocxid.put("QTYALLOCATED", qtyAllocChangeToId);
+            lotxlocxid.put("QTYPICKED", qtyPickChangeToId);
             lotxlocxid.put("STATUS", toIdStatus);
             lotxlocxid.put("ADDWHO", EHContextHelper.getUser().getUsername());
             lotxlocxid.put("EDITWHO", EHContextHelper.getUser().getUsername());
             DBHelper.insert( "LOTXLOCXID", lotxlocxid);
+
+            if("HOLD".equals(toIdStatus)){
+                List<Map<String, Object>> fromIdInvHoldList = DBHelper.executeQueryRawData("SELECT * FROM INVENTORYHOLD WHERE HOLD = 1 AND ID = ? ", new Object[]{toId});
+
+                fromIdInvHoldList.forEach(invHoldRecord->{
+
+                    Map<String,Object> invHoldRec = new HashMap<>();
+                    invHoldRec.put("INVENTORYHOLDKEY", IdGenerationHelper.getNCounterStrWithLength("INVENTORYHOLDKEY",10));
+                    invHoldRec.put("WHSEID", EHContextHelper.getCurrentOrgId());
+                    invHoldRec.put("LOT", "");
+                    invHoldRec.put("LOC", "");
+                    invHoldRec.put("ID", invHoldRecord.get("ID"));
+                    invHoldRec.put("HOLD", 1);
+                    invHoldRec.put("STATUS", invHoldRecord.get("STATUS"));
+                    invHoldRec.put("DATEON", EHDateTimeHelper.getCurrentDate());
+                    invHoldRec.put("WHOON", EHContextHelper.getUser().getUsername());
+                    invHoldRec.put("ADDWHO", EHContextHelper.getUser().getUsername());
+                    invHoldRec.put("EDITWHO", EHContextHelper.getUser().getUsername());
+                    DBHelper.insert( "INVENTORYHOLD", invHoldRec);
+
+                });
+            }
+
+        }else {
+            //TODO: 暂不对原LPN和新LPN冻结状态的一致性做校验，冻结状态暂以目标容器当前状态为准。相关逻辑可现在项目代码中实现，后续有必要再考虑抽离到核心逻辑。
+            DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTY = QTY + ?, QTYALLOCATED = QTYALLOCATED + ?,QTYPICKED = QTYPICKED + ?, EDITWHO = ?,EDITDATE = ? WHERE STORERKEY = ? AND LOC = ? AND ID = ?"
+                    , new Object[]{ qtyToBeMoved, qtyAllocChangeToId, qtyPickChangeToId, EHContextHelper.getUser().getUsername(), EHDateTimeHelper.getCurrentDate(), storerKey, toLoc, toId});
         }
 
-        //TODO: 暂不对原LPN和新LPN冻结状态的一致性做校验，冻结状态暂以目标容器为准。相关逻辑可现在项目代码中实现，后续有必要再考虑抽离到核心逻辑。
-        DBHelper.executeUpdate("UPDATE LOTXLOCXID SET STATUS = ? ,QTY = QTY + ?, QTYALLOCATED = QTYALLOCATED + ?,QTYPICKED = QTYPICKED + ?, EDITWHO = ?,EDITDATE = ? WHERE STORERKEY = ? AND LOC = ? AND ID = ?"
-                    , new Object[]{toIdStatus, qtyToBeMoved,qtyAllocChangeToId, qtyPickChangeToId, EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),storerKey,toLoc, toId});
-
-        //更新后检查ID的数量，如果为0直接删除
+        //更新后检查LOTXLOCXID的数量，如果为0直接删除
         DBHelper.executeUpdate("DELETE FROM LOTXLOCXID WHERE STORERKEY = ? AND LOC = ? AND ID = ? AND QTY = 0 ", new Object[]{storerKey, fromLoc, fromId});
 
         //TODO: 仅保留用于和INFORWMS兼用性，后续会删除ID表
@@ -229,11 +256,11 @@ public class MoveService extends WMSBaseService {
 
         DBHelper.executeUpdate("UPDATE ID SET QTY=QTY-?,EDITWHO=?,EDITDATE=? WHERE ID=?", new Object[]{qtyToBeMoved, EHContextHelper.getUser().getUsername(), EHDateTimeHelper.getCurrentDate(), fromId});
 
-        String toIdStatusForIdTable = toIdStatus;
+        String toIdStatus4IdTable = toIdStatus;
         if (toIdStatus.equals("HOLD"))
         {
             long cntIdHold=DBHelper.getCount( "SELECT COUNT(1) FROM INVENTORYHOLD WHERE HOLD=? AND ID=?", new String[]{"1",toId});
-            if (cntIdHold==0) toIdStatusForIdTable = "OK";
+            if (cntIdHold==0) toIdStatus4IdTable = "OK";
         }
 
         if (DBHelper.getCount("SELECT COUNT(1) FROM ID WHERE ID = ?", new String[]{toId})==0)
@@ -243,12 +270,12 @@ public class MoveService extends WMSBaseService {
             id.put("EDITWHO", EHContextHelper.getUser().getUsername());
             id.put("ID", toId);
             id.put("QTY", qtyToBeMoved);
-            id.put("STATUS", toIdStatusForIdTable);
+            id.put("STATUS", toIdStatus4IdTable);
             id.put("PACKKEY", fromIdHashMap.get("PACKKEY"));
             DBHelper.insert("ID", id);
         } else {
             DBHelper.executeUpdate( "UPDATE ID SET QTY=QTY+?, STATUS = ? , EDITWHO=?,EDITDATE=? WHERE ID=?",
-                    new Object[]{qtyToBeMoved,toIdStatusForIdTable, EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),toId});
+                    new Object[]{qtyToBeMoved,toIdStatus4IdTable, EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),toId});
         }
 
         //更新后检查ID的数量，如果为0直接删除
@@ -283,7 +310,7 @@ public class MoveService extends WMSBaseService {
                     , new Object[]{qtyToBeMoved,qtyAllocChangeToId,qtyPickChangeToId,EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),storerKey,toLoc,sku});
         }
 
-        //更新后检查ID的数量，如果为0直接删除
+        //更新后检查SKUXLOC数量，如果为0直接删除
         DBHelper.executeUpdate("DELETE FROM SKUXLOC WHERE STORERKEY = ? AND SKU = ? AND LOC = ? AND QTY = 0 ", new Object[]{storerKey,sku,fromLoc});
 
 
@@ -311,11 +338,9 @@ public class MoveService extends WMSBaseService {
             }
             DBHelper.executeUpdate("UPDATE LOT SET QTYONHOLD = QTYONHOLD + ?,EDITWHO=?,EDITDATE=? WHERE LOT=?", new Object[]{qtyLotHoldChange,EHContextHelper.getUser().getUsername(),EHDateTimeHelper.getCurrentDate(),lot});
 
-
-
         }
 
-        //更新后检查ID的数量，如果为0直接删除
+        //更新后检查LOT，如果为0直接删除
         DBHelper.executeUpdate("DELETE FROM LOT WHERE STORERKEY = ? AND LOT = ? AND QTY = 0 ", new Object[]{storerKey,lot});
 
     }

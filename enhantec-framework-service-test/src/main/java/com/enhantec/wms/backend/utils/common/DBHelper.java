@@ -380,6 +380,12 @@ public class DBHelper {
 
     }
 
+    public static List<Map<String, Object>> executeQueryRawData(String statement, Object[] params) {
+
+       return executeQueryRawData(statement, Arrays.asList(params));
+
+    }
+
     public static List<Map<String, Object>> executeQueryRawData(String statement, List<Object> params) {
 
         List<Map<String, Object>> tempRes =  EHContextHelper.getBean(EHSqlService.class).selectList(statement,params);
