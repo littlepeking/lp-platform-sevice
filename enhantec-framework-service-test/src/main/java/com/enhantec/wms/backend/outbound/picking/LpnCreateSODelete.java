@@ -99,7 +99,7 @@ public class LpnCreateSODelete extends WMSBaseService {
             udtrn.TITLE04="容器条码"; udtrn.CONTENT04=orderDetailInfo.get("IDREQUIRED");
             udtrn.TITLE05="唯一码"; udtrn.CONTENT05=idHashMap.get("SERIALNUMBER");
             udtrn.TITLE06 = "出库数量"; udtrn.CONTENT06=orderDetailInfo.get("OPENQTY");
-            udtrn.Insert(userid);
+            udtrn.insert(userid);
 
             ServiceDataMap theOutDO = new ServiceDataMap();
 //            theOutDO.clearDO();

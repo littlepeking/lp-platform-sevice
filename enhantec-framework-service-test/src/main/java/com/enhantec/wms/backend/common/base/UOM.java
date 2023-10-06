@@ -13,21 +13,21 @@ import java.util.Optional;
 
 public class UOM {
 
-    public static BigDecimal UOMQty2StdQty( String packKey, String uom, BigDecimal uomQty) throws Exception {
+    public static BigDecimal UOMQty2StdQty( String packKey, String uom, BigDecimal uomQty) {
 
         //设置scale=5，否则重量为0时会变成0E-10的数值
         return  getConversionRate2Std( packKey,uom).multiply(uomQty).setScale(5);
 
     }
 
-    public static BigDecimal Std2UOMQty( String packKey, String uom, BigDecimal stdQty) throws Exception {
+    public static BigDecimal Std2UOMQty( String packKey, String uom, BigDecimal stdQty) {
 
         return  stdQty.divide(getConversionRate2Std( packKey,uom));
 
     }
 
 
-    public static BigDecimal getConversionRate2Std( String packKey, String uom) throws Exception {
+    public static BigDecimal getConversionRate2Std( String packKey, String uom) {
 
         Map<String, String> uomHashMap = getUOMHashMap( packKey);
 
@@ -56,25 +56,25 @@ public class UOM {
         return uomHashMap;
     }
 
-    public static String getStdUOM( String packKey) throws DBResourceException {
+    public static String getStdUOM(String packKey) throws DBResourceException {
         Map<String,String> uomHashMap= getUOMHashMap( packKey);
         return uomHashMap.get("PACKUOM3");
     }
 
     public static String getUOMCode(String packKey, String uom) {
-//
-//        PackDTO packUomDTO = PackDAO.getPack(packKey,context, null);
+
+        Map<String,String>  packHashMap =Pack.findById(packKey,true);
 
         String uomCode = null;
-//        if(packUomDTO.getPackuom3().equalsIgnoreCase(uom)){
-//            uomCode = "6";
-//        }else if(packUomDTO.getPackuom1().equalsIgnoreCase(uom)){
-//            uomCode = "2";
-//        }else if(packUomDTO.getPackuom4().equalsIgnoreCase(uom)){
-//            uomCode = "1";
-//        }else if(packUomDTO.getPackuom2().equalsIgnoreCase(uom)){
-//            uomCode = "3";
-//        }
+        if(packHashMap.get("PACKUOM3").equalsIgnoreCase(uom)){
+            uomCode = "6";
+        }else if(packHashMap.get("PACKUOM1").equalsIgnoreCase(uom)){
+            uomCode = "2";
+        }else if(packHashMap.get("PACKUOM4").equalsIgnoreCase(uom)){
+            uomCode = "1";
+        }else if(packHashMap.get("PACKUOM2").equalsIgnoreCase(uom)){
+            uomCode = "3";
+        }
         if(uomCode == null) ExceptionHelper.throwRfFulfillLogicException("未找到UOM"+uom+"到UOM code的转换关系");
         return uomCode;
     }

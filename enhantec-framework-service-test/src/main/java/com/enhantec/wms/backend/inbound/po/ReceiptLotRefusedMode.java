@@ -64,7 +64,7 @@ public class ReceiptLotRefusedMode  extends WMSBaseService
 		    UDTRN.TITLE03="新状态";    UDTRN.CONTENT03="91";
 		    UDTRN.TITLE04="原处理方式";    UDTRN.CONTENT04=LOTS[1];
 		    UDTRN.TITLE05="新处理方式";    UDTRN.CONTENT05=PROCESSINGMODE;
-		    UDTRN.Insert( userid);		
+		    UDTRN.insert( userid);
 		
 		}
 		catch (Exception e)

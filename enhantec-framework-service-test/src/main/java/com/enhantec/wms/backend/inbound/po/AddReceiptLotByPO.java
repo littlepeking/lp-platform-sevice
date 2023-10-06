@@ -139,7 +139,7 @@ public class AddReceiptLotByPO extends WMSBaseService
 		    UDTRN.TITLE03="物料代码";    UDTRN.CONTENT03=mRec.get("FROMSKU");
 		    UDTRN.TITLE04="物料描述";    UDTRN.CONTENT04=mRec.get("FROMSKUDESCR");
 		    UDTRN.TITLE05="厂家来源批次";    UDTRN.CONTENT05=mRec.get("FROMLOT");
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 
 		    
 

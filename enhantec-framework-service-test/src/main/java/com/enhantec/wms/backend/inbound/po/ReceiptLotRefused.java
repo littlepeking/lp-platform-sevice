@@ -82,7 +82,7 @@ public class ReceiptLotRefused  extends WMSBaseService
 		    UDTRN.FROMKEY2="";
 		    UDTRN.FROMKEY3="";
 		    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 			
 			//String STORERKEY=XtSql.GetValue( "select udf1 from codelkup where listname=? and code=?", new String[]{"STASYSSET","STORERKEY"}, "");
 			//MailBeanByPreReceipt mail=new MailBeanByPreReceipt();

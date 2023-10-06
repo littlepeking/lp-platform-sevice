@@ -2,6 +2,7 @@ package com.enhantec.wms.backend.utils.common;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.enhantec.framework.common.exception.EHApplicationException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -86,9 +87,9 @@ public class UtilHelper {
         return s1;
     }
 
-    public static int decimalCompare(BigDecimal num1, BigDecimal num2) throws Exception {
+    public static int decimalCompare(BigDecimal num1, BigDecimal num2) {
 
-        if( num1 == null || num2 == null ) throw new Exception("待比较的两个数字均不能为空");
+        if( num1 == null || num2 == null ) throw new EHApplicationException("待比较的两个数字均不能为空");
 
         return num1.compareTo(num2);
 

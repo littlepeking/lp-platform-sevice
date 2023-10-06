@@ -263,7 +263,7 @@ public class ReceivingWithSignature extends WMSBaseService {
         UDTRN.CONTENT17 = LegecyUtilHelper.Nz(receiptDetailInfo.get("ELOTTABLE12"), "");
         UDTRN.TITLE18 = "存货类型";
         UDTRN.CONTENT18 = LegecyUtilHelper.Nz(receiptDetailInfo.get("LOTTABLE02"), "");
-        UDTRN.Insert( userid);
+        UDTRN.insert( userid);
     }
 
     /**

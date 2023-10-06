@@ -95,7 +95,7 @@ public class RemoveLabel extends WMSBaseService {
             UDTRN.FROMKEY2LABEL="标签容器号";
             UDTRN.FROMKEY2=id;
             UDTRN.FROMKEY3="";
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             serviceDataHolder.setReturnCode(1);

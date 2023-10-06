@@ -129,7 +129,7 @@ public class ConfirmASN extends WMSBaseService {
                 UDTRN.TITLE02 = "操作人";
                 UDTRN.CONTENT02 = isConfirmedUser
                 ;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
             }else{
 
@@ -164,7 +164,7 @@ public class ConfirmASN extends WMSBaseService {
                 UDTRN.CONTENT02 = isConfirmedUser1;
                 UDTRN.TITLE02 = "复核人";
                 UDTRN.CONTENT02 = isConfirmedUser2;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
             }
 

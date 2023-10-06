@@ -72,7 +72,7 @@ public class ConfirmPoByUI extends WMSBaseService {
             UDTRN.TITLE02 = "操作人";
             UDTRN.CONTENT02 = isConfirmedUser
             ;
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
           
 
         }catch (Exception e){

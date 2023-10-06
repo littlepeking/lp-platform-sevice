@@ -167,7 +167,7 @@ public class ReturnWithASNAdd extends WMSBaseService {
             udtrn.TITLE03="容器号/箱号"; udtrn.CONTENT03=lpn;
             udtrn.TITLE04="数量"; udtrn.CONTENT04=netWgt;
             udtrn.TITLE05="单位"; udtrn.CONTENT05=uom;
-            udtrn.Insert(EHContextHelper.getUser().getUsername());
+            udtrn.insert(EHContextHelper.getUser().getUsername());
 
             ServiceDataMap theOutDO = new ServiceDataMap();
             //扫描单个唯一码情况，返回唯一码

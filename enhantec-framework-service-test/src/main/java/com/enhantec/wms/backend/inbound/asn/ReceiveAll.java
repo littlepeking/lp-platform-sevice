@@ -83,7 +83,7 @@ public class ReceiveAll extends WMSBaseService {
             UDTRN.TITLE03 = "复核人";
             UDTRN.CONTENT03 = isConfirmedUser2;
             try {
-                UDTRN.Insert( EHContextHelper.getUser().getUsername());
+                UDTRN.insert( EHContextHelper.getUser().getUsername());
             } catch (Exception e) {
                 ExceptionHelper.throwRfFulfillLogicException(e.getMessage());
             }

@@ -134,7 +134,7 @@ public class Move extends WMSBaseService {
 			UDTRN.TITLE03="目标库位";    UDTRN.CONTENT03=toLoc;
 			//UDTRN.TITLE04="数量";    UDTRN.CONTENT04=TOBEMOVEDQTY;
 
-			UDTRN.Insert( userid);
+			UDTRN.insert( userid);
 
 			
 

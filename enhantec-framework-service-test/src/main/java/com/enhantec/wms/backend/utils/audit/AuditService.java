@@ -70,7 +70,7 @@ public class AuditService extends WMSBaseService {
     public static void doAudit( Udtrn uDTRN) throws Exception {
         //Add audit record
         String userid = EHContextHelper.getUser().getUsername();
-        uDTRN.Insert( userid);
+        uDTRN.insert( userid);
 
     }
 
@@ -88,7 +88,7 @@ public class AuditService extends WMSBaseService {
         }
 
         //Add audit record
-        uDTRN.Insert( username);
+        uDTRN.insert( username);
 
     }
 

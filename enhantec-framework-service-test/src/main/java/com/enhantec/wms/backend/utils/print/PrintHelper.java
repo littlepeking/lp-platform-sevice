@@ -17,7 +17,7 @@ import java.util.List;
 
 public class PrintHelper {
 
-    public static void printLPNByIDNotes( String id, String labelName, String printer, String copies, String notes) throws Exception {
+    public static void printLPNByIDNotes( String id, String labelName, String printer, String copies, String notes) {
 
         Map<String, String> idNotes =  IDNotes.findById(id,true);
 
@@ -33,7 +33,7 @@ public class PrintHelper {
 
     }
 
-    public static void removePrintTaskByIDNotes(String labelName, String id) throws Exception {
+    public static void removePrintTaskByIDNotes(String labelName, String id) {
         DBHelper.executeUpdate("DELETE FROM PRINT_TASK WHERE LABELNAME = ? AND [KEY] = ? AND PRINTSTATUS = -1 ", new Object[]{
                 labelName,
                 id
@@ -109,7 +109,7 @@ public class PrintHelper {
      * @return
      * @throws Exception
      */
-    private static String getLabelSuffixBySku( String sku) throws Exception {
+    private static String getLabelSuffixBySku( String sku) {
 
 
         Map<String,String> skuHashMap = SKU.findById(sku,true);

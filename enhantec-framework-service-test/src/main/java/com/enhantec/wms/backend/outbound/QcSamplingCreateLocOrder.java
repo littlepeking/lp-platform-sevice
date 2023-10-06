@@ -112,7 +112,7 @@ public class QcSamplingCreateLocOrder  extends WMSBaseService
                 UDTRN.TITLE02 = "出库单号";
                 UDTRN.CONTENT02 = OrderKey;
                 //UDTRN.TITLE03="项目";    UDTRN.CONTENT03=PROJECTCODE;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
             }else{
                 orderExists = true;
                 OrderKey = OldOrderKey;

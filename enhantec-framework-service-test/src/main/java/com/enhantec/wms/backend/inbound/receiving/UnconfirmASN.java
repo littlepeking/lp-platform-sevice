@@ -63,7 +63,7 @@ public class UnconfirmASN extends WMSBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="ASN单号";    UDTRN.CONTENT01=receiptKey;
             UDTRN.TITLE02="确认状态";    UDTRN.CONTENT02="N";
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
 
 

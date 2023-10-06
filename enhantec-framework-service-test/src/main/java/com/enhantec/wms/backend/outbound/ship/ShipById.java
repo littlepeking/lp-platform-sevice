@@ -97,7 +97,7 @@ public class ShipById extends WMSBaseService {
             UDTRN.TITLE02 = "容器条码/箱号";
             UDTRN.CONTENT02 = fromId;
 
-            UDTRN.Insert( EHContextHelper.getUser().getUsername());
+            UDTRN.insert( EHContextHelper.getUser().getUsername());
 
 
         }catch (Exception e) {

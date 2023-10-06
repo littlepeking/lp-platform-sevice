@@ -270,7 +270,7 @@ public class QcSamplingPostOrder extends WMSBaseService
 			UDTRN.FROMKEY3="";
 			UDTRN.TITLE01="取样批次";    UDTRN.CONTENT01=LOTTABLE06;
 			UDTRN.TITLE02="出库单号";    UDTRN.CONTENT02=ORDERKEY;
-			UDTRN.Insert( userid);
+			UDTRN.insert( userid);
 
 
 			//call system api to do allocate and ship here to avoid transaction rollback by other issues, like incorrect label sql etc...

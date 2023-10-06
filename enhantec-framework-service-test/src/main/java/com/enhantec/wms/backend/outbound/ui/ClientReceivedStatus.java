@@ -64,7 +64,7 @@ public class ClientReceivedStatus extends WMSBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="出库订单号";    UDTRN.CONTENT01=ORDERKEY;
             UDTRN.TITLE02="是否签收";    UDTRN.CONTENT02="是";
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
 
         }catch (Exception e){

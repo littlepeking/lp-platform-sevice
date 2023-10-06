@@ -67,7 +67,7 @@ public class UpdateQualityStatusJob extends WMSBaseService {
 					UDTRN.CONTENT01 = tempLotAttr.get("SKU");
 					UDTRN.TITLE02 = "收货批次";
 					UDTRN.CONTENT02 = tempLotAttr.get("ELOT");
-					UDTRN.Insert( userid);
+					UDTRN.insert( userid);
 				}
 
 			}
@@ -105,7 +105,7 @@ public class UpdateQualityStatusJob extends WMSBaseService {
 					UDTRN.CONTENT01 = tempLotAttr.get("SKU");
 					UDTRN.TITLE02 = "收货批次";
 					UDTRN.CONTENT02 = tempLotAttr.get("ELOT");
-					UDTRN.Insert( userid);
+					UDTRN.insert( userid);
 
 				}
 

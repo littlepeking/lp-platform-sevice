@@ -57,7 +57,7 @@ public class ReceiptLotClose  extends WMSBaseService
 			    UDTRN.FROMKEY2="";
 			    UDTRN.FROMKEY3="";
 			    UDTRN.TITLE01="收货批次";    UDTRN.CONTENT01=RECEIPTLOT;
-			    UDTRN.Insert( userid);
+			    UDTRN.insert( userid);
 			
 		
 		}

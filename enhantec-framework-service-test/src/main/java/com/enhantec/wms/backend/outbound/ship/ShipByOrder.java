@@ -141,7 +141,7 @@ public class ShipByOrder extends WMSBaseService {
 
 
 
-            UDTRN.Insert( EHContextHelper.getUser().getUsername());
+            UDTRN.insert( EHContextHelper.getUser().getUsername());
 
             //生基采购退货还po单客户化 创建单据时控制一个出库单仅出一个批次 直接查询拣货数量 归还po数量
             Map<String, String> orderTypeEntry = CodeLookup.getCodeLookupByKey( "ORDERTYPE", orderInfo.get("TYPE"));

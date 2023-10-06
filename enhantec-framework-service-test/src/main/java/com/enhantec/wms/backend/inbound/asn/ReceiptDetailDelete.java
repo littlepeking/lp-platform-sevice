@@ -62,7 +62,7 @@ public class ReceiptDetailDelete extends WMSBaseService
 			UDTRN.TITLE01="收货单号";    UDTRN.CONTENT01=RECEIPTKEY;
 			UDTRN.TITLE02="收货行号";    UDTRN.CONTENT02=RECEIPTLINENUMBER;
 			UDTRN.TITLE03="容器条码/箱号";    UDTRN.CONTENT03=receiptDetailHashMap.get("TOID");
-			UDTRN.Insert( userid);
+			UDTRN.insert( userid);
 
 			String totalLines = DBHelper.getStringValue( "SELECT COUNT(1) FROM RECEIPTDETAIL WHERE RECEIPTKEY=? ",new String[]{RECEIPTKEY},"0");
 

@@ -265,7 +265,7 @@ public class AddLabel extends WMSBaseService {
             UDTRN.TITLE07="皮重/数量";    UDTRN.CONTENT07=tareWgt;
 
 
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
 
             ServiceDataMap theOutDO = new ServiceDataMap();

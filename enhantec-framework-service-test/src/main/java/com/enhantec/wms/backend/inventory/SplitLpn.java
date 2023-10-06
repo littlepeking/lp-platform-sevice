@@ -108,7 +108,7 @@ public class SplitLpn extends WMSBaseService {
 			UDTRN.TITLE04="目标库位";    UDTRN.CONTENT04=toLoc;
 			UDTRN.TITLE05="数量";    UDTRN.CONTENT05=qtyToSplit;
 
-			UDTRN.Insert( userid);
+			UDTRN.insert( userid);
 
 			ServiceDataMap theOutDO = new ServiceDataMap();
 

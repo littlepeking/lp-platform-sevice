@@ -78,7 +78,7 @@ public class CloseSO extends WMSBaseService {
             UDTRN.FROMKEY2="";
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="订单号";    UDTRN.CONTENT01=orderKey;
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
         }catch (Exception e){
             

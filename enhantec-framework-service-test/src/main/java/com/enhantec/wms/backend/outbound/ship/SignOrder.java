@@ -63,7 +63,7 @@ public class SignOrder extends WMSBaseService {
 
 
 
-            UDTRN.Insert( EHContextHelper.getUser().getUsername());
+            UDTRN.insert( EHContextHelper.getUser().getUsername());
 
 
         }catch (Exception e)

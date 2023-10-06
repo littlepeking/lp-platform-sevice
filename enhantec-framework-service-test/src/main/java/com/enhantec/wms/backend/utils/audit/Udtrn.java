@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.utils.audit;
 
+import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.utils.common.LegecyUtilHelper;
@@ -457,19 +458,19 @@ UDTRN	EDITWHO	NVARCHAR2 (30)	Y	编辑人
         return SQL1 + ") " + SQL2 + ");";
     }
 
-    public String Insert( String User) throws Exception {
+    public String insert(String User) {
         String SERIALKEY = Integer.toString(LegacyDBHelper.GetSeq( "seq_UDTRN"));
-        return Insert( SERIALKEY, User);
+        return insert( SERIALKEY, User);
 
 
     }
 
 
-    public String Insert( String SERIALKEY, String User) throws Exception {
+    public String insert(String SERIALKEY, String User) {
 
 
-        if (LegecyUtilHelper.isNull(FROMTYPE)) throw new Exception("{事务表.来源类型}不能为空");
-        if (LegecyUtilHelper.isNull(FROMTABLENAME)) throw new Exception("{事务表.来源表}不能为空");
+        if (LegecyUtilHelper.isNull(FROMTYPE)) throw new EHApplicationException("{事务表.来源类型}不能为空");
+        if (LegecyUtilHelper.isNull(FROMTABLENAME)) throw new EHApplicationException("{事务表.来源表}不能为空");
         //if (XtUtils.isNull(FROMKEY)) throw new Exception("{事务表.关键字}不能为空");
         ArrayList<String> Params = new ArrayList<String>();
         String SQL1 = "insert into UDTRN(ADDWHO,EDITWHO";

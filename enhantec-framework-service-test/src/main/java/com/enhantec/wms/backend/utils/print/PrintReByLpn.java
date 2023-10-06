@@ -81,7 +81,7 @@ public class PrintReByLpn extends WMSBaseService
 		    UDTRN.TITLE04="物料编号";    UDTRN.CONTENT04=mID.get("SKU");
 		    UDTRN.TITLE05="物料名称";    UDTRN.CONTENT05=mID.get("DESCR");
 		   
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 			
 
 

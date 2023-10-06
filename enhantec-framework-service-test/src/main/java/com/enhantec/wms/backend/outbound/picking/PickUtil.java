@@ -18,12 +18,9 @@ import com.enhantec.wms.backend.utils.print.Labels;
 import com.enhantec.wms.backend.utils.print.PrintHelper;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -171,7 +168,7 @@ public class PickUtil {
      * @param itrnKey
      * @throws Exception
      */
-    public static void pickSerialNumber( String orderKey, String orderLineNumber, String pickdetailKey, Map<String, String> fromIdHashMap, String toId, String[] snList, String itrnKey) throws Exception {
+    public static void pickSerialNumber( String orderKey, String orderLineNumber, String pickdetailKey, Map<String, String> fromIdHashMap, String toId, String[] snList, String itrnKey){
 
         String userid = EHContextHelper.getUser().getUsername();
 
@@ -353,7 +350,7 @@ public class PickUtil {
         UDTRN.CONTENT06 = lotxLocxIdHashMap.get("ELOTTABLE03");
         UDTRN.TITLE07 = "拣货数量";
         UDTRN.CONTENT07 = stdQtyTobePicked.toPlainString();
-        UDTRN.Insert( userid);
+        UDTRN.insert( userid);
 
         Map<String, String> result = new HashMap<>();
         result.put("TOID", toId);

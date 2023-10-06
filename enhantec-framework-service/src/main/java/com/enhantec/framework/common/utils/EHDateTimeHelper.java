@@ -33,8 +33,16 @@ public class EHDateTimeHelper {
         }
     }
 
-    public static String getCurrentDateStr(){
-        return LocalDateTime.now().toString();
+    public static String getLocalDateStr(LocalDate date){
+        return date.toString();
+    }
+
+    public static String getLocalDateStr(LocalDateTime date){
+        return date.toLocalDate().toString();
+    }
+
+    public static String getLocalDateTimeStr(LocalDateTime localDateTime){
+        return localDateTime.toString();
     }
 
     public static LocalDateTime getCurrentDate(){
@@ -44,4 +52,5 @@ public class EHDateTimeHelper {
     public static LocalDateTime getCurrentDate11AM(){
         return LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0));
     }
+
 }

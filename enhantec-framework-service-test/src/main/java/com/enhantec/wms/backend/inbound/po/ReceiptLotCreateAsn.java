@@ -515,7 +515,7 @@ public class ReceiptLotCreateAsn extends WMSBaseService
 		    UDTRN.TITLE15="桶数";    UDTRN.CONTENT15=BARRELQTY;
 		    UDTRN.TITLE16="备注";    UDTRN.CONTENT16=NOTE;
 		    
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 
 		    
 			//----------------------------------------------------------------

@@ -164,7 +164,7 @@ public class CloseASN extends WMSBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="ASN单号";    UDTRN.CONTENT01=receiptKey;
             UDTRN.TITLE02="状态";    UDTRN.CONTENT02="11";
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
 
 

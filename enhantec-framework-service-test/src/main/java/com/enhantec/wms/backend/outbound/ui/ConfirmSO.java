@@ -101,7 +101,7 @@ public class ConfirmSO extends WMSBaseService {
                 UDTRN.CONTENT01 = ORDERKEY;
                 UDTRN.TITLE02 = "确认状态";
                 UDTRN.CONTENT02 = "Y";
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
             }else{
                 /**
                  * 增加RF的确认，这里想着可以不在这加，而放到RF端，签名后调用后台两次，暂时先这么写，回头确认一下
@@ -137,7 +137,7 @@ public class ConfirmSO extends WMSBaseService {
                 UDTRN.CONTENT03 = isConfirmedUser1;
                 UDTRN.TITLE04 = "复核人";
                 UDTRN.CONTENT04 = isConfirmedUser2;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
             }
 
 

@@ -71,7 +71,7 @@ public class PrintSNLabelByAsn extends WMSBaseService
 		    UDTRN.TITLE04="物料编号";    UDTRN.CONTENT04=lastReceiptDetailByLPN.get("SKU");
 		    UDTRN.TITLE05="物料名称";    UDTRN.CONTENT05=sku.get("DESCR");
 
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 			
 
 

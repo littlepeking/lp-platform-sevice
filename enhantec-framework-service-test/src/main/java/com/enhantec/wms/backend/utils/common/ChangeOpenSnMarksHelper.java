@@ -3,7 +3,7 @@ import com.enhantec.wms.backend.common.base.SKU;
 
 public class ChangeOpenSnMarksHelper {
 
- public static void changeOpenSnMarksBYLpn( String sku , String... ids) throws Exception {
+ public static void changeOpenSnMarksBYLpn( String sku , String... ids) {
      String openSnMarks = "0";
      if(SKU.isSerialControl(sku)){
          for (String id:ids) {

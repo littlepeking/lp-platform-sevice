@@ -258,7 +258,7 @@ CODE	DESCRIPTION
                 UDTRN.CONTENT16 = isConfirmedUser1;
                 UDTRN.TITLE17 = "复核人";
                 UDTRN.CONTENT17 = isConfirmedUser2;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
                 theOutDO.setAttribValue("FROMKEY"+Integer.toString(1), PoKey+"-"+POLINENUMBER);
                 theOutDO.setAttribValue("FROMQTY"+Integer.toString(1), mPO.get("AVAILABLEQTY"));

@@ -108,7 +108,7 @@ public class LegacyDBHelper {
 	}
 
 
-	public static void ExecUpdate(String TableName,Map<String,String> UpdateFields,Map<String,String> WhereFields) throws Exception
+	public static void execUpdate(String TableName, Map<String,String> UpdateFields, Map<String,String> WhereFields)
 	{
 		ArrayList<String> aParams=new ArrayList<String>();
 		String SQL="update "+TableName+" set ";
@@ -332,7 +332,7 @@ public class LegacyDBHelper {
 //	}
 
 
-	public static int GetSeq(String Seq) throws Exception
+	public static int GetSeq(String Seq)
 	{
 
 //    	Statement sm = null;

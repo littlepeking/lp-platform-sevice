@@ -149,7 +149,7 @@ public class LpnCreateSOShip extends WMSBaseService {
             UDTRN.FROMKEY2="";
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="出库单号";    UDTRN.CONTENT01=orderKey;
-            UDTRN.Insert( userId);
+            UDTRN.insert( userId);
 
         }catch (Exception e){
             if ( e instanceof FulfillLogicException)

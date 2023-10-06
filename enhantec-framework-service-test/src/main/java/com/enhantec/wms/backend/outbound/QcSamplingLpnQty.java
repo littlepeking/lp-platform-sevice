@@ -161,7 +161,7 @@ public class QcSamplingLpnQty extends WMSBaseService
 			UDTRN.TITLE08="扣样量";    UDTRN.CONTENT08=openQty;
 			UDTRN.TITLE09="扣样计量单位";    UDTRN.CONTENT09=uom;
 		    UDTRN.TITLE10="库位";    UDTRN.CONTENT10=LOC;
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 			
 				
 			//----------------

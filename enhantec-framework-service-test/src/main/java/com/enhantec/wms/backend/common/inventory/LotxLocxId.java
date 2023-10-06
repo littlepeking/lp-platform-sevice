@@ -168,7 +168,7 @@ public class LotxLocxId {
      * @param checkExist
      * @return
      */
-    public static Map<String, Object> findRawRecordWithoutCheckIDNotes(String storerKey, String fromId, boolean checkExist) {
+    public static Map<String, Object> findRawRecordWithoutCheckIDNotes(String fromId, boolean checkExist) {
 
         String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
                 + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
@@ -179,13 +179,13 @@ public class LotxLocxId {
                 + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
                 + ",b.LOTTABLE01 PACKKEY"
                 + " from  lotxlocxid a,v_lotattribute b "
-                + " where a.lot=b.lot and a.qty>0 and a.STORERKEY = ? and a.ID = ? ";
-        Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{storerKey, fromId},"库存明细",checkExist);
+                + " where a.lot=b.lot and a.qty>0 and a.ID = ? ";
+        Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{fromId},"库存明细",checkExist);
 //        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("在货主"+storerKey+"下未找到容器条码"+fromId);
         return record;
     }
 
-    public static Map<String, Object> findRawRecordWithoutCheckIDNotes(String storerKey, String loc, String id, boolean checkExist) {
+    public static Map<String, Object> findRawRecordWithoutCheckIDNotes(String loc, String id, boolean checkExist) {
 
         String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
                 + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
@@ -196,8 +196,8 @@ public class LotxLocxId {
                 + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
                 + ",b.LOTTABLE01 PACKKEY"
                 + " FROM  LOTXLOCXID a,V_LOTATTRIBUTE b "
-                + " WHERE a.LOT=b.LOT AND a.QTY>0 AND a.STORERKEY = ? AND a.LOC = ? AND a.ID = ? ";
-        Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{storerKey, loc, id},"库存明细",checkExist);
+                + " WHERE a.LOT=b.LOT AND a.QTY>0 AND a.LOC = ? AND a.ID = ? ";
+        Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{loc, id},"库存明细",checkExist);
         return record;
     }
 

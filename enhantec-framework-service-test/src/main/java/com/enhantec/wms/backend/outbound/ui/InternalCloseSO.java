@@ -54,7 +54,7 @@ public class InternalCloseSO extends WMSBaseService {
                 UDTRN.FROMKEY3 = "";
                 UDTRN.TITLE01 = "订单号";
                 UDTRN.CONTENT01 = orderKey;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
     
             }else{

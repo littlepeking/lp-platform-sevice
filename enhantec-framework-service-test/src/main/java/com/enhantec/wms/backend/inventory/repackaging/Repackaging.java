@@ -257,7 +257,7 @@ public class Repackaging extends WMSBaseService {
                 UDTRN.CONTENT06 = UtilHelper.trimZerosAndToStr(totalUsedQty);
                 UDTRN.TITLE07 = "损耗量";
                 UDTRN.CONTENT07 = UtilHelper.decimalStrSubtract(totalUsedQty.toPlainString(), totalReceivedQty.toPlainString());
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
                // context.theSQLMgr.transactionCommit();
 

@@ -90,7 +90,7 @@ public class CancelRepackaging extends WMSBaseService {
             UDTRN.CONTENT02 = orderKey + orderLineNumber;
             UDTRN.TITLE03 = "分装入库单号";
             UDTRN.CONTENT03 = repackReceiptKey;
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
           
         }

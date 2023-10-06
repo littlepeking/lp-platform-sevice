@@ -137,7 +137,7 @@ public class CDSysSet {
      * 如果配置成N，则标签不打印重量信息
      * @return
      */
-    public static boolean enableLabelWgt()throws Exception{
+    public static boolean enableLabelWgt(){
         return "Y".equalsIgnoreCase(CodeLookup.getSysConfig( "LABELWGT","Y"));
     }
 

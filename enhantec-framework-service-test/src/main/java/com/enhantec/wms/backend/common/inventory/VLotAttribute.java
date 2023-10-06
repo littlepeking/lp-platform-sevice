@@ -7,6 +7,8 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.wms.backend.utils.common.UtilHelper;
+
 import java.util.Map;
 
 public class VLotAttribute {
@@ -38,25 +40,42 @@ public class VLotAttribute {
     }
 
     public static Map<String,Object> findByLot( String lot, boolean checkExist) {
+
+        if(UtilHelper.isEmpty(lot)) ExceptionHelper.throwRfFulfillLogicException("查询的批次不允许为空");
+
+
         // LOTTABLE01, LOTTABLE09, LOTTABLE10 未使用
         //LOTTABLE04 收货日期, LOTTABLE12 成品生产日期 在相同收货批次下存在不同的值，忽略
 
-        String SQL="select " +
+        String SQL="SELECT " +
+                "STORERKEY"+
+                "SKU"+
                 "LOTTABLE01," + //项目号
                 "LOTTABLE02," + //存货类型
+                "LOTTABLE03," +
+                "LOTTABLE04," + //入库日期
+                "LOTTABLE05," +
+                "LOTTABLE06," +//批号
+                "LOTTABLE07," +
+                "LOTTABLE08," +
+                "LOTTABLE09," +
+                "LOTTABLE10," +//采购
+                "LOTTABLE11," +
+                "LOTTABLE12," +
+                "ELOTTABLE01," +
                 "ELOTTABLE02," + //质量等级
                 "ELOTTABLE03," + //质量状态
-                "LOTTABLE04," + //入库日期
+                "ELOTTABLE04," +
                 "ELOTTABLE05," + //复验日期
-                "LOTTABLE06," +//批号
+                "ELOTTABLE06," +
                 "ELOTTABLE07," +//规格
                 "ELOTTABLE08," +//供应商
                 "ELOTTABLE09," +//供应商批次
-                "LOTTABLE10," +//采购
+                "ELOTTABLE10," +
                 "ELOTTABLE11," +//有效期
-                "ELOTTABLE12 " //成品生产日期
-                + " from v_lotattribute "
-                + " where lot = ?";
+                "ELOTTABLE12 " +//成品生产日期
+                " FROM V_LOTATTRIBUTE " +
+                " WHERE LOT = ?";
 
         Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{ lot},"批属性");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到WMS批次"+lot);

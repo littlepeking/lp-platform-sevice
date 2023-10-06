@@ -87,7 +87,7 @@ public class ReleasePackLoc extends WMSBaseService {
             UDTRN.CONTENT01 = orderKey + orderLineNumber;
             UDTRN.TITLE02 = "分装间";
             UDTRN.CONTENT02 = currentPackLoc;
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
           
         }

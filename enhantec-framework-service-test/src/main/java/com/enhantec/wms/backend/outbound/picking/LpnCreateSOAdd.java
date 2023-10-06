@@ -117,7 +117,7 @@ public class LpnCreateSOAdd extends WMSBaseService {
             udtrn.CONTENT02 = orderKey;
             udtrn.TITLE03 = "容器号/唯一码/箱号";
             udtrn.CONTENT03 = lpnOrSN;
-            udtrn.Insert(userId);
+            udtrn.insert(userId);
 
             orderDetailCount = DBHelper.getStringValue( "SELECT COUNT(ORDERKEY) FROM ORDERDETAIL WHERE ORDERKEY = ?",
                     new Object[]{orderHashMap.get("ORDERKEY")}, "");
@@ -173,7 +173,7 @@ public class LpnCreateSOAdd extends WMSBaseService {
         udtrn.CONTENT01 = orderType;
         udtrn.TITLE02 = "出库单号";
         udtrn.CONTENT02 = orderKey;
-        udtrn.Insert(userId);
+        udtrn.insert(userId);
         return orders;
     }
 

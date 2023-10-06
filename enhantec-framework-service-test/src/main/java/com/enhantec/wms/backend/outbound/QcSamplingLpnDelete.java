@@ -80,7 +80,7 @@ public class QcSamplingLpnDelete extends WMSBaseService
 		    UDTRN.TITLE07="取样量";    UDTRN.CONTENT07=mORDER.get("SUSR1");
 		    UDTRN.TITLE08="扣样量";    UDTRN.CONTENT08=mORDER.get("SUSR2");
 		    UDTRN.TITLE09="取样库位";    UDTRN.CONTENT09=mORDER.get("SUSR3");
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 			
 				
 			//----------------

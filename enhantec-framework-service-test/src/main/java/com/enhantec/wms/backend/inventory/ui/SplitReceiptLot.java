@@ -107,7 +107,7 @@ public class SplitReceiptLot extends WMSBaseService {
             UDTRN.TITLE01="原批次"; UDTRN.CONTENT01=lottabl06ToBeSplit;
             UDTRN.TITLE02="拆分批次"; UDTRN.CONTENT02=lottable06Splitted;
             UDTRN.TITLE03="合并批次"; UDTRN.CONTENT03=toLottablemerge;
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
             //--------------------------------------------------------------
 
 

@@ -125,7 +125,7 @@ public class LotxId {
 
     }
 
-    public static String buildLotxIHeaderInfo( String sku, String ioFlag, String id, String sourceKey, String sourceLineNumber,String pickDetailKey,String lot) throws Exception {
+    public static String buildLotxIHeaderInfo( String sku, String ioFlag, String id, String sourceKey, String sourceLineNumber,String pickDetailKey,String lot){
         String lotxidKey = IdGenerationHelper.getNCounterStr("LOTXIDHEADER");
 
         Map<String,String> lotxIdHeaderHashMap = new HashMap<>();
@@ -151,7 +151,7 @@ public class LotxId {
 
 
 
-    public static void buildLotxIdDetailInfo(String  lotxidKey, String sku, String ioFlag, String fromId, String toId, String sourceKey, String sourceLineNumber, String pickDetailKey, String lot, String sn, int seq) throws Exception {
+    public static void buildLotxIdDetailInfo(String  lotxidKey, String sku, String ioFlag, String fromId, String toId, String sourceKey, String sourceLineNumber, String pickDetailKey, String lot, String sn, int seq) {
 
 
         if ("I".equals(ioFlag)) {

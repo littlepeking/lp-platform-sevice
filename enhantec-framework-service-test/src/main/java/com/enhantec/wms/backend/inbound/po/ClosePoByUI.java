@@ -67,7 +67,7 @@ public class ClosePoByUI extends WMSBaseService {
             UDTRN.CONTENT01 = poKey;
             UDTRN.TITLE02 = "操作人";
             UDTRN.CONTENT02 = user;
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
           
 

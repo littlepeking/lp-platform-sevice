@@ -81,7 +81,7 @@ public class CreateReceiptCheckByASN extends WMSBaseService
                 UDTRN.CONTENT04 = isConfirmedUser1;
                 UDTRN.TITLE05 = "复核人";
                 UDTRN.CONTENT05 = isConfirmedUser2;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
                 String ASNReceiptCheckStatus = CodeLookup.getCodeLookupValue("ASNCHKRES",checkresult,"UDF1","检查结果");
             DBHelper.executeUpdate("update receipt set RECEIPTCHECKSTATUS=? where receiptkey=?"

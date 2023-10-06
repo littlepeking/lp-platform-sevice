@@ -1,5 +1,6 @@
 package com.enhantec.wms.backend.common.base;
 
+import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
@@ -10,7 +11,6 @@ import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.utils.common.*;
 
 import java.math.BigDecimal;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -23,7 +23,7 @@ import static com.enhantec.wms.backend.outbound.OutboundUtils.checkQtyIsAvailabl
 
 public class IDNotes {
 
-    public static void decreaseWgtByIdWithAvailQtyCheck( String id, String openQty, String errorName) throws Exception {
+    public static void decreaseWgtByIdWithAvailQtyCheck( String id, String openQty, String errorName) {
 
         checkQtyIsAvailableInIDNotes( id, str2Decimal(openQty, errorName, false));
 
@@ -33,7 +33,7 @@ public class IDNotes {
 
     }
 
-    public static Map<String,String> decreaseWgtById( BigDecimal netWgt, String id) throws Exception {
+    public static Map<String,String> decreaseWgtById( BigDecimal netWgt, String id) {
 
         Map<String,String> currentIDNotes = DBHelper.getRecordByConditions("IDNOTES", new HashMap<String,Object>(){{
             put("ID",id);
@@ -67,7 +67,7 @@ public class IDNotes {
     }
 
     //分装的情况下要更新原始重量，发运操作没有分拆容器所以不需要执行此方法
-    public static Map<String,String> syncOriginalWgtById( String id) throws Exception {
+    public static Map<String,String> syncOriginalWgtById( String id) {
 
         Map<String,String> currentIDNotes = DBHelper.getRecordByConditions("IDNOTES", new HashMap<String,Object>(){{
             put("ID",id);
@@ -105,7 +105,7 @@ public class IDNotes {
      * @return
      * @throws Exception
      */
-    public static String splitWgtById( BigDecimal grossWgt, BigDecimal netWgt, BigDecimal tareWgt, String grossWgtLabel, String netWgtLabel, String tareWgtLabel, String uomLabel,  String id, String toid, String orderKey, boolean isSplitLpn) throws Exception {
+    public static String splitWgtById( BigDecimal grossWgt, BigDecimal netWgt, BigDecimal tareWgt, String grossWgtLabel, String netWgtLabel, String tareWgtLabel, String uomLabel,  String id, String toid, String orderKey, boolean isSplitLpn) {
 
         Map<String,String> fromIDNotes = IDNotes.findById( id,true);
 
@@ -137,9 +137,9 @@ public class IDNotes {
 
                 if (toIdNotes != null && !toIdNotes.get("LOT").equals(decreasedFromIdNotes.get("LOT"))) {
                     if(!UtilHelper.isEmpty(orderKey)) {
-                        throw new Exception("拣货至容器条码/箱号" + toid + "的收货批次和" + id + "的批次不匹配，不允许合箱拣货");
+                        throw new EHApplicationException("拣货至容器条码/箱号" + toid + "的收货批次和" + id + "的批次不匹配，不允许合箱拣货");
                     }else{
-                        throw new Exception("合并至容器条码/箱号" + toid + "的收货批次和" + id + "的批次不匹配，不允许合箱");
+                        throw new EHApplicationException("合并至容器条码/箱号" + toid + "的收货批次和" + id + "的批次不匹配，不允许合箱");
                     }
                 }
 
@@ -157,7 +157,7 @@ public class IDNotes {
                 updateFields.put("ISOPENED", "1");
                 Map<String,String> whereFields = new HashMap<>();
                 whereFields.put("ID", toid);
-                LegacyDBHelper.ExecUpdate( "idnotes", updateFields, whereFields);
+                LegacyDBHelper.execUpdate( "idnotes", updateFields, whereFields);
                 if(UtilHelper.decimalStrCompare(decreasedFromIdNotes.get("NETWGT"),"0") == 0) {
                     IDNotes.archiveIDNotes( decreasedFromIdNotes);
                 }
@@ -272,15 +272,15 @@ public class IDNotes {
         return toid;
     }
 
-    public static void update( String id, Map<String,String> updateFields) throws Exception {
+    public static void update( String id, Map<String,String> updateFields) {
 
-        if(UtilHelper.isEmpty(id)) throw new Exception("待更新的容器号不能为空");
+        if(UtilHelper.isEmpty(id)) throw new EHApplicationException("待更新的容器号不能为空");
 
         String userid = EHContextHelper.getUser().getUsername();
 
         updateFields.put("EditWho", userid);
 
-        LegacyDBHelper.ExecUpdate( "IDNOTES",updateFields, new HashMap<String,String>(){{put("ID",id);}});
+        LegacyDBHelper.execUpdate( "IDNOTES",updateFields, new HashMap<String,String>(){{put("ID",id);}});
     }
 
     public static Map<String,String> findAvailInvById(String id,boolean checkExist) throws DBResourceException {
@@ -327,7 +327,7 @@ public class IDNotes {
      * @param id
      * @return 容器条码false/箱号true
      */
-    public static boolean isBoxId( String id) throws Exception {
+    public static boolean isBoxId( String id) {
         List<String> enableWarehouses = System.getEnableWarehouses();
         for (String enableWarehouse : enableWarehouses) {
             String boxPrefix = CDSysSet.getBoxPrefix(enableWarehouse).get("UDF1");
@@ -338,7 +338,7 @@ public class IDNotes {
         }
         return false;
     }
-    public static boolean isLpnOrBoxId(String id)throws Exception{
+    public static boolean isLpnOrBoxId(String id){
         return isLpn(id) || isBoxId(id);
     }
 
@@ -347,7 +347,7 @@ public class IDNotes {
      * @param id
      * @return 容器条码false/箱号true
      */
-    public static boolean isLpn( String id) throws Exception {
+    public static boolean isLpn( String id) {
         List<String> enableWarehouses = System.getEnableWarehouses();
         for (String enableWarehouse : enableWarehouses) {
             String lpnPrefix = CDSysSet.getLpnPrefix(enableWarehouse).get("UDF1");
@@ -372,7 +372,7 @@ public class IDNotes {
 //    }
 
 
-    public static void archiveIDNotes( Map<String, String> shippedIdNotesHashMap) throws Exception {
+    public static void archiveIDNotes( Map<String, String> shippedIdNotesHashMap) {
         Map<String,String> idNotesHistory=new HashMap<>();
         idNotesHistory.put("ADDWHO", EHContextHelper.getUser().getUsername());
         idNotesHistory.put("EDITWHO", EHContextHelper.getUser().getUsername());

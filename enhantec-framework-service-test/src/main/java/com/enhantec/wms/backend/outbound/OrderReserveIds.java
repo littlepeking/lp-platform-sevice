@@ -55,7 +55,7 @@ public class OrderReserveIds extends WMSBaseService {
             UDTRN.FROMKEY=projectId;
             UDTRN.TITLE01="项目号"; UDTRN.CONTENT01=projectId;
             UDTRN.TITLE02="容器条码列表"; UDTRN.CONTENT01=ids;
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
             //--------------------------------------------------------------
 
 

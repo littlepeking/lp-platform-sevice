@@ -5,7 +5,7 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 
 public class LabelConfig {
 
-    public  static String getLabelTemplatePrefix( String labelName)throws Exception{
+    public  static String getLabelTemplatePrefix( String labelName){
 
         String templatePrefix = DBHelper.getStringValue( " SELECT LABELDESCR FROM LabelConfig WHERE LabelName = ? ", new Object[]{labelName}, "标签配置" + labelName);
 

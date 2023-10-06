@@ -127,7 +127,7 @@ public class MaintainLeftLpnQty extends WMSBaseService {
                 UDTRN.TITLE02 = "单位";
                 UDTRN.CONTENT02 = uom;
 
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
             }else if(UtilHelper.equals(type,"REMOVE")) {
 
@@ -153,7 +153,7 @@ public class MaintainLeftLpnQty extends WMSBaseService {
                 UDTRN.FROMKEY1 = receiptKey;
                 UDTRN.FROMKEY2LABEL = "余料容器号";
                 UDTRN.FROMKEY2 = id;
-                UDTRN.Insert( userid);
+                UDTRN.insert( userid);
 
             }else{
                 //query

@@ -65,7 +65,7 @@ public class UnconfirmSO extends WMSBaseService {
             UDTRN.FROMKEY3="";
             UDTRN.TITLE01="出库单号";    UDTRN.CONTENT01=ORDERKEY;
             UDTRN.TITLE02="确认状态";    UDTRN.CONTENT02="N";
-            UDTRN.Insert( userid);
+            UDTRN.insert( userid);
 
 
 

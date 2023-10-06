@@ -1,6 +1,7 @@
 package com.enhantec.wms.backend.utils.print;
 
 import com.alibaba.fastjson.JSON;
+import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
@@ -68,8 +69,8 @@ public class PrintUtil {
     }
 
     //PRINTSTATUS -1 缓存后续打印 0 正在打印
-    public static void printLabel( String printer, String labelTempName, String labelName, String copies, String notes, List<Map<String,String>> data, String key) throws Exception {
-        if(UtilHelper.isEmpty(printer)) throw new Exception("打印机不允许为空");
+    public static void printLabel( String printer, String labelTempName, String labelName, String copies, String notes, List<Map<String,String>> data, String key)  {
+        if(UtilHelper.isEmpty(printer)) throw new EHApplicationException("打印机不允许为空");
         //PRINTER=-1 不打印 PRINTER = 0 缓存打印 其他 = 直接打印
         if("-1".equals(printer)) return;
 

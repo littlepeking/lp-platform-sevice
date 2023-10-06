@@ -64,7 +64,7 @@ public class PutawayByLPN extends WMSBaseService {
 		    UDTRN.TITLE02="SKU";    UDTRN.CONTENT02=sku;
 		    UDTRN.TITLE03="来源库位";    UDTRN.CONTENT03=toloc;
 		    UDTRN.TITLE04="目标库位";    UDTRN.CONTENT04=finaltoloc;
-		    UDTRN.Insert( userid);
+		    UDTRN.insert( userid);
 
 		    String TOTAL1= DBHelper.getStringValue( "SELECT COUNT(1) FROM LOTXLOCXID A,LOC C WHERE A.LOC=C.LOC AND A.QTY>0 AND C.PUTAWAYZONE='DOCK' AND A.LOT=?", new String[]{idHashMapWithLot.get("LOT")}, "0");
     		String TOTAL2= DBHelper.getStringValue(
