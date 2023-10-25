@@ -21,7 +21,10 @@ import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.core.WMSCoreOperations;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.ServiceDataMap;
+import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.utils.common.FulfillLogicException;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 import lombok.AllArgsConstructor;
@@ -30,9 +33,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service
+@Service(WMSCoreServiceNames.OUTBOUND_SINGLE_LOT_ID_PICK)
 @AllArgsConstructor
-public class SingleLotLpnPickService {
+public class SingleLotLpnPickService extends WMSBaseService {
 
     private final WMSCoreOperations wmsCoreOperations;
 
@@ -73,6 +76,10 @@ public class SingleLotLpnPickService {
         Map<String, String> pickDetailHashMap = PickDetail.findByPickDetailKey(pickDetailKey,true);
         Map<String, Object> pdIdHashMap = LotxLocxId.findRawRecordWithoutCheckIDNotes(pickDetailHashMap.get("ID"),true);
 
+        if(!pickDetailHashMap.get("STATUS").equals("0") && !pickDetailHashMap.get("STATUS").equals("1")){
+            throw new EHApplicationException("当前拣货明细状态不允许拣货");
+        }
+
 
         //暂不支持扫描容器直接换托盘功能
         if(!pickDetailHashMap.get("ID").equals(fromId)) throw new EHApplicationException("暂不支持扫描容器直接换托盘功能");
@@ -90,7 +97,9 @@ public class SingleLotLpnPickService {
         ////////////////////////////////////////////////////////////////////////////////////////////
 
         //调用标准拣货逻辑
-        wmsCoreOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick,autoShip);
+        ServiceDataMap serviceDataMap = wmsCoreOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick,autoShip);
+
+        serviceDataHolder.setOutputData(serviceDataMap);
 
     }
 }

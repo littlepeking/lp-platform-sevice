@@ -101,11 +101,11 @@ public class EHSqlService {
 
         DBHelper.convertSqlParamListObj2String(params);
 
-        if(statement.toLowerCase().startsWith("insert into"))
+        if(statement.toLowerCase().trim().startsWith("insert into"))
             return  SqlRunner.db().insert(convertQuestionMark2Index(statement),params.toArray());
-        else  if(statement.toLowerCase().startsWith("update"))
+        else  if(statement.toLowerCase().trim().startsWith("update"))
             return  SqlRunner.db().update(convertQuestionMark2Index(statement),params.toArray());
-        else  if(statement.toLowerCase().startsWith("delete "))
+        else  if(statement.toLowerCase().trim().startsWith("delete "))
             return  SqlRunner.db().delete(convertQuestionMark2Index(statement),params.toArray());
         else
             throw new UnsupportedOperationException("本方法不支持除 insert/update/delete 外的操作");

@@ -47,7 +47,7 @@ import java.util.Map;
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class WMSCoreOperations {
 
-    public void move(String fromId, String toId, String fromLoc, String toLoc, String lot,
+    public ServiceDataMap move(String fromId, String toId, String fromLoc, String toLoc, String lot,
                             BigDecimal qtyToBeMoved, BigDecimal fromQtyAllocChg, BigDecimal fromQtyPickedChg,
                             BigDecimal toQtyAllocChg, BigDecimal toQtyPickedChg, boolean autoShip,boolean saveItrn){
 //        if (autoShip) {
@@ -116,7 +116,7 @@ public class WMSCoreOperations {
         if (fromIdQtyAllocated.compareTo(fromQtyAllocChg) < 0) throw new EHApplicationException("库存分配量不足");
         //LOTXLOCXID中可以减少部分分配量（比如拣货时），但不存在部分移动拣货量的情况，但允许整体移动拣货至容器。
         if (fromQtyPickedChg.compareTo(BigDecimal.ZERO) > 0 &&
-                ( fromQtyPickedChg.compareTo(fromIdQtyPicked) != 0) || qtyToBeMoved.compareTo(fromIdQty) != 0 ) throw new EHApplicationException("移动已拣货的容器时，不允许移动部分数量");
+                ( fromQtyPickedChg.compareTo(fromIdQtyPicked) != 0 || qtyToBeMoved.compareTo(fromIdQty) != 0 )) throw new EHApplicationException("移动已拣货的容器时，不允许移动部分数量");
         BigDecimal fromIdAvailQty = fromIdQty.subtract(fromIdQtyAllocated).subtract(fromIdQtyPicked);
         BigDecimal expectedAvailQtyToBeMoved= qtyToBeMoved.subtract(fromQtyAllocChg).subtract(fromQtyPickedChg);
         if (fromIdAvailQty.compareTo(expectedAvailQtyToBeMoved) < 0) throw new EHApplicationException("可用库存不足,请检查容器是否被分配或拣货");
@@ -165,9 +165,8 @@ public class WMSCoreOperations {
 
         DBHelper.executeUpdate( "UPDATE ID SET QTY=QTY-?, EDITWHO=?, EDITDATE=? WHERE ID=?", new Object[]{qtyToBeMoved, username, currentDate, fromId});
 
+        // 自动发运不增加目标数量
         if (!autoShip) {
-
-            // 自动发运不增加目标数量
             if (!toIdInvExist) {
                 Map<String, Object> id = new HashMap<>();
                 id.put("ADDWHO", username);
@@ -273,8 +272,11 @@ public class WMSCoreOperations {
         DBHelper.executeUpdate("DELETE FROM LOT WHERE STORERKEY = ? AND LOT = ? AND QTY = 0 ", new Object[]{storerKey,lot});
 
         //交易记录
+
+        Integer itrnKey = null;
+
         if(saveItrn){
-            int itrnKey = IdGenerationHelper.getNCounter("ITRNKEY");
+            itrnKey = IdGenerationHelper.getNCounter("ITRNKEY");
 
             Map<String,Object> itrn = new HashMap<String,Object>();
             itrn.put("ADDWHO", username);
@@ -313,6 +315,13 @@ public class WMSCoreOperations {
             DBHelper.insert("ITRN", itrn);
         }
 
+
+        ServiceDataMap serviceDataMap = new ServiceDataMap();
+        serviceDataMap.setAttribValue("itrnKey", itrnKey);
+        serviceDataMap.setAttribValue("toId", toId);
+
+        return serviceDataMap;
+
     }
 
     public ServiceDataMap pick(String pickDetailKey,String toId, String toLoc,BigDecimal uomQtyToBePicked, String uom, boolean allowShortPick,boolean reduceOpenQtyAfterShortPick, boolean allowOverPick, boolean autoShip){
@@ -346,23 +355,21 @@ public class WMSCoreOperations {
         if (Integer.parseInt(iOrderLineStatus)<0) throw new EHApplicationException("出库单明细行当前状态异常,不允许拣货");
         if (Integer.parseInt(iOrderLineStatus)>=95) throw new EHApplicationException("出库单明细行当前状态已完成出库,不允许拣货");
 
-        if(toId == null) throw new EHApplicationException("拣货至容器号不允许为空");
-
         String toLocationType = DBHelper.getStringValue("SELECT LOCATIONTYPE FROM LOC WHERE LOC=?", new String[]{toLoc});
         if (!toLocationType.equals("PICKTO")) throw new EHApplicationException("拣货目标库位不存在或类型错误");
 
 
         Map<String, String> orderHashMap = Orders.findByOrderKey(pdHashMap.get("ORDERKEY"),true);
-        Map<String, String> orderDetailHashMap = Orders.findOrderDetailByKey(pdHashMap.get("ORDERKEY"),pdHashMap.get("ORDERDETAILKEY"),true);
+        Map<String, String> orderDetailHashMap = Orders.findOrderDetailByKey(pdHashMap.get("ORDERKEY"),pdHashMap.get("ORDERLINENUMBER"),true);
 
-        if (!orderDetailHashMap.get("IDREQUIRED").equals(fromId)) throw new EHApplicationException("已指定容器条码("+orderDetailHashMap.get("IDREQUIRED")+"),请按要求拣货");
+        if (!UtilHelper.isEmpty(orderDetailHashMap.get("IDREQUIRED")) && !orderDetailHashMap.get("IDREQUIRED").equals(fromId)) throw new EHApplicationException("已指定容器条码("+orderDetailHashMap.get("IDREQUIRED")+"),请按要求拣货");
 
         ////////////////////////
         // 检查物料是否冻结,(核对单据类型与冻结类型对应表) HOLDALLOCATIONMATRIX
 
         List<Object> holdReasonList = DBHelper.getValueList("SELECT STATUSCODE FROM HOLDALLOCATIONMATRIX WHERE ORDERTYPE = ?", new Object[]{orderHashMap.get("ORDERTYPE")},"冻结状态");
 
-        Map<String,String> fromIdHashMap = LotxLocxId.findWithoutCheckIDNotes(pdHashMap.get("ID"),true);
+        Map<String,String> fromIdHashMap = LotxLocxId.findByLotAndId(lot, fromId,true);
 
         if (!fromIdHashMap.get("STATUS").equals("OK"))
         {
@@ -384,6 +391,8 @@ public class WMSCoreOperations {
 
         boolean isFullLpnPick = qtyToBePicked.compareTo(new BigDecimal(fromIdHashMap.get("QTY"))) == 0;
 
+//        if(toId == null) throw new EHApplicationException("拣货至容器号不允许为空");
+
         if(UtilHelper.isEmpty(toId)){
             if(isFullLpnPick){
                 toId = fromId;
@@ -392,7 +401,7 @@ public class WMSCoreOperations {
             }
         }
 
-        BigDecimal qtyPickDetailAlloc =  new BigDecimal(fromIdHashMap.get("QTY"));
+        BigDecimal qtyPickDetailAlloc =  new BigDecimal(pdHashMap.get("QTY"));
 
         if(qtyPickDetailAlloc.compareTo(new BigDecimal(fromIdHashMap.get("QTYALLOCATED")))>0){
             throw new EHApplicationException("WMS数据异常:拣货明细待拣货数量" + qtyPickDetailAlloc + "大于和当前拣货容器" + fromId + "的分配量"+ fromIdHashMap.get("QTYALLOCATED"));
@@ -407,9 +416,7 @@ public class WMSCoreOperations {
         BigDecimal qtyAllocChg = qtyToBePicked.subtract(qtyPickDetailAlloc);
 
         BigDecimal qtyAvailable = DBHelper.getDecimalValue("SELECT QTY-QTYALLOCATED-QTYPICKED FROM LOTXLOCXID WHERE LOT=? AND LOC=? AND ID=?", new Object[]{lot,fromLoc,fromId });
-        if (qtyAllocChg.compareTo(qtyAvailable)>0) throw new EHApplicationException("当前容器可超拣数量为"+qtyAvailable.toString()+",不满足超拣需求");
-
-
+        if (qtyAllocChg.compareTo(qtyAvailable)>0) throw new EHApplicationException("当前容器的最大可超拣数量为"+qtyAvailable.toString()+",不满足超拣需求");
 
         String username = EHContextHelper.getUser().getUsername();
         LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
@@ -441,14 +448,14 @@ public class WMSCoreOperations {
         move(fromId, toId, fromLoc, toLoc, lot, qtyToBePicked, qtyPickDetailAlloc, BigDecimal.ZERO,BigDecimal.ZERO,qtyToBePicked,autoShip,false);
 
         //完成拣货调整拣货明细和订单量
-        DBHelper.executeUpdate("UPDATE PICKDETAIL SET QTY = QTY + ?, ADJUSTEDQTY = ADJUSTEDQTY + ?, EDITWHO=?,EDITDATE=?,STATUS=?,LOC=?,ID=?,DROPID=? WHERE PICKDETAILKEY=?"
-                    , new Object[]{qtyAllocChg, qtyAllocChg, username,currentDate, autoShip ? 9 : 5 ,toLoc, toId, toId, pickDetailKey});
+        DBHelper.executeUpdate("UPDATE PICKDETAIL SET QTY = QTY + ?, EDITWHO=?,EDITDATE=?,STATUS=?,LOC=?,ID=?,DROPID=? WHERE PICKDETAILKEY=?"
+                    , new Object[]{qtyAllocChg, username,currentDate, autoShip ? 9 : 5 ,toLoc, toId, toId, pickDetailKey});
 
         DBHelper.executeUpdate("UPDATE TASKDETAIL SET QTY = QTY + ?, UOMQTY = UOMQTY + ? , UOM = ?, EDITWHO=?,EDITDATE=?,STATUS=?,TOLOC=?, TOID = ? WHERE STATUS < 9 AND  PICKDETAILKEY = ?"
                 , new Object[]{qtyAllocChg, UOM.Std2UOMQty(packKey, uom, qtyAllocChg), uom, username,currentDate, 9, toLoc, toId, pickDetailKey});
 
-        Map<String,String> odHashMap=DBHelper.getRecord("SELECT STATUS,OPENQTY - QTYPICKED AS QTY FROM ORDERDETAIL  WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
-                    ,  new String[]{pdHashMap.get("ORDERKEY"),pdHashMap.get("ORDERLINENUMBER")},"订单行");
+//        Map<String,String> odHashMap=DBHelper.getRecord("SELECT STATUS,OPENQTY - QTYPICKED AS QTY FROM ORDERDETAIL  WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
+//                    ,  new String[]{pdHashMap.get("ORDERKEY"),pdHashMap.get("ORDERLINENUMBER")},"订单行");
 
 //        String odStatus = autoShip ? "95": "55";
 //
@@ -581,8 +588,9 @@ public class WMSCoreOperations {
         DBHelper.insert("ITRN", itrn);
 
         ServiceDataMap serviceDataMap = new ServiceDataMap();
-        serviceDataMap.setAttribValue("itrnkey", itrnKey);
+        serviceDataMap.setAttribValue("itrnKey", itrnKey);
         serviceDataMap.setAttribValue("toId", toId);
+
         return serviceDataMap;
 
     }
@@ -625,31 +633,34 @@ public class WMSCoreOperations {
             int ordinstaged = 0;
             int ordloaded = 0;
 
-            List<Map<String,String>>  res = DBHelper.executeQuery( " SELECT a.status, b.locationtype, a.dropid, a.wavekey FROM PICKDETAIL a, LOC b WHERE b.Loc = a.Loc AND a.OrderKey = ? AND a.OrderLineNumber = ?",
+            List<Map<String,String>>  res = DBHelper.executeQuery( " SELECT A.STATUS, B.LOCATIONTYPE, A.DROPID, A.WAVEKEY FROM PICKDETAIL A, LOC B WHERE B.LOC = A.LOC AND A.ORDERKEY = ? AND A.ORDERLINENUMBER = ?",
                     new Object[]{ orderkey, orderLineNumber});
 
             for(Map<String,String> r : res) {
-                pickdetailstatus = r.get("status");
-                locType = r.get("locationtype");
-                dropid = r.get("dropid");
-                waveKey = r.get("wavekey");
-                ++ordreleased;
-            }
+                pickdetailstatus = r.get("STATUS");
+                locType = r.get("LOCATIONTYPE");
+                dropid = r.get("DROPID");
+                waveKey = r.get("WAVEKEY");
 
-            if (pickdetailstatus.equals("2") || pickdetailstatus.equals("3")) {
-                ++inpick;
-            }
+                if (((pickdetailstatus.equals("1")) && (waveKey != " "))) {
+                    ordreleased = ordreleased + 1;
+                }
 
-            if (pickdetailstatus.equals("6")) {
-                ++ordpacked;
-            }
+                if (pickdetailstatus.equals("2") || pickdetailstatus.equals("3")) {
+                    ++inpick;
+                }
 
-            if (locType.equals("STAGED")) {
-                ++ordinstaged;
-            }
+                if (pickdetailstatus.equals("6")) {
+                    ++ordpacked;
+                }
 
-            if (pickdetailstatus.equals("8")) {
-                ++ordloaded;
+                if (locType.equals("STAGED")) {
+                    ++ordinstaged;
+                }
+
+                if (pickdetailstatus.equals("8")) {
+                    ++ordloaded;
+                }
             }
 
 
@@ -661,23 +672,23 @@ public class WMSCoreOperations {
             loaded=ordloaded;
 
 
-            Map<String,Object>  resStatus = DBHelper.getRawRecord(" SELECT SUM ( CASE WHEN b.status = '0' AND a.wavekey <> ' ' THEN 1 ELSE 0 END ) RELEASED, SUM ( CASE WHEN b.status >= '2' AND b.status <= '3' THEN 1 ELSE 0 END ) INPICKING FROM DEMANDALLOCATION a, TASKDETAIL b WHERE b.Sourcekey = a.DemandKey AND b.SourceType = 'DP' AND b.status = '0' AND a.OrderKey = ? AND a.OrderLineNumber = ?",
+            Map<String,Object>  resStatus = DBHelper.getRawRecord(" SELECT SUM ( CASE WHEN b.status = '0' AND a.wavekey <> ' ' THEN 1 ELSE 0 END ) RELEASED, SUM ( CASE WHEN b.status >= '2' AND b.status <= '3' THEN 1 ELSE 0 END ) INPICKING FROM DEMANDALLOCATION a, TASKDETAIL b WHERE b.Sourcekey = a.DemandKey AND b.SourceType = 'DP' AND b.status = '0' AND a.OrderKey = ? AND a.OrderLineNumber = ? ",
                     new Object[]{orderkey, orderLineNumber});
 
-            dpreleased = (int) resStatus.get("RELEASED");
-            dpinpicking = (int) resStatus.get("RELEASED");
+            dpreleased = (int) (resStatus.get("RELEASED")  == null? 0: resStatus.get("RELEASED"));
+            dpinpicking = (int) (resStatus.get("INPICKING")  == null? 0: resStatus.get("INPICKING"));
 
             Map<String,Object>  resOrderLine = DBHelper.getRawRecord(" SELECT SHIPPEDQTY, OPENQTY, QTYPREALLOCATED, QTYALLOCATED, QTYPICKED, ISSUBSTITUTE, WPReleased, STATUS FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?",
                     new Object[]{ orderkey, orderLineNumber});
 
-            SHIPPEDQTY = (double) resOrderLine.get("SHIPPEDQTY");
-            OPENQTY =  (double) resOrderLine.get("OPENQTY");
-            QTYPREALLOCATED =  (double) resOrderLine.get("QTYPREALLOCATED");
-            QTYALLOCATED = (double) resOrderLine.get("QTYALLOCATED");
-            QTYPICKED =  (double) resOrderLine.get("QTYPICKED");
+            SHIPPEDQTY = ((BigDecimal) resOrderLine.get("SHIPPEDQTY")).doubleValue();
+            OPENQTY =   ((BigDecimal) resOrderLine.get("OPENQTY")).doubleValue();
+            QTYPREALLOCATED =   ((BigDecimal) resOrderLine.get("QTYPREALLOCATED")).doubleValue();
+            QTYALLOCATED =  ((BigDecimal) resOrderLine.get("QTYALLOCATED")).doubleValue();
+            QTYPICKED =   ((BigDecimal) resOrderLine.get("QTYPICKED")).doubleValue();
             ISSUBSTITUTE =  (int) resOrderLine.get("ISSUBSTITUTE");
-            wpReleased =  (String) resOrderLine.get("WPReleased");
-            ODSTATUS = (int) resOrderLine.get("STATUS");
+            wpReleased =  (String) resOrderLine.get("WPRELEASED");
+            ODSTATUS = Integer.parseInt(resOrderLine.get("STATUS").toString());
 
 
             if (pickstotal== null) {
@@ -799,13 +810,13 @@ public class WMSCoreOperations {
             Map<String,String> resOrderLine2 = DBHelper.getRecord(" SELECT Status, Storerkey, SKU FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?",
                     new Object[]{ orderkey,orderLineNumber});
 
-            orderdetailstatus = resOrderLine2.get("Status");
-            storerkey =  resOrderLine2.get("Storerkey");
+            orderdetailstatus = resOrderLine2.get("STATUS");
+            storerkey =  resOrderLine2.get("STORERKEY");
             sku =  resOrderLine2.get("SKU");
 
             Map<String,String> resOrderstatussetup = DBHelper.getRecord(" SELECT MAX ( Code ) code FROM Orderstatussetup WHERE Orderflag = '1' AND Detailflag = '1' AND Enabled = '1' AND Code <= ?",
                     new Object[]{newStatus});
-            maxcode = resOrderstatussetup.get("code");
+            maxcode = resOrderstatussetup.get("CODE");
 
 
             if (maxcode != null && maxcode.equals("09") && orderdetailstatus != null && orderdetailstatus.compareToIgnoreCase("02") >= 0 && orderdetailstatus != null && orderdetailstatus.compareToIgnoreCase("08") <= 0) {
@@ -824,7 +835,7 @@ public class WMSCoreOperations {
                 Map<String,Object> resPackoutdetail = DBHelper.getRawRecord(" SELECT SUM(qtypicked) qtypicked FROM Packoutdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ?",
                         new Object[]{orderkey,storerkey,sku} );
 
-                qtyPacked = (double) resPackoutdetail.get("qtypicked");
+                qtyPacked = ((BigDecimal) resPackoutdetail.get("QTYPICKED")).doubleValue();
 
 
                 if (qtyPacked > 0.0D) {
@@ -832,7 +843,7 @@ public class WMSCoreOperations {
                     Map<String,Object> resOrderDetail = DBHelper.getRawRecord(" SELECT sum(Openqty+SHIPPEDQTY) qty FROM Orderdetail WHERE Orderkey = ? AND Storerkey =? AND SKU = ? ",
                             new Object[]{orderkey,storerkey,sku} );
 
-                    qtyOrdered = (Integer) resOrderDetail.get("qty");
+                    qtyOrdered = (Integer) resOrderDetail.get("QTY");
 
                     if (qtyPacked == qtyOrdered) {
                         newStatus = orderdetailstatus;
@@ -851,7 +862,7 @@ public class WMSCoreOperations {
             }
 
             ServiceDataMap serviceDataMap = new ServiceDataMap();
-            serviceDataMap.setAttribValue("newStatus", newStatus);
+            serviceDataMap.setAttribValue("NEWSTATUS", newStatus);
 
             return serviceDataMap;
         } finally {
@@ -874,9 +885,9 @@ public class WMSCoreOperations {
             Map<String,Object>  res = DBHelper.getRawRecord( " SELECT COUNT ( * ) count, MAX ( Status ) maxStatus, MIN ( Status ) minStatus FROM Orderdetail WHERE Orderkey = ? AND Status <> '18' and ( openqty>0 or shippedqty>0 or qtypreallocated>0 or qtyallocated>0 or qtypicked>0 )",
                     new Object[]{ orderkey});
 
-            orderDetailCount = (Integer) res.get("count");
-            maxStatus = (String) res.get("maxStatus");
-            minStatus = (String) res.get("minStatus");
+            orderDetailCount = (Integer) res.get("COUNT");
+            maxStatus = (String) res.get("MAXSTATUS");
+            minStatus = (String) res.get("MINSTATUS");
 
 
 
@@ -1007,8 +1018,8 @@ public class WMSCoreOperations {
             }
 
             ServiceDataMap serviceDataMap = new ServiceDataMap();
-            serviceDataMap.setAttribValue("status", oldStatus);
-            serviceDataMap.setAttribValue("newStatus", newStatus);
+            serviceDataMap.setAttribValue("STATUS", oldStatus);
+            serviceDataMap.setAttribValue("NEWSTATUS", newStatus);
 
             return serviceDataMap;
 
@@ -1031,7 +1042,7 @@ public class WMSCoreOperations {
 
         DBHelper.executeUpdate( "UPDATE ORDERS SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? "
                 , new Object[]{
-                        orderStatusParam.getString("newStatus"),
+                        orderStatusParam.getString("NEWSTATUS"),
                         userid,
                         EHDateTimeHelper.getCurrentDate(),
                         orderKey
@@ -1041,7 +1052,7 @@ public class WMSCoreOperations {
     public void updateOrderDetailStatus(String orderKey, String orderLineNumber) {
 
         ServiceDataMap orderDetailStatusParam = getOrderDetailStatus(orderKey, orderLineNumber);
-        String newOrderDetailStatus = orderDetailStatusParam.getString("newStatus");
+        String newOrderDetailStatus = orderDetailStatusParam.getString("NEWSTATUS");
 
         String userid = EHContextHelper.getUser().getUsername();
 
@@ -1055,39 +1066,62 @@ public class WMSCoreOperations {
         );
     }
 
+
+
     /**
-     * 分配库存
+     * 添加拣货明细
      * @param orderKey
      * @param orderLineNumber
      * @param lot
-     * @param loc
      * @param id
      * @return pickDetailKey
      */
-    public String addPickDetail(String orderKey, String orderLineNumber, String lot, String loc, String id, String packKey, String uom, BigDecimal uomQty) {
+    public ServiceDataMap addPickDetail(String orderKey, String orderLineNumber, String lot, String id, String packKey, String uom, BigDecimal uomQty) {
 
         BigDecimal qty = UOM.UOMQty2StdQty(packKey,uom, uomQty);
 
         String username = EHContextHelper.getUser().getUsername();
         LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
 
-        DBHelper.executeUpdate("UPDATE ORDERDETAIL SET EDITWHO=?,EDITDATE=?,STATUS=?,OPENQTY = OPENQTY + ?,  QTYALLOCATED=QTYALLOCATED+? WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
+        Map<String, String> lotxLocxIdHashMap = LotxLocxId.findByLotAndId(lot,id, true);
+
+        String loc = lotxLocxIdHashMap.get("LOC");
+
+        String qtyAvailableInLLI = UtilHelper.decimalStrSubtract(lotxLocxIdHashMap.get("QTY"), UtilHelper.decimalStrAdd(lotxLocxIdHashMap.get("QTYALLOCATED"), lotxLocxIdHashMap.get("QTYPICKED")));
+
+        if(new BigDecimal(qtyAvailableInLLI).compareTo(qty)<0) throw new EHApplicationException("拣货明细添加失败:当前容器的库存可用数量小于待添加的拣货明细数量");
+
+        Map<String, String> orderDetailHashMap = Orders.findOrderDetailByKey(orderKey,orderLineNumber,true);
+
+        String qtyPickAndAlloc = UtilHelper.decimalStrAdd(orderDetailHashMap.get("QTYALLOCATED"), orderDetailHashMap.get("QTYPICKED"));
+
+        if(UtilHelper.decimalStrCompare(qtyPickAndAlloc, orderDetailHashMap.get("OPENQTY")) == 0) throw new EHApplicationException("当前分配和拣货数量已经达到订单行的要求，不允许超量拣货");
+
+        DBHelper.executeUpdate("UPDATE ORDERDETAIL SET EDITWHO = ?,EDITDATE = ?, QTYALLOCATED = QTYALLOCATED + ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? "
                 , new Object[] {username,currentDate,qty,orderKey,orderLineNumber});
 
-        DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTYALLOCATED=QTYALLOCATED+?,EDITWHO=?,EDITDATE=? WHERE LOT=? AND LOC=? AND ID=?" , new Object[]{qty,username,currentDate,lot,loc,id});
+        //处理超分配的情况（仅允许最后一个容器超分配）
+        DBHelper.executeUpdate("UPDATE ORDERDETAIL SET OPENQTY = QTYALLOCATED + QTYPICKED WHERE OPENQTY < QTYALLOCATED + QTYPICKED AND ORDERKEY = ? AND ORDERLINENUMBER = ? "
+                , new Object[] {username,currentDate,qty,orderKey,orderLineNumber});
+
+        DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTYALLOCATED = QTYALLOCATED + ?, EDITWHO = ?, EDITDATE = ? WHERE LOT = ? AND LOC = ? AND ID = ? " , new Object[]{qty,username,currentDate,lot,loc,id});
 
         Map<String,Object> lotHashMap = VLotAttribute.findByLot(lot, true);
 
         String storerKey = lotHashMap.get("STORERKEY").toString();
         String sku = lotHashMap.get("SKU").toString();
 
-        DBHelper.executeUpdate("UPDATE SKUXLOC SET QTYALLOCATED=QTYALLOCATED+?,EDITWHO=?,EDITDATE=? WHERE  LOC=?  AND STORERKEY=? AND SKU=?", new Object[]{qty,username,"@date",loc,storerKey,sku});
+        DBHelper.executeUpdate("UPDATE SKUXLOC SET QTYALLOCATED = QTYALLOCATED + ?,EDITWHO = ?,EDITDATE = ? WHERE LOC = ? AND STORERKEY = ? AND SKU = ?", new Object[]{qty,username,currentDate,loc,storerKey,sku});
 
-        DBHelper.executeUpdate("UPDATE LOT SET QTYALLOCATED=QTYALLOCATED+?,EDITWHO=?,EDITDATE=? WHERE LOT=?", new Object[]{qty,username,currentDate,lot});
+        DBHelper.executeUpdate("UPDATE LOT SET QTYALLOCATED = QTYALLOCATED + ?,EDITWHO = ?,EDITDATE = ? WHERE LOT = ?", new Object[]{qty,username,currentDate,lot});
 
         String pickDetailKey = IdGenerationHelper.generateIDByKeyName("PICKDETAILKEY",10);
         String cartonId = IdGenerationHelper.generateIDByKeyName("CARTONID",10);
 
+        String waveKey = buildWave(orderKey);
+
+
+        ///////////
         Map<String,Object> pdHashMap = new HashMap<>();
         pdHashMap.put("ADDWHO", username);
         pdHashMap.put("EDITWHO", username);
@@ -1110,16 +1144,71 @@ public class WMSCoreOperations {
         pdHashMap.put("CARTONGROUP", "STD");
         pdHashMap.put("CARTONTYPE", "SMALL");
         pdHashMap.put("CASEID", cartonId);
+        pdHashMap.put("TOLOC", "PICKTO");//TODO 后期改成根据通道门来设置
+        pdHashMap.put("WAVEKEY",waveKey);
+        pdHashMap.put("PICKMETHOD", 1);
 
         Map<String, String> locHashMap = DBHelper.getRecord("SELECT A.LOGICALLOCATION,A.PUTAWAYZONE FROM LOC A,PUTAWAYZONE B WHERE A.PUTAWAYZONE=B.PUTAWAYZONE AND A.LOC=?"
                 ,new Object[] {loc},"库位");
 
-        pdHashMap.put("DOOR", locHashMap.get("PUTAWAYZONE"));
-        pdHashMap.put("ROUTE", locHashMap.get("LOGICALLOCATION"));
+//        pdHashMap.put("DOOR", locHashMap.get("PUTAWAYZONE"));
+//        pdHashMap.put("ROUTE", locHashMap.get("LOGICALLOCATION"));
 
         DBHelper.insert("PICKDETAIL", pdHashMap);
 
-        return pickDetailKey;
+        updateOrderDetailStatus(orderKey,orderLineNumber);
+        updateOrderStatus(orderKey);
+
+        ServiceDataMap serviceDataMap = new ServiceDataMap();
+        serviceDataMap.setAttribValue("pickDetailKey", pickDetailKey);
+
+        return serviceDataMap;
+
+    }
+
+    //用于满足Legacy WMS发放任务的规则,创建wave
+    private String buildWave(String orderKey) {
+
+        String username = EHContextHelper.getUser().getUsername();
+
+        String waveKey = null;
+        String waveDetailKey = null;
+
+        //如果存在拣货明细，使用当前使用的wavekey，否则创建新的。
+        String currentWaveKey = DBHelper.getStringValue(
+                "SELECT MAX(WAVEKEY) FROM PICKDETAIL WHERE ORDERKEY = ? ", new Object[]{ orderKey });
+
+        if( currentWaveKey != null ){
+            waveKey = currentWaveKey;
+
+            waveDetailKey = DBHelper.getStringValue(
+                    "SELECT WAVEDETAILKEY FROM WAVEDETAIL WHERE WAVEKEY = ? AND ORDERKEY = ? ", new Object[]{ waveKey, orderKey });
+
+            if(waveDetailKey == null) {
+
+                waveDetailKey = IdGenerationHelper.fillStringWithZero(Integer.parseInt(DBHelper.getStringValue(
+                        "SELECT MAX(WAVEDETAILKEY)+1 FROM WAVEDETAIL WHERE WAVEKEY = ? AND ORDERKEY = ? ", new Object[]{waveKey, orderKey})), 10);
+
+                DBHelper.executeUpdate("INSERT INTO WAVEDETAIL ( WAVEKEY,WAVEDETAILKEY,ORDERKEY,ADDWHO,EDITWHO) " +
+                        "VALUES ( ?, ?, ?, ?, ?)", new Object[]{waveKey, waveDetailKey, orderKey, username, username});
+
+            }
+
+        }else {
+            waveKey = IdGenerationHelper.getNCounterStrWithLength("WAVEKEY", 10);
+            waveDetailKey = "0000000001";
+
+            DBHelper.executeUpdate(
+                    "INSERT INTO WAVE ( WAVEKEY, DESCR, WAVETYPE, STATUS, DISPATCHPALLETPICKMETHOD, DISPATCHCASEPICKMETHOD, DISPATCHPIECEPICKMETHOD,BATCHFLAG,AUTOBATCH,INPROCESS,ADDWHO,EDITWHO) "+
+                            " VALUES ( ?, ?, '0', '0', '1', '3', '3', '0', '0', '0', ?, ?)", new Object[]{waveKey, "", username, username});
+
+
+            DBHelper.executeUpdate("INSERT INTO WAVEDETAIL ( WAVEKEY,WAVEDETAILKEY,ORDERKEY,ADDWHO,EDITWHO) " +
+                    "VALUES ( ?, ?, ?, ?, ?)", new Object[]{waveKey, waveDetailKey, orderKey, username, username});
+
+        }
+
+        return waveKey;
     }
 
 

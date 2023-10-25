@@ -18,6 +18,7 @@ package com.enhantec.wms.backend.core.inbound;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.common.receiving.Receipt;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.utils.common.*;
@@ -31,7 +32,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Service("core.inbound.receivingById")
+@Service(WMSCoreServiceNames.INBOUND_RECEIVING_BY_ID)
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 public class ReceivingByIdService extends WMSBaseService{
 

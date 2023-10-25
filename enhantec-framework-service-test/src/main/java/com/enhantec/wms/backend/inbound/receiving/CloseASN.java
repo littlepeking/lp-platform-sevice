@@ -73,7 +73,7 @@ public class CloseASN extends WMSBaseService {
             String notes = DBHelper.getStringValue("SELECT NOTES FROM Esignature WHERE SERIALKEY = ?",new Object[]{
                     esignatureKey},"电子签名");
 
-            ServiceHelper.executeService(WMSCoreServiceNames.CORE_INBOUND_CLOSE_ASN,
+            ServiceHelper.executeService(WMSCoreServiceNames.INBOUND_CLOSE_ASN,
                     new ServiceDataHolder(
                             new ServiceDataMap(
                             new HashMap<String,Object>(){{

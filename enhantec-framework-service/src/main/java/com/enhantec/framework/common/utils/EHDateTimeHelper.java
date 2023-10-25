@@ -34,15 +34,11 @@ public class EHDateTimeHelper {
     }
 
     public static String getLocalDateStr(LocalDate date){
-        return date.toString();
+      return   date == null ? null : date.toString();
     }
 
     public static String getLocalDateStr(LocalDateTime date){
-        return date.toLocalDate().toString();
-    }
-
-    public static String getLocalDateTimeStr(LocalDateTime localDateTime){
-        return localDateTime.toString();
+        return date == null ? null : date.toLocalDate().toString();
     }
 
     public static LocalDateTime getCurrentDate(){

@@ -137,6 +137,33 @@ public class LotxLocxId {
     }
 
 
+
+    /**
+     * 用于查询有彩虹托盘可能的明细信息
+     * 前提：不支持相同ID存在于多个库位的情况或者相同ID属于不同货主。
+     * @param lot
+     * @param id
+     * @return
+     */
+    public static Map<String, String> findByLotAndId(String lot, String id, boolean checkExist) {
+
+        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
+                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
+                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
+                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",b.LOTTABLE01 PACKKEY"
+                + " FROM LOTXLOCXID A,V_LOTATTRIBUTE B "
+                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOT = ? AND A.ID = ? ";
+        Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{lot, id},"库存明细");
+        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到批次为"+lot+"的容器条码"+id);
+        return record;
+    }
+
+
+
     /**
      * 目前仅用于收货后回填IDNOTES.LOT
      * @param storerKey

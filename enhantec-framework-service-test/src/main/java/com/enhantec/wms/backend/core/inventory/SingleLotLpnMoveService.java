@@ -23,7 +23,9 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHDateTimeHelper;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.core.WMSCoreOperations;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
+import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.utils.common.*;
 import lombok.AllArgsConstructor;
@@ -34,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service("core.inventory.singleLotLpnMove")
+@Service(WMSCoreServiceNames.INV_SINGLE_LOT_ID_MOVE)
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @AllArgsConstructor
 public class SingleLotLpnMoveService extends WMSBaseService {
@@ -135,6 +137,9 @@ public class SingleLotLpnMoveService extends WMSBaseService {
             qtyPickChangeToId = BigDecimal.ZERO;
         }
 
-        wmsCoreOperations.move(fromId,toId,fromLoc,toLoc,lot,qtyToBeMoved,qtyAllocChangeFromId,qtyPickChangeFromId,qtyAllocChangeToId,qtyPickChangeToId,false,true);
+        ServiceDataMap serviceDataMap = wmsCoreOperations.move(fromId,toId,fromLoc,toLoc,lot,qtyToBeMoved,qtyAllocChangeFromId,qtyPickChangeFromId,qtyAllocChangeToId,qtyPickChangeToId,false,true);
+
+        serviceDataHolder.setOutputData(serviceDataMap);
+
     }
 }

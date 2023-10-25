@@ -48,8 +48,8 @@ public class VLotAttribute {
         //LOTTABLE04 收货日期, LOTTABLE12 成品生产日期 在相同收货批次下存在不同的值，忽略
 
         String SQL="SELECT " +
-                "STORERKEY"+
-                "SKU"+
+                "STORERKEY,"+
+                "SKU,"+
                 "LOTTABLE01," + //项目号
                 "LOTTABLE02," + //存货类型
                 "LOTTABLE03," +

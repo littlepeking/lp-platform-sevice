@@ -121,7 +121,7 @@ public class InventoryHelper {
 
         ServiceDataMap moveDO = buildParams( fromIdHashMap.get("STORERKEY"), fromId, toId,  toLoc, deltaNetWgt);
 
-        ServiceHelper.executeService(WMSCoreServiceNames.CORE_INV_MOVE,new ServiceDataHolder(moveDO));
+        ServiceHelper.executeService(WMSCoreServiceNames.INV_SINGLE_LOT_ID_MOVE,new ServiceDataHolder(moveDO));
 
         if (!toId.equalsIgnoreCase(fromId)){//拆分SN时 不一致
             ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(fromIdHashMap.get("SKU"),toId,fromId);

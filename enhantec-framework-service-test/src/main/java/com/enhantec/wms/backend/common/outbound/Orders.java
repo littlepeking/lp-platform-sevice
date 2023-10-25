@@ -34,7 +34,7 @@ public class Orders {
         String SQL="select * from orderdetail where orderkey = ? and orderlinenumber = ?";
         Map<String,String> rec= DBHelper.getRecord( SQL,
                 new Object[]{ orderKey , orderLineNumber},
-                "订单行"+orderKey+orderLineNumber,checkExist);
+                "订单行"+orderKey+" "+orderLineNumber,checkExist);
         return rec;
 
     }
