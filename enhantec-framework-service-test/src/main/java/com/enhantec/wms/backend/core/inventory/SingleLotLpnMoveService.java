@@ -78,6 +78,8 @@ public class SingleLotLpnMoveService extends WMSBaseService {
         String fromLoc = fromIdHashMap.get("LOC");
         if(UtilHelper.isEmpty(toLoc)) toLoc = fromLoc; //用于拆分合并容器的情况
 
+        if(qtyToBeMoved.compareTo(qtyInFromId)>0) throw new EHApplicationException("请求移动数量不能超过容器内总数量");
+
         boolean isFullLpnMove = qtyToBeMoved.compareTo(qtyInFromId) == 0;
 
         if(UtilHelper.isEmpty(toId)){

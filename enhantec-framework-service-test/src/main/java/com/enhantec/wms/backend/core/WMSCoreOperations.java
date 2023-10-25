@@ -25,6 +25,7 @@ import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.inventory.VLotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
+import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
@@ -1155,6 +1156,70 @@ public class WMSCoreOperations {
 //        pdHashMap.put("ROUTE", locHashMap.get("LOGICALLOCATION"));
 
         DBHelper.insert("PICKDETAIL", pdHashMap);
+
+        updateOrderDetailStatus(orderKey,orderLineNumber);
+        updateOrderStatus(orderKey);
+
+        ServiceDataMap serviceDataMap = new ServiceDataMap();
+        serviceDataMap.setAttribValue("pickDetailKey", pickDetailKey);
+
+        return serviceDataMap;
+
+    }
+
+    /**
+     * 删除拣货明细
+     * @param pickDetailKey
+     * @return pickDetailKey
+     */
+    public ServiceDataMap removePickDetail(String pickDetailKey) {
+
+        String username = EHContextHelper.getUser().getUsername();
+        LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
+
+        Map<String, String> pickDetailMap = PickDetail.findByPickDetailKey(pickDetailKey,true);
+
+        String orderKey = pickDetailMap.get("ORDERKEY");
+        String orderLineNumber = pickDetailMap.get("ORDERLINENUMBER");
+        String lot = pickDetailMap.get("LOT");
+        String loc = pickDetailMap.get("LOC");
+        String id = pickDetailMap.get("ID");
+        String status = pickDetailMap.get("STATUS");
+        BigDecimal qty = new BigDecimal(pickDetailMap.get("QTY"));
+
+        BigDecimal qtyAllocatedChg;
+        BigDecimal qtyPickedChg;
+
+        if(UtilHelper.decimalStrCompare(status,"5")<0){
+            qtyAllocatedChg = qty;
+            qtyPickedChg = BigDecimal.ZERO;
+        }else if(status.equals("5")){
+            qtyAllocatedChg = BigDecimal.ZERO;
+            qtyPickedChg = qty;
+        }else{
+            throw new EHApplicationException("当前状态不允许删除拣货明细");
+        }
+
+
+        DBHelper.executeUpdate("UPDATE ORDERDETAIL SET EDITWHO = ?,EDITDATE = ?, QTYALLOCATED = QTYALLOCATED - ?, QTYPICKED = QTYPICKED - ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? "
+                , new Object[] {username,currentDate,qtyAllocatedChg, qtyPickedChg, orderKey, orderLineNumber});
+
+        DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTYALLOCATED = QTYALLOCATED - ?, QTYPICKED = QTYPICKED - ? , EDITWHO = ?, EDITDATE = ? WHERE LOT = ? AND LOC = ? AND ID = ? "
+                , new Object[]{qtyAllocatedChg, qtyPickedChg,username,currentDate,lot,loc,id});
+
+        Map<String,Object> lotHashMap = VLotAttribute.findByLot(lot, true);
+
+        String storerKey = lotHashMap.get("STORERKEY").toString();
+        String sku = lotHashMap.get("SKU").toString();
+
+        DBHelper.executeUpdate("UPDATE SKUXLOC SET QTYALLOCATED = QTYALLOCATED - ?, QTYPICKED = QTYPICKED - ? ,EDITWHO = ?,EDITDATE = ? WHERE LOC = ? AND STORERKEY = ? AND SKU = ?",
+                new Object[]{qtyAllocatedChg, qtyPickedChg, username, currentDate, loc, storerKey, sku});
+
+        DBHelper.executeUpdate("UPDATE LOT SET QTYALLOCATED = QTYALLOCATED - ?, QTYPICKED = QTYPICKED - ? ,EDITWHO = ?,EDITDATE = ? WHERE LOT = ?",
+                new Object[]{qtyAllocatedChg, qtyPickedChg, username, currentDate, lot});
+
+        DBHelper.executeUpdate("DELETE FROM PICKDETAIL WHERE PICKDETAILKEY = ?", new Object[]{pickDetailKey});
+        DBHelper.executeUpdate("DELETE FROM TASKDETAIL WHERE PICKDETAILKEY = ?", new Object[]{pickDetailKey});
 
         updateOrderDetailStatus(orderKey,orderLineNumber);
         updateOrderStatus(orderKey);
