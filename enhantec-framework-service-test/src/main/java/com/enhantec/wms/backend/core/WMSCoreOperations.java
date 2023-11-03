@@ -31,6 +31,7 @@ import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
+import jdk.jshell.execution.Util;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +41,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
@@ -326,6 +325,8 @@ public class WMSCoreOperations {
     }
 
     public ServiceDataMap pick(String pickDetailKey,String toId, String toLoc,BigDecimal uomQtyToBePicked, String uom, boolean allowShortPick,boolean reduceOpenQtyAfterShortPick, boolean allowOverPick, boolean autoShip){
+
+        //TODO 检查toId是否存在，如存在则继续检查该容器是否在PICKTO类型的库位并且该容器的数量必须等于拣货量，如不满足则不允许拣货至该容器。
 
         Map<String,String> pdHashMap = DBHelper.getRecord(
                 "SELECT ORDERKEY,ORDERLINENUMBER,PICKDETAILKEY,QTY,STORERKEY,SKU,ID,LOC,LOT,STATUS,PACKKEY,UOM FROM PICKDETAIL where PICKDETAILKEY=?"
@@ -679,7 +680,7 @@ public class WMSCoreOperations {
             dpreleased = (int) (resStatus.get("RELEASED")  == null? 0: resStatus.get("RELEASED"));
             dpinpicking = (int) (resStatus.get("INPICKING")  == null? 0: resStatus.get("INPICKING"));
 
-            Map<String,Object>  resOrderLine = DBHelper.getRawRecord(" SELECT SHIPPEDQTY, OPENQTY, QTYPREALLOCATED, QTYALLOCATED, QTYPICKED, ISSUBSTITUTE, WPReleased, STATUS FROM OrderDetail WHERE OrderKey = ? AND OrderLineNumber = ?",
+            Map<String,Object>  resOrderLine = DBHelper.getRawRecord(" SELECT SHIPPEDQTY, OPENQTY, QTYPREALLOCATED, QTYALLOCATED, QTYPICKED, ISSUBSTITUTE, WPRELEASED, STATUS FROM ORDERDETAIL WHERE ORDERKEY = ? AND ORDERLINENUMBER = ?",
                     new Object[]{ orderkey, orderLineNumber});
 
             SHIPPEDQTY = ((BigDecimal) resOrderLine.get("SHIPPEDQTY")).doubleValue();
@@ -1037,17 +1038,30 @@ public class WMSCoreOperations {
 
     public void updateOrderStatus(String orderKey) {
 
-        ServiceDataMap orderStatusParam = getOrderStatus(orderKey);
+        ServiceDataMap orderStatusRes = getOrderStatus(orderKey);
+        String oldStatus = orderStatusRes.getString("STATUS");
+        String newStatus = orderStatusRes.getString("NEWSTATUS");
+        if(!oldStatus.equals(newStatus)){
 
-        String userid = EHContextHelper.getUser().getUsername();
+            String userid = EHContextHelper.getUser().getUsername();
+            LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
 
-        DBHelper.executeUpdate( "UPDATE ORDERS SET Status = ? , EditWho = ?, EditDate = ? WHERE Orderkey = ? "
-                , new Object[]{
-                        orderStatusParam.getString("NEWSTATUS"),
-                        userid,
-                        EHDateTimeHelper.getCurrentDate(),
-                        orderKey
-                });
+            DBHelper.executeUpdate( "UPDATE ORDERS SET STATUS = ? , EDITWHO = ?, EDITDATE = ? WHERE ORDERKEY = ? "
+                    , new Object[]{
+                            orderStatusRes.getString("NEWSTATUS"),
+                            userid,
+                            EHDateTimeHelper.getCurrentDate(),
+                            orderKey
+                    });
+
+            if (newStatus.equals("95"))
+            {
+                DBHelper.executeUpdate("UPDATE ORDERS SET ACTUALSHIPDATE = ? WHERE ORDERKEY = ?", new Object[]{currentDate,orderKey});
+            }
+
+        }
+
+
     }
 
     public void updateOrderDetailStatus(String orderKey, String orderLineNumber) {
@@ -1078,6 +1092,8 @@ public class WMSCoreOperations {
      * @return pickDetailKey
      */
     public ServiceDataMap addPickDetail(String orderKey, String orderLineNumber, String lot, String id, String packKey, String uom, BigDecimal uomQty) {
+
+        //TODO 校验拣货至ID未被其他容器使用
 
         BigDecimal qty = UOM.UOMQty2StdQty(packKey,uom, uomQty);
 
@@ -1276,18 +1292,160 @@ public class WMSCoreOperations {
         return waveKey;
     }
 
-
     /**
-     * 取消分配库存
-     * @param pickDetailKey
+     * 按拣货至容器发运
      */
-    public void deletePickDetail(String pickDetailKey) {
+    public void shipById(String id)
+    {
+        List<Map<String,String>> LotxLocxIdList = LotxLocxId.findMultiLotIdWithoutIDNotes(id);
 
+        if (LotxLocxIdList.size() == 0) throw new EHApplicationException("未找到可发运的容器");
 
+        LotxLocxIdList.forEach(e->{
+            if(!Loc.findById(e.get("LOC"),true).get("LOCATIONTYPE").equals("PICKTO"))
+            throw new EHApplicationException("当前容器存在于非拣货至库位，不允许发运");
+        });
 
+        List<Map<String,String>> pickDetailList = new ArrayList<>();
+
+        for(Map<String,String> lotxLocxIdHashMap : LotxLocxIdList){
+
+            if(UtilHelper.decimalStrCompare(lotxLocxIdHashMap.get("QTY"),lotxLocxIdHashMap.get("QTYPICKED"))!=0) throw new EHApplicationException("当前容器中存在非拣货状态的库存，不允许发运");
+
+            //取得当前容器关联的拣货明细
+            List<Map<String,String>> tempPickedPDDetails = DBHelper.executeQuery("SELECT * FROM PICKDETAIL WHERE ID=? AND LOC = ? AND LOT = ? AND STATUS>=5 AND STATUS<9", new Object[] {id, lotxLocxIdHashMap.get("LOC"),lotxLocxIdHashMap.get("LOT")});
+
+            BigDecimal tempTotalPickedQty = BigDecimal.ZERO;
+            for(Map<String,String> tempPickedPDDetail : tempPickedPDDetails){
+                tempTotalPickedQty = tempTotalPickedQty.add(new BigDecimal(tempPickedPDDetail.get("QTY")));
+            }
+
+            if(tempTotalPickedQty.compareTo(new BigDecimal(lotxLocxIdHashMap.get("QTY")))!=0)
+                throw new EHApplicationException("当前容器数量和拣货明细中的数量不匹配，请检查库存量和拣货明细量是否匹配");
+
+            pickDetailList.addAll(tempPickedPDDetails);
+
+        }
+
+        HashSet<String> updatedOrderDetailKeys = new HashSet<>();
+
+        pickDetailList.forEach(pdHashMap -> {
+            shipByPickDetail(pdHashMap);
+            updatedOrderDetailKeys.add(pdHashMap.get("ORDERLINENUMBER"));
+        } );
+
+        //一个待发运容器只能对应一个订单但可能用于多个订单行的落放ID
+        updatedOrderDetailKeys.forEach(odKey -> updateOrderDetailStatus(pickDetailList.get(0).get("ORDERKEY"), odKey));
+        updateOrderStatus(pickDetailList.get(0).get("ORDERKEY"));
 
     }
 
+
+
+    /**
+     * 按订单号发运
+     * @param orderKey
+     */
+    public void shipByOrder(String orderKey, boolean allowPartialShip)
+    {
+        //16	部分分配/部分运送
+        //27    部分发放/部分发货
+        //53	部分拣选/部分运送
+        //57	已全部拣货/部分运送
+        //92	部分运送
+        //95	出货全部完成
+
+        if(!allowPartialShip){
+            long unPickFinishedCount = DBHelper.getCount("SELECT COUNT(*) FROM ORDERDETAIL WHERE ORDERKEY=? AND STATUS<55", new Object[] {orderKey});
+            if(unPickFinishedCount>0) throw new EHApplicationException("存在未拣货完成的订单明细行，不允许发运");
+        }
+
+        List<Map<String,String>> pickDetails = DBHelper.executeQuery("SELECT * FROM PICKDETAIL WHERE ORDERKEY=? AND STATUS>=5 AND STATUS<9", new Object[] {orderKey});
+        if (pickDetails == null) throw new EHApplicationException("未找到待发运的拣货明细");
+
+        pickDetails.forEach(pdHashMap ->  shipByPickDetail(pdHashMap));
+
+        String SQL="SELECT * FROM ORDERDETAIL WHERE ORDERKEY = ? AND STATUS < 95";
+        List<Map<String,String>> orderDetails = DBHelper.executeQuery( SQL, new Object[]{ orderKey});
+
+        orderDetails.forEach( od-> updateOrderDetailStatus(orderKey, od.get("ORDERLINENUMBER")));
+        updateOrderStatus(orderKey);
+
+    }
+
+    private void shipByPickDetail(Map<String, String> pdHashMap) {
+
+        if(!Loc.findById(pdHashMap.get("LOC"),true).get("LOCATIONTYPE").equals("PICKTO"))
+                throw new EHApplicationException("当前容器存在于非拣货至库位，不允许发运");
+
+        String username = EHContextHelper.getUser().getUsername();
+        LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
+
+        Map<String,String> LotxLocxIdHashMap = LotxLocxId.findByLotAndId(pdHashMap.get("LOT"), pdHashMap.get("ID"),true);
+        Map<String,Object> lotHashMap = VLotAttribute.findByLot(pdHashMap.get("LOT"),true);
+        //------------------------------------------------------------------------------------
+        DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTY=QTY-?,QTYPICKED=QTYPICKED-?,EDITWHO=?,EDITDATE=? WHERE LOT=? AND LOC=? AND ID=?"
+                , new Object[]{pdHashMap.get("QTY"), pdHashMap.get("QTY"), username, currentDate, pdHashMap.get("LOT"), pdHashMap.get("LOC"), pdHashMap.get("ID")});
+        //------------------------------------------------------------------------------------
+
+        boolean isLpnHold = LotxLocxIdHashMap.get("STATUS").equals("HOLD");
+
+        DBHelper.executeUpdate( "UPDATE LOT SET QTY=QTY - ?,QTYPICKED = QTYPICKED - ?,EDITWHO = ?,EDITDATE = ?,QTYONHOLD = QTYONHOLD - ? WHERE LOT = ?"
+                , new Object[]{pdHashMap.get("QTY"), pdHashMap.get("QTY"), username, currentDate,isLpnHold ? pdHashMap.get("QTY") : 0, pdHashMap.get("LOT")});
+        //------------------------------------------------------------------------------------
+        DBHelper.executeUpdate("UPDATE ID SET QTY = QTY - ? , EDITWHO = ?,EDITDATE = ? WHERE ID = ?"
+                , new Object[]{pdHashMap.get("QTY"), username, currentDate, pdHashMap.get("ID")});
+        //------------------------------------------------------------------------------------
+        DBHelper.executeUpdate( "UPDATE SKUXLOC SET QTY = QTY - ?, QTYPICKED = QTYPICKED - ?,EDITWHO = ?, EDITDATE = ? WHERE LOC = ? AND STORERKEY = ? AND SKU = ?"
+                , new Object[]{pdHashMap.get("QTY"), pdHashMap.get("QTY"), username, currentDate, pdHashMap.get("LOC"), pdHashMap.get("STORERKEY"), pdHashMap.get("SKU")});
+        //------------------------------------------------------------------------------------
+        DBHelper.executeUpdate( "UPDATE PICKDETAIL SET STATUS=?,EDITWHO=?,EDITDATE=? WHERE PICKDETAILKEY=?"
+                , new Object[]{"9", username, currentDate, pdHashMap.get("PICKDETAILKEY")});
+
+        DBHelper.executeUpdate( "UPDATE ORDERDETAIL SET EDITWHO=?,EDITDATE=?,ACTUALSHIPDATE=?,OPENQTY=OPENQTY-?,QTYPICKED=QTYPICKED-?,SHIPPEDQTY=SHIPPEDQTY+? WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
+                , new Object[]{username,currentDate,currentDate,pdHashMap.get("QTY"),pdHashMap.get("QTY"),pdHashMap.get("QTY"),pdHashMap.get("ORDERKEY"),pdHashMap.get("ORDERLINENUMBER")});
+
+        int itrnKey = IdGenerationHelper.getNCounter("ITRNKEY");
+        Map<String,Object> itrn = new HashMap<>();
+        itrn.put("ADDWHO", username);
+        itrn.put("EDITWHO", username);
+        itrn.put("ITRNKEY", itrnKey);
+        itrn.put("ITRNSYSID", "0");
+        itrn.put("TRANTYPE", "WD");
+        itrn.put("STORERKEY", pdHashMap.get("STORERKEY"));
+        itrn.put("SKU", pdHashMap.get("SKU"));
+        itrn.put("LOT", pdHashMap.get("LOT"));
+        itrn.put("FROMLOC", " ");
+        itrn.put("FROMID", pdHashMap.get("ID"));
+        itrn.put("TOLOC", pdHashMap.get("LOC"));
+        itrn.put("TOID", pdHashMap.get("ID"));
+        itrn.put("SOURCEKEY", pdHashMap.get("ORDERKEY")+ pdHashMap.get("ORDERLINENUMBER"));
+        itrn.put("SOURCETYPE", "ShipByPickDetail");
+        itrn.put("QTY", "-"+ pdHashMap.get("QTY"));
+        itrn.put("UOMQTY", "-"+ pdHashMap.get("QTY"));
+        itrn.put("PACKKEY", pdHashMap.get("PACKKEY"));
+        itrn.put("UOM", "EA");
+        itrn.put("UOMCALC", "0");
+        itrn.put("INTRANSIT", "1");
+        itrn.put("STATUS", "OK");
+        itrn.put("LOTTABLE01", lotHashMap.get("LOTTABLE01"));
+        itrn.put("LOTTABLE02", lotHashMap.get("LOTTABLE02"));
+        itrn.put("LOTTABLE03", lotHashMap.get("LOTTABLE03"));
+        itrn.put("LOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE04")));
+        itrn.put("LOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE05")));
+        itrn.put("LOTTABLE06", lotHashMap.get("LOTTABLE06"));
+        itrn.put("LOTTABLE07", lotHashMap.get("LOTTABLE07"));
+        itrn.put("LOTTABLE08", lotHashMap.get("LOTTABLE08"));
+        itrn.put("LOTTABLE09", lotHashMap.get("LOTTABLE09"));
+        itrn.put("LOTTABLE10", lotHashMap.get("LOTTABLE10"));
+        itrn.put("LOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE11")));
+        itrn.put("LOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE12")));
+        //---------------------------------
+        DBHelper.insert("ITRN", itrn);
+    }
+
+
+    //TODO 低优先级，待实现
     public void switchLpn(String taskDetailKey, String lot, String loc, String id){
 
 

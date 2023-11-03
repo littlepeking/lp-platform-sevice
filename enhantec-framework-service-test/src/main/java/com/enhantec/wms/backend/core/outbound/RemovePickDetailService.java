@@ -33,7 +33,7 @@ import java.util.Map;
 
 @Service(WMSCoreServiceNames.OUTBOUND_REMOVE_SINGLE_LOT_ID_PD)
 @AllArgsConstructor
-public class removePickDetailService extends WMSBaseService {
+public class RemovePickDetailService extends WMSBaseService {
 
     private final WMSCoreOperations wmsCoreOperations;
 

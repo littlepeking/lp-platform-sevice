@@ -93,7 +93,6 @@ public class LotxLocxId {
 
     }
 
-
     public static Map<String,String> findBySkuAndSerialNum( String sku, String serialNum) {
 
 
@@ -135,6 +134,30 @@ public class LotxLocxId {
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到容器条码"+FROMID);
         return record;
     }
+
+
+    /**
+     * 查询当前ID下的多批次记录。
+     * @param fromId
+     * @return
+     */
+    public static List<Map<String,String>> findMultiLotIdWithoutIDNotes( String fromId) {
+
+        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
+                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
+                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
+                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",b.LOTTABLE01 PACKKEY"
+                + " FROM  LOTXLOCXID A,V_LOTATTRIBUTE B "
+                + " WHERE A.LOT=B.LOT AND A.QTY > 0 AND A.ID = ? ";
+        return DBHelper.executeQuery( SQL, new Object[]{ fromId});
+
+    }
+
+
 
 
 
