@@ -2,7 +2,8 @@ package com.enhantec.wms.backend.outbound.picking;
 
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
-import com.enhantec.wms.backend.core.WMSCoreOperations;
+import com.enhantec.wms.backend.core.WMSOperations;
+import com.enhantec.wms.backend.core.outbound.OutboundUtilHelper;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -10,7 +11,6 @@ import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
-import com.enhantec.wms.backend.utils.common.ServiceHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
@@ -59,7 +59,7 @@ public class ClusterPickingConfirm extends WMSBaseService {
 
     private static final Map<String, Object> keyLocks = new ConcurrentHashMap<>();
 
-    private final WMSCoreOperations wmsCoreOperations;
+    private final WMSOperations wmsOperations;
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
@@ -235,7 +235,7 @@ public class ClusterPickingConfirm extends WMSBaseService {
 
                 //执行原生拣货
                 //ServiceDataMap res = ServiceHelper.executeService( "NSPRFTPK01C", serviceDataHolder);
-                ServiceDataMap res = wmsCoreOperations.pick(pickdetailKey,toId,"PICKTO",uomQtyTobePicked,uom,true,false,true,false);
+                ServiceDataMap res = wmsOperations.pick(pickdetailKey,toId,"PICKTO",uomQtyTobePicked,uom,true,false,true,false);
 
                 //唯一码LOTXID拣货逻辑(使用NSPRFTPK01C进行整容器拣货时，不需要手工更新唯一码库存)
                 if(!isPickFullLPN) {
@@ -264,8 +264,8 @@ public class ClusterPickingConfirm extends WMSBaseService {
                                         orderLineNumber}
                         );
 
-                        wmsCoreOperations.updateOrderDetailStatus(orderKey, orderLineNumber);
-                        wmsCoreOperations.updateOrderStatus(orderKey);
+                        OutboundUtilHelper.updateOrderDetailStatus(orderKey, orderLineNumber);
+                        OutboundUtilHelper.updateOrderStatus(orderKey);
                     }
 
                 }

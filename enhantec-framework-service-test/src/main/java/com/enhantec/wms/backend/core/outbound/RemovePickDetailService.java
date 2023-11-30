@@ -18,9 +18,8 @@
 package com.enhantec.wms.backend.core.outbound;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
-import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.core.WMSCoreOperations;
-import com.enhantec.wms.backend.core.WMSCoreServiceNames;
+import com.enhantec.wms.backend.core.WMSOperations;
+import com.enhantec.wms.backend.core.WMSServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
@@ -28,14 +27,11 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
-@Service(WMSCoreServiceNames.OUTBOUND_REMOVE_SINGLE_LOT_ID_PD)
+@Service(WMSServiceNames.OUTBOUND_REMOVE_SINGLE_LOT_ID_PD)
 @AllArgsConstructor
 public class RemovePickDetailService extends WMSBaseService {
 
-    private final WMSCoreOperations wmsCoreOperations;
+    private final WMSOperations wmsOperations;
 
     /**
      * 删除拣货明细
@@ -47,7 +43,7 @@ public class RemovePickDetailService extends WMSBaseService {
 
         if(UtilHelper.isEmpty(pickDetailKey)) throw new EHApplicationException("拣货明细号不能为空");
 
-        ServiceDataMap serviceDataMap = wmsCoreOperations.removePickDetail(pickDetailKey);
+        ServiceDataMap serviceDataMap = wmsOperations.removePickDetail(pickDetailKey);
 
         serviceDataHolder.setOutputData(serviceDataMap);
     }

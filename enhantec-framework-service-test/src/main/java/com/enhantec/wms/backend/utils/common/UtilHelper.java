@@ -30,6 +30,15 @@ public class UtilHelper {
         return false;
     }
 
+    public static boolean hasIntersection(List list1, List list2) {
+
+        List commonElements = new ArrayList<>(list1);
+
+        commonElements.retainAll(list2);
+
+        return !commonElements.isEmpty();
+    }
+
 
     public static boolean isNull(String vValue)
     {

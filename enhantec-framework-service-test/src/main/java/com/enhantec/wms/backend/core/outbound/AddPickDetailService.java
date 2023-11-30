@@ -19,8 +19,8 @@ package com.enhantec.wms.backend.core.outbound;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.core.WMSCoreOperations;
-import com.enhantec.wms.backend.core.WMSCoreServiceNames;
+import com.enhantec.wms.backend.core.WMSOperations;
+import com.enhantec.wms.backend.core.WMSServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
@@ -31,11 +31,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service(WMSCoreServiceNames.OUTBOUND_ADD_SINGLE_LOT_ID_PD)
+@Service(WMSServiceNames.OUTBOUND_ADD_SINGLE_LOT_ID_PD)
 @AllArgsConstructor
 public class AddPickDetailService extends WMSBaseService {
 
-    private final WMSCoreOperations wmsCoreOperations;
+    private final WMSOperations wmsOperations;
 
     /**
      * 添加拣货明细
@@ -61,7 +61,7 @@ public class AddPickDetailService extends WMSBaseService {
 
         String lot = idHashMap.get("LOT");
 
-        ServiceDataMap serviceDataMap = wmsCoreOperations.addPickDetail(orderKey, orderLineNumber, lot, id, packKey, uom, uomQty);
+        ServiceDataMap serviceDataMap = wmsOperations.addPickDetail(orderKey, orderLineNumber, lot, id, packKey, uom, uomQty);
 
         serviceDataHolder.setOutputData(serviceDataMap);
     }

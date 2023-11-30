@@ -1,10 +1,13 @@
 package com.enhantec.wms.backend.common.outbound;
 
+import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.ExceptionHelper;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Map;
 import java.util.List;
 
@@ -37,6 +40,18 @@ public class Orders {
                 "订单行"+orderKey+" "+orderLineNumber,checkExist);
         return rec;
 
+    }
+
+    public static Map<String, Object> findOrderDetail(String orderKey, String orderLineNumber) {
+        Map<String,Object> orderDetailMap = DBHelper.getRawRecord(
+                "SELECT A.STORERKEY, A.TYPE, B.SKU, B.PACKKEY,B.UOM, B.IDREQUIRED, B.ORIGINALQTY, B.OPENQTY, B.QTYPREALLOCATED, B.QTYALLOCATED, B.QTYPICKED, B.SHIPPEDQTY, B.STATUS," +
+                        " B.LOTTABLE01, B.LOTTABLE02, B.LOTTABLE03, B.LOTTABLE04, B.LOTTABLE05, B.LOTTABLE06, B.LOTTABLE07, B.LOTTABLE08, B.LOTTABLE09, B.LOTTABLE10, B.LOTTABLE11, B.LOTTABLE12"
+                        + " FROM ORDERS A, ORDERDETAIL B"
+                        + " WHERE A.ORDERKEY=B.ORDERKEY AND B.ORDERKEY=? AND B.ORDERLINENUMBER=?", new String[] {orderKey, orderLineNumber},"订单行",false);
+
+        if (orderDetailMap == null) throw new EHApplicationException("未找到出库单明细行("+orderKey+","+orderLineNumber+")");
+
+        return orderDetailMap;
     }
 
 }

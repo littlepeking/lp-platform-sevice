@@ -17,18 +17,18 @@
 
 package com.enhantec.wms.backend.core.outbound;
 
-import com.enhantec.wms.backend.core.WMSCoreOperations;
-import com.enhantec.wms.backend.core.WMSCoreServiceNames;
+import com.enhantec.wms.backend.core.WMSOperations;
+import com.enhantec.wms.backend.core.WMSServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service(WMSCoreServiceNames.OUTBOUND_SHIP_BY_ORDER)
+@Service(WMSServiceNames.OUTBOUND_SHIP_BY_ORDER)
 @AllArgsConstructor
 public class ShipByOrderService extends WMSBaseService {
 
-    private final WMSCoreOperations wmsCoreOperations;
+    private final WMSOperations wmsOperations;
 
 
     /**
@@ -39,7 +39,7 @@ public class ShipByOrderService extends WMSBaseService {
 
         String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderKey");
 
-        wmsCoreOperations.shipByOrder(orderKey,false);
+        wmsOperations.shipByOrder(orderKey,false);
 
     }
 }

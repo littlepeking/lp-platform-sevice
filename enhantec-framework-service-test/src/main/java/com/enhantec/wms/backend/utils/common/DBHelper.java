@@ -457,7 +457,7 @@ public class DBHelper {
 
 
     // New insert function
-    public static boolean insert(String tableName, Map<String, Object> fields) {
+    public static boolean executeInsert(String tableName, Map<String, Object> fields) {
         if (tableName == null || tableName.isEmpty() || fields == null || fields.isEmpty()) {
             // Handle invalid input
             throw new EHApplicationException("Invalid input for insert row without table name and fields information.");

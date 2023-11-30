@@ -17,8 +17,9 @@
 
 package com.enhantec.wms.backend.core;
 
-public class WMSCoreServiceNames {
-    public static final  String CORE_PREFIX = "core-";
+public class WMSServiceNames {
+    public static final String CORE_PREFIX = "core-";
+
     public static final String INBOUND_CLOSE_ASN = CORE_PREFIX + "inbound-closeASNService";
     public static final String INBOUND_RECEIVING_BY_ID = CORE_PREFIX + "inbound-receivingById";
     public static final String INV_SINGLE_LOT_ID_MOVE = CORE_PREFIX + "inventory-singleLotLpnMove";
@@ -27,4 +28,7 @@ public class WMSCoreServiceNames {
     public static final String OUTBOUND_REMOVE_SINGLE_LOT_ID_PD = CORE_PREFIX + "outbound-removeSingleLotLpnPickDetail";
     public static final String OUTBOUND_SHIP_BY_ID = CORE_PREFIX + "outbound-shipById";
     public static final String OUTBOUND_SHIP_BY_ORDER = CORE_PREFIX + "outbound-shipByOrder";
+
+    public static final String ALLOCATION_PICK_CODE_PREFIX = CORE_PREFIX + "outbound-allocationPickCode-";
+    public static final String OUTBOUND_ALLOCATION_PICK_CODE_A01 = CORE_PREFIX + ALLOCATION_PICK_CODE_PREFIX +"A01";
 }

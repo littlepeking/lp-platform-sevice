@@ -12,21 +12,21 @@ import static com.enhantec.wms.backend.common.Const.CommonLottableFields;
 public class LotxLocxId {
 
     private static  String idDetailSelectClause =
-            "select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                    + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.LOTTABLE03,b.ELOTTABLE03"
-                    + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                    + ",b.LOTTABLE05,FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                    + ",b.ELOTTABLE06,b.LOTTABLE06,b.LOTTABLE07,b.ELOTTABLE07,b.LOTTABLE08,b.ELOTTABLE08,b.LOTTABLE09,b.ELOTTABLE09,b.LOTTABLE10"
-                    + ",b.LOTTABLE11,FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                    + ",b.LOTTABLE12,FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                    + ",b.ELOTTABLE13,b.ELOTTABLE14,b.ELOTTABLE15,b.ELOTTABLE16,b.ELOTTABLE17,b.ELOTTABLE18,b.ELOTTABLE19,b.ELOTTABLE20,b.ELOTTABLE21"
+            "select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                    + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.LOTTABLE03,B.ELOTTABLE03"
+                    + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                    + ",B.LOTTABLE05,FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                    + ",B.ELOTTABLE06,B.LOTTABLE06,B.LOTTABLE07,B.ELOTTABLE07,B.LOTTABLE08,B.ELOTTABLE08,B.LOTTABLE09,B.ELOTTABLE09,B.LOTTABLE10"
+                    + ",B.LOTTABLE11,FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                    + ",B.LOTTABLE12,FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                    + ",B.ELOTTABLE13,B.ELOTTABLE14,B.ELOTTABLE15,B.ELOTTABLE16,B.ELOTTABLE17,B.ELOTTABLE18,B.ELOTTABLE19,B.ELOTTABLE20,B.ELOTTABLE21"
                     + ",D.NETWGT, D.GROSSWGT,D.TAREWGT,D.ORIGINALNETWGT,D.ORIGINALGROSSWGT, D.ORIGINALTAREWGT, D.PACKKEY,D.UOM, D.BARRELDESCR ,D.TOTALBARREL, D.PROJECTCODE , D.LASTSHIPPEDLOC,D.ISOPENED,D.RETURNTIMES,D.BARRELNUMBER,D.TOTALBARREL, " +Const.commonSkuFieldsWithAlias;
 
     public static Map<String, String> findAvailInvByLocId( String FROMLOC, String FROMID, boolean useHold, boolean checkExist) {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d, SKU s "
-                + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED > 0 AND A.LOC= ? and a.id = d.id and a.id = ? ";
+                + " where A.lot=B.lot and A.SKU = s.SKU and A.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED > 0 AND A.LOC= ? and A.id = d.id and A.id = ? ";
         if(!useHold) SQL += " AND A.STATUS <> 'HOLD'";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ FROMLOC, FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到可用库存");
@@ -44,7 +44,7 @@ public class LotxLocxId {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d, SKU s "
-                + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED = A.QTY AND A.LOC= ? and a.id = d.id and a.id = ? ";
+                + " where A.lot=B.lot and A.SKU = s.SKU and A.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED = A.QTY AND A.LOC= ? and A.id = d.id and A.id = ? ";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ FROMLOC, FROMID},"库存明细");
         if(record == null) ExceptionHelper.throwRfFulfillLogicException(errMsg);
 
@@ -55,7 +55,7 @@ public class LotxLocxId {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d, SKU s "
-                + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED = A.QTY and a.id = d.id and a.id = ? ";
+                + " where A.lot=B.lot and A.SKU = s.SKU and A.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED = A.QTY and A.id = d.id and A.id = ? ";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{  FROMID},"库存明细");
         if(record == null) ExceptionHelper.throwRfFulfillLogicException(errMsg);
 
@@ -68,7 +68,7 @@ public class LotxLocxId {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d , SKU s "
-                + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED > 0 AND a.id = d.id and a.id = ? ";
+                + " where A.lot=B.lot and A.SKU = s.SKU and A.qty>0 and d.netwgt>0 and A.QTY-A.QTYPICKED-A.QTYALLOCATED > 0 AND A.id = d.id and A.id = ? ";
         if(!useHold) SQL += " AND A.STATUS <> 'HOLD'";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到ID为"+FROMID+"的可用库存");
@@ -86,7 +86,7 @@ public class LotxLocxId {
 
         String SQL = idDetailSelectClause
                 + " from  lotxlocxid a,v_lotattribute b, IDNOTES d , SKU s "
-                + " where a.lot=b.lot and a.SKU = s.SKU and a.qty>0 and d.netwgt>0 and a.id = d.id and a.id = ? ";
+                + " where A.lot=B.lot and A.SKU = s.SKU and A.qty>0 and d.netwgt>0 and A.id = d.id and A.id = ? ";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到容器条码"+FROMID);
         return record;
@@ -120,16 +120,16 @@ public class LotxLocxId {
      */
     public static Map<String, String> findWithoutCheckIDNotes( String FROMID, boolean checkExist) {
 
-        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
-                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
-                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                + ",b.LOTTABLE01 PACKKEY"
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
                 + " from  lotxlocxid a,v_lotattribute b "
-                + " where a.lot=b.lot and a.qty>0 and a.id = ? ";
+                + " where A.lot=B.lot and A.qty>0 and A.id = ? ";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{ FROMID},"库存明细");
         if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到容器条码"+FROMID);
         return record;
@@ -143,14 +143,14 @@ public class LotxLocxId {
      */
     public static List<Map<String,String>> findMultiLotIdWithoutIDNotes( String fromId) {
 
-        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
-                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
-                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                + ",b.LOTTABLE01 PACKKEY"
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
                 + " FROM  LOTXLOCXID A,V_LOTATTRIBUTE B "
                 + " WHERE A.LOT=B.LOT AND A.QTY > 0 AND A.ID = ? ";
         return DBHelper.executeQuery( SQL, new Object[]{ fromId});
@@ -170,14 +170,14 @@ public class LotxLocxId {
      */
     public static Map<String, String> findByLotAndId(String lot, String id, boolean checkExist) {
 
-        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
-                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
-                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                + ",b.LOTTABLE01 PACKKEY"
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
                 + " FROM LOTXLOCXID A,V_LOTATTRIBUTE B "
                 + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOT = ? AND A.ID = ? ";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{lot, id},"库存明细");
@@ -196,16 +196,16 @@ public class LotxLocxId {
      */
     public static Map<String, String> findWithoutCheckIDNotes(String storerKey, String fromId, boolean checkExist) {
 
-        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
-                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
-                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                + ",b.LOTTABLE01 PACKKEY"
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
                 + " from  lotxlocxid a,v_lotattribute b "
-                + " where a.lot=b.lot and a.qty>0 and a.STORERKEY = ? and a.ID = ? ";
+                + " where A.lot=B.lot and A.qty>0 and A.STORERKEY = ? and A.ID = ? ";
         Map<String,String> record= DBHelper.getRecord( SQL, new Object[]{storerKey, fromId},"库存明细",checkExist);
 //        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("在货主"+storerKey+"下未找到容器条码"+fromId);
         return record;
@@ -213,23 +213,22 @@ public class LotxLocxId {
 
     /**
      * 目前仅用于收货后回填IDNOTES.LOT
-     * @param storerKey
      * @param fromId
      * @param checkExist
      * @return
      */
     public static Map<String, Object> findRawRecordWithoutCheckIDNotes(String fromId, boolean checkExist) {
 
-        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
-                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
-                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                + ",b.LOTTABLE01 PACKKEY"
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
                 + " from  lotxlocxid a,v_lotattribute b "
-                + " where a.lot=b.lot and a.qty>0 and a.ID = ? ";
+                + " where A.lot=B.lot and A.qty>0 and A.ID = ? ";
         Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{fromId},"库存明细",checkExist);
 //        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("在货主"+storerKey+"下未找到容器条码"+fromId);
         return record;
@@ -237,16 +236,16 @@ public class LotxLocxId {
 
     public static Map<String, Object> findRawRecordWithoutCheckIDNotes(String loc, String id, boolean checkExist) {
 
-        String SQL="select a.ID,a.LOT,a.LOC,a.ID,a.STORERKEY,a.SKU,a.QTY,a.QTYALLOCATED,a.QTYPICKED,a.QTY-a.QTYPICKED-a.QTYALLOCATED AVAILABLEQTY, a.STATUS "
-                + ",b.LOTTABLE01,b.LOTTABLE02,b.ELOTTABLE02,b.ELOTTABLE03"
-                + ",FORMAT(b.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
-                + ",FORMAT(b.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
-                + ",b.ELOTTABLE06,b.LOTTABLE06,b.ELOTTABLE07,b.ELOTTABLE08,b.ELOTTABLE09,b.LOTTABLE10"
-                + ",FORMAT(b.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
-                + ",FORMAT(b.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
-                + ",b.LOTTABLE01 PACKKEY"
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
                 + " FROM  LOTXLOCXID a,V_LOTATTRIBUTE b "
-                + " WHERE a.LOT=b.LOT AND a.QTY>0 AND a.LOC = ? AND a.ID = ? ";
+                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOC = ? AND A.ID = ? ";
         Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{loc, id},"库存明细",checkExist);
         return record;
     }

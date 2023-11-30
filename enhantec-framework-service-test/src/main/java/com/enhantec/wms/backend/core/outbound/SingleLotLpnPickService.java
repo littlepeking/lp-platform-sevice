@@ -20,8 +20,8 @@ package com.enhantec.wms.backend.core.outbound;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.core.WMSCoreOperations;
-import com.enhantec.wms.backend.core.WMSCoreServiceNames;
+import com.enhantec.wms.backend.core.WMSOperations;
+import com.enhantec.wms.backend.core.WMSServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
@@ -33,11 +33,11 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service(WMSCoreServiceNames.OUTBOUND_SINGLE_LOT_ID_PICK)
+@Service(WMSServiceNames.OUTBOUND_SINGLE_LOT_ID_PICK)
 @AllArgsConstructor
 public class SingleLotLpnPickService extends WMSBaseService {
 
-    private final WMSCoreOperations wmsCoreOperations;
+    private final WMSOperations wmsOperations;
 
 
     /**
@@ -97,7 +97,7 @@ public class SingleLotLpnPickService extends WMSBaseService {
         ////////////////////////////////////////////////////////////////////////////////////////////
 
         //调用标准拣货逻辑
-        ServiceDataMap serviceDataMap = wmsCoreOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick,autoShip);
+        ServiceDataMap serviceDataMap = wmsOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick,autoShip);
 
         serviceDataHolder.setOutputData(serviceDataMap);
 
