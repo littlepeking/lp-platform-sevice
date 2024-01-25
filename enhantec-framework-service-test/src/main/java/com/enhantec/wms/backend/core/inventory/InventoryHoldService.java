@@ -60,15 +60,15 @@ public class InventoryHoldService extends WMSBaseService {
 
         }else if("UNHOLD".equals(operationType)) {
 
-            if(!UtilHelper.isEmpty(id)) inventoryOperations.releaseById(id, reasonCode, false);
-            if(!UtilHelper.isEmpty(lot)) inventoryOperations.releaseByLot(lot, reasonCode, false);
-            if(!UtilHelper.isEmpty(loc)) inventoryOperations.releaseByLoc(loc, reasonCode, false);
+            if(!UtilHelper.isEmpty(id)) inventoryOperations.unholdById(id, reasonCode, false);
+            if(!UtilHelper.isEmpty(lot)) inventoryOperations.unholdByLot(lot, reasonCode, false);
+            if(!UtilHelper.isEmpty(loc)) inventoryOperations.unholdByLoc(loc, reasonCode, false);
 
         }else if("DELETE".equals(operationType)) {
 
-            if(!UtilHelper.isEmpty(id)) inventoryOperations.releaseById(id, reasonCode, true);
-            if(!UtilHelper.isEmpty(lot)) inventoryOperations.releaseByLot(lot, reasonCode, true);
-            if(!UtilHelper.isEmpty(loc)) inventoryOperations.releaseByLoc(loc, reasonCode, true);
+            if(!UtilHelper.isEmpty(id)) inventoryOperations.unholdById(id, reasonCode, true);
+            if(!UtilHelper.isEmpty(lot)) inventoryOperations.unholdByLot(lot, reasonCode, true);
+            if(!UtilHelper.isEmpty(loc)) inventoryOperations.unholdByLoc(loc, reasonCode, true);
 
         }else {
             throw new EHApplicationException("不支持该冻结操作:" + operationType);

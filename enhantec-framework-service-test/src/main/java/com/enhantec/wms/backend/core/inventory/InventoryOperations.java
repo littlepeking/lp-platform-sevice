@@ -573,7 +573,7 @@ public class InventoryOperations {
      * @param reasonCode
      * @param isDelete
      */
-    public void releaseById(String id, String reasonCode, boolean isDelete){
+    public void unholdById(String id, String reasonCode, boolean isDelete){
 
         //仅ID HOLD冻结记录
         List<String> holdReasonListById = InventoryHold.getHoldReasonsById(id);
@@ -612,7 +612,7 @@ public class InventoryOperations {
      * @param reasonCode
      * @param isDelete
      */
-    public void releaseByLot(String lot, String reasonCode, boolean isDelete){
+    public void unholdByLot(String lot, String reasonCode, boolean isDelete){
 
         //仅LOT HOLD冻结记录
         List<String> holdReasonListByLot = InventoryHold.getHoldReasonsByLot(lot);
@@ -651,7 +651,7 @@ public class InventoryOperations {
      * @param reasonCode
      * @param isDelete
      */
-    public void releaseByLoc(String loc, String reasonCode, boolean isDelete){
+    public void unholdByLoc(String loc, String reasonCode, boolean isDelete){
 
         //仅LOC HOLD冻结记录
         List<String> holdReasonListByLoc = InventoryHold.getHoldReasonsByLoc(loc);
@@ -662,7 +662,7 @@ public class InventoryOperations {
 
         releaseByLotxLocxId(lotxLocxIdHashMapList,reasonCode);
 
-        //更新或删除INVENTORYHOLD
+        //更新或删除INVENTORY HOLD RECORD
         if(isDelete) {
 
             DBHelper.executeUpdate("DELETE FROM INVENTORYHOLD WHERE LOC = ? AND STATUS = ? ", new Object[]{loc, reasonCode});
