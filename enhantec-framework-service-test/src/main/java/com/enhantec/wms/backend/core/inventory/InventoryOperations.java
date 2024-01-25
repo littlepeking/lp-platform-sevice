@@ -582,7 +582,7 @@ public class InventoryOperations {
 
         List<Map<String,String>>  lotxLocxIdHashMapList = LotxLocxId.findMultiLotIdWithoutIDNotes(id);
 
-        releaseById(lotxLocxIdHashMapList,reasonCode);
+        releaseByLotxLocxId(lotxLocxIdHashMapList,reasonCode);
 
         //更新或删除INVENTORYHOLD
         if(isDelete) {
@@ -621,7 +621,7 @@ public class InventoryOperations {
 
         List<Map<String,String>>  lotxLocxIdHashMapList = LotxLocxId.findByLot(lot);
 
-        releaseById(lotxLocxIdHashMapList,reasonCode);
+        releaseByLotxLocxId(lotxLocxIdHashMapList,reasonCode);
 
         //更新或删除INVENTORYHOLD
         if(isDelete) {
@@ -660,7 +660,7 @@ public class InventoryOperations {
 
         List<Map<String,String>>  lotxLocxIdHashMapList = LotxLocxId.findByLoc(loc);
 
-        releaseById(lotxLocxIdHashMapList,reasonCode);
+        releaseByLotxLocxId(lotxLocxIdHashMapList,reasonCode);
 
         //更新或删除INVENTORYHOLD
         if(isDelete) {
@@ -688,7 +688,7 @@ public class InventoryOperations {
      * @param lotxLocxIdHashMapList
      * @param reasonCode
      */
-    private void releaseById(List<Map<String, String>> lotxLocxIdHashMapList, String reasonCode){
+    private void releaseByLotxLocxId(List<Map<String, String>> lotxLocxIdHashMapList, String reasonCode){
 
         String username = EHContextHelper.getUser().getUsername();
         LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
