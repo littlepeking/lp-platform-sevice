@@ -70,7 +70,7 @@ public class ShipById extends WMSBaseService {
 
             }else {
 
-                Map<String, String> pickDetailInfo = PickDetail.findPickedLpn( fromId, true);
+                Map<String, String> pickDetailInfo = PickDetail.findByPickedId( fromId, true);
 
                 OrderValidationHelper.checkOrderTypeAndQualityStatusByPickDetailKey(pickDetailInfo.get("PICKDETAILKEY"));
 

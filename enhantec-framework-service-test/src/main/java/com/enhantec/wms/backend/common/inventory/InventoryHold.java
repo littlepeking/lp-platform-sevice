@@ -23,9 +23,24 @@ import java.util.List;
 
 public class InventoryHold {
 
+    public static List<String> getHoldReasonsById( String id) {
+        return (List<String>) DBHelper.getValueList("SELECT STATUS FROM INVENTORYHOLD WHERE ID=? AND HOLD=1 "
+                , new Object[]{id}, "容器冻结原因");
+    }
+
+    public static List<String> getHoldReasonsByLoc( String loc) {
+        return (List<String>) DBHelper.getValueList("SELECT STATUS FROM INVENTORYHOLD WHERE LOC=? AND HOLD=1 "
+                , new Object[]{loc}, "库位冻结原因");
+    }
+
+    public static List<String> getHoldReasonsByLot( String lot) {
+        return (List<String>) DBHelper.getValueList("SELECT STATUS FROM INVENTORYHOLD WHERE LOT=? AND HOLD=1 "
+                , new Object[]{lot}, "批次冻结原因");
+    }
+
     public static List<String> getIdHoldReasons(String lot, String loc, String id) {
         return (List<String>) DBHelper.getValueList("SELECT STATUS FROM INVENTORYHOLD WHERE (LOT=? OR LOC=? OR ID=?) AND HOLD=1 "
-                , new Object[]{lot, loc, id}, "容器冻结原因");
+                , new Object[]{lot, loc, id}, "冻结原因");
     }
 
     public static List<String> getOrderTypeHoldReasons(String orderType) {

@@ -15,30 +15,19 @@
  *
  *******************************************************************************/
 
-package com.enhantec.wms.backend.core.outbound;
+package com.enhantec.wms.backend.common.inventory;
 
-import com.enhantec.wms.backend.core.WMSServiceNames;
-import com.enhantec.wms.backend.framework.ServiceDataHolder;
-import com.enhantec.wms.backend.framework.WMSBaseService;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.enhantec.wms.backend.utils.common.DBHelper;
 
-@Service(WMSServiceNames.OUTBOUND_SHIP_BY_ORDER)
-@AllArgsConstructor
-public class ShipByOrderService extends WMSBaseService {
+import java.util.Map;
 
-    private final OutboundOperations outboundOperations;
+public class Lot {
 
+    public static Map<String,Object> findById(String lot){
 
-    /**
-     * 根据订单号发运
-     * @param serviceDataHolder
-     */
-    public void execute(ServiceDataHolder serviceDataHolder){
-
-        String orderKey = serviceDataHolder.getInputDataAsMap().getString("orderKey");
-
-        outboundOperations.shipByOrder(orderKey,false);
+        return DBHelper.getRawRecord("SELECT QTY-QTYPICKED-QTYALLOCATED--QTYPREALLOCATED-QTYHOLD FROM LOT WHERE LOT = ? ", new Object[]{lot},"批次",false);
 
     }
+
+
 }

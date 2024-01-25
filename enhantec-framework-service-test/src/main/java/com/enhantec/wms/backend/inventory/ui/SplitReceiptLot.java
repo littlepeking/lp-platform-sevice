@@ -2,7 +2,7 @@ package com.enhantec.wms.backend.inventory.ui;
 
 import com.enhantec.wms.backend.utils.common.LegacyDBHelper;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.common.inventory.VLotAttribute;
+import com.enhantec.wms.backend.common.inventory.LotAttribute;
 import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.audit.Udtrn;
@@ -62,7 +62,7 @@ public class SplitReceiptLot extends WMSBaseService {
                  lottable06Splitted = IdGenerationHelper.createSubReceiptLot( lottabl06ToBeSplit, "S");
 
                 //新增ELOTATTIBUTE批次记录
-                Map<String, String> elotHashMap = VLotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
+                Map<String, String> elotHashMap = LotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
 
                 Map<String,String> newELotHashMap = new HashMap<String,String>();
                 newELotHashMap.put("STORERKEY", elotHashMap.get("STORERKEY"));
@@ -79,8 +79,8 @@ public class SplitReceiptLot extends WMSBaseService {
 
             }else {
                 //合并
-                Map<String, String> elotHashMap = VLotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
-                Map<String, String> mergeelotHashMap = VLotAttribute.findElottableByLottable06( toLottablemerge, true);
+                Map<String, String> elotHashMap = LotAttribute.findElottableByLottable06( lottabl06ToBeSplit, true);
+                Map<String, String> mergeelotHashMap = LotAttribute.findElottableByLottable06( toLottablemerge, true);
                 for (int i = 1; i <= 25; i++) {
                     String num = UtilHelper.addPrefixZeros4Number(i, 2);
                     String toElotpro=UtilHelper.isEmpty(mergeelotHashMap.get("ELOTTABLE" +num))?" ":mergeelotHashMap.get("ELOTTABLE" +num);

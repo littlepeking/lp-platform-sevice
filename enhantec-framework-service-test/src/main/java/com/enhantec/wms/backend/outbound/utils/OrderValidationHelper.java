@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.common.base.CodeLookup;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.code.CDOrderType;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.common.inventory.VLotAttribute;
+import com.enhantec.wms.backend.common.inventory.LotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.utils.common.*;
@@ -133,7 +133,7 @@ public class OrderValidationHelper {
 
         if (!UtilHelper.isEmpty(orderTypeEntry.get("UDF5"))) {
 
-            Map<String,Object> la = VLotAttribute.findByLot( pickDetail.get("LOT"),true);
+            Map<String,Object> la = LotAttribute.findByLot( pickDetail.get("LOT"),true);
 //
 //                if (!UtilHelper.equals(String.valueOf(la.get("ELOTTABLE03")), orderTypeEntry.get("UDF5")))
 //                    ExceptionHelper.throwRfFulfillLogicException("订单类型" + orderTypeEntry.get("DESCRIPTION") + "只允许发运质量状态为" + orderTypeEntry.get("UDF5") + "的物料");

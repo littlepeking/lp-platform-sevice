@@ -19,7 +19,15 @@ public class PickDetail {
         return record;
     }
 
-    public static Map<String, String> findPickedLpn( String lpn, boolean checkExist) {
+    public static List<Map<String, String>> findByUnshippedId( String lpn) {
+
+        String SQL="SELECT * FROM PICKDETAIL WHERE STATUS <= 5 AND ID = ?";
+
+        return DBHelper.executeQuery( SQL, new Object[]{ lpn});
+    }
+
+
+    public static Map<String, String> findByPickedId(String lpn, boolean checkExist) {
 
         String SQL="select * from pickdetail where status = 5 and id = ?";
 

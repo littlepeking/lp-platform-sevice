@@ -15,13 +15,16 @@
  *
  *******************************************************************************/
 
-package com.enhantec.wms.backend.core.outbound.allocations;
+package com.enhantec.wms.backend.core.outbound.allocations.strategies;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHDateTimeHelper;
+import com.enhantec.wms.backend.common.inventory.InventoryHold;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.core.outbound.OutboundUtilHelper;
+import com.enhantec.wms.backend.core.outbound.allocations.AllocationExecutor;
+import com.enhantec.wms.backend.core.outbound.allocations.OrderDetailAllocInfo;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
 import lombok.AllArgsConstructor;
@@ -32,10 +35,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class PreAllocationService {
+public class SoftAllocationService implements AllocationExecutor {
 
 
     private String applyInvFilterCondition(String sql, ArrayList<Object> params, String attributeName, Object attributeValue) {
@@ -49,9 +53,9 @@ public class PreAllocationService {
                 sqlToBeAppend += " AND " + attributeName + " IN (";
                 for(String orderSelectedLot : orderSelectedLots)
                 {
-                    if(!UtilHelper.isEmpty(orderSelectedLot)) sqlToBeAppend += " ?, "; params.add(orderSelectedLot);
+                    if(!UtilHelper.isEmpty(orderSelectedLot)) sqlToBeAppend += " ?,"; params.add(orderSelectedLot);
                 }
-                sqlToBeAppend = sqlToBeAppend.substring(0, sql.length() - 1)+")";
+                sqlToBeAppend = sqlToBeAppend.substring(0, sqlToBeAppend.length() - 1)+")";
             }else  if(attributeValue instanceof LocalDateTime) {
                 sqlToBeAppend +=" AND " + attributeName + " = ? ";
                 params.add(attributeValue);
@@ -75,13 +79,13 @@ public class PreAllocationService {
 
         Map<String, Object> orderDetailMap = Orders.findOrderDetail(orderKey, orderLineNumber);
 
-        String sql="SELECT LOT,QTY-QTYPREALLOCATED-QTYALLOCATED-QTYPICKED-QTYONHOLD AS QTYUNHOLDAVAIL, QTYONHOLD AS QTYONHOLDAVAIL FROM LOT WHERE QTY>0 AND QTY-QTYPREALLOCATED-QTYALLOCATED-QTYPICKED>0";
+        String sql="SELECT L.LOT,L.QTY-L.QTYPREALLOCATED-L.QTYALLOCATED-L.QTYPICKED-L.QTYONHOLD AS QTYUNHOLDAVAIL, L.QTYONHOLD AS QTYONHOLDAVAIL FROM LOT L, LOTATTRIBUTE LA WHERE QTY-QTYPREALLOCATED-QTYALLOCATED-QTYPICKED>0 AND L.LOT = LA.LOT ";
 
 
         ArrayList<Object> params = new ArrayList<>();
 
-        sql+=" AND STORERKEY=?"; params.add(orderDetailMap.get("STORERKEY").toString());
-        sql+=" AND SKU=?"; params.add(orderDetailMap.get("SKU").toString());
+        sql+=" AND L.STORERKEY=?"; params.add(orderDetailMap.get("STORERKEY").toString());
+        sql+=" AND L.SKU=?"; params.add(orderDetailMap.get("SKU").toString());
 
         sql = applyInvFilterCondition(sql, params, "LOTTABLE01", orderDetailMap.get("LOTTABLE01"));
         sql = applyInvFilterCondition(sql, params, "LOTTABLE02", orderDetailMap.get("LOTTABLE02"));
@@ -125,27 +129,23 @@ public class PreAllocationService {
 
     /**
      * 正常库存按批次分配（用于正常库存按批次分配和动态拣货的分配）
-     * @param orderKey
-     * @param orderLineNumber
+     * @param orderDetailAllocInfo
      * @return
      */
-    public List<String> preAllocateOrderLine(String orderKey, String orderLineNumber){
+    public void allocate(OrderDetailAllocInfo orderDetailAllocInfo){
+
+        List<String> orderHoldReasons = InventoryHold.getOrderTypeHoldReasons(orderDetailAllocInfo.getOrderType());
+
+        //动态拣货跳过需要冻结分配的订单行
+        if(orderHoldReasons.stream().map(e-> !e.equals("OK")).count()>0) return;
 
         String username = EHContextHelper.getUser().getUsername();
         LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
 
         List<String> allocLotList = new ArrayList<>();
 
-        Map<String, Object> orderDetailInfo = Orders.findOrderDetail(orderKey,orderLineNumber);
 
-        BigDecimal openQty = (BigDecimal)orderDetailInfo.get("OPENQTY");
-        BigDecimal qtyPreAllocated = (BigDecimal)orderDetailInfo.get("QTYPREALLOCATED");
-        BigDecimal qtyAllocated = (BigDecimal)orderDetailInfo.get("QTYALLOCATED");
-        BigDecimal qtyPicked = (BigDecimal)orderDetailInfo.get("QTYPICKED");
-
-        BigDecimal qtyToBeAllocate = openQty.subtract(qtyPreAllocated).subtract(qtyAllocated).subtract(qtyPicked);
-
-        List<Map<String,Object>>  candidateLotInfoList = getCandidateLotInfo(orderKey,orderLineNumber);
+        List<Map<String,Object>> candidateLotInfoList = getCandidateLotInfo(orderDetailAllocInfo.getOrderKey(),orderDetailAllocInfo.getOrderLineNumber());
 
         for(Map<String, Object> candidateLotInfo : candidateLotInfoList)
         {
@@ -156,37 +156,39 @@ public class PreAllocationService {
 
             if (qtyUnHoldAvail.compareTo(BigDecimal.ZERO)>0){
 
-                if(qtyUnHoldAvail.compareTo(qtyToBeAllocate)>=0){
+                if(qtyUnHoldAvail.compareTo(orderDetailAllocInfo.getQtyToBeAllocate())>=0){
 
-                    qtyLotAlloc = qtyToBeAllocate;
-                    qtyToBeAllocate = BigDecimal.ZERO;
+                    qtyLotAlloc = orderDetailAllocInfo.getQtyToBeAllocate();
+                    orderDetailAllocInfo.setQtyToBeAllocate(BigDecimal.ZERO);
 
-                }else if(qtyUnHoldAvail.compareTo(qtyToBeAllocate)<0){
+                }else if(qtyUnHoldAvail.compareTo(orderDetailAllocInfo.getQtyToBeAllocate())<0){
 
                     qtyLotAlloc = qtyUnHoldAvail;
-                    qtyToBeAllocate = qtyToBeAllocate.subtract(qtyUnHoldAvail);
+                    orderDetailAllocInfo.setQtyToBeAllocate(orderDetailAllocInfo.getQtyToBeAllocate().subtract(qtyUnHoldAvail));
 
                 }
 
                 DBHelper.executeUpdate("UPDATE LOT SET QTYPREALLOCATED = QTYPREALLOCATED + ?,EDITWHO = ?,EDITDATE = ? WHERE LOT = ?", new Object[]{qtyLotAlloc,username,currentDate,lot});
 
-                if(!DBHelper.executeUpdate("UPDATE PREALLOCATEPICKDETAIL SET QTY = QTY + ?, EDITWHO = ?, EDITDATE = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? AND LOT = ?" , new Object[]{qtyLotAlloc, username,currentDate,orderKey,orderLineNumber, lot})){
-                    DBHelper.executeUpdate("INSERT INTO PREALLOCATEPICKDETAIL (ORDERKEY, ORDERLINENUMBER, LOT, QTY, ADDWHO, ADDDATE, EDITWHO, EDITDATE) VALUES (?,?,?,?,?,?,?,?)" , new Object[]{orderKey, orderLineNumber, lot,qtyLotAlloc, username,currentDate,username,currentDate});
+                if(!DBHelper.executeUpdate("UPDATE PREALLOCATEPICKDETAIL SET QTY = QTY + ?, EDITWHO = ?, EDITDATE = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? AND LOT = ?" , new Object[]{qtyLotAlloc, username,currentDate,orderDetailAllocInfo.getOrderKey(),orderDetailAllocInfo.getOrderLineNumber(), lot})){
+                    DBHelper.executeUpdate("INSERT INTO PREALLOCATEPICKDETAIL (ORDERKEY, ORDERLINENUMBER, LOT, QTY, ADDWHO, ADDDATE, EDITWHO, EDITDATE) VALUES (?,?,?,?,?,?,?,?)" , new Object[]{ orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber(), lot,qtyLotAlloc, username,currentDate,username,currentDate});
                 }
+
+                DBHelper.executeUpdate("UPDATE ORDERDETAIL SET QTYPREALLOCATED = QTYPREALLOCATED + ?,EDITWHO = ?,EDITDATE = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ", new Object[]{qtyLotAlloc, username, currentDate, orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber()});
+
 
                 allocLotList.add(lot);
             }
 
-            if(qtyToBeAllocate.compareTo(BigDecimal.ZERO) == 0){
+            if(orderDetailAllocInfo.getQtyToBeAllocate().compareTo(BigDecimal.ZERO) == 0){
                 break;
             }
 
         }
 
-        OutboundUtilHelper.updateOrderDetailStatus(orderKey,orderLineNumber);
-        OutboundUtilHelper.updateOrderStatus(orderKey);
+        OutboundUtilHelper.updateOrderDetailStatus(orderDetailAllocInfo.getOrderKey(),orderDetailAllocInfo.getOrderLineNumber());
+        OutboundUtilHelper.updateOrderStatus(orderDetailAllocInfo.getOrderKey());
 
-        return allocLotList;
     }
 
 }

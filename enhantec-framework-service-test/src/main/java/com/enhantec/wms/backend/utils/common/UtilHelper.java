@@ -353,4 +353,9 @@ public class UtilHelper {
         return properties;
     }
 
+    public static String getMapString(Map map, String attribute) {
+
+       return map.get(attribute) != null ? map.get(attribute).toString() : null;
+
+    }
 }

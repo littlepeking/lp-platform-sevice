@@ -11,7 +11,7 @@ import com.enhantec.wms.backend.common.base.code.CDQualityStatus;
 import com.enhantec.wms.backend.common.base.code.CDReceiptType;
 import com.enhantec.wms.backend.common.base.code.CDSysSet;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.common.inventory.VLotAttribute;
+import com.enhantec.wms.backend.common.inventory.LotAttribute;
 import com.enhantec.wms.backend.common.receiving.Receipt;
 import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
@@ -400,7 +400,7 @@ public class ReceivingWithSignature extends WMSBaseService {
      */
     private void processELottableInfo(Map<String,String> receiptDetailInfo) throws Exception {
         //根据收货批号获取该批次Elottable的信息。
-        Map<String, String> receiptLotInfo = VLotAttribute.getEnterpriseReceiptLotInfo( receiptDetailInfo.get("LOTTABLE06"));
+        Map<String, String> receiptLotInfo = LotAttribute.getEnterpriseReceiptLotInfo( receiptDetailInfo.get("LOTTABLE06"));
 
         if (receiptLotInfo != null) {
             //如果收货批次相同，但是物料代码不同，提示批次被占用。

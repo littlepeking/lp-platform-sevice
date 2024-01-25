@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.common.inventory.VLotAttribute;
+import com.enhantec.wms.backend.common.inventory.LotAttribute;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
@@ -59,7 +59,7 @@ public class SwapPickDetailLPN extends WMSBaseService {
             ServiceDataMap outDO = new ServiceDataMap();
 
             Map<String,String>  skuHashMap = SKU.findById(taskDetailInfo.get("SKU"),true);
-            Map<String,Object>  lotHashMap = VLotAttribute.findByLot(taskDetailInfo.get("LOT"),true);
+            Map<String,Object>  lotHashMap = LotAttribute.findByLot(taskDetailInfo.get("LOT"),true);
             Map<String,String>  idNotesHashMap = IDNotes.findById(newId,true);
             Map<String,String>  taskDetailHashMap = TaskDetail.findById(newTaskDetailKey,true);
             Map<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(newId,true);

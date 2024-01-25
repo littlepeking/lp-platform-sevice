@@ -2,7 +2,7 @@ package com.enhantec.wms.backend.outbound.picking;
 
 import com.enhantec.wms.backend.common.outbound.PickDetail;
 import com.enhantec.wms.backend.common.task.TaskDetail;
-import com.enhantec.wms.backend.core.WMSOperations;
+import com.enhantec.wms.backend.core.outbound.OutboundOperations;
 import com.enhantec.wms.backend.core.outbound.OutboundUtilHelper;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.framework.common.utils.EHContextHelper;
@@ -59,7 +59,7 @@ public class ClusterPickingConfirm extends WMSBaseService {
 
     private static final Map<String, Object> keyLocks = new ConcurrentHashMap<>();
 
-    private final WMSOperations wmsOperations;
+    private final OutboundOperations outboundOperations;
 
     @Override
     public void execute(ServiceDataHolder serviceDataHolder) {
@@ -235,7 +235,7 @@ public class ClusterPickingConfirm extends WMSBaseService {
 
                 //执行原生拣货
                 //ServiceDataMap res = ServiceHelper.executeService( "NSPRFTPK01C", serviceDataHolder);
-                ServiceDataMap res = wmsOperations.pick(pickdetailKey,toId,"PICKTO",uomQtyTobePicked,uom,true,false,true,false);
+                ServiceDataMap res = outboundOperations.pick(pickdetailKey,toId,"PICKTO",uomQtyTobePicked,uom,true,false,true,false);
 
                 //唯一码LOTXID拣货逻辑(使用NSPRFTPK01C进行整容器拣货时，不需要手工更新唯一码库存)
                 if(!isPickFullLPN) {

@@ -42,7 +42,7 @@ public class Receipt {
         return record;
     }
 
-    public static Map<String,String> findUnreceivedRDByLPN(String receiptKey, String lpn, boolean checkExist)  {
+    public static Map<String,String> findUnreceivedRDByLPN(String lpn, boolean checkExist)  {
 
         Map<String,String> record = IDNotes.findAvailInvById(lpn,false);
         if(record!=null) throw new FulfillLogicException("库存已在系统中存在，不允许重复收货");
@@ -53,10 +53,10 @@ public class Receipt {
                         "A.GROSSWGTEXPECTED ORIGINALGROSSWGT, A.TAREWGTEXPECTED ORIGINALTAREWGT, A.QTYEXPECTED, A.QTYEXPECTED ORIGINALNETWGT, " +
                         Const.receiptDetailLottableFields +", CONCAT(A.BARRELNUMBER,'/',A.TOTALBARRELNUMBER) AS BARRELDESCR " +
                         " FROM SKU S,RECEIPTDETAIL A " +
-                        " WHERE  A.SKU = S.SKU and A.STATUS=0 and A.RECEIPTKEY = ? and A.TOID = ? "
-                , new Object[]{receiptKey, lpn},"待收货明细");
+                        " WHERE  A.SKU = S.SKU and A.STATUS=0 and A.TOID = ? "
+                , new Object[]{lpn},"待收货明细");
 
-        if (checkExist == true && idHashMap == null) throw new FulfillLogicException("在收货单"+receiptKey+"中未找到容器条码为"+lpn+"的待收货明细");
+        if (checkExist == true && idHashMap == null) throw new FulfillLogicException("未找到容器条码为"+lpn+"的待收货明细");
 
         return idHashMap;
 

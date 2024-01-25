@@ -2,7 +2,7 @@
 package com.enhantec.wms.backend.inventory.ui;
 
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.common.inventory.VLotAttribute;
+import com.enhantec.wms.backend.common.inventory.LotAttribute;
 import com.enhantec.wms.backend.framework.WMSBaseService;import com.enhantec.framework.common.utils.EHContextHelper;import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.inventory.utils.ChangeByLotHelper;
 import com.enhantec.wms.backend.inventory.utils.InventoryValidationHelper;
@@ -55,7 +55,7 @@ public class ExcuteChange extends WMSBaseService {
                 InventoryValidationHelper.validateLotQty(fromLottable06);
                String toLottable06= IdGenerationHelper.createReceiptLot(toSku);
                //插入新批次将旧批次批属性复制至新批次
-                Map<String,String> elotHashMap = VLotAttribute.findElottableByLottable06(fromLottable06,true);
+                Map<String,String> elotHashMap = LotAttribute.findElottableByLottable06(fromLottable06,true);
                 Map<String,String> newELotHashMap = new HashMap<String,String>();
                 newELotHashMap.put("STORERKEY", elotHashMap.get("STORERKEY"));
                 newELotHashMap.put("SKU", toSku);

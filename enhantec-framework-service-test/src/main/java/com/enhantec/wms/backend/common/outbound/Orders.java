@@ -25,7 +25,7 @@ public class Orders {
 
     public static List<Map<String,String>> findOrderDetailsByOrderKey( String orderKey, boolean checkExist) {
 
-        String SQL="select * from orderdetail where orderkey = ?";
+        String SQL="SELECT * FROM ORDERDETAIL WHERE ORDERKEY = ? ORDER BY ORDERLINENUMBER ";
         List<Map<String,String>> list= DBHelper.executeQuery( SQL, new Object[]{ orderKey});
         if(checkExist && list.size() == 0) ExceptionHelper.throwRfFulfillLogicException("未找到订单号为"+orderKey+"的订单明细");
         return list;
@@ -44,7 +44,7 @@ public class Orders {
 
     public static Map<String, Object> findOrderDetail(String orderKey, String orderLineNumber) {
         Map<String,Object> orderDetailMap = DBHelper.getRawRecord(
-                "SELECT A.STORERKEY, A.TYPE, B.SKU, B.PACKKEY,B.UOM, B.IDREQUIRED, B.ORIGINALQTY, B.OPENQTY, B.QTYPREALLOCATED, B.QTYALLOCATED, B.QTYPICKED, B.SHIPPEDQTY, B.STATUS," +
+                "SELECT A.STORERKEY, A.TYPE, B.SKU, B.PACKKEY,B.UOM, B.IDREQUIRED, B.ORIGINALQTY, B.OPENQTY, B.QTYPREALLOCATED, B.QTYALLOCATED, B.QTYPICKED, B.SHIPPEDQTY, B.STATUS, B.NEWALLOCATIONSTRATEGY, " +
                         " B.LOTTABLE01, B.LOTTABLE02, B.LOTTABLE03, B.LOTTABLE04, B.LOTTABLE05, B.LOTTABLE06, B.LOTTABLE07, B.LOTTABLE08, B.LOTTABLE09, B.LOTTABLE10, B.LOTTABLE11, B.LOTTABLE12"
                         + " FROM ORDERS A, ORDERDETAIL B"
                         + " WHERE A.ORDERKEY=B.ORDERKEY AND B.ORDERKEY=? AND B.ORDERLINENUMBER=?", new String[] {orderKey, orderLineNumber},"订单行",false);

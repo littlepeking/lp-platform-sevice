@@ -4,7 +4,7 @@ import com.enhantec.wms.backend.common.base.IDNotes;
 import com.enhantec.wms.backend.common.base.SKU;
 import com.enhantec.wms.backend.common.base.UOM;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.common.inventory.VLotAttribute;
+import com.enhantec.wms.backend.common.inventory.LotAttribute;
 import com.enhantec.wms.backend.common.task.TaskDetail;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
@@ -43,7 +43,7 @@ public class CCGetTask extends WMSBaseService {
 
         Map<String,String> skuHashMap = SKU.findById(sku,true);
         String  stdUom = UOM.getStdUOM(skuHashMap.get("PACKKEY"));
-        Map<String,Object>  lotHashMap = VLotAttribute.findByLot(lot,true);
+        Map<String,Object>  lotHashMap = LotAttribute.findByLot(lot,true);
         Map<String,String>  idNotesHashMap = IDNotes.findById(fromId,true);
         Map<String,String>  taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
         Map<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(fromId,true);

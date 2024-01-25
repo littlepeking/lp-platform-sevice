@@ -15,18 +15,16 @@
  *
  *******************************************************************************/
 
-package com.enhantec.wms.backend.core.outbound.allocations.strategyCode;
+package com.enhantec.wms.backend.core.outbound.allocations.strategies;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHDateTimeHelper;
 import com.enhantec.wms.backend.common.Const;
 import com.enhantec.wms.backend.common.inventory.InventoryHold;
 import com.enhantec.wms.backend.common.outbound.Orders;
-import com.enhantec.wms.backend.core.WMSServiceNames;
 import com.enhantec.wms.backend.core.outbound.OutboundUtilHelper;
-import com.enhantec.wms.backend.core.outbound.allocations.AllocInfo;
+import com.enhantec.wms.backend.core.outbound.allocations.OrderDetailAllocInfo;
 import com.enhantec.wms.backend.core.outbound.allocations.AllocationExecutor;
-import com.enhantec.wms.backend.core.outbound.allocations.PreAllocationService;
 import com.enhantec.wms.backend.utils.common.DBHelper;
 import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
 import com.enhantec.wms.backend.utils.common.UtilHelper;
@@ -40,32 +38,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service(WMSServiceNames.OUTBOUND_ALLOCATION_PICK_CODE_A01)
+@Service
 @AllArgsConstructor
 /**
  * 订单分配的基础类，后续功能需要对orderLineAllocInfo进行逐步扩展
  */
-public class A01 implements AllocationExecutor {
+public class HardAllocationService implements AllocationExecutor {
 
-    private final PreAllocationService preAllocationService;
+    private final SoftAllocationService preAllocationService;
 
 
     /**
      * 按容器分配（用于正常库存和冻结库存的任务拣货）
-     * @param allocInfo
+     * @param orderDetailAllocInfo
      * @return 订单号是否全部分配完成
      */
     @Override
-    public boolean allocate(AllocInfo allocInfo){
+    public void allocate(OrderDetailAllocInfo orderDetailAllocInfo){
 
-        List<Map<String,Object>>  candidateLotInfoList = preAllocationService.getCandidateLotInfo(allocInfo.getOrderKey(), allocInfo.getOrderLineNumber());
+        List<Map<String,Object>>  candidateLotInfoList = preAllocationService.getCandidateLotInfo(orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber());
 
         for(Map<String, Object> candidateLotInfo : candidateLotInfoList)
         {
             String lot = candidateLotInfo.get("LOT").toString();
             BigDecimal qtyUnHoldAvail = (BigDecimal)candidateLotInfo.get("QTYUNHOLDAVAIL");
             BigDecimal qtyOnHoldAvail = (BigDecimal)candidateLotInfo.get("QTYONHOLDAVAIL");
-            List<String> orderHoldReasons = InventoryHold.getOrderTypeHoldReasons(allocInfo.getOrderType());
+            List<String> orderHoldReasons = InventoryHold.getOrderTypeHoldReasons(orderDetailAllocInfo.getOrderType());
+
+            orderDetailAllocInfo.getCurrentAllocLotInfo().setLot(lot);
+            orderDetailAllocInfo.getCurrentAllocLotInfo().setUnHoldQtyAvail(qtyUnHoldAvail);
 
             //如果订单为非冻结分配类型的订单，则可先根据批次正常可用库存数量做校验，来决定是否有必要进一步分配明细容器库存
             if(orderHoldReasons.isEmpty() || orderHoldReasons.size()==1 && orderHoldReasons.get(0).equals("OK")){
@@ -74,11 +75,11 @@ public class A01 implements AllocationExecutor {
                     continue;
                 }else {
                     //使用正常库存分配的情况（使用此分支的目的是为了提高SQL检索效率，不需要加载冻结库存的数据）
-                    List<Map<String, Object>> idInfoListByLot = findIdAllocCandidatesByLotAndRequiredId(lot, allocInfo.getIdRequired(), false);
+                    List<Map<String, Object>> idInfoListByLot = findIdAllocCandidatesByLotAndRequiredId(lot, orderDetailAllocInfo.getIdRequired(), false);
 
                     for(Map<String, Object> idInfoByLot : idInfoListByLot){
 
-                        if(allocateIdInv(allocInfo, idInfoByLot)) break;
+                        if(allocateIdInv(orderDetailAllocInfo, idInfoByLot)) break;
 
                     }
                 }
@@ -90,7 +91,7 @@ public class A01 implements AllocationExecutor {
                     continue;
                 }else{
                     //冻结分配且不使用正常库存的情况（使用此分支的目的是为了提高SQL检索效率，不需要加载正常库存的数据）
-                    List<Map<String, Object>> holdIdInfoListByLot = findIdAllocCandidatesByLotAndRequiredId(lot, allocInfo.getIdRequired(),true);
+                    List<Map<String, Object>> holdIdInfoListByLot = findIdAllocCandidatesByLotAndRequiredId(lot, orderDetailAllocInfo.getIdRequired(),true);
 
                     for(Map<String, Object> holdIdInfoByLot : holdIdInfoListByLot){
                         //STATUS=HOLD
@@ -98,28 +99,28 @@ public class A01 implements AllocationExecutor {
 
                         if(UtilHelper.hasIntersection(idHoldReasons,orderHoldReasons)) {
 
-                            if(allocateIdInv(allocInfo, holdIdInfoByLot)) break;
+                            if(allocateIdInv(orderDetailAllocInfo, holdIdInfoByLot)) break;
 
                         }
                     }
                 }
             }else {
                 //当前批次存在可分配的库存，且允许分配任何正常库存或者满足任一冻结原因的明细库存
-                List<Map<String, Object>> idInfoListByLot = findIdAllocCandidatesByLotAndRequiredId(lot, allocInfo.getIdRequired(),null);
+                List<Map<String, Object>> idInfoListByLot = findIdAllocCandidatesByLotAndRequiredId(lot, orderDetailAllocInfo.getIdRequired(),null);
 
                 for(Map<String,Object> idInfo : idInfoListByLot){
 
                     //此时如果id为正常库存则可以直接分配，因为此分支已包含了OK的冻结原因
                     if("OK".equals(idInfo.get("STATUS"))){
 
-                        if(allocateIdInv(allocInfo, idInfo)) break;
+                        if(allocateIdInv(orderDetailAllocInfo, idInfo)) break;
 
                     }else {
                         //STATUS=HOLD
                         List<String> idHoldReasons = InventoryHold.getIdHoldReasons(idInfo.get("LOT").toString(),idInfo.get("LOC").toString(),idInfo.get("ID").toString());
                         if(UtilHelper.hasIntersection(idHoldReasons,orderHoldReasons)){
 
-                            if(allocateIdInv(allocInfo, idInfo)) break;
+                            if(allocateIdInv(orderDetailAllocInfo, idInfo)) break;
 
                         }
                     }
@@ -127,20 +128,19 @@ public class A01 implements AllocationExecutor {
             }
         }
 
-        OutboundUtilHelper.updateOrderDetailStatus(allocInfo.getOrderKey(), allocInfo.getOrderLineNumber());
-        OutboundUtilHelper.updateOrderStatus(allocInfo.getOrderKey());
+        OutboundUtilHelper.updateOrderDetailStatus(orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber());
+        OutboundUtilHelper.updateOrderStatus(orderDetailAllocInfo.getOrderKey());
 
-        return allocInfo.getQtyToBeAllocate().compareTo(BigDecimal.ZERO) <= 0;
     }
 
 
     /**
      * 按最小计量单位分配
-     * @param allocInfo 订单行分配请求参数
+     * @param orderDetailAllocInfo 订单行分配请求参数
      * @param idInfoByLot 当前分配的容器ID库存信息
      * @return 订单行是否全部分配完成
      */
-    private boolean allocateIdInv(AllocInfo allocInfo, Map<String, Object> idInfoByLot) {
+    private boolean allocateIdInv(OrderDetailAllocInfo orderDetailAllocInfo, Map<String, Object> idInfoByLot) {
 
         String username = EHContextHelper.getUser().getUsername();
         LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
@@ -148,13 +148,17 @@ public class A01 implements AllocationExecutor {
         BigDecimal qtyIdAllocated = BigDecimal.ZERO;
 
         BigDecimal qtyIdAvail = (BigDecimal) idInfoByLot.get("QTYAVAIL");
-        if (qtyIdAvail.compareTo(BigDecimal.ZERO)>0){
+        //id用于分配的可用量要去除掉批次中的预分配量，从而避免任务拣货和动态拣货出现库存冲突
+        BigDecimal qtyIdAllocAvail = qtyIdAvail.compareTo(orderDetailAllocInfo.getCurrentAllocLotInfo().getUnHoldQtyAvail()) >= 0 ? orderDetailAllocInfo.getCurrentAllocLotInfo().getUnHoldQtyAvail() : qtyIdAvail;
+        if (qtyIdAllocAvail.compareTo(BigDecimal.ZERO)>0){
 
-            if(qtyIdAvail.compareTo(allocInfo.getQtyToBeAllocate())<0 /*|| orderLineAllocInfo.isFullLpnAlloc() TODO isFullLpnAlloc待增加配置于分配策略明细中*/){
-                qtyIdAllocated = qtyIdAvail;
-            }else if(qtyIdAvail.compareTo(allocInfo.getQtyToBeAllocate())>=0){
-                qtyIdAllocated = allocInfo.getQtyToBeAllocate();
+            if(qtyIdAllocAvail.compareTo(orderDetailAllocInfo.getQtyToBeAllocate())<0 /*|| orderLineAllocInfo.isFullLpnAlloc() TODO isFullLpnAlloc待增加配置于分配策略明细中*/){
+                qtyIdAllocated = qtyIdAllocAvail;
+            }else if(qtyIdAllocAvail.compareTo(orderDetailAllocInfo.getQtyToBeAllocate())>=0){
+                qtyIdAllocated = orderDetailAllocInfo.getQtyToBeAllocate();
             }
+
+            orderDetailAllocInfo.getCurrentAllocLotInfo().setUnHoldQtyAvail(orderDetailAllocInfo.getCurrentAllocLotInfo().getUnHoldQtyAvail().subtract(qtyIdAllocated));
 
             DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTYALLOCATED = QTYALLOCATED + ?,EDITWHO = ?,EDITDATE = ? WHERE LOT = ? AND LOC = ? AND ID  = ? AND QTY > 0", new Object[]{ qtyIdAllocated, username, currentDate, idInfoByLot.get("LOT"), idInfoByLot.get("LOC"), idInfoByLot.get("ID")});
 
@@ -165,15 +169,15 @@ public class A01 implements AllocationExecutor {
             //如果UOM=1,为当前物料默认包装下容器的标准数量分配，如PL
             //如果UOM=2,为当前物料默认包装下箱的标准数量分配，如CS
 
-            Map<String, Object> orderDetailInfo = Orders.findOrderDetail(allocInfo.getOrderKey(), allocInfo.getOrderLineNumber());
+            Map<String, Object> orderDetailInfo = Orders.findOrderDetail(orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber());
 
             Map<String, Object> pickDetailInfo = DBHelper.getRawRecord("SELECT * FROM PICKDETAIL WHERE STATUS IN (0,1) AND ORDERKEY = ? AND ORDERLINENUMBER = ? AND PACKKEY = ? AND UOM = ? AND LOT = ? AND FROMLOC = ? AND ID = ?",
-                    new Object[]{ allocInfo.getOrderKey(), allocInfo.getOrderLineNumber(), orderDetailInfo.get("PACKKEY"),"6", idInfoByLot.get("LOT"), idInfoByLot.get("LOC"), idInfoByLot.get("ID")},"拣货明细",false);
+                    new Object[]{ orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber(), orderDetailInfo.get("PACKKEY"),"6", idInfoByLot.get("LOT"), idInfoByLot.get("LOC"), idInfoByLot.get("ID")},"拣货明细",false);
 
             if (pickDetailInfo!=null) {
 
                 DBHelper.executeUpdate("UPDATE PICKDETAIL SET QTY = QTY + ?, EDITWHO = ?, EDITDATE = ? WHERE STATUS IN (0,1) AND ORDERKEY = ? AND ORDERLINENUMBER = ? AND PACKKEY = ? AND UOM = ? AND LOT = ? AND FROMLOC = ? AND ID = ?",
-                        new Object[]{qtyIdAllocated, username, currentDate, allocInfo.getOrderKey(), allocInfo.getOrderLineNumber(), orderDetailInfo.get("PACKKEY"),"6", idInfoByLot.get("LOT"), idInfoByLot.get("LOC"), idInfoByLot.get("ID")});
+                        new Object[]{qtyIdAllocated, username, currentDate, orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber(), orderDetailInfo.get("PACKKEY"),"6", idInfoByLot.get("LOT"), idInfoByLot.get("LOC"), idInfoByLot.get("ID")});
 
                 if(pickDetailInfo.get("STATUS").equals("1")){
                     DBHelper.executeUpdate("UPDATE TASKDETAIL SET QTY = QTY + ?, UOMQTY = UOMQTY + ?, EDITWHO = ?, EDITDATE = ? WHERE PICKDETAILKEY = ? ",
@@ -182,10 +186,12 @@ public class A01 implements AllocationExecutor {
 
             }else {
                 Map<String, Object> pickDetailHashMap = new HashMap<>();
+                pickDetailHashMap.put("STORERKEY", orderDetailAllocInfo.getStorerKey());
                 pickDetailHashMap.put("PICKDETAILKEY", IdGenerationHelper.getNCounterStrWithLength("PICKDETAILKEY", 10));
                 pickDetailHashMap.put("WHSEID", EHContextHelper.getCurrentOrgId());
-                pickDetailHashMap.put("ORDERKEY", allocInfo.getOrderKey());
-                pickDetailHashMap.put("ORDERLINENUMBER", allocInfo.getOrderLineNumber());
+                pickDetailHashMap.put("ORDERKEY", orderDetailAllocInfo.getOrderKey());
+                pickDetailHashMap.put("ORDERLINENUMBER", orderDetailAllocInfo.getOrderLineNumber());
+                pickDetailHashMap.put("SKU", orderDetailAllocInfo.getSku());
                 pickDetailHashMap.put("PACKKEY", orderDetailInfo.get("PACKKEY"));
                 pickDetailHashMap.put("UOM", "6");
                 pickDetailHashMap.put("LOT", idInfoByLot.get("LOT"));
@@ -204,25 +210,31 @@ public class A01 implements AllocationExecutor {
             //here QTYONHOLD means QTYONHOLDAVAIL
             DBHelper.executeUpdate("UPDATE LOT SET QTYALLOCATED = QTYALLOCATED + ?, QTYONHOLD = QTYONHOLD - ?, EDITWHO = ?,EDITDATE = ? WHERE LOT = ?",
                     new Object[]{qtyIdAllocated, "HOLD".equals(idInfoByLot.get("STATUS")) ? qtyIdAllocated : 0, username, currentDate, idInfoByLot.get("LOT")});
+
+            DBHelper.executeUpdate("UPDATE SKUXLOC SET QTYALLOCATED = QTYALLOCATED + ?, EDITWHO = ?,EDITDATE = ? WHERE STORERKEY = ? AND SKU = ? AND LOC = ? ",
+                    new Object[]{qtyIdAllocated, username, currentDate,orderDetailAllocInfo.getStorerKey(), orderDetailAllocInfo.getSku(), idInfoByLot.get("LOC") });
+
+            DBHelper.executeUpdate("UPDATE ORDERDETAIL SET QTYALLOCATED = QTYALLOCATED + ?, EDITWHO = ?,EDITDATE = ? WHERE ORDERKEY = ? AND ORDERLINENUMBER = ? ",
+                    new Object[]{qtyIdAllocated, username, currentDate, orderDetailAllocInfo.getOrderKey(), orderDetailAllocInfo.getOrderLineNumber()});
         }
 
-        allocInfo.setQtyToBeAllocate(allocInfo.getQtyToBeAllocate().subtract(qtyIdAllocated));
+        orderDetailAllocInfo.setQtyToBeAllocate(orderDetailAllocInfo.getQtyToBeAllocate().subtract(qtyIdAllocated));
 
-        updateAllocStatus(allocInfo, qtyIdAllocated);
+        updateAllocStatus(orderDetailAllocInfo, qtyIdAllocated);
 
-        return allocInfo.getResult().getAllocStatus() == AllocInfo.AllocStatus.fullyAllocated;
+        return orderDetailAllocInfo.getResult().getAllocStatus() == OrderDetailAllocInfo.AllocStatus.fullyAllocated;
 
     }
 
-    private void updateAllocStatus(AllocInfo allocInfo, BigDecimal qtyIdAllocated) {
+    private void updateAllocStatus(OrderDetailAllocInfo orderDetailAllocInfo, BigDecimal qtyIdAllocated) {
 
-        if(allocInfo.getQtyToBeAllocate().compareTo(BigDecimal.ZERO) <= 0){
+        if(orderDetailAllocInfo.getQtyToBeAllocate().compareTo(BigDecimal.ZERO) <= 0){
 
-            allocInfo.getResult().setAllocStatus(AllocInfo.AllocStatus.fullyAllocated);
+            orderDetailAllocInfo.getResult().setAllocStatus(OrderDetailAllocInfo.AllocStatus.fullyAllocated);
 
-        }else if(allocInfo.getResult().getAllocStatus() != AllocInfo.AllocStatus.partialAllocated && qtyIdAllocated.compareTo(BigDecimal.ZERO)>0){
+        }else if(orderDetailAllocInfo.getResult().getAllocStatus() != OrderDetailAllocInfo.AllocStatus.partialAllocated && qtyIdAllocated.compareTo(BigDecimal.ZERO)>0){
 
-            allocInfo.getResult().setAllocStatus(AllocInfo.AllocStatus.partialAllocated);
+            orderDetailAllocInfo.getResult().setAllocStatus(OrderDetailAllocInfo.AllocStatus.partialAllocated);
 
         }
     }

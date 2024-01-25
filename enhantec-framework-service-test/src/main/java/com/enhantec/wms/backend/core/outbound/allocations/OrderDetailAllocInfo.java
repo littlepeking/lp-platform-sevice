@@ -23,13 +23,17 @@ import java.util.Map;
 import java.math.BigDecimal;
 
 @Data
-public class AllocInfo {
+public class OrderDetailAllocInfo {
+
+    private String storerKey;
 
     private String orderKey;
 
     private String orderLineNumber;
 
     private String orderType;
+
+    private String sku;
 
     private String idRequired;
 
@@ -44,10 +48,22 @@ public class AllocInfo {
 
     private AllocationResult result = new AllocationResult();
 
+    private CurrentAllocLotInfo currentAllocLotInfo = new CurrentAllocLotInfo();
+
     public enum AllocStatus {
         fullyAllocated,
         partialAllocated,
         notAllocated
+    }
+
+    //used by hard allocation
+    @Data
+    public class CurrentAllocLotInfo {
+
+        private String lot;
+
+        private BigDecimal unHoldQtyAvail;
+
     }
 
     //分配结果

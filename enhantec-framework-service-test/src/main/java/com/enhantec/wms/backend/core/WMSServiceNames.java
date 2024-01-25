@@ -28,7 +28,5 @@ public class WMSServiceNames {
     public static final String OUTBOUND_REMOVE_SINGLE_LOT_ID_PD = CORE_PREFIX + "outbound-removeSingleLotLpnPickDetail";
     public static final String OUTBOUND_SHIP_BY_ID = CORE_PREFIX + "outbound-shipById";
     public static final String OUTBOUND_SHIP_BY_ORDER = CORE_PREFIX + "outbound-shipByOrder";
-
-    public static final String ALLOCATION_PICK_CODE_PREFIX = CORE_PREFIX + "outbound-allocationPickCode-";
-    public static final String OUTBOUND_ALLOCATION_PICK_CODE_A01 = CORE_PREFIX + ALLOCATION_PICK_CODE_PREFIX +"A01";
+    public static final String OUTBOUND_ALLOCATE_ORDER = CORE_PREFIX + "outbound-allocateOrder";
 }

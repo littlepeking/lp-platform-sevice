@@ -27,7 +27,7 @@ public class AllocationStrategy {
 
     public static Map<String, String> findByKey(String allocationStrategyKey) {
 
-        String SQL="SELECT * FROM ALLOCATESTRATEGY WHERE ALLOCATESTRATEGYKEY = ? ";
+        String SQL="SELECT * FROM NEWALLOCATIONSTRATEGY WHERE ALLOCATESTRATEGYKEY = ? ";
 
         Map<String,String> records= DBHelper.getRecord( SQL, new Object[]{ allocationStrategyKey},"分配策略",true);
 
@@ -37,7 +37,7 @@ public class AllocationStrategy {
 
     public static List<Map<String, String>> findAllocStrategyDetailsByKey(String allocationStrategyKey) {
 
-        String SQL="SELECT * FROM ALLOCATESTRATEGYDETAIL WHERE ALLOCATESTRATEGYKEY = ? ";
+        String SQL="SELECT * FROM NEWALLOCATIONSTRATEGYDETAIL WHERE NEWSTRATEGYKEY = ? ";
 
         List<Map<String,String>> records = DBHelper.executeQuery( SQL, new Object[]{ allocationStrategyKey});
 

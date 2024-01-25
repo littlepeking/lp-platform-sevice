@@ -20,7 +20,6 @@ package com.enhantec.wms.backend.core.outbound;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.core.WMSOperations;
 import com.enhantec.wms.backend.core.WMSServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
@@ -37,7 +36,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class SingleLotLpnPickService extends WMSBaseService {
 
-    private final WMSOperations wmsOperations;
+    private final OutboundOperations outboundOperations;
 
 
     /**
@@ -97,7 +96,7 @@ public class SingleLotLpnPickService extends WMSBaseService {
         ////////////////////////////////////////////////////////////////////////////////////////////
 
         //调用标准拣货逻辑
-        ServiceDataMap serviceDataMap = wmsOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick,autoShip);
+        ServiceDataMap serviceDataMap = outboundOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick,autoShip);
 
         serviceDataHolder.setOutputData(serviceDataMap);
 

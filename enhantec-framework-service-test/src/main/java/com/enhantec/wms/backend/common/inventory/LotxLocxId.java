@@ -325,4 +325,40 @@ public class LotxLocxId {
                 , new Object[]{storerKey, id});
     }
 
+
+    public static List<Map<String,String>> findByLot(String lot) {
+
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
+                + " FROM LOTXLOCXID A,V_LOTATTRIBUTE B "
+                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOT = ? ORDER BY ID";
+
+        List<Map<String,String>> records= DBHelper.executeQuery( SQL, new Object[]{lot});
+        return records;
+    }
+
+    public static List<Map<String,String>> findByLoc(String loc) {
+
+        String SQL="select A.ID,A.LOT,A.LOC,A.ID,A.STORERKEY,A.SKU,A.QTY,A.QTYALLOCATED,A.QTYPICKED,A.QTY-A.QTYPICKED-A.QTYALLOCATED AVAILABLEQTY, A.STATUS "
+                + ",B.LOTTABLE01,B.LOTTABLE02,B.ELOTTABLE02,B.ELOTTABLE03"
+                + ",FORMAT(B.LOTTABLE04,'"+ Const.DateTimeFormat+"') AS LOTTABLE04"
+                + ",FORMAT(B.ELOTTABLE05,'"+Const.DateTimeFormat+"') as ELOTTABLE05"
+                + ",B.ELOTTABLE06,B.LOTTABLE06,B.ELOTTABLE07,B.ELOTTABLE08,B.ELOTTABLE09,B.LOTTABLE10"
+                + ",FORMAT(B.ELOTTABLE11,'"+Const.DateTimeFormat+"') as ELOTTABLE11"
+                + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
+                + ",B.LOTTABLE01 PACKKEY"
+                + " FROM LOTXLOCXID A,V_LOTATTRIBUTE B "
+                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOC = ? ORDER BY LOT, ID";
+
+        List<Map<String,String>> records= DBHelper.executeQuery( SQL, new Object[]{loc});
+        return records;
+    }
+
+
 }
