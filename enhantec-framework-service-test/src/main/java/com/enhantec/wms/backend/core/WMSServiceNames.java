@@ -23,6 +23,7 @@ public class WMSServiceNames {
     public static final String INBOUND_CLOSE_ASN = CORE_PREFIX + "inbound-closeASNService";
     public static final String INBOUND_RECEIVING_BY_ID = CORE_PREFIX + "inbound-receivingById";
     public static final String INV_SINGLE_LOT_ID_MOVE = CORE_PREFIX + "inventory-singleLotLpnMove";
+    public static final String INV_HOLD = CORE_PREFIX + "inventory-hold";
     public static final String OUTBOUND_SINGLE_LOT_ID_PICK = CORE_PREFIX + "outbound-singleLotLpnPick";
     public static final String OUTBOUND_ADD_SINGLE_LOT_ID_PD = CORE_PREFIX + "outbound-addSingleLotLpnPickDetail";
     public static final String OUTBOUND_REMOVE_SINGLE_LOT_ID_PD = CORE_PREFIX + "outbound-removeSingleLotLpnPickDetail";

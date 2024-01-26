@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service(WMSServiceNames.INV_SINGLE_LOT_ID_MOVE)
+@Service(WMSServiceNames.INV_HOLD)
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @AllArgsConstructor
 public class InventoryHoldService extends WMSBaseService {
