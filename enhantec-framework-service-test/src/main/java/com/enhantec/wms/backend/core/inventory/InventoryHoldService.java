@@ -45,7 +45,7 @@ public class InventoryHoldService extends WMSBaseService {
         //HOLD / UNHOLD / DELETE = UNHOLD + DELETE INVENTORY HOLD RECORD
         String operationType = serviceDataHolder.getInputDataAsMap().getString("operationType");
 
-        if (((UtilHelper.isEmpty(id) ? 1 : 0) + (UtilHelper.isEmpty(lot) ? 1 : 0) + (UtilHelper.isEmpty(loc) ? 1 : 0)) != 1) {
+        if (((!UtilHelper.isEmpty(id) ? 1 : 0) + (!UtilHelper.isEmpty(lot) ? 1 : 0) + (!UtilHelper.isEmpty(loc) ? 1 : 0)) != 1) {
             throw new EHApplicationException("容器ID、批次或库位参数必须传且只允许传入一个");
         }
 

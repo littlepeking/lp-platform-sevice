@@ -337,7 +337,7 @@ public class LotxLocxId {
                 + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
                 + ",B.LOTTABLE01 PACKKEY"
                 + " FROM LOTXLOCXID A,V_LOTATTRIBUTE B "
-                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOT = ? ORDER BY ID";
+                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOT = ? ORDER BY A.ID";
 
         List<Map<String,String>> records= DBHelper.executeQuery( SQL, new Object[]{lot});
         return records;
@@ -354,7 +354,7 @@ public class LotxLocxId {
                 + ",FORMAT(B.ELOTTABLE12,'"+Const.DateTimeFormat+"') as ELOTTABLE12"
                 + ",B.LOTTABLE01 PACKKEY"
                 + " FROM LOTXLOCXID A,V_LOTATTRIBUTE B "
-                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOC = ? ORDER BY LOT, ID";
+                + " WHERE A.LOT=B.LOT AND A.QTY>0 AND A.LOC = ? ORDER BY A.LOT, A.ID";
 
         List<Map<String,String>> records= DBHelper.executeQuery( SQL, new Object[]{loc});
         return records;

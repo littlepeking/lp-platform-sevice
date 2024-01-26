@@ -335,35 +335,30 @@ public class InventoryOperations {
 
     public void holdById(String id, String reasonCode){
 
-        Map<String,String> holdIdRecord = DBHelper.getRecord("SELECT * FROM INVENTORYHOLD WHERE STATUS = ? AND ID = ? ", new Object[]{reasonCode, id},"容器冻结记录");
-
-        boolean isIdHold = holdIdRecord != null && "1".equals(holdIdRecord.get("HOLD"));
-
-        if(!isIdHold){
-
-            throw new EHApplicationException("容器"+id+"未被冻结原因"+reasonCode+"冻结，不允许解冻");
-
+        if(InventoryHold.getHoldReasonsById(id).contains(reasonCode)){
+            throw new EHApplicationException("容器"+id+"已存在相同冻结代码"+reasonCode+"的记录，不允许重复冻结");
         }
+
 
         List<Map<String,String>> lotxLocxIdList = LotxLocxId.findMultiLotIdWithoutIDNotes(id);
 
         if (lotxLocxIdList.size() == 0) throw new EHApplicationException("未找到库存容器"+id);
 
-        if(InventoryHold.getHoldReasonsById(id).contains(reasonCode)){
-            throw new EHApplicationException("容器"+id+"已存在相同冻结代码"+reasonCode+"的记录，不允许重复冻结");
-        }
 
         increaseLotxLocxIdListHoldQty(lotxLocxIdList);
+
+
+        Map<String,String> holdIdRecord = DBHelper.getRecord("SELECT * FROM INVENTORYHOLD WHERE STATUS = ? AND ID = ? ", new Object[]{reasonCode, id},"容器冻结记录");
 
         if(holdIdRecord != null){
 
             DBHelper.executeUpdate( "UPDATE INVENTORYHOLD SET EDITWHO=?,EDITDATE=?,HOLD=?,DATEON=?, WHOON=?"
-                            + " WHERE ID = ? STATUS = ?"
+                            + " WHERE ID = ? AND STATUS = ?"
                     , new Object[] {
                             EHContextHelper.getUser().getUsername(),
                             LocalDateTime.now(),
                             "1",
-                            LocalDateTime.now().toString(),
+                            LocalDateTime.now(),
                             EHContextHelper.getUser().getUsername(),
                             id, reasonCode});
 
@@ -379,23 +374,9 @@ public class InventoryOperations {
             }});
 
         }
-
-
     }
 
-
-
     public void holdByLot(String lot, String reasonCode){
-
-        Map<String,String> holdLotRecord = DBHelper.getRecord("SELECT * FROM INVENTORYHOLD WHERE STATUS = ? AND LOT = ? ", new Object[]{reasonCode, lot},"批次冻结记录");
-
-        boolean isLotHold = holdLotRecord != null && "1".equals(holdLotRecord.get("HOLD"));
-
-        if(!isLotHold){
-
-            throw new EHApplicationException("批次"+lot+"未被冻结原因"+reasonCode+"冻结，不允许解冻");
-
-        }
 
         //确认批次已存在
         LotAttribute.findByLot(lot, true);
@@ -419,20 +400,29 @@ public class InventoryOperations {
 
             increaseLotxLocxIdListHoldQty(lotxLocxIdList);
 
+            DBHelper.executeUpdate( "UPDATE LOT SET STATUS = ?, EDITWHO = ?,EDITDATE = ? WHERE LOT = ? "
+                    , new Object[] {
+                            "HOLD",
+                            EHContextHelper.getUser().getUsername(),
+                            LocalDateTime.now(),
+                            lot});
+
         }else {
             //如果该批次已经有其他冻结记录，说明该批次下的所有库存分配量和拣货量都为冻结分配或者拣货的库存，因此可以使用其他任意原因再次冻结,无需修改库存。
             //Do Nothing
         }
 
+        Map<String,String> holdLotRecord = DBHelper.getRecord("SELECT * FROM INVENTORYHOLD WHERE STATUS = ? AND LOT = ? ", new Object[]{reasonCode, lot},"批次冻结记录");
+
         if(holdLotRecord!=null){
 
             DBHelper.executeUpdate( "UPDATE INVENTORYHOLD SET EDITWHO=?,EDITDATE=?,HOLD=?,DATEON=?, WHOON=?"
-                            + " WHERE LOT = ? STATUS = ?"
+                            + " WHERE LOT = ? AND STATUS = ?"
                     , new Object[] {
                             EHContextHelper.getUser().getUsername(),
                             LocalDateTime.now(),
                             "1",
-                            LocalDateTime.now().toString(),
+                            LocalDateTime.now(),
                             EHContextHelper.getUser().getUsername(),
                            lot, reasonCode});
 
@@ -453,17 +443,6 @@ public class InventoryOperations {
 
     public void holdByLoc(String loc, String reasonCode){
 
-        Map<String,String> holdLocRecord = DBHelper.getRecord("SELECT * FROM INVENTORYHOLD WHERE STATUS = ? AND LOC = ? ", new Object[]{reasonCode, loc},"库位冻结记录");
-
-        boolean isLocHold = holdLocRecord != null && "1".equals(holdLocRecord.get("HOLD"));
-
-        if(!isLocHold){
-
-            throw new EHApplicationException("库位"+loc+"未被冻结原因"+reasonCode+"冻结，不允许解冻");
-
-        }
-
-
         //确认库位已存在
         Loc.findById(loc, true);
 
@@ -483,15 +462,18 @@ public class InventoryOperations {
             //Do Nothing
         }
 
+
+        Map<String,String> holdLocRecord = DBHelper.getRecord("SELECT * FROM INVENTORYHOLD WHERE STATUS = ? AND LOC = ? ", new Object[]{reasonCode, loc},"库位冻结记录");
+
         if(holdLocRecord != null){
 
-            DBHelper.executeUpdate( "UPDATE INVENTORYHOLD SET EDITWHO=?,EDITDATE=?,HOLD=?,DATEON=?, WHOON=?"
-                            + " WHERE LOC = ? STATUS = ?"
+            DBHelper.executeUpdate( "UPDATE INVENTORYHOLD SET EDITWHO = ?,EDITDATE = ?,HOLD = ?,DATEON = ?, WHOON = ?"
+                            + " WHERE LOC = ? AND STATUS = ?"
                     , new Object[] {
                             EHContextHelper.getUser().getUsername(),
                             LocalDateTime.now(),
                             "1",
-                            LocalDateTime.now().toString(),
+                            LocalDateTime.now(),
                             EHContextHelper.getUser().getUsername(),
                             loc, reasonCode});
 
@@ -549,8 +531,8 @@ public class InventoryOperations {
             throw new EHApplicationException("容器"+id+"存在分配量或拣货量，不允许冻结");
         }
 
-        //当前lot中正常库存的可用量qty-qtypicked-qtyallocated-qtypreallocated-qtyhold（hold状态库存的可用量）是否大于当前待冻结的id的数量，如果大于则允许冻结，否则不允许
-        BigDecimal qtyUnholdAvail = DBHelper.getDecimalValue("SELECT QTY-QTYPICKED-QTYALLOCATED-QTYPREALLOCATED-QTYHOLD FROM LOT WHERE LOT = ? ", new Object[]{lotxLocxIdHashMap.get("LOT")});
+        //当前lot中正常库存的可用量qty-qtypicked-qtyallocated-qtypreallocated-qtyonhold（hold状态库存的可用量）是否大于当前待冻结的id的数量，如果大于则允许冻结，否则不允许
+        BigDecimal qtyUnholdAvail = DBHelper.getDecimalValue("SELECT QTY-QTYPICKED-QTYALLOCATED-QTYPREALLOCATED-QTYONHOLD FROM LOT WHERE LOT = ? ", new Object[]{lotxLocxIdHashMap.get("LOT")});
 
         if(qtyUnholdAvail.compareTo(new BigDecimal(lotxLocxIdHashMap.get("QTY"))) <0) throw new EHApplicationException("待冻结容器"+id+"的数量为"+lotxLocxIdHashMap.get("QTY")+"大于当前批次可锁定的数量"+ qtyUnholdAvail);
 
@@ -578,7 +560,7 @@ public class InventoryOperations {
         //仅ID HOLD冻结记录
         List<String> holdReasonListById = InventoryHold.getHoldReasonsById(id);
 
-        if(!holdReasonListById.contains(reasonCode)) throw new EHApplicationException("未找到待解冻容器"+id+"的冻结记录");
+        if(!holdReasonListById.contains(reasonCode)) throw new EHApplicationException("未找到待解冻容器"+id+"且冻结原因为"+reasonCode+"的冻结记录");
 
         List<Map<String,String>>  lotxLocxIdHashMapList = LotxLocxId.findMultiLotIdWithoutIDNotes(id);
 
@@ -592,12 +574,12 @@ public class InventoryOperations {
         }else {
 
             DBHelper.executeUpdate("UPDATE INVENTORYHOLD SET EDITWHO=?,EDITDATE=?,HOLD=?,DATEOFF=?, WHOOFF=?"
-                            + " WHERE ID = ? STATUS = ?"
+                            + " WHERE ID = ? AND STATUS = ?"
                     , new Object[] {
                             EHContextHelper.getUser().getUsername(),
                             LocalDateTime.now(),
                             "0",
-                            LocalDateTime.now().toString(),
+                            LocalDateTime.now(),
                             EHContextHelper.getUser().getUsername(),
                             id, reasonCode});
 
@@ -617,11 +599,22 @@ public class InventoryOperations {
         //仅LOT HOLD冻结记录
         List<String> holdReasonListByLot = InventoryHold.getHoldReasonsByLot(lot);
 
-        if(!holdReasonListByLot.contains(reasonCode)) throw new EHApplicationException("未找到待解冻批次"+lot+"的冻结记录");
+        if(!holdReasonListByLot.contains(reasonCode)) throw new EHApplicationException("未找到待解冻批次"+lot+"且冻结原因为"+reasonCode+"的冻结记录");
 
         List<Map<String,String>>  lotxLocxIdHashMapList = LotxLocxId.findByLot(lot);
 
         releaseByLotxLocxId(lotxLocxIdHashMapList,reasonCode);
+
+        //如果当前lot不存在除当前reasonCode外的其他冻结记录，则在解冻后将lot状态置为OK
+        if (holdReasonListByLot.size()==1){
+
+            DBHelper.executeUpdate( "UPDATE LOT SET STATUS = ?, EDITWHO = ?, EDITDATE = ? WHERE LOT = ? "
+                    , new Object[] {
+                            "OK",
+                            EHContextHelper.getUser().getUsername(),
+                            LocalDateTime.now(),
+                            lot});
+        }
 
         //更新或删除INVENTORYHOLD
         if(isDelete) {
@@ -631,12 +624,12 @@ public class InventoryOperations {
         }else {
 
             DBHelper.executeUpdate("UPDATE INVENTORYHOLD SET EDITWHO=?,EDITDATE=?,HOLD=?,DATEOFF=?, WHOOFF=?"
-                            + " WHERE LOT = ? STATUS = ?"
+                            + " WHERE LOT = ? AND STATUS = ?"
                     , new Object[] {
                             EHContextHelper.getUser().getUsername(),
                             LocalDateTime.now(),
                             "0",
-                            LocalDateTime.now().toString(),
+                            LocalDateTime.now(),
                             EHContextHelper.getUser().getUsername(),
                             lot, reasonCode});
 
@@ -656,7 +649,7 @@ public class InventoryOperations {
         //仅LOC HOLD冻结记录
         List<String> holdReasonListByLoc = InventoryHold.getHoldReasonsByLoc(loc);
 
-        if(!holdReasonListByLoc.contains(reasonCode)) throw new EHApplicationException("未找到待解冻库位"+loc+"的冻结记录");
+        if(!holdReasonListByLoc.contains(reasonCode)) throw new EHApplicationException("未找到待解冻库位"+loc+"且冻结原因为"+reasonCode+"的冻结记录");
 
         List<Map<String,String>>  lotxLocxIdHashMapList = LotxLocxId.findByLoc(loc);
 
@@ -670,12 +663,12 @@ public class InventoryOperations {
         }else {
 
             DBHelper.executeUpdate("UPDATE INVENTORYHOLD SET EDITWHO=?,EDITDATE=?,HOLD=?,DATEOFF=?, WHOOFF=?"
-                            + " WHERE LOC = ? STATUS = ?"
+                            + " WHERE LOC = ? AND STATUS = ?"
                     , new Object[] {
                             EHContextHelper.getUser().getUsername(),
                             LocalDateTime.now(),
                             "0",
-                            LocalDateTime.now().toString(),
+                            LocalDateTime.now(),
                             EHContextHelper.getUser().getUsername(),
                             loc, reasonCode});
 
@@ -695,7 +688,7 @@ public class InventoryOperations {
 
         for (Map<String,String> lotxLocxIdHashMap: lotxLocxIdHashMapList) {
 
-            if(checkReleaseIdHoldByReasonCode(lotxLocxIdHashMap, reasonCode)){
+            if(checkReleaseIdHoldByReasonCode(lotxLocxIdHashMap, reasonCode)&& lotxLocxIdHashMap.get("STATUS").equals("HOLD")){
 
                 DBHelper.executeUpdate("UPDATE LOTXLOCXID SET STATUS=?,EDITWHO=?,EDITDATE=? WHERE LOT=? AND LOC=? AND ID=?"
                         , new Object[]{"OK", username, currentDate, lotxLocxIdHashMap.get("LOT"), lotxLocxIdHashMap.get("LOC"), lotxLocxIdHashMap.get("ID")});
