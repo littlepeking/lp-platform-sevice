@@ -97,7 +97,7 @@ public class HardAllocationService implements AllocationExecutor {
                         //STATUS=HOLD
                         List<String> idHoldReasons = InventoryHold.getIdHoldReasons(holdIdInfoByLot.get("LOT").toString(),holdIdInfoByLot.get("LOC").toString(),holdIdInfoByLot.get("ID").toString());
 
-                        if(UtilHelper.hasIntersection(idHoldReasons,orderHoldReasons)) {
+                        if(UtilHelper.hasIntersectionString(idHoldReasons,orderHoldReasons,true)) {
 
                             if(allocateIdInv(orderDetailAllocInfo, holdIdInfoByLot)) break;
 
@@ -118,7 +118,7 @@ public class HardAllocationService implements AllocationExecutor {
                     }else {
                         //STATUS=HOLD
                         List<String> idHoldReasons = InventoryHold.getIdHoldReasons(idInfo.get("LOT").toString(),idInfo.get("LOC").toString(),idInfo.get("ID").toString());
-                        if(UtilHelper.hasIntersection(idHoldReasons,orderHoldReasons)){
+                        if(UtilHelper.hasIntersectionString(idHoldReasons,orderHoldReasons,true)){
 
                             if(allocateIdInv(orderDetailAllocInfo, idInfo)) break;
 

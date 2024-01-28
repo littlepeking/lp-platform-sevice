@@ -30,13 +30,19 @@ public class UtilHelper {
         return false;
     }
 
-    public static boolean hasIntersection(List list1, List list2) {
+    public static boolean hasIntersectionString(List<String> list1, List<String>  list2, boolean isIgnoreCase) {
 
-        List commonElements = new ArrayList<>(list1);
+        List<String> list1Copy = new ArrayList<>(list1);
+        List<String> list2Copy = new ArrayList<>(list2);
 
-        commonElements.retainAll(list2);
+        if(isIgnoreCase) {
+            list1Copy.replaceAll(s -> s.toLowerCase(Locale.ENGLISH));
+            list2Copy.replaceAll(s -> s.toLowerCase(Locale.ENGLISH));
+        }
 
-        return !commonElements.isEmpty();
+        list1Copy.retainAll(list2Copy);
+
+        return !list1Copy.isEmpty();
     }
 
 

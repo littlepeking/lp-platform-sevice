@@ -748,7 +748,7 @@ public class InventoryOperations {
                 List<String> holdReasonListByOrder = InventoryHold.getOrderTypeHoldReasons(orderInfo.get("TYPE"));
 
                 holdReasonListByOrder.retainAll(holdReasonListById);
-                if(holdReasonListByOrder.size()<0) throw new EHApplicationException("冻结原因"+reasonCode+"解冻后，将不能满足订单"+orderKey+"的冻结要求，解冻失败");
+                if(holdReasonListByOrder.size()<=0) throw new EHApplicationException("冻结原因"+reasonCode+"解冻后，将不能满足订单"+orderKey+"的冻结要求，解冻失败");
 
             }
 
