@@ -27,18 +27,14 @@ import com.enhantec.wms.backend.common.inventory.LotAttribute;
 import com.enhantec.wms.backend.common.outbound.AllocationStrategy;
 import com.enhantec.wms.backend.common.outbound.Orders;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.common.receiving.Receipt;
 import com.enhantec.wms.backend.core.inventory.InventoryOperations;
-import com.enhantec.wms.backend.core.outbound.OutboundUtilHelper;
 import com.enhantec.wms.backend.core.outbound.allocations.AllocationExecutor;
 import com.enhantec.wms.backend.core.outbound.allocations.OrderDetailAllocInfo;
 import com.enhantec.wms.backend.core.outbound.allocations.strategies.HardAllocationService;
 import com.enhantec.wms.backend.core.outbound.allocations.strategies.SoftAllocationService;
-import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -157,7 +153,7 @@ public class OutboundOperations {
         }
     }
 
-    public ServiceDataMap pick(String pickDetailKey,String toId, String toLoc,BigDecimal uomQtyToBePicked, String uom, boolean allowShortPick,boolean reduceOpenQtyAfterShortPick, boolean allowOverPick, boolean autoShip){
+    public ServiceDataMap pick(String pickDetailKey,String toId, String toLoc,BigDecimal uomQtyToBePicked, String uom, boolean allowShortPick,boolean reduceOpenQtyAfterShortPick, boolean allowOverPick){
 
         //TODO 检查toId是否存在，如存在则继续检查该容器是否在PICKTO类型的库位并且该容器的数量必须等于拣货量，如不满足则不允许拣货至该容器。
 
@@ -280,11 +276,11 @@ public class OutboundOperations {
 //        }
 
         //执行拣货移动
-        inventoryOperations.move(fromId, toId, fromLoc, toLoc, lot, qtyToBePicked, qtyPickDetailAlloc, BigDecimal.ZERO,BigDecimal.ZERO,qtyToBePicked,autoShip,false);
+        inventoryOperations.move(fromId, toId, fromLoc, toLoc, lot, lot, qtyToBePicked, qtyPickDetailAlloc, BigDecimal.ZERO,BigDecimal.ZERO,qtyToBePicked,true);
 
         //完成拣货调整拣货明细和订单量
         DBHelper.executeUpdate("UPDATE PICKDETAIL SET QTY = QTY + ?, EDITWHO=?,EDITDATE=?,STATUS=?,LOC=?,ID=?,DROPID=? WHERE PICKDETAILKEY=?"
-                    , new Object[]{qtyAllocChg, username,currentDate, autoShip ? 9 : 5 ,toLoc, toId, toId, pickDetailKey});
+                    , new Object[]{qtyAllocChg, username,currentDate,  5 ,toLoc, toId, toId, pickDetailKey});
 
         DBHelper.executeUpdate("UPDATE TASKDETAIL SET QTY = QTY + ?, UOMQTY = UOMQTY + ? , UOM = ?, EDITWHO=?,EDITDATE=?,STATUS=?,TOLOC=?, TOID = ? WHERE STATUS < 9 AND  PICKDETAILKEY = ?"
                 , new Object[]{qtyAllocChg, UOM.Std2UOMQty(packKey, uom, qtyAllocChg), uom, username,currentDate, 9, toLoc, toId, pickDetailKey});
@@ -335,29 +331,13 @@ public class OutboundOperations {
 //            DBHelper.executeUpdate("UPDATE ORDERS SET EDITWHO = ?, EDITDATE = ?, STATUS = ? WHERE ORDERKEY = ? "
 //                    , new Object[]{username,currentDate, orderStatus,orderKey});
 
-        if (autoShip)
-        {
-
-            if(shortPick && !reduceOpenQtyAfterShortPick){
-                DBHelper.executeUpdate("UPDATE ORDERDETAIL SET EDITWHO=?,EDITDATE=?,ACTUALSHIPDATE=?,QTYALLOCATED=QTYALLOCATED-?,OPENQTY=OPENQTY-?,ADJUSTEDQTY = ADJUSTEDQTY + ? ,SHIPPEDQTY=SHIPPEDQTY+? WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
-                        , new Object[]{username, currentDate, currentDate, qtyPickDetailAlloc, qtyToBePicked, 0, qtyToBePicked, orderKey, orderLineNumber});
-            }else {
-                DBHelper.executeUpdate("UPDATE ORDERDETAIL SET EDITWHO=?,EDITDATE=?,ACTUALSHIPDATE=?,QTYALLOCATED=QTYALLOCATED-?,OPENQTY=OPENQTY-?,ADJUSTEDQTY = ADJUSTEDQTY + ? ,SHIPPEDQTY=SHIPPEDQTY+? WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
-                        , new Object[]{username, currentDate, currentDate, qtyPickDetailAlloc, qtyPickDetailAlloc, qtyAllocChg, qtyToBePicked, orderKey, orderLineNumber});
-            }
-        }
-        else
-        {
-            if(shortPick && !reduceOpenQtyAfterShortPick){
+        if(shortPick && !reduceOpenQtyAfterShortPick){
                 DBHelper.executeUpdate("UPDATE ORDERDETAIL SET EDITWHO=?,EDITDATE=?,OPENQTY = OPENQTY + ?,QTYALLOCATED=QTYALLOCATED-?,QTYPICKED=QTYPICKED+? , ADJUSTEDQTY = ADJUSTEDQTY + ? WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
                         , new Object[]{username, currentDate, 0, qtyPickDetailAlloc, qtyToBePicked, orderKey,0, orderLineNumber});
             }else {
                 DBHelper.executeUpdate("UPDATE ORDERDETAIL SET EDITWHO=?,EDITDATE=?,OPENQTY = OPENQTY + ?,QTYALLOCATED=QTYALLOCATED-?,QTYPICKED=QTYPICKED+? , ADJUSTEDQTY = ADJUSTEDQTY + ? WHERE ORDERKEY=? AND ORDERLINENUMBER=?"
                         , new Object[]{username, currentDate, qtyAllocChg, qtyPickDetailAlloc, qtyToBePicked, qtyAllocChg, orderKey, orderLineNumber});
-            }
         }
-
-        if (autoShip) DBHelper.executeUpdate("UPDATE ORDERS SET ACTUALSHIPDATE = ? WHERE ORDERKEY = ? " , new Object[]{currentDate,orderKey});
 
         OutboundUtilHelper.updateOrderDetailStatus(orderKey,orderLineNumber);
         OutboundUtilHelper.updateOrderStatus(orderKey);
@@ -372,10 +352,7 @@ public class OutboundOperations {
         itrn.put("EDITWHO", username);
         itrn.put("ITRNKEY", itrnKey);
         itrn.put("ITRNSYSID", "0");
-        if (autoShip)
-            itrn.put("TRANTYPE", "WD");
-        else
-            itrn.put("TRANTYPE", "MV");
+        itrn.put("TRANTYPE", "MV");
 
         itrn.put("STORERKEY", storerKey);
         itrn.put("SKU", lot);
@@ -384,20 +361,11 @@ public class OutboundOperations {
         itrn.put("FROMID", fromId);
         itrn.put("TOLOC", toLoc);
         itrn.put("TOID", toId);
-        if (autoShip)
-        {
-            itrn.put("SOURCEKEY", orderKey+orderLineNumber);
-            itrn.put("SOURCETYPE", "ntrPickDetailUpdate");
-            itrn.put("QTY", "-"+qtyToBePicked);
-            itrn.put("UOMQTY", "-"+uomQtyToBePicked);
-        }
-        else
-        {
-            itrn.put("SourceKey", pickDetailKey);
-            itrn.put("SOURCETYPE", "PICKING");
-            itrn.put("QTY", qtyToBePicked);
-            itrn.put("UOMQTY", qtyToBePicked);
-        }
+        itrn.put("SourceKey", pickDetailKey);
+        itrn.put("SOURCETYPE", "PICKING");
+        itrn.put("QTY", qtyToBePicked);
+        itrn.put("UOMQTY", qtyToBePicked);
+
         itrn.put("STATUS","OK");
 
         itrn.put("PACKKEY", packKey);
@@ -405,7 +373,7 @@ public class OutboundOperations {
         itrn.put("UOMCALC", "0");
         itrn.put("INTRANSIT", "1");
 
-        Map<String,Object> lotHashMap = LotAttribute.findByLot(lot, true);
+        Map<String,Object> lotHashMap = LotAttribute.findWithEntByLot(lot, true);
 
         itrn.put("LOTTABLE01", lotHashMap.get("LOTTABLE01"));
         itrn.put("LOTTABLE02", lotHashMap.get("LOTTABLE02"));
@@ -473,7 +441,7 @@ public class OutboundOperations {
 
         DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTYALLOCATED = QTYALLOCATED + ?, EDITWHO = ?, EDITDATE = ? WHERE LOT = ? AND LOC = ? AND ID = ? " , new Object[]{qty,username,currentDate,lot,loc,id});
 
-        Map<String,Object> lotHashMap = LotAttribute.findByLot(lot, true);
+        Map<String,Object> lotHashMap = LotAttribute.findWithEntByLot(lot, true);
 
         String storerKey = lotHashMap.get("STORERKEY").toString();
         String sku = lotHashMap.get("SKU").toString();
@@ -573,7 +541,7 @@ public class OutboundOperations {
         DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTYALLOCATED = QTYALLOCATED - ?, QTYPICKED = QTYPICKED - ? , EDITWHO = ?, EDITDATE = ? WHERE LOT = ? AND LOC = ? AND ID = ? "
                 , new Object[]{qtyAllocatedChg, qtyPickedChg,username,currentDate,lot,loc,id});
 
-        Map<String,Object> lotHashMap = LotAttribute.findByLot(lot, true);
+        Map<String,Object> lotHashMap = LotAttribute.findWithEntByLot(lot, true);
 
         String storerKey = lotHashMap.get("STORERKEY").toString();
         String sku = lotHashMap.get("SKU").toString();
@@ -732,7 +700,7 @@ public class OutboundOperations {
         LocalDateTime currentDate = EHDateTimeHelper.getCurrentDate();
 
         Map<String,String> LotxLocxIdHashMap = LotxLocxId.findByLotAndId(pdHashMap.get("LOT"), pdHashMap.get("ID"),true);
-        Map<String,Object> lotHashMap = LotAttribute.findByLot(pdHashMap.get("LOT"),true);
+        Map<String,Object> lotHashMap = LotAttribute.findWithEntByLot(pdHashMap.get("LOT"),true);
         //------------------------------------------------------------------------------------
         DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTY=QTY-?,QTYPICKED=QTYPICKED-?,EDITWHO=?,EDITDATE=? WHERE LOT=? AND LOC=? AND ID=?"
                 , new Object[]{pdHashMap.get("QTY"), pdHashMap.get("QTY"), username, currentDate, pdHashMap.get("LOT"), pdHashMap.get("LOC"), pdHashMap.get("ID")});

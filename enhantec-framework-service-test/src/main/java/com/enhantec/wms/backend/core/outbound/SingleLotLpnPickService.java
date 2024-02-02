@@ -56,7 +56,6 @@ public class SingleLotLpnPickService extends WMSBaseService {
         boolean allowOverPick = serviceDataHolder.getInputDataAsMap().getBoolean("allowOverPick");//是否允许超拣
         boolean allowShortPick = serviceDataHolder.getInputDataAsMap().getBoolean("allowShortPick");//是否允许短拣
         boolean reduceOpenQtyAfterShortPick = serviceDataHolder.getInputDataAsMap().getBoolean("reduceOpenQtyAfterShortPick");//是否允许短拣
-        boolean autoShip = serviceDataHolder.getInputDataAsMap().getBoolean("autoShip");//是否直接发运
 
 
         if(UtilHelper.isEmpty(fromId)) throw new FulfillLogicException("待拣货的容器号不能为空");
@@ -96,7 +95,7 @@ public class SingleLotLpnPickService extends WMSBaseService {
         ////////////////////////////////////////////////////////////////////////////////////////////
 
         //调用标准拣货逻辑
-        ServiceDataMap serviceDataMap = outboundOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick,autoShip);
+        ServiceDataMap serviceDataMap = outboundOperations.pick(pickDetailKey,toId,toLoc,uomQtyToBePicked, uom, allowShortPick, reduceOpenQtyAfterShortPick, allowOverPick);
 
         serviceDataHolder.setOutputData(serviceDataMap);
 

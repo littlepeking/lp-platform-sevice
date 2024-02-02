@@ -361,4 +361,25 @@ public class LotxLocxId {
     }
 
 
+    /**
+     * @param id
+     * @param lot
+     * @param checkExist
+     * @return
+     */
+    public static Map<String,Object> find(String id, String lot, boolean checkExist) {
+
+        /*
+            因为一个id只允许出现在一个库位，所以此处不需要传loc。
+         */
+
+        String SQL="SELECT * FROM LOTXLOCXID A "
+                + " WHERE A.QTY > 0 AND A.LOT = ? AND A.ID = ? ";
+
+        Map<String,Object> record= DBHelper.getRawRecord( SQL, new Object[]{lot, id},"库存明细");
+        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到批次为"+lot+"的容器条码"+id);
+        return record;
+    }
+
+
 }

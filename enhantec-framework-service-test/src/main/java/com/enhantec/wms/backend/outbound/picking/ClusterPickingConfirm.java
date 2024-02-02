@@ -235,7 +235,7 @@ public class ClusterPickingConfirm extends WMSBaseService {
 
                 //执行原生拣货
                 //ServiceDataMap res = ServiceHelper.executeService( "NSPRFTPK01C", serviceDataHolder);
-                ServiceDataMap res = outboundOperations.pick(pickdetailKey,toId,"PICKTO",uomQtyTobePicked,uom,true,false,true,false);
+                ServiceDataMap res = outboundOperations.pick(pickdetailKey,toId,"PICKTO",uomQtyTobePicked,uom,true,false,true);
 
                 //唯一码LOTXID拣货逻辑(使用NSPRFTPK01C进行整容器拣货时，不需要手工更新唯一码库存)
                 if(!isPickFullLPN) {

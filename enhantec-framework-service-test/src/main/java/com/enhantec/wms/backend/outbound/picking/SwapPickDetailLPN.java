@@ -59,7 +59,7 @@ public class SwapPickDetailLPN extends WMSBaseService {
             ServiceDataMap outDO = new ServiceDataMap();
 
             Map<String,String>  skuHashMap = SKU.findById(taskDetailInfo.get("SKU"),true);
-            Map<String,Object>  lotHashMap = LotAttribute.findByLot(taskDetailInfo.get("LOT"),true);
+            Map<String,Object>  lotHashMap = LotAttribute.findWithEntByLot(taskDetailInfo.get("LOT"),true);
             Map<String,String>  idNotesHashMap = IDNotes.findById(newId,true);
             Map<String,String>  taskDetailHashMap = TaskDetail.findById(newTaskDetailKey,true);
             Map<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(newId,true);

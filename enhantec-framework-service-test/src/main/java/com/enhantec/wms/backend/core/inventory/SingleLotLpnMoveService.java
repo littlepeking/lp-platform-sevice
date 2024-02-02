@@ -43,9 +43,9 @@ public class SingleLotLpnMoveService extends WMSBaseService {
     private final InventoryOperations inventoryOperations;
 
     /**
-     * 支持三种移动方式：
-     * 1.标准移动：只允许移动托盘可用量至目标库位容器。
-     * 3.移动已被分配或部分分配的整托盘：LPN会被移动，同时移动的分配量会被同时更新对应的拣货明细记录。
+     * 支持的移动方式：
+     * 标准移动：只允许移动托盘可用量至目标库位容器。
+     * 移动已被分配或部分分配的整托盘：LPN会被移动，同时移动的分配量会被同时更新对应的拣货明细记录。
      * @param serviceDataHolder
      */
     public void execute(ServiceDataHolder serviceDataHolder){
@@ -138,7 +138,7 @@ public class SingleLotLpnMoveService extends WMSBaseService {
             qtyPickChangeToId = BigDecimal.ZERO;
         }
 
-        ServiceDataMap serviceDataMap = inventoryOperations.move(fromId,toId,fromLoc,toLoc,lot,qtyToBeMoved,qtyAllocChangeFromId,qtyPickChangeFromId,qtyAllocChangeToId,qtyPickChangeToId,false,true);
+        ServiceDataMap serviceDataMap = inventoryOperations.move(fromId,toId,fromLoc,toLoc,lot, lot, qtyToBeMoved,qtyAllocChangeFromId,qtyPickChangeFromId,qtyAllocChangeToId,qtyPickChangeToId,true);
 
         serviceDataHolder.setOutputData(serviceDataMap);
 

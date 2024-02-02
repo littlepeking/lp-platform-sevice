@@ -51,9 +51,25 @@ public class InventoryOperations {
     static public String OK = "OK";
 
 
-    public ServiceDataMap move(String fromId, String toId, String fromLoc, String toLoc, String lot,
+    /**
+     * 移动
+     * @param fromId 来源ID
+     * @param toId  目标ID
+     * @param fromLoc 来源库位
+     * @param toLoc  目标库位
+     * @param fromLot 来源批次
+     * @param toLot 目标批次
+     * @param qtyToBeMoved  待移动量
+     * @param fromQtyAllocChg fromId此次需要减少的分配量(目前用于拣货时扣量使用)
+     * @param fromQtyPickedChg fromId此次需要减少的拣货量(仅用于整体移动拣货至ID使用，仅留出接口，移动拣货至ID的功能待开发)
+     * @param toQtyAllocChg toId此次需要增加的分配量（目前用于移动带分配量的整容器）
+     * @param toQtyPickedChg toId此次需要增加的拣货量（目前用于拣货增加拣货量使用）
+     * @param saveItrn 是否保持交易记录
+     * @return 返回交易记录ID和目标ID
+     */
+    public ServiceDataMap move(String fromId, String toId, String fromLoc, String toLoc, String fromLot,String toLot,
                                BigDecimal qtyToBeMoved, BigDecimal fromQtyAllocChg, BigDecimal fromQtyPickedChg,
-                               BigDecimal toQtyAllocChg, BigDecimal toQtyPickedChg, boolean autoShip, boolean saveItrn){
+                               BigDecimal toQtyAllocChg, BigDecimal toQtyPickedChg, boolean saveItrn){
 //        if (autoShip) {
 //            if (qty.compareTo(toQtyPickedChg) != 0) throw new EHApplicationException("来源数量与目标拣货量不一致");
 //            if (qty.compareTo(fromQtyAllocChg) != 0) throw new EHApplicationException("来源数量与来源分配量不一致");
@@ -70,12 +86,13 @@ public class InventoryOperations {
 
         Loc.findById(fromLoc,true);
         if(!fromLoc.equals(toLoc)) Loc.findById(toLoc,true);
-        LotAttribute.findByLot(lot,true);
+        Map<String,Object> fromLotAttrHashMap = LotAttribute.findWithEntByLot(fromLot,true);
+        Map<String,Object> toLotAttrHashMap = LotAttribute.findWithEntByLot(toLot,true);
         if(UtilHelper.isEmpty(fromId)) ExceptionHelper.throwRfFulfillLogicException("移动的源容器号不能为空");
 
 
         Map<String, String> lotxLocxFromIdHashMap = DBHelper.getRecord( "SELECT A.STORERKEY, A.SKU, A.QTY, A.QTYALLOCATED, A.QTYPICKED "
-                + " FROM LOTXLOCXID A WHERE LOT=? AND LOC=? AND ID=?", new Object[]{lot, fromLoc, fromId},"库存",false); // AND STATUS=?    ,fromStatus
+                + " FROM LOTXLOCXID A WHERE LOT=? AND LOC=? AND ID=?", new Object[]{fromLot, fromLoc, fromId},"库存",false); // AND STATUS=?    ,fromStatus
         if (lotxLocxFromIdHashMap == null) throw new EHApplicationException("未找到可用库存");
 
         Map<String,String> locMap = DBHelper.getRecord( "SELECT LOCATIONTYPE FROM LOC WHERE LOC=?", new Object[]{toLoc}, "库位");
@@ -86,9 +103,12 @@ public class InventoryOperations {
 
         boolean isToLocHold = DBHelper.getCount("SELECT COUNT(1) FROM INVENTORYHOLD WHERE HOLD = 1 AND LOC = ? ", new Object[]{toLoc}) > 0;
 
-        boolean isLotHold = DBHelper.getCount("SELECT COUNT(1) FROM INVENTORYHOLD WHERE HOLD = 1 AND LOT = ? ", new Object[]{lot}) > 0;
+        boolean isFromLotHold = DBHelper.getCount("SELECT COUNT(1) FROM INVENTORYHOLD WHERE HOLD = 1 AND LOT = ? ", new Object[]{fromLot}) > 0;
 
-        String fromLotxLocxIdHoldStatus = isFromIdHold || isFromLocHold || isLotHold ? "HOLD":"OK";
+        boolean isToLotHold = DBHelper.getCount("SELECT COUNT(1) FROM INVENTORYHOLD WHERE HOLD = 1 AND LOT = ? ", new Object[]{toLot}) > 0;
+
+
+        String fromLotxLocxIdHoldStatus = isFromIdHold || isFromLocHold || isFromLotHold ? "HOLD":"OK";
 
 //        long fromCount1 = DBHelper.getCount( "SELECT COUNT(1) FROM LOC WHERE LOCATIONFLAG=? AND LOC=?", new Object[]{"HOLD", fromLoc});
 //        if (fromCount1 > 0) fromStatus = "HOLD";
@@ -105,8 +125,7 @@ public class InventoryOperations {
         //目标LPN本身是否被hold
         boolean isToIdHold = !toIdInvExist ? isFromIdHold : DBHelper.getCount("SELECT COUNT(1) FROM INVENTORYHOLD WHERE HOLD = 1 AND ID = ? ", new Object[]{toId}) > 0;
 
-        String toLotxLocxIdHoldStatus = isToIdHold || isToLocHold || isLotHold ? "HOLD":"OK";
-
+        String toLotxLocxIdHoldStatus = isToIdHold || isToLocHold || isToLotHold ? "HOLD":"OK";
 
 //        long toCount1 = DBHelper.getCount( "SELECT COUNT(1) FROM LOC WHERE LOCATIONFLAG=? AND LOC=?", new Object[]{"HOLD", toLoc});
 //        if (toCount1 > 0) toStatus = "HOLD";
@@ -122,8 +141,23 @@ public class InventoryOperations {
         if (fromQtyPickedChg.compareTo(BigDecimal.ZERO) > 0 &&
                 ( fromQtyPickedChg.compareTo(fromIdQtyPicked) != 0 || qtyToBeMoved.compareTo(fromIdQty) != 0 )) throw new EHApplicationException("移动已拣货的容器时，不允许移动部分数量");
         BigDecimal fromIdAvailQty = fromIdQty.subtract(fromIdQtyAllocated).subtract(fromIdQtyPicked);
-        BigDecimal expectedAvailQtyToBeMoved= qtyToBeMoved.subtract(fromQtyAllocChg).subtract(fromQtyPickedChg);
-        if (fromIdAvailQty.compareTo(expectedAvailQtyToBeMoved) < 0) throw new EHApplicationException("可用库存不足,请检查容器是否被分配或拣货");
+        // qtyToBeMoved-fromQtyAllocChg代表抛去这次拣货量外，还需要多少可用库存满足移动的要求。
+        //举例:当前id的分配量归属于多条拣货明细，当拣货明细1进行拣货时，只会把它自己的拣货量传入fromQtyAllocChg，因此通过下述计算expectedAvailQtyToBeMoved就会得出除原拣货明细要求外的额外需要移动的拣货数量。此数量不能大于当前id的可用量，否则会影响其他拣货明细。
+        //根据上述校验的条件要求，对于存在拣货量的id移动存在两种场景：
+        // 1.当fromQtyPickedChg=0时为仅移动可用量，此时 qtyToBeMoved == expectedAvailQtyToBeMoved <= fromIdAvailQty
+        // 2.当fromQtyPickedChg>0时为移动整个容器，此时 qtyToBeMoved == fromIdQty 且 expectedAvailQtyToBeMoved == fromIdAvailQty
+        BigDecimal expectedAvailQtyToBeMoved = qtyToBeMoved.subtract(fromQtyAllocChg).subtract(fromQtyPickedChg);
+        if (fromIdAvailQty.compareTo(expectedAvailQtyToBeMoved) < 0) throw new EHApplicationException("容器"+fromIdAvailQty+"可用库存不足,移动失败");
+
+        //如果目标批次和源批次不同（批属性转移的情况），则源批次下的可移动量要小于该批次可用量(包含冻结库存的可用量)-源批次下动态拣货的分配量
+        if(!fromLot.equals(toLot)) {
+            Map<String, Object> lotMap = Lot.findById(fromLot);
+
+            BigDecimal qtyAvailByLot = (BigDecimal) lotMap.get("QTYAVAILWITHHOLD");
+            if (qtyAvailByLot.compareTo(expectedAvailQtyToBeMoved) < 0)
+                throw new EHApplicationException("批次" + fromLot + "可用库存不足，移动失败");
+
+        }
 
 
         String username = EHContextHelper.getUser().getUsername();
@@ -133,34 +167,30 @@ public class InventoryOperations {
         //  LOTXLOCXID
         //------------------------------------------------------------------------------------
         DBHelper.executeUpdate( "UPDATE LOTXLOCXID SET QTY=QTY-?, QTYALLOCATED=QTYALLOCATED-?, QTYPICKED=QTYPICKED-?, EDITWHO=?, EDITDATE=? WHERE LOT=? AND LOC=? AND ID=?"
-                , new Object[]{qtyToBeMoved, fromQtyAllocChg, fromQtyPickedChg, username, currentDate, lot, fromLoc, fromId});
+                , new Object[]{qtyToBeMoved, fromQtyAllocChg, fromQtyPickedChg, username, currentDate, fromLot, fromLoc, fromId});
         //------------------------------------------------------------------------------------
-        if (!autoShip) {
-            // 自动发运不增加目标数量
-            if (DBHelper.getCount( "SELECT COUNT(1) FROM LOTXLOCXID WHERE LOT=? AND LOC=? AND ID=?", new Object[]{lot, toLoc, toId}) == 0) {
+        if (DBHelper.getCount("SELECT COUNT(1) FROM LOTXLOCXID WHERE LOT=? AND LOC=? AND ID=?", new Object[]{toLot, toLoc, toId}) == 0) {
 
-                Map<String, Object> lotxlocxid = new HashMap<>();
-                lotxlocxid.put("STORERKEY", storerKey);
-                lotxlocxid.put("SKU", sku);
-                lotxlocxid.put("LOT", lot);
-                lotxlocxid.put("LOC", toLoc);
-                lotxlocxid.put("ID", toId);
-                lotxlocxid.put("QTY", qtyToBeMoved);
-                lotxlocxid.put("QTYALLOCATED", toQtyAllocChg);
-                lotxlocxid.put("QTYPICKED", toQtyPickedChg);
-                lotxlocxid.put("STATUS", toLotxLocxIdHoldStatus);
-                lotxlocxid.put("ADDWHO", username);
-                lotxlocxid.put("EDITWHO", username);
-                DBHelper.executeInsert( "LOTXLOCXID", lotxlocxid);
+            Map<String, Object> lotxlocxid = new HashMap<>();
+            lotxlocxid.put("STORERKEY", storerKey);
+            lotxlocxid.put("SKU", sku);
+            lotxlocxid.put("LOT", toLot);
+            lotxlocxid.put("LOC", toLoc);
+            lotxlocxid.put("ID", toId);
+            lotxlocxid.put("QTY", qtyToBeMoved);
+            lotxlocxid.put("QTYALLOCATED", toQtyAllocChg);
+            lotxlocxid.put("QTYPICKED", toQtyPickedChg);
+            lotxlocxid.put("STATUS", toLotxLocxIdHoldStatus);
+            lotxlocxid.put("ADDWHO", username);
+            lotxlocxid.put("EDITWHO", username);
+            DBHelper.executeInsert("LOTXLOCXID", lotxlocxid);
 
-            } else
-                //TODO: 暂不对原LPN和新LPN冻结状态的一致性做校验，冻结状态暂以目标容器当前状态为准。相关逻辑可现在项目代码中实现，后续有必要再考虑抽离到核心逻辑。
-                DBHelper.executeUpdate( "UPDATE LOTXLOCXID SET QTY=QTY+?, QTYALLOCATED=QTYALLOCATED+?, QTYPICKED=QTYPICKED+?, EDITWHO=?, EDITDATE=? WHERE LOT=? AND LOC=? AND ID=?"
-                        , new Object[]{qtyToBeMoved, toQtyAllocChg, toQtyPickedChg, username, currentDate, lot, toLoc, toId});
-        }
+        } else
+            DBHelper.executeUpdate("UPDATE LOTXLOCXID SET QTY=QTY+?, QTYALLOCATED=QTYALLOCATED+?, QTYPICKED=QTYPICKED+?, STATUS = ?, EDITWHO=?, EDITDATE=? WHERE LOT=? AND LOC=? AND ID=?"
+                    , new Object[]{qtyToBeMoved, toQtyAllocChg, toQtyPickedChg, toLotxLocxIdHoldStatus, username, currentDate, toLot, toLoc, toId});
 
         //更新后检查LOTXLOCXID的数量，如果为0直接删除
-        DBHelper.executeUpdate("DELETE FROM LOTXLOCXID WHERE LOT = ? AND LOC = ? AND ID = ? AND QTY = 0 ", new Object[]{lot, fromLoc, fromId});
+        DBHelper.executeUpdate("DELETE FROM LOTXLOCXID WHERE LOT = ? AND LOC = ? AND ID = ? AND QTY = 0 ", new Object[]{fromLot, fromLoc, fromId});
 
         //------------------------------------------------------------------------------------
         //  ID
@@ -169,43 +199,41 @@ public class InventoryOperations {
 
         DBHelper.executeUpdate( "UPDATE ID SET QTY=QTY-?, EDITWHO=?, EDITDATE=? WHERE ID=?", new Object[]{qtyToBeMoved, username, currentDate, fromId});
 
-        // 自动发运不增加目标数量
-        if (!autoShip) {
-            if (!toIdInvExist) {
-                Map<String, Object> id = new HashMap<>();
-                id.put("ADDWHO", username);
-                id.put("EDITWHO", username);
-                id.put("ID", toId);
-                id.put("QTY", qtyToBeMoved);
-                id.put("STATUS", isToIdHold);
-                id.put("PACKKEY", packKey);
-                DBHelper.executeInsert( "ID", id);
+        if (!toIdInvExist) {
+            Map<String, Object> id = new HashMap<>();
+            id.put("ADDWHO", username);
+            id.put("EDITWHO", username);
+            id.put("ID", toId);
+            id.put("QTY", qtyToBeMoved);
+            id.put("STATUS", isToIdHold);
+            id.put("PACKKEY", packKey);
+            DBHelper.executeInsert("ID", id);
 
-                //当目标LPN为新记录时，也要复制关联的冻结记录。
-                List<Map<String, Object>> fromIdInvHoldList = DBHelper.executeQueryRawData("SELECT * FROM INVENTORYHOLD WHERE HOLD = 1 AND ID = ? ", new Object[]{fromId});
+            //当目标LPN为新记录时，也要复制关联的冻结记录。
+            List<Map<String, Object>> fromIdInvHoldList = DBHelper.executeQueryRawData("SELECT * FROM INVENTORYHOLD WHERE HOLD = 1 AND ID = ? ", new Object[]{fromId});
 
-                fromIdInvHoldList.forEach(invHoldRecord -> {
+            fromIdInvHoldList.forEach(invHoldRecord -> {
 
-                    Map<String, Object> invHoldRec = new HashMap<>();
-                    invHoldRec.put("INVENTORYHOLDKEY", IdGenerationHelper.getNCounterStrWithLength("INVENTORYHOLDKEY", 10));
-                    invHoldRec.put("WHSEID", EHContextHelper.getCurrentOrgId());
-                    invHoldRec.put("LOT", "");
-                    invHoldRec.put("LOC", "");
-                    invHoldRec.put("ID", toId);
-                    invHoldRec.put("HOLD", 1);
-                    invHoldRec.put("STATUS", invHoldRecord.get("STATUS"));
-                    invHoldRec.put("DATEON", currentDate);
-                    invHoldRec.put("WHOON", username);
-                    invHoldRec.put("ADDWHO", username);
-                    invHoldRec.put("EDITWHO", username);
-                    DBHelper.executeInsert("INVENTORYHOLD", invHoldRec);
+                Map<String, Object> invHoldRec = new HashMap<>();
+                invHoldRec.put("INVENTORYHOLDKEY", IdGenerationHelper.getNCounterStrWithLength("INVENTORYHOLDKEY", 10));
+                invHoldRec.put("WHSEID", EHContextHelper.getCurrentOrgId());
+                invHoldRec.put("LOT", "");
+                invHoldRec.put("LOC", "");
+                invHoldRec.put("ID", toId);
+                invHoldRec.put("HOLD", 1);
+                invHoldRec.put("STATUS", invHoldRecord.get("STATUS"));
+                invHoldRec.put("DATEON", currentDate);
+                invHoldRec.put("WHOON", username);
+                invHoldRec.put("ADDWHO", username);
+                invHoldRec.put("EDITWHO", username);
+                DBHelper.executeInsert("INVENTORYHOLD", invHoldRec);
 
-                });
+            });
 
-            } else
-                DBHelper.executeUpdate( "UPDATE ID SET QTY=QTY+?, EDITWHO=?, EDITDATE=? WHERE ID=?"
-                        , new Object[]{qtyToBeMoved, username, currentDate, toId});
-        }
+        } else
+            DBHelper.executeUpdate("UPDATE ID SET QTY=QTY+?, EDITWHO=?, EDITDATE=? WHERE ID=?"
+                    , new Object[]{qtyToBeMoved, username, currentDate, toId});
+
 
         //更新后检查FROMID的数量，如果为0直接删除
         DBHelper.executeUpdate("DELETE FROM ID WHERE ID = ? AND QTY = 0 ", new Object[]{fromId});
@@ -218,24 +246,22 @@ public class InventoryOperations {
         DBHelper.executeUpdate( "UPDATE SKUXLOC SET QTY=QTY-?, QTYALLOCATED=QTYALLOCATED-?, QTYPICKED=QTYPICKED-?, EDITWHO=?, EDITDATE=? WHERE  LOC=?  AND STORERKEY=? AND SKU=?"
                 , new Object[]{qtyToBeMoved, fromQtyAllocChg, fromQtyPickedChg, username, currentDate, fromLoc, storerKey, sku});
 
-        if (!autoShip) {
-            // 自动发运不增加目标数量
-            if (DBHelper.getCount( "SELECT COUNT(1) FROM SKUXLOC  WHERE  LOC=?  AND STORERKEY=? AND SKU=?", new Object[]{toLoc, storerKey, sku}) == 0) {
-                Map<String, Object> skuxloc = new HashMap<>();
-                skuxloc.put("ADDWHO", username);
-                skuxloc.put("EDITWHO", username);
-                skuxloc.put("STORERKEY", storerKey);
-                skuxloc.put("SKU", sku);
-                skuxloc.put("LOC", toLoc);
-                skuxloc.put("QTY", qtyToBeMoved);
-                skuxloc.put("QTYALLOCATED", toQtyAllocChg);
-                skuxloc.put("QTYPICKED", toQtyPickedChg);
-                skuxloc.put("LOCATIONTYPE", locMap.get("LOCATIONTYPE"));
-                DBHelper.executeInsert( "SKUXLOC", skuxloc);
-            } else
-                DBHelper.executeUpdate( "UPDATE SKUXLOC SET QTY=QTY+?, QTYALLOCATED=QTYALLOCATED+?, QTYPICKED=QTYPICKED+?, EDITWHO=?, EDITDATE=? WHERE  LOC=?  AND STORERKEY=? AND SKU=?"
-                        , new Object[]{qtyToBeMoved, toQtyAllocChg, toQtyPickedChg, username, currentDate, toLoc, storerKey, sku});
-        }
+        if (DBHelper.getCount("SELECT COUNT(1) FROM SKUXLOC  WHERE  LOC=?  AND STORERKEY=? AND SKU=?", new Object[]{toLoc, storerKey, sku}) == 0) {
+            Map<String, Object> skuxloc = new HashMap<>();
+            skuxloc.put("ADDWHO", username);
+            skuxloc.put("EDITWHO", username);
+            skuxloc.put("STORERKEY", storerKey);
+            skuxloc.put("SKU", sku);
+            skuxloc.put("LOC", toLoc);
+            skuxloc.put("QTY", qtyToBeMoved);
+            skuxloc.put("QTYALLOCATED", toQtyAllocChg);
+            skuxloc.put("QTYPICKED", toQtyPickedChg);
+            skuxloc.put("LOCATIONTYPE", locMap.get("LOCATIONTYPE"));
+            DBHelper.executeInsert("SKUXLOC", skuxloc);
+        } else
+            DBHelper.executeUpdate("UPDATE SKUXLOC SET QTY=QTY+?, QTYALLOCATED=QTYALLOCATED+?, QTYPICKED=QTYPICKED+?, EDITWHO=?, EDITDATE=? WHERE  LOC=?  AND STORERKEY=? AND SKU=?"
+                    , new Object[]{qtyToBeMoved, toQtyAllocChg, toQtyPickedChg, username, currentDate, toLoc, storerKey, sku});
+
 
         //更新后检查SKUXLOC数量，如果为0直接删除
         DBHelper.executeUpdate("DELETE FROM SKUXLOC WHERE STORERKEY = ? AND SKU = ? AND LOC = ? AND QTY = 0 ", new Object[]{storerKey,sku,fromLoc});
@@ -244,39 +270,22 @@ public class InventoryOperations {
         //------------------------------------------------------------------------------------
         //  LOT
         //------------------------------------------------------------------------------------
-        if (autoShip) {
-            DBHelper.executeUpdate( "UPDATE LOT SET QTY=QTY-?, QTYALLOCATED=QTYALLOCATED-?, EDITWHO=?, EDITDATE=? WHERE LOT=?"
-                    , new Object[]{qtyToBeMoved, qtyToBeMoved, username, currentDate, lot});
-        } else {
-            //LOT总量不会变化，分配量和拣货量需要根据实际情况调整
-            if ((fromQtyAllocChg.compareTo(BigDecimal.ZERO) != 0) || (toQtyAllocChg.compareTo(BigDecimal.ZERO) != 0) || (fromQtyPickedChg.compareTo(BigDecimal.ZERO) != 0) || (toQtyPickedChg.compareTo(BigDecimal.ZERO) != 0)) {
-                DBHelper.executeUpdate( "UPDATE LOT SET QTYALLOCATED=QTYALLOCATED-?+?, QTYPICKED=QTYPICKED-?+?, EDITWHO=?, EDITDATE=? WHERE LOT=?"
-                        , new Object[]{fromQtyAllocChg, toQtyAllocChg, fromQtyPickedChg, toQtyPickedChg, username, currentDate, lot});
-            }
-            if (!fromLotxLocxIdHoldStatus.equals(toLotxLocxIdHoldStatus)) {
-//                BigDecimal qtyOnHold = DBHelper.getDecimalValue( "SELECT SUM(QTY) FROM LOTXLOCXID WHERE STATUS = 'HOLD' AND LOT = ?", new Object[]{lot});
-//                DBHelper.executeUpdate( "UPDATE LOT SET QTYONHOLD = ?, EDITWHO = ?, EDITDATE = ? WHERE LOT = ?"
-//                        , new Object[]{qtyOnHold, username, currentDate, lot});
 
-                BigDecimal qtyLotHoldChange;
-                if("HOLD".equals(fromLotxLocxIdHoldStatus)){
-                    //HOLD=>OK
-                    qtyLotHoldChange = qtyToBeMoved.negate();
-                }else {
-                    //OK=>HOLD
-                    qtyLotHoldChange = qtyToBeMoved;
-                }
-                DBHelper.executeUpdate("UPDATE LOT SET QTYONHOLD = QTYONHOLD + ?,EDITWHO=?,EDITDATE=? WHERE LOT=?", new Object[]{qtyLotHoldChange,username,currentDate,lot});
+        BigDecimal qtyFromLotHoldChange = fromLotxLocxIdHoldStatus.equals(HOLD) ? qtyToBeMoved : BigDecimal.ZERO;
+        BigDecimal qtyToLotHoldChange = toLotxLocxIdHoldStatus.equals(HOLD) ? qtyToBeMoved : BigDecimal.ZERO;
 
-            }
+        if ((fromQtyAllocChg.compareTo(BigDecimal.ZERO) != 0) || (toQtyAllocChg.compareTo(BigDecimal.ZERO) != 0) || (fromQtyPickedChg.compareTo(BigDecimal.ZERO) != 0) || (toQtyPickedChg.compareTo(BigDecimal.ZERO) != 0)) {
+            DBHelper.executeUpdate("UPDATE LOT SET QTY= QTY-?, QTYALLOCATED=QTYALLOCATED-?, QTYPICKED=QTYPICKED-?, QTYONHOLD = QTYONHOLD-?, EDITWHO=?, EDITDATE=? WHERE LOT=?"
+                    , new Object[]{qtyToBeMoved, fromQtyAllocChg, fromQtyPickedChg, qtyFromLotHoldChange, username, currentDate, fromLot});
+            DBHelper.executeUpdate("UPDATE LOT SET QTY= QTY+?, QTYALLOCATED=QTYALLOCATED+?, QTYPICKED=QTYPICKED+?, QTYONHOLD = QTYONHOLD+?, EDITWHO=?, EDITDATE=? WHERE LOT=?"
+                    , new Object[]{qtyToBeMoved, toQtyAllocChg, toQtyPickedChg, qtyToLotHoldChange, username, currentDate, toLot});
         }
 
 
         //更新后检查LOT，如果为0直接删除
-        DBHelper.executeUpdate("DELETE FROM LOT WHERE STORERKEY = ? AND LOT = ? AND QTY = 0 ", new Object[]{storerKey,lot});
+        DBHelper.executeUpdate("DELETE FROM LOT WHERE LOT = ? AND QTY = 0 ", new Object[]{fromLot});
 
         //交易记录
-
         Integer itrnKey = null;
 
         if(saveItrn){
@@ -289,8 +298,9 @@ public class InventoryOperations {
             itrn.put("ITRNSYSID", "0");
             itrn.put("TRANTYPE", "MV");
             itrn.put("STORERKEY", storerKey);
-            itrn.put("SKU", lot);
-            itrn.put("LOT", lot);
+            itrn.put("SKU", sku);
+            itrn.put("FROMLOT", fromLot);
+            itrn.put("TOLOT", toLot);
             itrn.put("FROMLOC", fromLoc);
             itrn.put("FROMID", fromId);
             itrn.put("TOLOC", toLoc);
@@ -301,20 +311,32 @@ public class InventoryOperations {
             itrn.put("UOMCALC", "0");
             itrn.put("INTRANSIT", "1");
 //----------------------------------
-            Map<String,Object> lotHashMap = LotAttribute.findByLot(lot, true);
 
-            itrn.put("LOTTABLE01", lotHashMap.get("LOTTABLE01"));
-            itrn.put("LOTTABLE02", lotHashMap.get("LOTTABLE02"));
-            itrn.put("LOTTABLE03", lotHashMap.get("LOTTABLE03"));
-            itrn.put("LOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE04")));
-            itrn.put("LOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE05")));
-            itrn.put("LOTTABLE06", lotHashMap.get("LOTTABLE06"));
-            itrn.put("LOTTABLE07", lotHashMap.get("LOTTABLE07"));
-            itrn.put("LOTTABLE08", lotHashMap.get("LOTTABLE08"));
-            itrn.put("LOTTABLE09", lotHashMap.get("LOTTABLE09"));
-            itrn.put("LOTTABLE10", lotHashMap.get("LOTTABLE10"));
-            itrn.put("LOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE11")));
-            itrn.put("LOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) lotHashMap.get("LOTTABLE12")));
+            itrn.put("FROMLOTTABLE01", fromLotAttrHashMap.get("LOTTABLE01"));
+            itrn.put("FROMLOTTABLE02", fromLotAttrHashMap.get("LOTTABLE02"));
+            itrn.put("FROMLOTTABLE03", fromLotAttrHashMap.get("LOTTABLE03"));
+            itrn.put("FROMLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE04")));
+            itrn.put("FROMLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE05")));
+            itrn.put("FROMLOTTABLE06", fromLotAttrHashMap.get("LOTTABLE06"));
+            itrn.put("FROMLOTTABLE07", fromLotAttrHashMap.get("LOTTABLE07"));
+            itrn.put("FROMLOTTABLE08", fromLotAttrHashMap.get("LOTTABLE08"));
+            itrn.put("FROMLOTTABLE09", fromLotAttrHashMap.get("LOTTABLE09"));
+            itrn.put("FROMLOTTABLE10", fromLotAttrHashMap.get("LOTTABLE10"));
+            itrn.put("FROMLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE11")));
+            itrn.put("FROMLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE12")));
+
+            itrn.put("TOLOTTABLE01", toLotAttrHashMap.get("LOTTABLE01"));
+            itrn.put("TOLOTTABLE02", toLotAttrHashMap.get("LOTTABLE02"));
+            itrn.put("TOLOTTABLE03", toLotAttrHashMap.get("LOTTABLE03"));
+            itrn.put("TOLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE04")));
+            itrn.put("TOLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE05")));
+            itrn.put("TOLOTTABLE06", toLotAttrHashMap.get("LOTTABLE06"));
+            itrn.put("TOLOTTABLE07", toLotAttrHashMap.get("LOTTABLE07"));
+            itrn.put("TOLOTTABLE08", toLotAttrHashMap.get("LOTTABLE08"));
+            itrn.put("TOLOTTABLE09", toLotAttrHashMap.get("LOTTABLE09"));
+            itrn.put("TOLOTTABLE10", toLotAttrHashMap.get("LOTTABLE10"));
+            itrn.put("TOLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE11")));
+            itrn.put("TOLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE12")));
 //---------------------------------
             DBHelper.executeInsert("ITRN", itrn);
         }
@@ -379,7 +401,7 @@ public class InventoryOperations {
     public void holdByLot(String lot, String reasonCode){
 
         //确认批次已存在
-        LotAttribute.findByLot(lot, true);
+        LotAttribute.findWithEntByLot(lot, true);
 
         List<Map<String,String>> lotxLocxIdList = LotxLocxId.findByLot(lot);
         //暂不做如下校验，原因：虑在lot存在的情况下，即使没有库存该批次也应该添加lot的冻结记录，如果后续有新的库存，应该自动变为冻结状态。
@@ -762,5 +784,141 @@ public class InventoryOperations {
 
     }
 
+
+    /**
+     *  批属性转移
+     *  转移后，id关联的lot冻结状态要参考目标lot的冻结状态。
+     * @param lot
+     * @param id
+     * @param overrideLotAttributeList 此参数为待更新的批属性列表，如果不传则默认使用原值。如需全量更新，需传全量属性列表
+     */
+    public void internalTransfer(String id, String lot, HashMap<String,Object> overrideLotAttributeList) {
+
+        Map<String,Object> lotxLocxIdMap = LotxLocxId.find(id,lot,true);
+
+        String loc = lotxLocxIdMap.get("LOC").toString();
+        BigDecimal qty = (BigDecimal) lotxLocxIdMap.get("QTY");
+
+        if(((BigDecimal)lotxLocxIdMap.get("QTYPICKED")).compareTo(BigDecimal.ZERO)>0 ||
+                ((BigDecimal)lotxLocxIdMap.get("QTYALLOCATED")).compareTo(BigDecimal.ZERO)>0){
+            throw new EHApplicationException("容器"+id+"存在分配量或拣货量，不允许内部转移");
+        }
+
+        LinkedHashMap<String, Object> toLotMap = new LinkedHashMap<>();
+
+
+        Map<String,Object> fromLotMap = LotAttribute.findByLot(lot,true);
+
+        fromLotMap.entrySet().forEach(e -> {
+
+            if (toString().startsWith("LOTTABLE")){
+                toLotMap.put(e.getKey(), e.getValue());
+
+            }
+
+        });
+
+        if(overrideLotAttributeList.size()==0) throw new EHApplicationException("未提供待修改的批属性信息列表");
+
+        boolean lotInfoChanged = false;
+
+        //override the changed lot attributes
+
+        for (Map.Entry<String, Object> attribute : overrideLotAttributeList.entrySet()) {
+
+            if (!toLotMap.containsKey(attribute.getKey()))
+                throw new EHApplicationException("批属性字段" + attribute.getKey() + "不存在");
+
+            if (!attribute.getValue().equals(toLotMap.get(attribute.getKey()))) {
+
+                toLotMap.put(attribute.getKey(), attribute.getValue());
+
+                lotInfoChanged = true;
+            }
+        }
+
+        if(!lotInfoChanged) throw new EHApplicationException("未修改批属性，无需进行转移");
+
+        //因为lot是lotattribute表的主键，因此对于不同的storerkey，即使物料和批属性组合相同也会产生不同的lot，所以这里要根据storerKey来过滤
+        toLotMap.put("STORERKEY",lotxLocxIdMap.get("STORERKEY"));
+        toLotMap.put("SKU",lotxLocxIdMap.get("SKU"));
+
+
+        StringBuffer sqlSB = new StringBuffer(" SELECT * FROM LOTATTRIBUTE WHERE 1=1 ");
+
+        toLotMap.entrySet().forEach(e-> sqlSB.append(" AND " + e.getKey() + " = ? "));
+
+        Map<String,Object> targetLotMap = DBHelper.getRawRecord(sqlSB.toString(), toLotMap.values().toArray(),"批属性记录",false);
+
+        String toLot;
+
+        if(targetLotMap == null){
+            //TODO 对于生成的新批次暂不考虑冻结是否与原批次一致，因为新批次需要复制原批次的冻结记录，因此暂保持与其他wms系统行为一致，暂不做处理
+            toLot = IdGenerationHelper.getNCounterStrWithLength("LOT",10);
+
+            toLotMap.put("LOT", toLot);
+
+            DBHelper.executeInsert("LOTATTRIBUTE",toLotMap);
+        }else {
+
+            toLot = targetLotMap.get("LOT").toString();
+
+        }
+
+        move(id, id, loc, loc, lot, toLot, qty, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false);
+
+        //交易记录
+        Integer itrnKey = IdGenerationHelper.getNCounter("ITRNKEY");
+        String username = EHContextHelper.getUser().getUsername();
+
+        Map<String, Object> itrn = new HashMap<>();
+        itrn.put("ADDWHO", username);
+        itrn.put("EDITWHO", username);
+        itrn.put("ITRNKEY", itrnKey);
+        itrn.put("ITRNSYSID", "0");
+        itrn.put("TRANTYPE", "IT");
+        itrn.put("STORERKEY", lotxLocxIdMap.get("STORERKEY"));
+        itrn.put("SKU", lotxLocxIdMap.get("SKU"));
+        itrn.put("ID", id);
+        itrn.put("FROMLOT", lot);
+        itrn.put("TOLOT", toLot);
+        itrn.put("LOC", loc);
+        itrn.put("SOURCETYPE", "");
+        itrn.put("QTY", qty);
+        itrn.put("STATUS", "OK");
+        itrn.put("UOMCALC", "0");
+        itrn.put("INTRANSIT", "1");
+//----------------------------------
+
+        itrn.put("FROMLOTTABLE01", fromLotMap.get("LOTTABLE01"));
+        itrn.put("FROMLOTTABLE02", fromLotMap.get("LOTTABLE02"));
+        itrn.put("FROMLOTTABLE03", fromLotMap.get("LOTTABLE03"));
+        itrn.put("FROMLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE04")));
+        itrn.put("FROMLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE05")));
+        itrn.put("FROMLOTTABLE06", fromLotMap.get("LOTTABLE06"));
+        itrn.put("FROMLOTTABLE07", fromLotMap.get("LOTTABLE07"));
+        itrn.put("FROMLOTTABLE08", fromLotMap.get("LOTTABLE08"));
+        itrn.put("FROMLOTTABLE09", fromLotMap.get("LOTTABLE09"));
+        itrn.put("FROMLOTTABLE10", fromLotMap.get("LOTTABLE10"));
+        itrn.put("FROMLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE11")));
+        itrn.put("FROMLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE12")));
+
+        itrn.put("TOLOTTABLE01", toLotMap.get("LOTTABLE01"));
+        itrn.put("TOLOTTABLE02", toLotMap.get("LOTTABLE02"));
+        itrn.put("TOLOTTABLE03", toLotMap.get("LOTTABLE03"));
+        itrn.put("TOLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE04")));
+        itrn.put("TOLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE05")));
+        itrn.put("TOLOTTABLE06", toLotMap.get("LOTTABLE06"));
+        itrn.put("TOLOTTABLE07", toLotMap.get("LOTTABLE07"));
+        itrn.put("TOLOTTABLE08", toLotMap.get("LOTTABLE08"));
+        itrn.put("TOLOTTABLE09", toLotMap.get("LOTTABLE09"));
+        itrn.put("TOLOTTABLE10", toLotMap.get("LOTTABLE10"));
+        itrn.put("TOLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE11")));
+        itrn.put("TOLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE12")));
+//---------------------------------
+        DBHelper.executeInsert("ITRN", itrn);
+
+
+    }
 
 }

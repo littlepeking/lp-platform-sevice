@@ -25,7 +25,7 @@ public class Lot {
 
     public static Map<String,Object> findById(String lot){
 
-        return DBHelper.getRawRecord("SELECT *, QTY-QTYPICKED-QTYALLOCATED-QTYPREALLOCATED-QTYONHOLD QTYAVAIL FROM LOT WHERE LOT = ? ", new Object[]{lot},"批次",false);
+        return DBHelper.getRawRecord("SELECT *, QTY-QTYPICKED-QTYALLOCATED-QTYPREALLOCATED-QTYONHOLD QTYAVAIL,QTY-QTYPICKED-QTYALLOCATED-QTYPREALLOCATED QTYAVAILWITHHOLD FROM LOT WHERE LOT = ? ", new Object[]{lot},"批次",false);
 
     }
 

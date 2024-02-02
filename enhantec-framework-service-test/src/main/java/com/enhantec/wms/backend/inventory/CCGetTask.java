@@ -43,7 +43,7 @@ public class CCGetTask extends WMSBaseService {
 
         Map<String,String> skuHashMap = SKU.findById(sku,true);
         String  stdUom = UOM.getStdUOM(skuHashMap.get("PACKKEY"));
-        Map<String,Object>  lotHashMap = LotAttribute.findByLot(lot,true);
+        Map<String,Object>  lotHashMap = LotAttribute.findWithEntByLot(lot,true);
         Map<String,String>  idNotesHashMap = IDNotes.findById(fromId,true);
         Map<String,String>  taskDetailHashMap = TaskDetail.findById(taskDetailKey,true);
         Map<String,String>  lotxLocxIdHashMap = LotxLocxId.findById(fromId,true);

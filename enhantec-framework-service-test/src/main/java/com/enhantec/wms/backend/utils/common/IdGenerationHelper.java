@@ -264,7 +264,7 @@ public class IdGenerationHelper {
 
             if (Count<=0)  ExceptionHelper.throwRfFulfillLogicException("Not find ("+KeyName+") by ncounter");
 
-            Map<String,Object> seqHashMap = DBHelper.getRawRecord("Select KeyCount from ncounter where KeyName=?",new Object[]{KeyName.toUpperCase()},"", false);
+            Map<String,Object> seqHashMap = DBHelper.getRawRecord("SELECT KEYCOUNT FROM NCOUNTER WHERE KEYNAME=?",new Object[]{KeyName.toUpperCase()},"", false);
 
             if (seqHashMap!=null)
             {

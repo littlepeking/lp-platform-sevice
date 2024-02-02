@@ -316,22 +316,20 @@ public class DBHelper {
         return convertList(res);
     }
 
-    //未完成，待实现
-    @Deprecated
-    public static void executeUpdate( String tableName, Map<String,Object> updateParams,  Map<String,Object> whereParams) throws DBResourceException{
+    public static void executeUpdate( String tableName, Map<String,Object> updateColumns,  Map<String,Object> whereColumns) throws DBResourceException{
 
-        if(updateParams==null || updateParams.size()==0) ExceptionHelper.throwRfFulfillLogicException("更新失败：表名或更新字段列表不允许为空");
-        if(whereParams==null || whereParams.size()==0) ExceptionHelper.throwRfFulfillLogicException("更新失败：WHERE条件字段类表不允许为空");
+        if(updateColumns==null || updateColumns.size()==0) ExceptionHelper.throwRfFulfillLogicException("更新失败：表名或更新字段列表不允许为空");
+        if(whereColumns==null || whereColumns.size()==0) ExceptionHelper.throwRfFulfillLogicException("更新失败：WHERE条件字段类表不允许为空");
 
 
         StringBuffer sqlStringBuffer = new StringBuffer("Update ");
         sqlStringBuffer.append(tableName);
         sqlStringBuffer.append(" set ");
-        updateParams.entrySet().stream().map(e-> sqlStringBuffer.append(" " + e.getKey()+ " = ? ," ));
+        updateColumns.entrySet().stream().map(e-> sqlStringBuffer.append(" " + e.getKey()+ " = ? ," ));
         sqlStringBuffer.append(" where ");
-        whereParams.entrySet().stream().map(e-> sqlStringBuffer.append(" " + e.getKey()+ " = ? AND" ));
+        whereColumns.entrySet().stream().map(e-> sqlStringBuffer.append(" " + e.getKey()+ " = ? AND" ));
 
-        List<Object> params = Stream.concat(updateParams.values().stream(), whereParams.values().stream())
+        List<Object> params = Stream.concat(updateColumns.values().stream(), whereColumns.values().stream())
                 .collect(Collectors.toList());
 
         executeUpdate(sqlStringBuffer.toString(),params);

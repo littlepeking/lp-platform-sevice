@@ -12,6 +12,17 @@ import java.util.Map;
 
 public class LotAttribute {
 
+    public static Map<String, Object> findByLot(String lot, boolean checkExist) {
+
+        if(UtilHelper.isEmpty(lot)) ExceptionHelper.throwRfFulfillLogicException("批次不能为空");
+
+        String SQL="SELECT * FROM LOTATTRIBUTE WHERE LOT = ?";
+
+        Map<String,Object> record = DBHelper.getRawRecord( SQL, new Object[]{ lot},"批属性");
+        if(checkExist && record == null) ExceptionHelper.throwRfFulfillLogicException("未找到WMS批次"+lot);
+        return record;
+
+    }
 
     public static Map<String, String> getEnterpriseReceiptLotInfo( String elot) {
         // LOTTABLE01, LOTTABLE10 未使用
@@ -38,9 +49,9 @@ public class LotAttribute {
 
     }
 
-    public static Map<String,Object> findByLot( String lot, boolean checkExist) {
+    public static Map<String,Object> findWithEntByLot(String lot, boolean checkExist) {
 
-        if(UtilHelper.isEmpty(lot)) ExceptionHelper.throwRfFulfillLogicException("未找到查询的批次"+lot);
+        if(UtilHelper.isEmpty(lot)) ExceptionHelper.throwRfFulfillLogicException("批次不能为空");
 
 
         // LOTTABLE01, LOTTABLE09, LOTTABLE10 未使用
