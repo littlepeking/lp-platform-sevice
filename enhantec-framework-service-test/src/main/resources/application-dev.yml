@@ -12,6 +12,9 @@ spring:
     base: DC=infor,DC=com
 mybatis-plus:
   configuration:
+    global-config:
+      db-config:
+        select-strategy: 2
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 enhantec:
   common:

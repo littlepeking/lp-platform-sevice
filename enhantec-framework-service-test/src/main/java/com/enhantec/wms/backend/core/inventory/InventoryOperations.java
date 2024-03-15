@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -82,7 +83,7 @@ public class InventoryOperations {
 //        BigDecimal to = toQtyAllocChg.add(toQtyPickedChg);
 //        if (from.compareTo(to) != 0) throw new EHApplicationException("来源分配拣货量与目标分配拣货量不一致");
 
-        if(fromLoc.equals(toLoc) && fromId.equals(toId)) throw new EHApplicationException("容器已在目标库位，不需要移动");
+        if(fromLoc.equals(toLoc) && fromId.equals(toId) && fromLot.equals(toLot) ) throw new EHApplicationException("容器已在目标库位，不需要移动");
 
         Loc.findById(fromLoc,true);
         if(!fromLoc.equals(toLoc)) Loc.findById(toLoc,true);
@@ -136,8 +137,9 @@ public class InventoryOperations {
         BigDecimal fromIdQtyAllocated = new BigDecimal(lotxLocxFromIdHashMap.get("QTYALLOCATED"));
         BigDecimal fromIdQtyPicked = new BigDecimal(lotxLocxFromIdHashMap.get("QTYPICKED"));
         if (fromIdQty.compareTo(qtyToBeMoved) < 0) throw new EHApplicationException("待移动的数量"+qtyToBeMoved+"大于容器的当前库存数量"+fromIdQty);
-        if (fromIdQtyAllocated.compareTo(fromQtyAllocChg) < 0) throw new EHApplicationException("库存分配量不足");
-        //LOTXLOCXID中可以减少部分分配量（比如拣货时），但不存在部分移动拣货量的情况，但允许整体移动拣货至容器。
+        //fromQtyAllocChg>0代表此次为拣货操作，需要减少分配数量，因此要保证分配量大于此次拣货的变化量
+        if (fromQtyAllocChg.compareTo(BigDecimal.ZERO) > 0 && fromIdQtyAllocated.compareTo(fromQtyAllocChg) < 0) throw new EHApplicationException("库存分配量不足");
+        //fromQtyPickedChg>0代表此次为发运或者移动整容器操作，此时不允许发运或移动部分拣货量，只允许整体操作容器。
         if (fromQtyPickedChg.compareTo(BigDecimal.ZERO) > 0 &&
                 ( fromQtyPickedChg.compareTo(fromIdQtyPicked) != 0 || qtyToBeMoved.compareTo(fromIdQty) != 0 )) throw new EHApplicationException("移动已拣货的容器时，不允许移动部分数量");
         BigDecimal fromIdAvailQty = fromIdQty.subtract(fromIdQtyAllocated).subtract(fromIdQtyPicked);
@@ -149,13 +151,20 @@ public class InventoryOperations {
         BigDecimal expectedAvailQtyToBeMoved = qtyToBeMoved.subtract(fromQtyAllocChg).subtract(fromQtyPickedChg);
         if (fromIdAvailQty.compareTo(expectedAvailQtyToBeMoved) < 0) throw new EHApplicationException("容器"+fromIdAvailQty+"可用库存不足,移动失败");
 
-        //如果目标批次和源批次不同（批属性转移的情况），则源批次下的可移动量要小于该批次可用量(包含冻结库存的可用量)-源批次下动态拣货的分配量
+        //如果目标批次和源批次不同（批属性转移的情况）：
+        // 1、 如为正常库存：则源批次下的可移动量要小于该批次正常库存的可用量(不包含冻结库存的可用量)-源批次下动态拣货的分配量
+        // 2、 如为冻结库存：则源批次下的可移动量要小于该批次冻结库存的可用量
         if(!fromLot.equals(toLot)) {
             Map<String, Object> lotMap = Lot.findById(fromLot);
 
-            BigDecimal qtyAvailByLot = (BigDecimal) lotMap.get("QTYAVAILWITHHOLD");
-            if (qtyAvailByLot.compareTo(expectedAvailQtyToBeMoved) < 0)
-                throw new EHApplicationException("批次" + fromLot + "可用库存不足，移动失败");
+            BigDecimal qtyUnHoldAvailByLot = (BigDecimal) lotMap.get("QTYAVAIL");
+            BigDecimal qtyOnHoldAvailByLot = (BigDecimal) lotMap.get("QTYONHOLD");
+
+            if(HOLD.equals(fromLotxLocxIdHoldStatus) && qtyOnHoldAvailByLot.compareTo(expectedAvailQtyToBeMoved) < 0
+            || OK.equals(fromLotxLocxIdHoldStatus) && qtyUnHoldAvailByLot.compareTo(expectedAvailQtyToBeMoved) < 0
+            ) {
+                throw new EHApplicationException("待移动的批次" + fromLot + "可用库存不足，移动失败");
+            }
 
         }
 
@@ -271,14 +280,34 @@ public class InventoryOperations {
         //  LOT
         //------------------------------------------------------------------------------------
 
-        BigDecimal qtyFromLotHoldChange = fromLotxLocxIdHoldStatus.equals(HOLD) ? qtyToBeMoved : BigDecimal.ZERO;
-        BigDecimal qtyToLotHoldChange = toLotxLocxIdHoldStatus.equals(HOLD) ? qtyToBeMoved : BigDecimal.ZERO;
+        BigDecimal fromQtyHoldChg = fromLotxLocxIdHoldStatus.equals(HOLD) ? qtyToBeMoved : BigDecimal.ZERO;
+        BigDecimal toQtyHoldChg = toLotxLocxIdHoldStatus.equals(HOLD) ? qtyToBeMoved : BigDecimal.ZERO;
 
-        if ((fromQtyAllocChg.compareTo(BigDecimal.ZERO) != 0) || (toQtyAllocChg.compareTo(BigDecimal.ZERO) != 0) || (fromQtyPickedChg.compareTo(BigDecimal.ZERO) != 0) || (toQtyPickedChg.compareTo(BigDecimal.ZERO) != 0)) {
+        if (!fromLot.equals(toLot)
+                || (fromQtyHoldChg.compareTo(toQtyHoldChg) != 0)
+                || (fromQtyAllocChg.compareTo(toQtyAllocChg) != 0)
+                || (fromQtyPickedChg.compareTo(toQtyPickedChg) != 0))
+        {
             DBHelper.executeUpdate("UPDATE LOT SET QTY= QTY-?, QTYALLOCATED=QTYALLOCATED-?, QTYPICKED=QTYPICKED-?, QTYONHOLD = QTYONHOLD-?, EDITWHO=?, EDITDATE=? WHERE LOT=?"
-                    , new Object[]{qtyToBeMoved, fromQtyAllocChg, fromQtyPickedChg, qtyFromLotHoldChange, username, currentDate, fromLot});
+                    , new Object[]{qtyToBeMoved, fromQtyAllocChg, fromQtyPickedChg, fromQtyHoldChg, username, currentDate, fromLot});
+
+            if (DBHelper.getCount("SELECT COUNT(1) FROM LOT  WHERE  LOT=? ", new Object[]{toLot}) == 0) {
+                Map<String, Object> lotHashMap = new HashMap<>();
+                lotHashMap.put("ADDWHO", username);
+                lotHashMap.put("EDITWHO", username);
+                lotHashMap.put("STORERKEY", storerKey);
+                lotHashMap.put("SKU", sku);
+                lotHashMap.put("LOT", toLot);
+                lotHashMap.put("QTY", qtyToBeMoved);
+                lotHashMap.put("QTYALLOCATED", toQtyAllocChg);
+                lotHashMap.put("QTYPICKED", toQtyPickedChg);
+                lotHashMap.put("QTYONHOLD", toQtyHoldChg);
+                lotHashMap.put("STATUS", isToLotHold? "HOLD":"OK");
+                DBHelper.executeInsert("LOT", lotHashMap);
+            } else
+
             DBHelper.executeUpdate("UPDATE LOT SET QTY= QTY+?, QTYALLOCATED=QTYALLOCATED+?, QTYPICKED=QTYPICKED+?, QTYONHOLD = QTYONHOLD+?, EDITWHO=?, EDITDATE=? WHERE LOT=?"
-                    , new Object[]{qtyToBeMoved, toQtyAllocChg, toQtyPickedChg, qtyToLotHoldChange, username, currentDate, toLot});
+                    , new Object[]{qtyToBeMoved, toQtyAllocChg, toQtyPickedChg, toQtyHoldChg, username, currentDate, toLot});
         }
 
 
@@ -289,18 +318,18 @@ public class InventoryOperations {
         Integer itrnKey = null;
 
         if(saveItrn){
-            itrnKey = IdGenerationHelper.getNCounter("ITRNKEY");
 
-            Map<String,Object> itrn = new HashMap<String,Object>();
+            itrnKey = IdGenerationHelper.getNCounter("ITRNKEY");
+            Map<String,Object> itrn = new HashMap<>();
+
             itrn.put("ADDWHO", username);
             itrn.put("EDITWHO", username);
             itrn.put("ITRNKEY", itrnKey);
             itrn.put("ITRNSYSID", "0");
-            itrn.put("TRANTYPE", "MV");
+            itrn.put("TRANTYPE", fromLot.equals(toLot) ? "MV":"IT");
             itrn.put("STORERKEY", storerKey);
             itrn.put("SKU", sku);
-            itrn.put("FROMLOT", fromLot);
-            itrn.put("TOLOT", toLot);
+            itrn.put("LOT", toLot);
             itrn.put("FROMLOC", fromLoc);
             itrn.put("FROMID", fromId);
             itrn.put("TOLOC", toLoc);
@@ -312,31 +341,53 @@ public class InventoryOperations {
             itrn.put("INTRANSIT", "1");
 //----------------------------------
 
-            itrn.put("FROMLOTTABLE01", fromLotAttrHashMap.get("LOTTABLE01"));
-            itrn.put("FROMLOTTABLE02", fromLotAttrHashMap.get("LOTTABLE02"));
-            itrn.put("FROMLOTTABLE03", fromLotAttrHashMap.get("LOTTABLE03"));
-            itrn.put("FROMLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE04")));
-            itrn.put("FROMLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE05")));
-            itrn.put("FROMLOTTABLE06", fromLotAttrHashMap.get("LOTTABLE06"));
-            itrn.put("FROMLOTTABLE07", fromLotAttrHashMap.get("LOTTABLE07"));
-            itrn.put("FROMLOTTABLE08", fromLotAttrHashMap.get("LOTTABLE08"));
-            itrn.put("FROMLOTTABLE09", fromLotAttrHashMap.get("LOTTABLE09"));
-            itrn.put("FROMLOTTABLE10", fromLotAttrHashMap.get("LOTTABLE10"));
-            itrn.put("FROMLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE11")));
-            itrn.put("FROMLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE12")));
+            itrn.put("LOTTABLE01", toLotAttrHashMap.get("LOTTABLE01"));
+            itrn.put("LOTTABLE02", toLotAttrHashMap.get("LOTTABLE02"));
+            itrn.put("LOTTABLE03", toLotAttrHashMap.get("LOTTABLE03"));
+            itrn.put("LOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE04")));
+            itrn.put("LOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE05")));
+            itrn.put("LOTTABLE06", toLotAttrHashMap.get("LOTTABLE06"));
+            itrn.put("LOTTABLE07", toLotAttrHashMap.get("LOTTABLE07"));
+            itrn.put("LOTTABLE08", toLotAttrHashMap.get("LOTTABLE08"));
+            itrn.put("LOTTABLE09", toLotAttrHashMap.get("LOTTABLE09"));
+            itrn.put("LOTTABLE10", toLotAttrHashMap.get("LOTTABLE10"));
+            itrn.put("LOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE11")));
+            itrn.put("LOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE12")));
 
-            itrn.put("TOLOTTABLE01", toLotAttrHashMap.get("LOTTABLE01"));
-            itrn.put("TOLOTTABLE02", toLotAttrHashMap.get("LOTTABLE02"));
-            itrn.put("TOLOTTABLE03", toLotAttrHashMap.get("LOTTABLE03"));
-            itrn.put("TOLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE04")));
-            itrn.put("TOLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE05")));
-            itrn.put("TOLOTTABLE06", toLotAttrHashMap.get("LOTTABLE06"));
-            itrn.put("TOLOTTABLE07", toLotAttrHashMap.get("LOTTABLE07"));
-            itrn.put("TOLOTTABLE08", toLotAttrHashMap.get("LOTTABLE08"));
-            itrn.put("TOLOTTABLE09", toLotAttrHashMap.get("LOTTABLE09"));
-            itrn.put("TOLOTTABLE10", toLotAttrHashMap.get("LOTTABLE10"));
-            itrn.put("TOLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE11")));
-            itrn.put("TOLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE12")));
+
+            //TODO 增加如下字段给批属性变更使用
+//            if(!fromLot.equals(toLot)) {
+
+//            itrn.put("FROMLOT", fromLot);
+//            itrn.put("TOLOT", toLot);
+//            itrn.put("FROMLOTTABLE01", fromLotAttrHashMap.get("LOTTABLE01"));
+//            itrn.put("FROMLOTTABLE02", fromLotAttrHashMap.get("LOTTABLE02"));
+//            itrn.put("FROMLOTTABLE03", fromLotAttrHashMap.get("LOTTABLE03"));
+//            itrn.put("FROMLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE04")));
+//            itrn.put("FROMLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE05")));
+//            itrn.put("FROMLOTTABLE06", fromLotAttrHashMap.get("LOTTABLE06"));
+//            itrn.put("FROMLOTTABLE07", fromLotAttrHashMap.get("LOTTABLE07"));
+//            itrn.put("FROMLOTTABLE08", fromLotAttrHashMap.get("LOTTABLE08"));
+//            itrn.put("FROMLOTTABLE09", fromLotAttrHashMap.get("LOTTABLE09"));
+//            itrn.put("FROMLOTTABLE10", fromLotAttrHashMap.get("LOTTABLE10"));
+//            itrn.put("FROMLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE11")));
+//            itrn.put("FROMLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotAttrHashMap.get("LOTTABLE12")));
+//
+//            itrn.put("TOLOTTABLE01", toLotAttrHashMap.get("LOTTABLE01"));
+//            itrn.put("TOLOTTABLE02", toLotAttrHashMap.get("LOTTABLE02"));
+//            itrn.put("TOLOTTABLE03", toLotAttrHashMap.get("LOTTABLE03"));
+//            itrn.put("TOLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE04")));
+//            itrn.put("TOLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE05")));
+//            itrn.put("TOLOTTABLE06", toLotAttrHashMap.get("LOTTABLE06"));
+//            itrn.put("TOLOTTABLE07", toLotAttrHashMap.get("LOTTABLE07"));
+//            itrn.put("TOLOTTABLE08", toLotAttrHashMap.get("LOTTABLE08"));
+//            itrn.put("TOLOTTABLE09", toLotAttrHashMap.get("LOTTABLE09"));
+//            itrn.put("TOLOTTABLE10", toLotAttrHashMap.get("LOTTABLE10"));
+//            itrn.put("TOLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE11")));
+//            itrn.put("TOLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotAttrHashMap.get("LOTTABLE12")));
+//            }
+
+
 //---------------------------------
             DBHelper.executeInsert("ITRN", itrn);
         }
@@ -794,6 +845,10 @@ public class InventoryOperations {
      */
     public void internalTransfer(String id, String lot, HashMap<String,Object> overrideLotAttributeList) {
 
+        if(UtilHelper.isEmpty(id)) throw new EHApplicationException("容器号不允许为空");
+        if(UtilHelper.isEmpty(lot)) throw new EHApplicationException("WMS源批次号不允许为空");
+        if(overrideLotAttributeList==null || overrideLotAttributeList.size()==0) throw new EHApplicationException("未提供待修改的批属性信息列表");
+
         Map<String,Object> lotxLocxIdMap = LotxLocxId.find(id,lot,true);
 
         String loc = lotxLocxIdMap.get("LOC").toString();
@@ -806,35 +861,58 @@ public class InventoryOperations {
 
         LinkedHashMap<String, Object> toLotMap = new LinkedHashMap<>();
 
-
         Map<String,Object> fromLotMap = LotAttribute.findByLot(lot,true);
 
-        fromLotMap.entrySet().forEach(e -> {
-
-            if (toString().startsWith("LOTTABLE")){
-                toLotMap.put(e.getKey(), e.getValue());
-
-            }
-
+        fromLotMap.entrySet().forEach(e ->{
+                    if(e.getKey().startsWith("LOTTABLE"))  toLotMap.put(e.getKey(), e.getValue());
         });
 
-        if(overrideLotAttributeList.size()==0) throw new EHApplicationException("未提供待修改的批属性信息列表");
 
         boolean lotInfoChanged = false;
-
-        //override the changed lot attributes
+//
+//        //override the changed lot attributes
+//        List<String> lotColumns = new ArrayList<>(){{
+//            add("LOTTABLE04");
+//            add("LOTTABLE05");
+//            add("LOTTABLE11");
+//            add("LOTTABLE12");
+//        }};
 
         for (Map.Entry<String, Object> attribute : overrideLotAttributeList.entrySet()) {
 
             if (!toLotMap.containsKey(attribute.getKey()))
                 throw new EHApplicationException("批属性字段" + attribute.getKey() + "不存在");
 
-            if (!attribute.getValue().equals(toLotMap.get(attribute.getKey()))) {
+            Object overrideValue;
 
-                toLotMap.put(attribute.getKey(), attribute.getValue());
+            if(toLotMap.get(attribute.getKey()) instanceof LocalDateTime) {
 
+
+                if (attribute.getValue() instanceof LocalDateTime) {
+
+                    overrideValue = attribute.getValue();
+
+                } else if (attribute.getValue() instanceof Number) {
+
+                    overrideValue = EHDateTimeHelper.timeStamp2LocalDateTime(attribute.getValue());
+
+                } else {
+
+                    throw new EHApplicationException("批属性字段" + attribute.getKey() + "的数据类型无法转换为时间格式");
+
+                }
+
+            }else {
+
+                overrideValue = attribute.getValue();
+
+            }
+
+            if(!overrideValue.equals(toLotMap.get(attribute.getKey()))){
+                toLotMap.put(attribute.getKey(), overrideValue);
                 lotInfoChanged = true;
             }
+
         }
 
         if(!lotInfoChanged) throw new EHApplicationException("未修改批属性，无需进行转移");
@@ -865,58 +943,7 @@ public class InventoryOperations {
 
         }
 
-        move(id, id, loc, loc, lot, toLot, qty, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false);
-
-        //交易记录
-        Integer itrnKey = IdGenerationHelper.getNCounter("ITRNKEY");
-        String username = EHContextHelper.getUser().getUsername();
-
-        Map<String, Object> itrn = new HashMap<>();
-        itrn.put("ADDWHO", username);
-        itrn.put("EDITWHO", username);
-        itrn.put("ITRNKEY", itrnKey);
-        itrn.put("ITRNSYSID", "0");
-        itrn.put("TRANTYPE", "IT");
-        itrn.put("STORERKEY", lotxLocxIdMap.get("STORERKEY"));
-        itrn.put("SKU", lotxLocxIdMap.get("SKU"));
-        itrn.put("ID", id);
-        itrn.put("FROMLOT", lot);
-        itrn.put("TOLOT", toLot);
-        itrn.put("LOC", loc);
-        itrn.put("SOURCETYPE", "");
-        itrn.put("QTY", qty);
-        itrn.put("STATUS", "OK");
-        itrn.put("UOMCALC", "0");
-        itrn.put("INTRANSIT", "1");
-//----------------------------------
-
-        itrn.put("FROMLOTTABLE01", fromLotMap.get("LOTTABLE01"));
-        itrn.put("FROMLOTTABLE02", fromLotMap.get("LOTTABLE02"));
-        itrn.put("FROMLOTTABLE03", fromLotMap.get("LOTTABLE03"));
-        itrn.put("FROMLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE04")));
-        itrn.put("FROMLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE05")));
-        itrn.put("FROMLOTTABLE06", fromLotMap.get("LOTTABLE06"));
-        itrn.put("FROMLOTTABLE07", fromLotMap.get("LOTTABLE07"));
-        itrn.put("FROMLOTTABLE08", fromLotMap.get("LOTTABLE08"));
-        itrn.put("FROMLOTTABLE09", fromLotMap.get("LOTTABLE09"));
-        itrn.put("FROMLOTTABLE10", fromLotMap.get("LOTTABLE10"));
-        itrn.put("FROMLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE11")));
-        itrn.put("FROMLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) fromLotMap.get("LOTTABLE12")));
-
-        itrn.put("TOLOTTABLE01", toLotMap.get("LOTTABLE01"));
-        itrn.put("TOLOTTABLE02", toLotMap.get("LOTTABLE02"));
-        itrn.put("TOLOTTABLE03", toLotMap.get("LOTTABLE03"));
-        itrn.put("TOLOTTABLE04", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE04")));
-        itrn.put("TOLOTTABLE05", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE05")));
-        itrn.put("TOLOTTABLE06", toLotMap.get("LOTTABLE06"));
-        itrn.put("TOLOTTABLE07", toLotMap.get("LOTTABLE07"));
-        itrn.put("TOLOTTABLE08", toLotMap.get("LOTTABLE08"));
-        itrn.put("TOLOTTABLE09", toLotMap.get("LOTTABLE09"));
-        itrn.put("TOLOTTABLE10", toLotMap.get("LOTTABLE10"));
-        itrn.put("TOLOTTABLE11", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE11")));
-        itrn.put("TOLOTTABLE12", EHDateTimeHelper.getLocalDateStr((LocalDateTime) toLotMap.get("LOTTABLE12")));
-//---------------------------------
-        DBHelper.executeInsert("ITRN", itrn);
+        move(id, id, loc, loc, lot, toLot, qty, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, true);
 
 
     }

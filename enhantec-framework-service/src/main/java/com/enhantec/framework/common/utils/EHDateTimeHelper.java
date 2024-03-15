@@ -24,7 +24,14 @@ import java.time.*;
 public class EHDateTimeHelper {
 
    public static LocalDateTime timeStamp2LocalDateTime(Object val){
-        long timestamp = (long) val;
+
+       long timestamp;
+
+       if (val instanceof Number) {
+           timestamp = ((Number) val).longValue();
+       } else {
+           throw new IllegalArgumentException("Not a valid timestamp value");
+       }
         if (timestamp > 0) {
             //return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);

@@ -21,7 +21,9 @@ class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesC
         // Modify the properties according to your requirements
         EHMybatisConfiguration configuration = new EHMybatisConfiguration();
         configuration.setObjectWrapperFactory(new EHMybatisPlusConfigurationPropCustomizer.MapWrapperFactory());
+        configuration.setCallSettersOnNulls(true);
         properties.setConfiguration(configuration);
+
         // Customize globalConfig or other properties as needed
     }
 

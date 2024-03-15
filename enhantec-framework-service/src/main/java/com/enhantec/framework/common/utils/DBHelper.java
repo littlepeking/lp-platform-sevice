@@ -121,7 +121,7 @@ public class DBHelper {
     public static void convertSqlParamListObj2String(List<Object> list){
 
         for (int i = 0; i < list.size(); i++) {
-            list.set(i, convertSqlParamObj2String(list.get(i)));
+            if(list.get(i) instanceof LocalDateTime) list.set(i, convertSqlParamObj2String(list.get(i)));
         }
 
     }
@@ -133,9 +133,16 @@ public class DBHelper {
      */
     public static String convertSqlParamObj2String(Object parameter){
 
+        return parameter == null ? null : parameter instanceof LocalDateTime ?
+                convertLocalDateTime2SqlString((LocalDateTime)parameter): parameter.toString();
+
+    }
+
+    public static String convertLocalDateTime2SqlString(LocalDateTime localDateTime){
+
         DateTimeFormatter dataTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        return parameter == null ? null : parameter instanceof LocalDateTime ? ((LocalDateTime)parameter).format(dataTimeFormatter): parameter.toString();
+        return localDateTime.format(dataTimeFormatter);
 
 
     }

@@ -10,7 +10,7 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/wms-services")
 @RequiredArgsConstructor
-public class LegacyWMSServiceController {
+public class WMSServiceController {
 
     private  final WMSCommonService wmsCommonService;
 

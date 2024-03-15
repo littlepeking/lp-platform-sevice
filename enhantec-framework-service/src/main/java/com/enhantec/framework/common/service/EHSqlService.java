@@ -16,19 +16,16 @@
  *******************************************************************************/
 package com.enhantec.framework.common.service;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.enhantec.framework.common.utils.DBHelper;
-import com.enhantec.framework.common.utils.DSConstants;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,7 +38,26 @@ public class EHSqlService {
 //    @DS(DSConstants.DS_DEFAULT)
 //    @Transactional(propagation = Propagation.REQUIRED)
     public List<Map<String, Object>> selectList(String statement, List<Object> params) {
+
+        convertDateParams2SqlString(params);
+
         return SqlRunner.db().selectList(convertQuestionMark2Index(statement),params.toArray());
+    }
+
+    private static void convertDateParams2SqlString(List<Object> params) {
+        for(int i = 0; i< params.size(); i++){
+            if(params.get(i) instanceof LocalDateTime){
+                params.set(i, DBHelper.convertLocalDateTime2SqlString((LocalDateTime)params.get(i)));
+            }
+        }
+    }
+
+    private static void convertDateParams2SqlString(Object[] params) {
+        for(int i = 0; i< params.length; i++){
+            if(params[i] instanceof LocalDateTime){
+                params[i] = DBHelper.convertLocalDateTime2SqlString((LocalDateTime)params[i]);
+            }
+        }
     }
 
 //    @DS(DSConstants.DS_PARAM)
@@ -53,6 +69,9 @@ public class EHSqlService {
 //    @DS(DSConstants.DS_DEFAULT)
 //    @Transactional(propagation = Propagation.REQUIRED)
     public long selectCount(String statement, List<Object> params) {
+
+        convertDateParams2SqlString(params);
+
         return SqlRunner.db().selectCount(convertQuestionMark2Index(statement),params.toArray());
     }
 
@@ -64,14 +83,23 @@ public class EHSqlService {
 
 //    @DS(DSConstants.DS_DEFAULT)
     public Map<String, Object> selectOne(String statement, List<Object> params) {
+
+        convertDateParams2SqlString(params);
+
         return SqlRunner.db().selectOne(convertQuestionMark2Index(statement),params.toArray());
     }
 
     public Object selectValue(String statement, List<Object> params) {
+
+        convertDateParams2SqlString(params);
+
         return SqlRunner.db().selectObj(convertQuestionMark2Index(statement),params.toArray());
     }
 
     public Object selectValue(String statement, Object[] params) {
+
+        convertDateParams2SqlString(params);
+
         return selectValue(statement, Arrays.asList(params));
     }
 
