@@ -49,7 +49,7 @@ public class Receipt {
 
         Map<String,String> idHashMap = DBHelper.getRecord(
                 " SELECT A.RECEIPTKEY, A.RECEIPTLINENUMBER, A.TOID," + Const.commonSkuFieldsWithAlias + "," +
-                        " A.PACKKEY, A.UOM," +
+                        " A.PACKKEY, A.UOM, A.CONDITIONCODE, " +
                         "A.GROSSWGTEXPECTED ORIGINALGROSSWGT, A.TAREWGTEXPECTED ORIGINALTAREWGT, A.QTYEXPECTED, A.QTYEXPECTED ORIGINALNETWGT, " +
                         Const.receiptDetailLottableFields +", CONCAT(A.BARRELNUMBER,'/',A.TOTALBARRELNUMBER) AS BARRELDESCR " +
                         " FROM SKU S,RECEIPTDETAIL A " +

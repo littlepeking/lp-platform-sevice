@@ -184,7 +184,7 @@ public class LotAttribute {
     )
     {
         String LOT=IdGenerationHelper.getNCounterStrWithLength("LOT",10);
-        LinkedHashMap<String,String> mLOT=new LinkedHashMap<>();
+        LinkedHashMap<String,Object> mLOT=new LinkedHashMap<>();
         mLOT.put("ADDWHO",EHContextHelper.getUser().getUsername());
         mLOT.put("EDITWHO",EHContextHelper.getUser().getUsername());
         mLOT.put("LOT",LOT);

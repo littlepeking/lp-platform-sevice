@@ -29,13 +29,13 @@ public class LegacyDBHelper {
 	private static Logger sqlLogger = LoggerFactory.getLogger(LegacyDBHelper.class);
 
 
-	public static void ExecInsert( String TableName, Map<String,String> Fields)
+	public static void ExecInsert( String TableName, Map<String,?> Fields)
 	{
 		ArrayList<Object> aParams=new ArrayList<>();
 		String SQL1="insert into "+TableName+"(";
 		String SQL2="values(";
 		int iLine=0;
-		for(Map.Entry<String, String> entry : Fields.entrySet()){
+		for(Map.Entry<String,?> entry : Fields.entrySet()){
 			String mapKey = entry.getKey();
 			Object mapValue = entry.getValue();
 			if (iLine>0) SQL1+=",";

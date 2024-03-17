@@ -103,7 +103,7 @@ public class InventoryHelper {
 
         if(snList.size()>0) {
             for (String sn: snList) {
-                Map<String,String> serialMove = new HashMap<>();
+                Map<String,Object> serialMove = new HashMap<>();
                 serialMove.put("WHSEID", "@user");
                 serialMove.put("STORERKEY", CDSysSet.getStorerKey());
                 serialMove.put("SKU", fromIdHashMap.get("SKU"));

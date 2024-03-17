@@ -111,7 +111,7 @@ public class QcSamplingLpnQty extends WMSBaseService
 
 			Map<String, String> orderInfo = Orders.findByOrderKey(ORDERKEY,true);
 			
-			Map<String,String> OrderDetail=new HashMap<String,String>();
+			Map<String,Object> OrderDetail=new HashMap<String,Object>();
 			OrderDetail.put("ADDWHO", userid);
 			OrderDetail.put("EDITWHO", userid);
 			OrderDetail.put("STATUS", "02");

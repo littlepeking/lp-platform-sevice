@@ -924,9 +924,21 @@ public class InventoryOperations {
 
         StringBuffer sqlSB = new StringBuffer(" SELECT * FROM LOTATTRIBUTE WHERE 1=1 ");
 
-        toLotMap.entrySet().forEach(e-> sqlSB.append(" AND " + e.getKey() + " = ? "));
 
-        Map<String,Object> targetLotMap = DBHelper.getRawRecord(sqlSB.toString(), toLotMap.values().toArray(),"批属性记录",false);
+        ArrayList queryToLotParams = new ArrayList<>();
+
+        toLotMap.entrySet().forEach(e->{
+
+                    if(e.getValue() != null){
+                        sqlSB.append(" AND " + e.getKey() + " = ? ");
+                        queryToLotParams.add(e.getValue());
+                    }else{
+                        sqlSB.append(" AND " + e.getKey() + " is null ");
+                    }
+
+        });
+
+        Map<String,Object> targetLotMap = DBHelper.getRawRecord(sqlSB.toString(), queryToLotParams.toArray(),"批属性记录",false);
 
         String toLot;
 

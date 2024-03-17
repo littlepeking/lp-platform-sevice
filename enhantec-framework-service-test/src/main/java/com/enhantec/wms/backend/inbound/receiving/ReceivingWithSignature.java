@@ -299,7 +299,7 @@ public class ReceivingWithSignature extends WMSBaseService {
             IDNotes.update(LPN,updateFields);
         }else {
             //为零记录已归档至归档表，所有收货或者退货记录均需重新插入IDNOTES表
-            Map<String,String> IDNOTES = new HashMap<>();
+            Map<String,Object> IDNOTES = new HashMap<>();
             IDNOTES.put("AddWho", userid);
             IDNOTES.put("EditWho", userid);
             IDNOTES.put("ID", LPN);/*LPN*/
@@ -425,7 +425,7 @@ public class ReceivingWithSignature extends WMSBaseService {
             /*因为目前收货批次、复测期、有效期已经抽取到ELOTATTRIBUTE表中，当相同批号出现时直接使用已存在的批次号即可，该批次号使用的质量状态、复测期、有效期会自动通过ELOTATTRIBUTE表进行关联，不需要像原始版本一样需要手工更新LOTATTRIBUTE表。*/
         } else {
             //如果没有收货批次信息，则插入新的收货批次信息。信息来源为收货单
-            Map<String,String> eLot = new HashMap<>();
+            Map<String,Object> eLot = new HashMap<>();
             eLot.put("STORERKEY", receiptDetailInfo.get("STORERKEY"));
             eLot.put("SKU", receiptDetailInfo.get("SKU"));
             eLot.put("ELOT", receiptDetailInfo.get("LOTTABLE06"));

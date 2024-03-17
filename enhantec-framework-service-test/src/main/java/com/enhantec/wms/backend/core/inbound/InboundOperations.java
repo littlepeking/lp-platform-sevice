@@ -85,7 +85,7 @@ public class InboundOperations {
         //---写入LOT-----------------------------------------
         if (DBHelper.getCount("select count(1) from LOT where Lot=?",new Object[]{TOLOT})==0)
         {
-            LinkedHashMap<String,String> Lot=new LinkedHashMap<>();
+            LinkedHashMap<String,Object> Lot=new LinkedHashMap<>();
             Lot.put("addwho", EHContextHelper.getUser().getUsername());
             Lot.put("editwho", EHContextHelper.getUser().getUsername());
             Lot.put("LOT",  TOLOT);
@@ -107,7 +107,7 @@ public class InboundOperations {
         if (DBHelper.getCount("select count(1) from lotxlocxid  where  Lot=? and Loc=? and ID=?",new Object[]{TOLOT,TOLOC,TOID})==0)
         {
 
-            LinkedHashMap<String,String> lotxlocxid=new LinkedHashMap<>();
+            LinkedHashMap<String,Object> lotxlocxid=new LinkedHashMap<>();
             lotxlocxid.put("addwho", EHContextHelper.getUser().getUsername());
             lotxlocxid.put("editwho", EHContextHelper.getUser().getUsername());
             lotxlocxid.put("LOT", TOLOT);
@@ -127,7 +127,7 @@ public class InboundOperations {
 //        //---写入ID-----------------------------------------
         if (DBHelper.getCount("select count(1) from ID where ID=?", new Object[]{TOID})==0)
         {
-            LinkedHashMap<String,String> idHashMap=new LinkedHashMap<>();
+            LinkedHashMap<String,Object> idHashMap=new LinkedHashMap<>();
             idHashMap.put("addwho", EHContextHelper.getUser().getUsername());
             idHashMap.put("editwho", EHContextHelper.getUser().getUsername());
             idHashMap.put("ID", TOID);
@@ -147,7 +147,7 @@ public class InboundOperations {
         {
             String LOCATIONTYPE=DBHelper.getStringValue( "SELECT LOCATIONTYPE FROM LOC WHERE LOC=?"
                     , new Object[]{TOLOC});
-            LinkedHashMap<String,String> SKUXLOC=new LinkedHashMap<>();
+            LinkedHashMap<String,Object> SKUXLOC=new LinkedHashMap<>();
             SKUXLOC.put("addwho", EHContextHelper.getUser().getUsername());
             SKUXLOC.put("editwho", EHContextHelper.getUser().getUsername());
             SKUXLOC.put("STORERKEY", STORERKEY);
@@ -164,11 +164,11 @@ public class InboundOperations {
         if (!CONDITIONCODE.equals("OK"))
         {
             String INVENTORYHOLDKEY= IdGenerationHelper.getNCounterStr("INVENTORYHOLDKEY");
-            String HOLD= DBHelper.getStringValue( "SELECT HOLD FROM INVENTORYHOLD WHERE LOT=? AND LOC=? AND ID=? AND STATUS=?"
+            String holdStatus = DBHelper.getStringValue( "SELECT HOLD FROM INVENTORYHOLD WHERE LOT=? AND LOC=? AND ID=? AND STATUS=?"
                     , new Object[] {" "," ",TOID,CONDITIONCODE});
-            if (HOLD.equals(""))
+            if (holdStatus == null)
             {
-                LinkedHashMap<String,String> INVENTORYHOLD=new LinkedHashMap<>();
+                LinkedHashMap<String,Object> INVENTORYHOLD=new LinkedHashMap<>();
                 // COMMENTS, HOURSTOHOLD, AUTORELEASEDATE, ADDDATE, ADDWHO, EDITDATE, EDITWHO
                 INVENTORYHOLD.put("ADDWHO",EHContextHelper.getUser().getUsername());
                 INVENTORYHOLD.put("EDITWHO",EHContextHelper.getUser().getUsername());
@@ -179,13 +179,13 @@ public class InboundOperations {
                 INVENTORYHOLD.put("HOLD","1");
                 INVENTORYHOLD.put("STATUS",CONDITIONCODE);
                 INVENTORYHOLD.put("LOC"," ");
-                INVENTORYHOLD.put("DATEON", LocalDateTime.now().toString());
+                INVENTORYHOLD.put("DATEON", LocalDateTime.now());
                 INVENTORYHOLD.put("WHOON",EHContextHelper.getUser().getUsername());
                 LegacyDBHelper.ExecInsert( "INVENTORYHOLD", INVENTORYHOLD);
             }
             else
             {
-                if (HOLD.equals("0"))
+                if (holdStatus.equals("0"))
                     LegacyDBHelper.ExecSql( "UPDATE INVENTORYHOLD SET EDITWHO=?,EDITDATE=?,HOLD=?,DATEON=?, WHOON=?"
                                     + " WHERE LOT=? AND LOC=? AND ID=? AND STATUS=? AND HOLD=?"
                             , new Object[] {EHContextHelper.getUser().getUsername(),LocalDateTime.now(),"1",LocalDateTime.now().toString(),EHContextHelper.getUser().getUsername()
