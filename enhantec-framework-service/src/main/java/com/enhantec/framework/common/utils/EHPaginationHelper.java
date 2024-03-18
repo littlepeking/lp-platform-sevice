@@ -79,12 +79,14 @@ public class EHPaginationHelper {
                                 }
                         );
                     } else if ("date".equals(f.getType())) {
-                        LocalDateTime dateTime = EHDateTimeHelper.timeStamp2LocalDateTime(f.getValue());
-                        queryWrapper.ge(columnName, dateTime);
+                        //The timestamp passed here should be the 12AM of user timezone.
+                        LocalDateTime startDateTime = EHDateTimeHelper.timeStamp2LocalDateTime(f.getValue());
+                        queryWrapper.ge(columnName, startDateTime);
                         Duration duration = Duration.ofHours(23);
                         duration = duration.plusMinutes(59).plusSeconds(59);
-                        //end of the day converted from the given timezone to the GMT timezone
-                        queryWrapper.lt(columnName, dateTime.plus(duration));
+                        //end of the day converted from the above startDateTime + 24 hours
+                        //The above conversion make sure the result of query match the timeframe of user timezone.
+                        queryWrapper.lt(columnName, startDateTime.plus(duration));
                     } else {
                         queryWrapper.eq(columnName, f.getValue());
                     }
