@@ -22,10 +22,8 @@ package com.enhantec.framework.common.utils;
 public interface DSConstants {
 
     static String DS_ADMIN = "admin";
-    //To choose a db schema for DB operation based on http header 'orgId',replaced by DS_ORG
-    //static String DS_HEADER_ORG = "#header.orgId";
 
-    static String DS_PARAM = "#dataSource";
+    static String DS_PARAM = "#dataSource"; //used by method first parameter which matched by SPEL
 
     //To choose a db schema for DB operation based on datasource of EHRequestContext
     static String DS_DEFAULT = "#DS_DEFAULT";

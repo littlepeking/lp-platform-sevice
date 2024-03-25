@@ -97,6 +97,8 @@ public class MultiDataSourceConfig {
 
                 //Add ORG datasources
                 ResultSet rs = statement.executeQuery("select * from EH_ORGANIZATION");
+                //SQLServer: Each org use different username/password, but connectionUrl is same for single db (one db is multiple orgs).
+                //MySql: Multiple Orgs can share same username/password, but connectionUrl is different for each db (each db is an org).
                 if(driverClassName.contains("sqlserver")){
 
                         while (rs.next()) {
