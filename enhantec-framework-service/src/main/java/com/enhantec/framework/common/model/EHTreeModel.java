@@ -36,7 +36,6 @@ import java.util.List;
 @AllArgsConstructor
 public class EHTreeModel<T extends EHTreeModel> extends EHVersionModel {
 
-
     @NotNull
     private String parentId;
 

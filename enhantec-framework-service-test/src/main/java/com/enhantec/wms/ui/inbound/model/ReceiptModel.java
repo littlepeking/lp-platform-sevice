@@ -18,9 +18,8 @@
 package com.enhantec.wms.ui.inbound.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.enhantec.framework.common.model.EHBaseModel;
+import com.enhantec.framework.common.model.EHWMSModel;
 import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.config.annotations.FieldNameConversion;
 import lombok.Data;
@@ -35,19 +34,7 @@ import java.time.LocalDateTime;
 @TableName(value ="RECEIPT")
 @FieldNameConversion(EHFieldNameConversionType.NONE)
 @Data
-public class ReceiptModel extends EHBaseModel implements Serializable {
-
-//    @TableId
-    private String serialKey;
-
-    public String getId(){
-        return serialKey;
-    }
-
-    public void setId(String serialKey){
-        this.serialKey = serialKey;
-    }
-
+public class ReceiptModel extends EHWMSModel implements Serializable {
 
     private String whseId;
     private String storerKey;

@@ -19,58 +19,43 @@
 
 package com.enhantec.framework.common.model;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
-
-/**
- *
- * @TableName EH_TRANSLATION
- */
+import java.time.LocalDateTime;
 
 @Data
-@SuperBuilder
-@TableName(value ="EH_TRANSLATION")
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class EhTranslation extends EHCommonModel implements Serializable {
-    /**
-     * 
-     */
+public class EHWMSModel extends EHBaseModel{
+
     @TableId
-    private String id;
+    String serialKey;
 
-    /**
-     * 
-     */
-    private String tableName;
+    public String getId(){
+        return serialKey;
+    }
 
-    /**
-     * 
-     */
-    private String columnName;
+    public void setId(String serialKey){
+        this.serialKey = serialKey;
+    }
 
-    /**
-     * 
-     */
-    private String transId;
+    @TableField(fill = FieldFill.INSERT)
+    LocalDateTime addDate;
 
-    /**
-     * 
-     */
-    private String languageCode;
+    @TableField(fill = FieldFill.INSERT)
+    String addWho;
 
-    /**
-     * 
-     */
-    private String transText;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    LocalDateTime editDate;
 
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    String editWho;
+
 }

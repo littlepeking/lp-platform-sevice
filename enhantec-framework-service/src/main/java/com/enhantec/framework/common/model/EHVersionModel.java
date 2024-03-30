@@ -31,7 +31,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class EHVersionModel extends EHBaseModel {
+public class EHVersionModel extends EHCommonModel {
 
     @TableField(fill = FieldFill.INSERT)
     @Version

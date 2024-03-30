@@ -21,7 +21,7 @@ package com.enhantec.framework.security.common.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.enhantec.framework.common.model.EHBaseModel;
+import com.enhantec.framework.common.model.EHCommonModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,7 +40,7 @@ import java.io.Serializable;
 @With
 @AllArgsConstructor
 @NoArgsConstructor
-public class EHRolePermission extends EHBaseModel implements Serializable {
+public class EHRolePermission extends EHCommonModel implements Serializable {
 
     /**
      * 

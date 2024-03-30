@@ -31,52 +31,66 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @SuperBuilder(toBuilder = true)
+@NoArgsConstructor
 @AllArgsConstructor
-public class EHBaseModel {
+public class EHCommonModel extends EHBaseModel{
 
+    @TableId
+    String id;
 
+    @TableField(fill = FieldFill.INSERT)
+    LocalDateTime addDate;
+
+    @TableField(fill = FieldFill.INSERT)
+    String addWho;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    LocalDateTime editDate;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    String editWho;
+
+    @Override
     public String getId(){
-        throw new EHApplicationException("child class must override method getId() ");
+       return id;
     }
-
+    @Override
     public void setId(String id){
-        throw new EHApplicationException("child class must override method setId() ");
+        this.id =id;
     }
 
+    @Override
     public void setAddWho(String addWho){
-        throw new EHApplicationException("child class must override method setAddWho() ");
+        this.addWho = addWho;
     }
-
+    @Override
     public String getAddWho(){
-        throw new EHApplicationException("child class must override method getAddWho() ");
+       return addWho;
     }
-
+    @Override
     public void setAddDate(LocalDateTime addDate){
-        throw new EHApplicationException("child class must override method setAddDate() ");
+        this.addDate = addDate;
     }
-
+    @Override
     public LocalDateTime getAddDate(){
-        throw new EHApplicationException("child class must override method getAddDate() ");
+        return addDate;
     }
-
-    public void setEditWho(String EditWho){
-        throw new EHApplicationException("child class must override method setEditWho() ");
+    @Override
+    public void setEditWho(String editWho){
+        this.editWho = editWho;
     }
-
+    @Override
     public String getEditWho(){
-        throw new EHApplicationException("child class must override method getEditWho() ");
+        return editWho;
     }
-
-
-    public void setEditDate(LocalDateTime EditDate){
-        throw new EHApplicationException("child class must override method setEditDate() ");
+    @Override
+    public void setEditDate(LocalDateTime editDate){
+        this.editDate = editDate;
     }
-
+    @Override
     public LocalDateTime getEditDate(){
-        throw new EHApplicationException("child class must override method getEditDate() ");
+       return editDate;
     }
-
-
 
 
 }

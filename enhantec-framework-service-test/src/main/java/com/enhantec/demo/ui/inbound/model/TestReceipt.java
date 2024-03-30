@@ -19,7 +19,7 @@ package com.enhantec.demo.ui.inbound.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.enhantec.framework.common.model.EHBaseModel;
+import com.enhantec.framework.common.model.EHCommonModel;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
      */
     @TableName(value ="TEST_RECEIPT")
     @Data
-    public class TestReceipt extends EHBaseModel implements Serializable {
+    public class TestReceipt extends EHCommonModel implements Serializable {
 
         /**
          *
