@@ -3,6 +3,7 @@ package com.enhantec.framework.config.mybatisplus;
 
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
+import com.enhantec.framework.common.utils.DBHelper;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
@@ -48,41 +49,19 @@ class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesC
 
         @Override
         public String findProperty(String name, boolean useCamelCaseMapping) {
+            //useCamelCaseMapping need be configured in
+            // application.xml => mybatis-plus.configuration.map-underscore-to-camel-case
             if (useCamelCaseMapping
-                    && ((name.charAt(0) >= 'A' && name.charAt(0) <= 'Z')
-                    || name.contains("_"))) {
-                return underlineToCamelhump(name);
+                    //&& ((name.charAt(0) >= 'A' && name.charAt(0) <= 'Z'))
+            ) {
+                //For map result, Application always use default IFieldNameConverter fieldName for any request as right now we cannot pass IFieldNameConverter by request
+                //Then we use default IFieldNameConverter to generate java Map data.
+                //But when we convert fieldName to columnName we should consider if columnName use default IFieldNameConverter or not, e.g. for Infor WMS, we cannot use snake format for compatible purpose, then we can pass IFieldNameConverter based on individual request.
+                return MybatisPlusConfig.getDefaultFieldNameConverter().convertColumnName2FieldName(name);
             }
             return name;
         }
 
-        /**
-         * Replaces underlined style hump style
-         *
-         * @param inputString
-         * @return
-         */
-        private String underlineToCamelhump(String inputString) {
-            StringBuilder sb = new StringBuilder();
-
-            boolean nextUpperCase = false;
-            for (int i = 0; i < inputString.length(); i++) {
-                char c = inputString.charAt(i);
-                if (c == '_') {
-                    if (sb.length() > 0) {
-                        nextUpperCase = true;
-                    }
-                } else {
-                    if (nextUpperCase) {
-                        sb.append(Character.toUpperCase(c));
-                        nextUpperCase = false;
-                    } else {
-                        sb.append(Character.toLowerCase(c));
-                    }
-                }
-            }
-            return sb.toString();
-        }
     }
 
 }

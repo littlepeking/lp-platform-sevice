@@ -12,16 +12,20 @@
  *
  *             Author: John Wang
  *             Email: john.wang_ca@hotmail.com
- * 
+ *
  *******************************************************************************/
 
+package com.enhantec.framework.config.annotations.converter;
 
 
-package com.enhantec.framework.config.annotations;
+public class NoFieldNameConverter implements IFieldNameConverter {
+    @Override
+    public String convertFieldName2ColumnName(String fieldName) {
+        return fieldName;
+    }
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-@Retention(RetentionPolicy.RUNTIME)
-public @interface EHTransField {
+    @Override
+    public String convertColumnName2FieldName(String columnName) {
+        return columnName;
+    }
 }

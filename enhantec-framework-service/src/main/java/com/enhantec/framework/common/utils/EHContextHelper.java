@@ -36,13 +36,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class    EHContextHelper {
+public class EHContextHelper {
 
 
     private static ApplicationContext applicationContext;
 
     public static void setApplicationContext(ApplicationContext applicationContext){
-        EHContextHelper.applicationContext = applicationContext;
+        if(EHContextHelper.applicationContext==null)
+            EHContextHelper.applicationContext = applicationContext;
     }
 
     public static <T> T getBean(Class<T> requiredType){

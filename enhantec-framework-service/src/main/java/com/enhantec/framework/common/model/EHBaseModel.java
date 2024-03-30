@@ -35,8 +35,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class EHBaseModel {
 
+//    public abstract String getId();
+//
+//    public abstract void setId(String serialKey);
+
     @TableId
     String id;
+
 
     @TableField(fill = FieldFill.INSERT)
     LocalDateTime addDate;

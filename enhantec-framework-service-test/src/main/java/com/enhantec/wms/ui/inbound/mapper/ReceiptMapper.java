@@ -17,43 +17,33 @@
 
 
 
-package com.enhantec.wms.ui.inbound.service.impl;
+package com.enhantec.wms.ui.inbound.mapper;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.enhantec.framework.common.utils.DSConstants;
-import com.enhantec.wms.ui.inbound.mapper.TestReceiptMapper;
-import com.enhantec.wms.ui.inbound.model.TestReceipt;
-import com.enhantec.wms.ui.inbound.service.TestReceiptService;
-import org.springframework.stereotype.Service;
+import com.enhantec.framework.common.mapper.EHBaseMapper;
+import com.enhantec.demo.ui.inbound.model.TestReceipt;
+import com.enhantec.wms.ui.inbound.model.ReceiptModel;
+import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
 
 /**
 * @author johnw
-* @description 针对表【test_receipt】的数据库操作Service实现
+* @description 针对表【test_receipt】的数据库操作Mapper
 * @createDate 2022-04-18 17:37:15
+* @Entity com.enhantec.wms.inbound.model.TestReceipt.TestReceipt
 */
-@Service
-@DS(DSConstants.DS_DEFAULT)
-public class TestReceiptServiceImpl extends ServiceImpl<TestReceiptMapper, TestReceipt>
-    implements TestReceiptService {
+@Repository
+public interface ReceiptMapper extends EHBaseMapper<ReceiptModel> {
 
+    List<ReceiptModel> selectAllById(@Param("id") String id);
 
-    public List<TestReceipt> findReceiptByReceiptId(String id){
-
-       return getBaseMapper().selectAllById(id);
-    }
-
-    //@DS(DBConst.DS_CONTEXT_ORG)
-    public Page<Map<String,Object>> getReceiptPageData(Page<Map<String,Object>> page, QueryWrapper qw){
-
-        return getBaseMapper().selectByReceiptKey(page, qw);
-    }
-
+    @MapKey("id")
+    Page<Map<String,Object>> selectByReceiptKey(Page<Map<String,Object>> page, QueryWrapper ew);
 
 }
 

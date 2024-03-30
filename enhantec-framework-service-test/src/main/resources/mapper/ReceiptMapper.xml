@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enhantec.wms.ui.inbound.mapper.ReceiptMapper">
+
+    <resultMap id="BaseResultMap" type="com.enhantec.wms.ui.inbound.model.ReceiptModel">
+        <result property="serialKey" column="serialKey" jdbcType="VARCHAR"/>
+        <result property="storerKey" column="storerKey" jdbcType="VARCHAR"/>
+        <result property="poKey" column="poKey" jdbcType="VARCHAR"/>
+        <result property="receiptDate" column="receiptDate" jdbcType="DATE"/>
+        <result property="externReceiptKey" column="externReceiptKey" jdbcType="VARCHAR"/>
+        <result property="externReceiptKey2" column="externReceiptKey2" jdbcType="VARCHAR"/>
+        <result property="packKey" column="packKey" jdbcType="VARCHAR"/>
+        <result property="uom" column="uom" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="susr1" column="susr1" jdbcType="VARCHAR"/>
+        <result property="susr2" column="susr2" jdbcType="VARCHAR"/>
+        <result property="susr3" column="susr3" jdbcType="VARCHAR"/>
+        <result property="susr4" column="susr4" jdbcType="VARCHAR"/>
+        <result property="susr5" column="susr5" jdbcType="VARCHAR"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="notes" column="notes" jdbcType="VARCHAR"/>
+        <result property="closeDate" column="closeDate" jdbcType="DATE"/>
+        <result property="isConfirmed" column="isConfirmed" jdbcType="VARCHAR"/>
+        <result property="isConfirmedUser1" column="isConfirmedUser1" jdbcType="BIT"/>
+        <result property="isConfirmedUser2" column="isConfirmedUser2" jdbcType="BIT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        serialKey,whseId, storerKey, receiptKey, poKey, receiptDate, externReceiptKey,
+        externReceiptKey2, packKey, uom, status, susr1, susr2, susr3, susr4, susr5, type,
+        notes, closeDate, isConfirmed, isConfirmedUser1, isConfirmedUser2
+    </sql>
+
+    <select id="selectAllById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from receipt
+        where
+        receiptKey = #{receiptKey,jdbcType=VARCHAR}
+    </select>
+    <select id="selectByReceiptKey" resultType="java.util.Map">
+        select
+        <include refid="Base_Column_List"/>
+        from RECEIPT
+        ${ew.customSqlSegment}
+    </select>
+</mapper>

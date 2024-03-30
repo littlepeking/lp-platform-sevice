@@ -240,12 +240,12 @@ public interface EHBaseMapper<T extends EHBaseModel> extends BaseMapper<T> {
             ////
         }
         if(updateWrapper!=null){
-            List<T> rowsUpdated = selectList(updateWrapper);
-            if(rowsUpdated.size()>0) {
+            List<T> updatedModelList = selectList(updateWrapper);
+            if(updatedModelList.size()>0) {
                 ////Add translation and update entity translation fields to default language.
-                EHTranslationHelper.saveTranslation(rowsUpdated);
+                EHTranslationHelper.saveTranslation(updatedModelList);
                 ////
-                rowsUpdated.forEach(row-> updateById(row));
+                updatedModelList.forEach(row-> updateById(row));
             }
         }
 

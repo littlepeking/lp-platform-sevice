@@ -23,8 +23,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHLocaleHelper;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
-import com.enhantec.wms.ui.inbound.model.TestReceipt;
-import com.enhantec.wms.ui.inbound.service.TestReceiptService;
+import com.enhantec.demo.ui.inbound.model.TestReceipt;
+import com.enhantec.demo.ui.inbound.service.TestReceiptService;
+import com.enhantec.framework.config.annotations.converter.NoFieldNameConverter;
+import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
+import com.enhantec.wms.ui.inbound.model.ReceiptModel;
+import com.enhantec.wms.ui.inbound.service.ReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.context.MessageSource;
@@ -35,47 +39,35 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/test-receipt")
+@RequestMapping("/api/wms/inbound/receipt")
 @RequiredArgsConstructor
-public class TestReceiptController {
+public class ReceiptController {
 
-    private final TestReceiptService testReceiptService;
+    private final ReceiptService receiptService;
 
-    private final MessageSource messageSource;
 
-    @GetMapping("/search/{id}")
-    public List<TestReceipt> findTestReceipt(@PathVariable String id){
+    @GetMapping("/findById/{id}")
+    public List<ReceiptModel> findById(@PathVariable String id){
 
-        List<TestReceipt>  res = testReceiptService.findReceiptByReceiptId(id);
+        List<ReceiptModel>  res = receiptService.findReceiptByReceiptId(id);
         return res;
 
-    }
-
-    @GetMapping("translate/{msgKey}")
-    public String getI18nMsg(@PathVariable String msgKey){
-        return EHLocaleHelper.getMsg(msgKey);
-    }
-
-    @GetMapping("translate/test")
-    public String testI18nArgs(){
-        return EHLocaleHelper.getMsg("c-testArgs","arg1");
     }
 
     @PreAuthorize("permitAll()")
+    //@PreAuthorize("hasAnyAuthority('SCHEDULER_JOB_DEFINITION')")
     @PostMapping("/queryByPage")
-    public Page<Map<String,Object>> findTestReceiptByReceiptKey(@RequestBody PageParams pageParams){
+    public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
 
-        Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
+        Page pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, new NoFieldNameConverter());
 
-        Page<Map<String,Object>> res = testReceiptService.getReceiptPageData(pageInfo,queryWrapper);
-
-        //DataFormatHelper.formatPageData(res);
+        Page<Map<String, Object>> res = receiptService.page(pageInfo, queryWrapper);
 
         return res;
-
     }
+
 
 
 }

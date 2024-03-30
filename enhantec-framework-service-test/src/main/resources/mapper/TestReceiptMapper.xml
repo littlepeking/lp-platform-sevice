@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.enhantec.wms.ui.inbound.mapper.TestReceiptMapper">
+<mapper namespace="com.enhantec.demo.ui.inbound.mapper.TestReceiptMapper">
 
-    <resultMap id="BaseResultMap" type="com.enhantec.wms.ui.inbound.model.TestReceipt">
+    <resultMap id="BaseResultMap" type="com.enhantec.demo.ui.inbound.model.TestReceipt">
             <id property="id" column="id" jdbcType="VARCHAR"/>
             <result property="receiptKey" column="receipt_key" jdbcType="VARCHAR"/>
             <result property="whseId" column="whse_id" jdbcType="VARCHAR"/>

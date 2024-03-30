@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.utils.DSConstants;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
 import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
 import com.enhantec.framework.scheduler.common.service.EHJobDefinitionService;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
@@ -53,8 +55,12 @@ public class JobManager implements DisposableBean, CommandLineRunner {
 
     private final TaskScheduler taskScheduler;
 
+    private final ApplicationContext applicationContext;
+
     @Override
     public void run(String... args){
+
+        EHContextHelper.setApplicationContext(applicationContext);
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
         // 初始化:加载enabled的定时任务

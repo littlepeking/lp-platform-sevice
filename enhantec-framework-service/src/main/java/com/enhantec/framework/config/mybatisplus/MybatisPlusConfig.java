@@ -15,40 +15,31 @@
  * 
  *******************************************************************************/
 
-
-
 package com.enhantec.framework.config.mybatisplus;
 
-
-import com.baomidou.mybatisplus.annotation.DbType;
-import com.baomidou.mybatisplus.core.MybatisConfiguration;
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import org.apache.ibatis.type.LocalDateTimeTypeHandler;
+import com.enhantec.framework.common.utils.EHContextHelper;
+import com.enhantec.framework.config.EHAppConfig;
+import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
+import com.enhantec.framework.config.annotations.converter.NoFieldNameConverter;
+import com.enhantec.framework.config.annotations.converter.Snake2CamelCaseFieldNameConverter;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.LocalDateTime;
 
 @MapperScan("com.enhantec.**.mapper")
 @Configuration
 public class MybatisPlusConfig {
 
-//    @Bean
-//    public MybatisConfiguration mybatisConfig() {
-//        MybatisConfiguration configuration = new MybatisConfiguration();
-//        configuration.getTypeHandlerRegistry().register(LocalDateTime.class, new LocalDateTimeTypeHandler());
-//        return configuration;
-//    }
 
-    //as we introduced ConfigurationCustomizer, so have to remove this bean to avoid conflict
-//    @Bean
-//    public MybatisConfiguration mybatisConfiguration() {
-//        return new LocalDateTimeConfiguration();
-//    }
+    public static boolean isMapSnakeToCamelCase(){
 
+      return EHContextHelper.getBean(EHAppConfig.MybatisPlus.ConfigurationProps.class).isMapUnderscoreToCamelCase();
 
+    }
+
+    public static IFieldNameConverter getDefaultFieldNameConverter(){
+       return isMapSnakeToCamelCase() ?
+                    new Snake2CamelCaseFieldNameConverter(): new NoFieldNameConverter();
+    }
 
 }

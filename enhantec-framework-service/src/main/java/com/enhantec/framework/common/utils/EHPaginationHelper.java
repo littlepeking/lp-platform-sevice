@@ -23,6 +23,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
+import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
+import com.enhantec.framework.config.mybatisplus.MybatisPlusConfig;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
@@ -44,7 +46,13 @@ public class EHPaginationHelper {
         return page;
     }
 
-    public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams) {
+    public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams){
+        return buildQueryWrapperByPageParams(pageParams,null);
+    }
+
+    public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams, IFieldNameConverter fieldNameConverter4Request) {
+
+        IFieldNameConverter fieldNameConverter = fieldNameConverter4Request != null ? fieldNameConverter4Request : MybatisPlusConfig.getDefaultFieldNameConverter();
 
         val queryWrapper = Wrappers.query();
 
@@ -55,7 +63,7 @@ public class EHPaginationHelper {
                     //removes all whitespaces and non-visible characters (e.g., tab, \n) in key
 
                     HashSet<String> singleColumnValues = new HashSet<>();
-                    String columnName = DBHelper.formatCamelKey2Snake(f.getColumnName());
+                    String columnName = fieldNameConverter.convertFieldName2ColumnName(f.getColumnName());
 
                     if ("string".equals(f.getType())) {
                         //deal with scenario => multiSelect filter allow empty value
@@ -102,7 +110,7 @@ public class EHPaginationHelper {
             {
                 if (e.getValue() != null && !StringUtils.isBlank(e.getValue().toString())) {
                     //removes all whitespaces and non-visible characters (e.g., tab, \n) in key
-                    queryWrapper.eq(DBHelper.formatCamelKey2Snake(e.getKey()), e.getValue());
+                    queryWrapper.eq(fieldNameConverter.convertFieldName2ColumnName(e.getKey()), e.getValue());
                 }
             });
         }
@@ -112,7 +120,7 @@ public class EHPaginationHelper {
             {
                 queryWrapper.orderBy(true,
                         "asc".equalsIgnoreCase(e.getValue()),
-                        DBHelper.formatCamelKey2Snake(e.getKey()));
+                        fieldNameConverter.convertFieldName2ColumnName(e.getKey()));
             });
         }
 
@@ -120,14 +128,26 @@ public class EHPaginationHelper {
     }
 
 
+    /**
+     * Only use when default Page's Map conversion logic of MyMapWrapper cannot satisfy the requirement.
+     * @param page
+     * @param fieldNameConverter4Request
+     */
+    public static void convertFieldNameByPage(Page<Map<String, Object>> page, IFieldNameConverter fieldNameConverter4Request) {
 
-    public static void formatPageData(Page<Map<String, Object>> page) {
-
-        var formattedRecords = page.getRecords().stream().map(r -> DBHelper.camelCaseMap(r)).collect(Collectors.toList());
+        var formattedRecords = page.getRecords().stream().map(r -> DBHelper.convertColumnName2FieldNameForMap(r,fieldNameConverter4Request)).collect(Collectors.toList());
 
         page.setRecords(formattedRecords);
 
     }
+
+    public static void convertFieldNameByPage(Page<Map<String, Object>> page) {
+
+        convertFieldNameByPage(page,null);
+
+    }
+
+
 
 
 

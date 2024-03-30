@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.enhantec.framework.common.utils.DSConstants;
+import jdk.jshell.execution.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,7 @@ public class MultiDataSourceConfig {
     @Value("${spring.datasource.orgUrlTemplate}")
     private String orgUrlTemplate;
     @Value("${spring.datasource.username}")
+
     private String username;
     @Value("${spring.datasource.password}")
     private String password;
@@ -115,11 +117,12 @@ public class MultiDataSourceConfig {
                                 property.setUsername(paramsArray[0]);
                                 property.setPassword(paramsArray[1]);
 
-                                if (StringUtils.isEmpty(orgUrlTemplate)) {
-                                    orgUrlTemplate = url;
-                                }
+                                //For sqlserver, org level connection string take precedence, then orgUrlTemplate and then admin url.
+                                String orgUrl = !StringUtils.isBlank(rs.getString("CONNECTION_STRING"))
+                                        ? rs.getString("CONNECTION_STRING"):
+                                        StringUtils.isBlank(orgUrlTemplate)? orgUrlTemplate : url;
 
-                                property.setUrl(orgUrlTemplate);
+                                property.setUrl(orgUrl);
                                 property.setDriverClassName(driverClassName);
                                 map.put(DATA_SOURCE_ORG_PREFIX + orgId, property);
                                 log.info("Loaded SQLServer datasource for org {} ", orgId);
@@ -133,7 +136,15 @@ public class MultiDataSourceConfig {
                             DataSourceProperty property = new DataSourceProperty();
                             property.setUsername(username);
                             property.setPassword(password);
-                            property.setUrl(String.format(orgUrlTemplate,connectionStringParams));
+
+                            ////For Mysql, org level connection string take precedence, then orgUrlTemplate and then admin url.
+                            String orgUrl = !StringUtils.isBlank(rs.getString("CONNECTION_STRING"))
+                                    ? rs.getString("CONNECTION_STRING") :
+                                    StringUtils.isBlank(orgUrlTemplate)? String.format(orgUrlTemplate,connectionStringParams) : url;
+
+                            //if(StringUtils.isBlank(orgUrlTemplate)) throw new RuntimeException("Organization connection string must be provided for MYSQL database. Error found at Org Id:"+rs.getString("ID"));
+
+                            property.setUrl(orgUrl);
                             property.setDriverClassName(driverClassName);
                             map.put(DATA_SOURCE_ORG_PREFIX+orgId, property);
                             log.info("Loaded mysql datasource for org {} ", orgId);

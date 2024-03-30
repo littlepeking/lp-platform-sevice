@@ -20,6 +20,9 @@
 package com.enhantec.framework.common.utils;
 
 
+import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
+import com.enhantec.framework.config.mybatisplus.MybatisPlusConfig;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -32,88 +35,74 @@ public class DBHelper {
 //       return ((DynamicRoutingDataSource) map.values().stream().findFirst().get()).getDataSource(orgId);
 //    }
 
-    public static String formatCamelKey2Snake(String key) {
-
-        String trimmedKey = key.replaceAll("\\s+", "");
-
-        return camelToSnake(trimmedKey);
-    }
-
 
     /**
-     * Convert the key in the Map from underscore to hump
+     * Convert the key in the Map from database column Name to java object field Name
      *
      * @param map
      * @return
      */
-    public static Map<String, Object> camelCaseMap(Map<String, Object> map) {
+    public static Map<String, Object> convertColumnName2FieldNameForMap(Map<String, Object> map, IFieldNameConverter fieldNameConverter4Request) {
+
+
+        IFieldNameConverter fieldNameConverter = fieldNameConverter4Request != null ? fieldNameConverter4Request : MybatisPlusConfig.getDefaultFieldNameConverter();
+
         Map<String, Object> newMap = new HashMap<>();
         Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> entry = it.next();
             String key = entry.getKey();
-            String newKey = SnakeToCamel(key);
+            String newKey = fieldNameConverter.convertColumnName2FieldName(key);
             newMap.put(newKey, entry.getValue());
         }
         return newMap;
     }
 
-    private static String SnakeToCamel(String colName) {
-        StringBuilder sb = new StringBuilder();
-        String[] str = colName.toLowerCase().split("_");
-        int i = 0;
-        for (String s : str) {
-            if (s.length() == 1) {
-                s = s.toUpperCase();
-            }
-            i++;
-            if (i == 1) {
-                sb.append(s);
-                continue;
-            }
-            if (s.length() > 0) {
-                sb.append(s.substring(0, 1).toUpperCase());
-                sb.append(s.substring(1));
+    public static String camelCase2Snake(String string) {
+        string = string.replaceAll("\\s+", "");
+
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < string.length(); i++) {
+            char ch = string.charAt(i);
+
+            if (Character.isUpperCase(ch)) {
+                if (i > 0) {
+                    result.append('_');
+                }
+                result.append(Character.toLowerCase(ch));
+            } else {
+                result.append(ch);
             }
         }
-        return sb.toString();
+
+        return result.toString();
     }
 
-    public static String camelToSnake(String str) {
 
-        // Empty String
-        String result = "";
+    public static String snake2CamelCase(String inputString) {
 
-        // Append first character(in lower case)
-        // to result string
-        char c = str.charAt(0);
-        result = result + Character.toLowerCase(c);
+        if(inputString== null || !inputString.contains("_")) return inputString;
 
-        // Traverse the string from
-        // ist index to last index
-        for (int i = 1; i < str.length(); i++) {
+        inputString = inputString.replaceAll("\\s+", "");
 
-            char ch = str.charAt(i);
+        StringBuilder sb = new StringBuilder();
 
-            // Check if the character is upper case
-            // then append '_' and such character
-            // (in lower case) to result string
-            if (Character.isUpperCase(ch)) {
-                result = result + '_';
-                result
-                        = result
-                        + Character.toLowerCase(ch);
-            }
+        boolean capitalizeNext = false;
 
-            // If the character is lower case then
-            // add such character into result string
-            else {
-                result = result + ch;
+        for (char c : inputString.toCharArray()) {
+            if (c == '_') {
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                sb.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+            } else {
+                sb.append(Character.toLowerCase(c));
             }
         }
 
-        // return the result
-        return result;
+        return sb.toString();
+
     }
 
 

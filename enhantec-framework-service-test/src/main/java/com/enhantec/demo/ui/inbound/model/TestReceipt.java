@@ -15,7 +15,7 @@
  * 
  *******************************************************************************/
 
-package com.enhantec.wms.ui.inbound.model;
+package com.enhantec.demo.ui.inbound.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;

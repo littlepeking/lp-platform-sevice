@@ -24,10 +24,15 @@ import com.enhantec.framework.common.model.EHBaseModel;
 import com.enhantec.framework.common.model.EhTranslation;
 import com.enhantec.framework.common.service.EhTranslationService;
 import com.enhantec.framework.config.TransFieldConfig;
-import com.enhantec.framework.config.annotations.EHTransField;
+import com.enhantec.framework.config.annotations.FieldNameConversion;
+import com.enhantec.framework.config.annotations.TransField;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
+import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
+import com.enhantec.framework.config.annotations.converter.NoFieldNameConverter;
+import com.enhantec.framework.config.annotations.converter.Snake2CamelCaseFieldNameConverter;
+import com.enhantec.framework.config.mybatisplus.MybatisPlusConfig;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -39,11 +44,13 @@ public class EHTranslationHelper {
     @SneakyThrows
     public static <T extends EHBaseModel> void saveTranslation(T model) {
 
+        IFieldNameConverter fieldNameConverter = getFieldNameConverterByClass(model.getClass());
+
         for (Field field : model.getClass().getDeclaredFields()) {
             Class type = field.getType();
-            String columnName = StringUtils.upperCase(DBHelper.formatCamelKey2Snake(field.getName()));
+            String columnName = fieldNameConverter.convertFieldName2ColumnName(field.getName());
 
-            if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
+            if (type == String.class && field.isAnnotationPresent(TransField.class)) {
 
                 EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
@@ -56,36 +63,52 @@ public class EHTranslationHelper {
                 String tableName = StringUtils.upperCase(tableNameAnnotation.value());
 
                 field.setAccessible(true);
-                Object text = field.get(model);
+                Object text = field.get(model) !=null ? field.get(model) : "";
 
-                if (text != null) {
-                    EhTranslation translation = null;
-                    if(translateId!=null) {
-                        translation = translationService.find(tableName, columnName, languageCode, translateId, false);
-                        if (translation != null) {
-                            translation.setTransText(text.toString());
-                        } else {
-                            translation = EhTranslation.builder().
-                                    tableName(tableName).
-                                    columnName(columnName).
-                                    transId(translateId).
-                                    languageCode(languageCode)
-                                    .transText(StringUtils.defaultString(text.toString(), ""))
-                                    .build();
-                        }
+                if (translateId != null) {
+                    EhTranslation translation;
+
+                    translation = translationService.find(tableName, columnName, languageCode, translateId, false);
+                    if (translation != null) {
+                        translation.setTransText(text.toString());
+                    } else {
+                        translation = EhTranslation.builder().
+                                tableName(tableName).
+                                columnName(columnName).
+                                transId(translateId).
+                                languageCode(languageCode)
+                                .transText(StringUtils.defaultString(text.toString(), ""))
+                                .build();
                     }
                     translationService.saveOrUpdate(translation);
-                    //Set field to default language translation in base table after get translation value from entity.
-                    EhTranslation defTranslation = translationService.findDefault(tableName,columnName,translateId);
-                    if(defTranslation!=null){
-                        field.set(model,defTranslation.getTransText());
-                    }
-
                 }
+
+                //Set field to default language translation in base table after get translation value from entity.
+                EhTranslation defTranslation = translationService.findDefault(tableName, columnName, translateId);
+                if (defTranslation != null) {
+                    field.set(model, defTranslation.getTransText());
+                }
+
+
 
             }
 
         }
+    }
+
+    private static <T extends EHBaseModel> IFieldNameConverter getFieldNameConverterByClass(Class<T> clazz) {
+        IFieldNameConverter fieldNameConverter;
+        if (clazz.isAnnotationPresent(FieldNameConversion.class)) {
+           if(EHFieldNameConversionType.SNAKE2CAMELCASE == clazz.getAnnotation(FieldNameConversion.class).value()){
+               fieldNameConverter = new Snake2CamelCaseFieldNameConverter();
+           }else{
+               //case: EHFieldNameConversionType.NONE == model.getClass().getAnnotation(FieldNameConversion.class).value()
+                fieldNameConverter = new NoFieldNameConverter();
+            }
+        }else{
+            fieldNameConverter = MybatisPlusConfig.getDefaultFieldNameConverter();
+        }
+        return fieldNameConverter;
     }
 
     public static <T extends EHBaseModel> void saveTranslation(Collection<T> models) {
@@ -97,7 +120,7 @@ public class EHTranslationHelper {
         for (Field field : clazz.getDeclaredFields()) {
             Class type = field.getType();
             String columnName = field.getName();
-            if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
+            if (type == String.class && field.isAnnotationPresent(TransField.class)) {
 
                 EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
@@ -126,7 +149,7 @@ public class EHTranslationHelper {
         for (Field field : model.getClass().getDeclaredFields()) {
             Class type = field.getType();
             String columnName = field.getName();
-            if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
+            if (type == String.class && field.isAnnotationPresent(TransField.class)) {
 
                 EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
@@ -153,10 +176,12 @@ public class EHTranslationHelper {
 
         if(model!=null) {
 
+            IFieldNameConverter fieldNameConverter = getFieldNameConverterByClass(model.getClass());
+
             for (Field field : model.getClass().getDeclaredFields()) {
                 Class type = field.getType();
-                String columnName = DBHelper.formatCamelKey2Snake(field.getName());
-                if (type == String.class && field.isAnnotationPresent(EHTransField.class)) {
+                String columnName =fieldNameConverter.convertFieldName2ColumnName(field.getName());
+                if (type == String.class && field.isAnnotationPresent(TransField.class)) {
 
                     EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
 
@@ -188,21 +213,24 @@ public class EHTranslationHelper {
 
     public static <T extends EHBaseModel> List<Map<String, Object>> translate(List<Map<String, Object>> dataList, List<TransFieldConfig> transFieldConfigList) {
 
-        EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
-        String languageCode = EHContextHelper.getLanguageCode();
+        if(transFieldConfigList!=null && transFieldConfigList.size()>0) {
 
-        dataList.forEach(dataMap->{
-           transFieldConfigList.forEach(transFieldConfig -> {
-               String translateId = dataMap.get(transFieldConfig.getTransIdFieldName()) == null ? null : dataMap.get(transFieldConfig.getTransIdFieldName()).toString();
-               if(translateId != null){
-                   EhTranslation translation = translationService.find(transFieldConfig.getTransTableName(),
-                           transFieldConfig.getTransColumnName(), languageCode, translateId,true);
-                   if(translation!=null) {
-                       dataMap.put(transFieldConfig.getTransTextFieldName(), translation.getTransText());
-                   }
-               }
-           });
-        });
+            EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
+            String languageCode = EHContextHelper.getLanguageCode();
+
+            dataList.forEach(dataMap -> {
+                transFieldConfigList.forEach(transFieldConfig -> {
+                    String translateId = dataMap.get(transFieldConfig.getTransIdFieldName()) == null ? null : dataMap.get(transFieldConfig.getTransIdFieldName()).toString();
+                    if (translateId != null) {
+                        EhTranslation translation = translationService.find(transFieldConfig.getTransTableName(),
+                                transFieldConfig.getTransColumnName(), languageCode, translateId, true);
+                        if (translation != null) {
+                            dataMap.put(transFieldConfig.getTransTextFieldName(), translation.getTransText());
+                        }
+                    }
+                });
+            });
+        }
 
         return dataList;
     }
