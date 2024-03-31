@@ -19,13 +19,17 @@
 
 package com.enhantec.wms.ui.inbound.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.mapper.EHBaseMapper;
 import com.enhantec.demo.ui.inbound.model.TestReceipt;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

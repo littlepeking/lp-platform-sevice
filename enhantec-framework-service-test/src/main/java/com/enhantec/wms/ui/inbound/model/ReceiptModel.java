@@ -36,27 +36,64 @@ import java.time.LocalDateTime;
 @Data
 public class ReceiptModel extends EHWMSModel implements Serializable {
 
+
+    @TableField(value = "whseId")
     private String whseId;
+
+    @TableField(value = "storerKey")
     private String storerKey;
+
+    @TableField(value = "receiptKey")
     private String receiptKey;
+
+    @TableField(value = "poKey")
     private String poKey;
+
+    @TableField(value = "receiptDate")
     private LocalDateTime receiptDate;
+
+    @TableField(value = "externReceiptKey")
     private String externReceiptKey;
-    private String externReceiptKey2;
-    private String packKey;
-    private String uom;
+
+    @TableField(value = "externalReceiptKey2")
+    private String externalReceiptKey2;
+
+    @TableField(value = "status")
     private String status;
+
+    @TableField(value = "susr1")
     private String susr1;
+
+    @TableField(value = "susr2")
     private String susr2;
+
+    @TableField(value = "susr3")
     private String susr3;
+
+    @TableField(value = "susr4")
     private String susr4;
+
+    @TableField(value = "susr5")
     private String susr5;
+
+    @TableField(value = "type")
     private String type;
+
+    @TableField(value = "notes")
     private String notes;
-    private LocalDateTime closeDate;
+
+    @TableField(value = "closedDate")
+    private LocalDateTime closedDate;
+
+    @TableField(value = "isConfirmed")
     private String isConfirmed;
-    private Boolean isConfirmedUser1;
+
+    @TableField(value = "isConfirmedUser")
+    private Boolean isConfirmedUser;
+
+    @TableField(value = "isConfirmedUser2")
     private Boolean isConfirmedUser2;
+
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

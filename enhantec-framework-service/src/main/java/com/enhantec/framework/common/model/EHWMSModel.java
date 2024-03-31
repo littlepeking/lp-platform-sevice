@@ -35,7 +35,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class EHWMSModel extends EHBaseModel{
 
-    @TableId
+    @TableId("serialKey")
     String serialKey;
 
     public String getId(){
@@ -46,16 +46,16 @@ public class EHWMSModel extends EHBaseModel{
         this.serialKey = serialKey;
     }
 
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(value = "addDate", fill = FieldFill.INSERT)
     LocalDateTime addDate;
 
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(value = "addWho",fill = FieldFill.INSERT)
     String addWho;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "editDate",fill = FieldFill.INSERT_UPDATE)
     LocalDateTime editDate;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "editWho",fill = FieldFill.INSERT_UPDATE)
     String editWho;
 
 }
