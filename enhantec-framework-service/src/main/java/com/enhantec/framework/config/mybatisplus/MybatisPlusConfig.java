@@ -19,9 +19,10 @@ package com.enhantec.framework.config.mybatisplus;
 
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.config.EHAppConfig;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
-import com.enhantec.framework.config.annotations.converter.NoFieldNameConverter;
-import com.enhantec.framework.config.annotations.converter.Snake2CamelCaseFieldNameConverter;
+import com.enhantec.framework.config.annotations.converter.NoConverter;
+import com.enhantec.framework.config.annotations.converter.CamelCase2UnderScoreConverter;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,15 +32,35 @@ import org.springframework.context.annotation.Configuration;
 public class MybatisPlusConfig {
 
 
-    public static boolean isMapSnakeToCamelCase(){
+    public static boolean isMapCamelCase2Underscore(){
 
       return EHContextHelper.getBean(EHAppConfig.MybatisPlus.ConfigurationProps.class).isMapUnderscoreToCamelCase();
 
     }
 
+    static CamelCase2UnderScoreConverter camelCase2UnderScoreConverter = new CamelCase2UnderScoreConverter();
+    static NoConverter noConverter = new NoConverter();
+
     public static IFieldNameConverter getDefaultFieldNameConverter(){
-       return isMapSnakeToCamelCase() ?
-                    new Snake2CamelCaseFieldNameConverter(): new NoFieldNameConverter();
+       return isMapCamelCase2Underscore() ? camelCase2UnderScoreConverter: noConverter;
+    }
+
+    public static IFieldNameConverter getFieldNameConverterByType(EHFieldNameConversionType type){
+
+        IFieldNameConverter fieldNameConverter = null;
+
+        switch (type){
+            case CAMELCASE2UNDERSCORE:
+                fieldNameConverter = camelCase2UnderScoreConverter;
+                        break;
+            case NONE:
+                fieldNameConverter = noConverter;
+                break;
+            default:
+                getDefaultFieldNameConverter();
+        }
+
+        return fieldNameConverter;
     }
 
 }

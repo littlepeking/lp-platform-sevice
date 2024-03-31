@@ -46,29 +46,19 @@ public class EhTranslation extends EHCommonModel implements Serializable {
     @TableId
     private String id;
 
-    /**
-     * 
-     */
+    @TableField("TABLE_NAME")
     private String tableName;
 
-    /**
-     * 
-     */
+    @TableField("COLUMN_NAME")
     private String columnName;
 
-    /**
-     * 
-     */
+    @TableField("TRANS_ID")
     private String transId;
 
-    /**
-     * 
-     */
+    @TableField("LANGUAGE_CODE")
     private String languageCode;
 
-    /**
-     * 
-     */
+    @TableField("TRANS_TEXT")
     private String transText;
 
     @TableField(exist = false)

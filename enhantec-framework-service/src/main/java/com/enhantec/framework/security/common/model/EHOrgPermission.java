@@ -42,8 +42,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class EHOrgPermission extends EHCommonModel implements Serializable {
 
+    @TableField("ORG_ID")
     private String orgId;
 
+    @TableField("PERMISSION_ID")
     private String permissionId;
 
     @TableField(exist = false)

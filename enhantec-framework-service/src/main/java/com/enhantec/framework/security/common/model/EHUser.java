@@ -46,30 +46,38 @@ public class EHUser extends EHVersionModel implements UserDetails, Serializable 
 
     private String username;
 
+    @TableField("AUTH_TYPE")
     private AuthType authType;
 
+    @TableField("DOMAIN_USERNAME")
     private String domainUsername; //ONLY used in AD
 
+
+    @TableField("FIRST_NAME")
     private String firstName;
 
+    @TableField("LAST_NAME")
     private String lastName;
 
     private String remark;
 
     @JsonIgnore
-    @TableField(exist = false)
+    @TableField(value = "ORIGINAL_PASSWORD", exist = false)
     private String originalPassword;
 
     @JsonIgnore
     private String password;
 
+    @TableField("PASSWORD_CHANGED_TIME")
     private LocalDateTime passwordChangedTime;
 
+    @TableField("API_KEY")
     private String apiKey;
 
     //Enable only used when the user need to be deleted, then we can make it disabled to make all existing data is still consistent.
     private boolean enabled;
 
+    @TableField("ACCOUNT_LOCKED")
     private boolean accountLocked;
 
     @TableField(exist = false)

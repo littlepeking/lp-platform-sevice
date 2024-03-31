@@ -19,6 +19,7 @@
 
 package com.enhantec.framework.security.common.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.framework.common.model.EHCommonModel;
 import lombok.AllArgsConstructor;
@@ -33,7 +34,9 @@ import lombok.experimental.SuperBuilder;
 @TableName("EH_USER_ROLE")
 public class EHUserRole extends EHCommonModel {
 
+    @TableField("USER_ID")
     String userId;
+    @TableField("ROLE_ID")
     String roleId;
 
 }

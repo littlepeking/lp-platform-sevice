@@ -42,14 +42,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class EHRolePermission extends EHCommonModel implements Serializable {
 
-    /**
-     * 
-     */
+    @TableField("ROLE_ID")
     private String roleId;
 
-    /**
-     * 
-     */
+    @TableField("PERMISSION_ID")
     private String permissionId;
 
     @TableField(exist = false)

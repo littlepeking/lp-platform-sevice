@@ -20,6 +20,7 @@ package com.enhantec.framework.scheduler.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
 import com.enhantec.framework.scheduler.common.service.EHJobDefinitionService;
 import com.enhantec.framework.scheduler.core.JobManager;
@@ -74,7 +75,7 @@ public class JobDefinitionController {
 
         Page pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<EHJobDefinitionModel> res = ehJobDefinitionService.page(pageInfo, queryWrapper);
 

@@ -20,7 +20,7 @@
 package com.enhantec.framework.common.utils;
 
 
-import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.config.mybatisplus.MybatisPlusConfig;
 
 import java.time.LocalDateTime;
@@ -42,17 +42,15 @@ public class DBHelper {
      * @param map
      * @return
      */
-    public static Map<String, Object> convertColumnName2FieldNameForMap(Map<String, Object> map, IFieldNameConverter fieldNameConverter4Request) {
+    public static Map<String, Object> convertColumnName2FieldNameForMap(Map<String, Object> map, EHFieldNameConversionType fieldNameConversionType) {
 
-
-        IFieldNameConverter fieldNameConverter = fieldNameConverter4Request != null ? fieldNameConverter4Request : MybatisPlusConfig.getDefaultFieldNameConverter();
 
         Map<String, Object> newMap = new HashMap<>();
         Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> entry = it.next();
             String key = entry.getKey();
-            String newKey = fieldNameConverter.convertColumnName2FieldName(key);
+            String newKey = MybatisPlusConfig.getFieldNameConverterByType(fieldNameConversionType).convertColumnName2FieldName(key);
             newMap.put(newKey, entry.getValue());
         }
         return newMap;

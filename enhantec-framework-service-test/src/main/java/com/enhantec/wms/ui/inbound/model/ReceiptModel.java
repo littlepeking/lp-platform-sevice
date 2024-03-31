@@ -20,8 +20,6 @@ package com.enhantec.wms.ui.inbound.model;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.framework.common.model.EHWMSModel;
-import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
-import com.enhantec.framework.config.annotations.FieldNameConversion;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -32,7 +30,6 @@ import java.time.LocalDateTime;
  * @TableName test_receipt
  */
 @TableName(value ="RECEIPT")
-@FieldNameConversion(EHFieldNameConversionType.NONE)
 @Data
 public class ReceiptModel extends EHWMSModel implements Serializable {
 

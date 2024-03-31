@@ -21,9 +21,9 @@
         <result property="susr5" column="susr5" jdbcType="VARCHAR"/>
         <result property="type" column="type" jdbcType="VARCHAR"/>
         <result property="notes" column="notes" jdbcType="VARCHAR"/>
-        <result property="closeDate" column="closeDate" jdbcType="DATE"/>
+        <result property="closedDate" column="closeDate" jdbcType="DATE"/>
         <result property="isConfirmed" column="isConfirmed" jdbcType="VARCHAR"/>
-        <result property="isConfirmedUser1" column="isConfirmedUser1" jdbcType="BIT"/>
+        <result property="isConfirmedUser" column="isConfirmedUser1" jdbcType="BIT"/>
         <result property="isConfirmedUser2" column="isConfirmedUser2" jdbcType="BIT"/>
     </resultMap>
 
@@ -33,13 +33,7 @@
         notes, closeDate, isConfirmed, isConfirmedUser1, isConfirmedUser2
     </sql>
 
-    <select id="selectAllById" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from receipt
-        where
-        receiptKey = #{receiptKey,jdbcType=VARCHAR}
-    </select>
+
     <select id="selectByReceiptKey" resultType="java.util.Map">
         select
         <include refid="Base_Column_List"/>

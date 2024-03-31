@@ -38,16 +38,16 @@ public class EHCommonModel extends EHBaseModel{
     @TableId
     String id;
 
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(value = "ADD_DATE", fill = FieldFill.INSERT)
     LocalDateTime addDate;
 
-    @TableField(fill = FieldFill.INSERT)
+    @TableField(value = "ADD_WHO", fill = FieldFill.INSERT)
     String addWho;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "EDIT_DATE", fill = FieldFill.INSERT_UPDATE)
     LocalDateTime editDate;
 
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "EDIT_WHO", fill = FieldFill.INSERT_UPDATE)
     String editWho;
 
     @Override

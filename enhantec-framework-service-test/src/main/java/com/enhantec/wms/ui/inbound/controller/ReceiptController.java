@@ -21,21 +21,15 @@ package com.enhantec.wms.ui.inbound.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
-import com.enhantec.framework.common.utils.EHLocaleHelper;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
-import com.enhantec.demo.ui.inbound.model.TestReceipt;
-import com.enhantec.demo.ui.inbound.service.TestReceiptService;
-import com.enhantec.framework.config.annotations.converter.NoFieldNameConverter;
-import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 import com.enhantec.wms.ui.inbound.service.ReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.context.MessageSource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -47,10 +41,8 @@ public class ReceiptController {
 
 
     @GetMapping("/findById/{id}")
-    public List<ReceiptModel> findById(@PathVariable String id){
-
-        List<ReceiptModel>  res = receiptService.findReceiptByReceiptId(id);
-        return res;
+    public ReceiptModel findById(@PathVariable String id){
+        return receiptService.getById(id);
 
     }
 
@@ -61,9 +53,9 @@ public class ReceiptController {
 
         Page pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, new NoFieldNameConverter());
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.NONE);
 
-        Page<Map<String, Object>> res = receiptService.getReceiptPageData(pageInfo, queryWrapper);
+        Page<Map<String, Object>> res = receiptService.getPageData(pageInfo, queryWrapper);
 
         return res;
     }

@@ -1,5 +1,6 @@
 package com.enhantec.framework.scheduler.common.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import com.enhantec.framework.common.model.EHVersionModel;
@@ -27,9 +28,8 @@ public class EHJobDefinitionModel extends EHVersionModel {
      */
     private String remark;
 
-    /**
-     * 
-     */
+
+    @TableField(value = "BEAN_NAME")
     private String beanName;
 
 //    /**

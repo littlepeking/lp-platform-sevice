@@ -43,13 +43,16 @@ import java.util.Collection;
 public class EHRole extends EHVersionModel implements GrantedAuthority, Serializable {
 
     @NotNull
+    @TableField("ORG_ID")
     private String orgId;// ONLY system tables has orgId as all biz transaction table rely on schema name to difference org.
 
     @NotNull
+    @TableField("ROLE_NAME")
     private String roleName;
 
     @NotNull
     @TransField
+    @TableField("DISPLAY_NAME")
     private String displayName;
 
     @JsonIgnore

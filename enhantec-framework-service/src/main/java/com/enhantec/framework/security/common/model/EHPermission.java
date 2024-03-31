@@ -19,6 +19,7 @@
 
 package com.enhantec.framework.security.common.model;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.framework.common.model.EHTreeModel;
 import com.enhantec.framework.config.annotations.TransField;
@@ -47,8 +48,10 @@ public class EHPermission extends EHTreeModel<EHPermission> implements GrantedAu
     @NotNull
     private String authority;
 
+    @TableField("MODULE_ID")
     private String moduleId;
     @TransField
+    @TableField("DISPLAY_NAME")
     private String displayName;
 
 

@@ -163,7 +163,7 @@ public interface EHBaseService<T extends EHBaseModel> extends IService<T> {
         return ((EHBaseMapper<T>) this.getBaseMapper()).selectListTr(queryWrapper);
     }
 
-    default List<T> list() {
+    default List<T>    list() {
         return ((EHBaseMapper<T>) this.getBaseMapper()).selectListTr(Wrappers.emptyWrapper());
     }
 

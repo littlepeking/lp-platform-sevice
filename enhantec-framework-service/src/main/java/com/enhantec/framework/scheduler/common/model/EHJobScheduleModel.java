@@ -23,17 +23,21 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class EHJobScheduleModel extends EHVersionModel {
 
+    @TableField("ORG_ID")
     private String orgId;
 
     private String description;
 
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    @TableField(value = "JOB_DEF_ID", updateStrategy = FieldStrategy.IGNORED)
     private String jobDefId;
 
+    @TableField(value = "JOB_ORG_IDS")
     private String jobOrgIds;//逗号分开
 
+    @TableField(value = "JOB_PARAMS")
     private String jobParams;
 
+    @TableField(value = "CRON_EXPRESSION")
     private String cronExpression;
 
     private boolean enabled;

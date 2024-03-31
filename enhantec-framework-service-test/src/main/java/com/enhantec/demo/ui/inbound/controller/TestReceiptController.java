@@ -25,6 +25,7 @@ import com.enhantec.framework.common.utils.EHLocaleHelper;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
 import com.enhantec.demo.ui.inbound.model.TestReceipt;
 import com.enhantec.demo.ui.inbound.service.TestReceiptService;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.context.MessageSource;
@@ -67,7 +68,7 @@ public class TestReceiptController {
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<Map<String,Object>> res = testReceiptService.getReceiptPageData(pageInfo,queryWrapper);
 

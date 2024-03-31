@@ -24,6 +24,7 @@ import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.security.common.dto.RoleDTO;
 import com.enhantec.framework.security.common.dto.UserRolesDTO;
 import com.enhantec.framework.security.common.model.EHRole;
@@ -124,7 +125,7 @@ public class RoleController {
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<Map<String, Object>> res = ehRoleService.getRolePageData(pageInfo, queryWrapper, EHContextHelper.getLanguageCode());
 
@@ -142,7 +143,7 @@ public class RoleController {
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<Map<String, Object>> res = ehRoleService.getUserRolePageData(pageInfo, queryWrapper, EHContextHelper.getLanguageCode());
 

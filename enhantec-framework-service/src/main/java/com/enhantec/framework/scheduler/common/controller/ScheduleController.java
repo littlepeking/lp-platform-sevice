@@ -21,6 +21,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.scheduler.common.model.EHJobDefinitionModel;
 import com.enhantec.framework.scheduler.common.model.EHJobScheduleModel;
 import com.enhantec.framework.scheduler.common.service.EHJobDefinitionService;
@@ -85,7 +86,7 @@ public class ScheduleController {
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<Map<String, Object>> res = ehJobScheduleService.getPageData(pageInfo, queryWrapper);
 

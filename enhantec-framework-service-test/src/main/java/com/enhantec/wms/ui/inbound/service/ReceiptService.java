@@ -35,8 +35,5 @@ import java.util.Map;
 */
 public interface ReceiptService extends IService<ReceiptModel> {
 
-    List<ReceiptModel> findReceiptByReceiptId(String id);
-
-    Page<Map<String,Object>> getReceiptPageData(Page<Map<String,Object>> page, QueryWrapper qw);
-
+    Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
 }

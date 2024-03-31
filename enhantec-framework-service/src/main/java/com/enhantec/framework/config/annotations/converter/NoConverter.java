@@ -18,7 +18,7 @@
 package com.enhantec.framework.config.annotations.converter;
 
 
-public class NoFieldNameConverter implements IFieldNameConverter {
+public class NoConverter implements IFieldNameConverter {
     @Override
     public String convertFieldName2ColumnName(String fieldName) {
         return fieldName;

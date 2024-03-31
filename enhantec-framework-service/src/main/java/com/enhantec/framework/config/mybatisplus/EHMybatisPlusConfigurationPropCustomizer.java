@@ -3,7 +3,8 @@ package com.enhantec.framework.config.mybatisplus;
 
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
-import com.enhantec.framework.common.utils.DBHelper;
+import com.enhantec.framework.config.annotations.converter.CamelCase2UnderScoreConverter;
+import lombok.AllArgsConstructor;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.wrapper.MapWrapper;
 import org.apache.ibatis.reflection.wrapper.ObjectWrapper;
@@ -14,13 +15,16 @@ import java.util.Map;
 
 
 @Component
+@AllArgsConstructor
 class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesCustomizer {
+
+    EHMybatisConfiguration ehMybatisConfiguration;
 
     @Override
     public void customize(MybatisPlusProperties properties) {
         // Customize the MybatisPlusProperties object
         // Modify the properties according to your requirements
-        EHMybatisConfiguration configuration = new EHMybatisConfiguration();
+        EHMybatisConfiguration configuration = ehMybatisConfiguration;
         configuration.setObjectWrapperFactory(new EHMybatisPlusConfigurationPropCustomizer.MapWrapperFactory());
         configuration.setCallSettersOnNulls(true);
         properties.setConfiguration(configuration);
@@ -47,19 +51,21 @@ class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesC
             super(metaObject, map);
         }
 
+        static CamelCase2UnderScoreConverter fieldNameConverter = new CamelCase2UnderScoreConverter();
+
         @Override
         public String findProperty(String name, boolean useCamelCaseMapping) {
             //useCamelCaseMapping need be configured in
             // application.xml => mybatis-plus.configuration.map-underscore-to-camel-case
-            if (useCamelCaseMapping
-                    //&& ((name.charAt(0) >= 'A' && name.charAt(0) <= 'Z'))
-            ) {
-                //For map result, Application always use default IFieldNameConverter fieldName for any request as right now we cannot pass IFieldNameConverter by request
-                //Then we use default IFieldNameConverter to generate java Map data.
-                //But when we convert fieldName to columnName we should consider if columnName use default IFieldNameConverter or not, e.g. for Infor WMS, we cannot use snake format for compatible purpose, then we can pass IFieldNameConverter based on individual request.
-                return MybatisPlusConfig.getDefaultFieldNameConverter().convertColumnName2FieldName(name);
-            }
-            return name;
+            //if (useCamelCaseMapping)
+            //{
+                //For map result, Application always use Snake2CamelCaseFieldNameConverter to generate fieldName for any request as right now we cannot pass IFieldNameConverter by request
+                //But when we convert fieldName to columnName we should consider if columnName should use default IFieldNameConverter or not, e.g. for Infor WMS, we cannot use snake column name for compatible purpose, so in that case we can pass IFieldNameConverter based on individual request.
+                //return MybatisPlusConfig.getDefaultFieldNameConverter().convertColumnName2FieldName(name);
+
+               return fieldNameConverter.convertColumnName2FieldName(name);
+            //}
+            //return name;
         }
 
     }

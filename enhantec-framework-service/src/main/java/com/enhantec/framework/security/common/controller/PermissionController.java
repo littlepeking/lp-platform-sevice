@@ -22,6 +22,7 @@ package com.enhantec.framework.security.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.security.common.dto.OrgPermissionsDTO;
 import com.enhantec.framework.security.common.dto.PermissionDTO;
 import com.enhantec.framework.security.common.dto.PermissionOrgsDTO;
@@ -133,7 +134,7 @@ public class PermissionController {
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<Map<String, Object>> res = permissionService.getPageData(pageInfo, queryWrapper);
 
@@ -151,7 +152,7 @@ public class PermissionController {
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<Map<String, Object>> res = permissionService.getRolePermissionPageData(pageInfo, queryWrapper);
 

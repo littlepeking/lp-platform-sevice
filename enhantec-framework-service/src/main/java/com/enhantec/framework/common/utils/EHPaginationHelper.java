@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
 import com.enhantec.framework.config.mybatisplus.MybatisPlusConfig;
 import lombok.val;
@@ -50,9 +51,9 @@ public class EHPaginationHelper {
         return buildQueryWrapperByPageParams(pageParams,null);
     }
 
-    public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams, IFieldNameConverter fieldNameConverter4Request) {
+    public static QueryWrapper buildQueryWrapperByPageParams(PageParams pageParams, EHFieldNameConversionType fieldNameConversionType) {
 
-        IFieldNameConverter fieldNameConverter = fieldNameConverter4Request != null ? fieldNameConverter4Request : MybatisPlusConfig.getDefaultFieldNameConverter();
+        IFieldNameConverter fieldNameConverter = MybatisPlusConfig.getFieldNameConverterByType(fieldNameConversionType);
 
         val queryWrapper = Wrappers.query();
 
@@ -133,9 +134,9 @@ public class EHPaginationHelper {
      * @param page
      * @param fieldNameConverter4Request
      */
-    public static void convertFieldNameByPage(Page<Map<String, Object>> page, IFieldNameConverter fieldNameConverter4Request) {
+    public static void convertFieldNameByPage(Page<Map<String, Object>> page, EHFieldNameConversionType fieldNameConversionType) {
 
-        var formattedRecords = page.getRecords().stream().map(r -> DBHelper.convertColumnName2FieldNameForMap(r,fieldNameConverter4Request)).collect(Collectors.toList());
+        var formattedRecords = page.getRecords().stream().map(r -> DBHelper.convertColumnName2FieldNameForMap(r,fieldNameConversionType)).collect(Collectors.toList());
 
         page.setRecords(formattedRecords);
 

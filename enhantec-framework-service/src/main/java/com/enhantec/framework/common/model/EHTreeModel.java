@@ -37,9 +37,10 @@ import java.util.List;
 public class EHTreeModel<T extends EHTreeModel> extends EHVersionModel {
 
     @NotNull
+    @TableField("PARENT_ID")
     private String parentId;
 
-    @TableField(exist = false)
+    @TableField(value = "CHECK_STATUS", exist = false)
     private Boolean checkStatus;
 
     @TableField(exist = false)

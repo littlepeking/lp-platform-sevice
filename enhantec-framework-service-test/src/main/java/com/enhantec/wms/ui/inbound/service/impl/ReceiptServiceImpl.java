@@ -45,13 +45,7 @@ import java.util.Map;
 public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, ReceiptModel>
     implements ReceiptService {
 
-
-    public List<ReceiptModel> findReceiptByReceiptId(String id){
-
-       return getBaseMapper().selectAllById(id);
-    }
-
-    public Page<Map<String,Object>> getReceiptPageData(Page<Map<String,Object>> page, QueryWrapper qw){
+    public Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw){
 
         return getBaseMapper().selectMapsPageTr(page, qw,null);
     }

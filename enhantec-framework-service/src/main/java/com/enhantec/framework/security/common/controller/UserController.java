@@ -22,6 +22,8 @@ package com.enhantec.framework.security.common.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
+import com.enhantec.framework.config.annotations.converter.CamelCase2UnderScoreConverter;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.framework.security.common.dto.UserDTO;
 import com.enhantec.framework.security.common.dto.UserPasswordChangeDTO;
 import com.enhantec.framework.security.common.model.EHUser;
@@ -123,7 +125,7 @@ public class UserController {
 
         Page<Map<String, Object>> pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams);
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.CAMELCASE2UNDERSCORE);
 
         Page<Map<String,Object>> res = ehUserService.getPageData(pageInfo,queryWrapper);
 

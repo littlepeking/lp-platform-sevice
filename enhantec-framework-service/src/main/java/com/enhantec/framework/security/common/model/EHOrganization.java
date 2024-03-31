@@ -51,6 +51,7 @@ public class EHOrganization extends EHTreeModel<EHOrganization> implements Seria
     private String name;
 
     @NotNull
+    @TableField("CONNECTION_STRING_PARAMS")
     private String connectionStringParams;
 
     /**

@@ -12,22 +12,21 @@
  *
  *             Author: John Wang
  *             Email: john.wang_ca@hotmail.com
- * 
+ *
  *******************************************************************************/
 
+package com.enhantec.framework.config.annotations.converter;
 
+import com.enhantec.framework.common.utils.DBHelper;
 
-package com.enhantec.framework.config.annotations;
+public class CamelCase2UnderScoreConverter implements IFieldNameConverter{
+    @Override
+    public String convertFieldName2ColumnName(String fieldName) {
+        return DBHelper.camelCase2Snake(fieldName);
+    }
 
-
-import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
-
-import java.lang.annotation.*;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
-public @interface FieldNameConversion {
-
-    EHFieldNameConversionType value() default EHFieldNameConversionType.SNAKE2CAMELCASE;
-
+    @Override
+    public String convertColumnName2FieldName(String fieldName) {
+        return DBHelper.snake2CamelCase(fieldName);
+    }
 }

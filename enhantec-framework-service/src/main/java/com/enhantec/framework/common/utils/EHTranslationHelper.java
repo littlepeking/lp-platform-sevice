@@ -19,21 +19,18 @@
 
 package com.enhantec.framework.common.utils;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.framework.common.model.EHBaseModel;
 import com.enhantec.framework.common.model.EhTranslation;
 import com.enhantec.framework.common.service.EhTranslationService;
 import com.enhantec.framework.config.TransFieldConfig;
-import com.enhantec.framework.config.annotations.FieldNameConversion;
 import com.enhantec.framework.config.annotations.TransField;
-import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
-import com.enhantec.framework.config.annotations.converter.IFieldNameConverter;
-import com.enhantec.framework.config.annotations.converter.NoFieldNameConverter;
-import com.enhantec.framework.config.annotations.converter.Snake2CamelCaseFieldNameConverter;
 import com.enhantec.framework.config.mybatisplus.MybatisPlusConfig;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
@@ -44,11 +41,21 @@ public class EHTranslationHelper {
     @SneakyThrows
     public static <T extends EHBaseModel> void saveTranslation(T model) {
 
-        IFieldNameConverter fieldNameConverter = getFieldNameConverterByClass(model.getClass());
+//        IFieldNameConverter fieldNameConverter = getFieldNameConverterByClass(model.getClass());
 
         for (Field field : model.getClass().getDeclaredFields()) {
+
             Class type = field.getType();
-            String columnName = fieldNameConverter.convertFieldName2ColumnName(field.getName());
+
+            TableField fieldAnnotation = field.getAnnotation(TableField.class);
+
+            String columnNameInAnnotation = fieldAnnotation != null ? fieldAnnotation.value() : null;
+
+            String columnName = StringUtils.isNotEmpty(columnNameInAnnotation) ? columnNameInAnnotation :
+                   MybatisPlusConfig.getDefaultFieldNameConverter().convertFieldName2ColumnName(field.getName());
+
+
+//            String columnName = fieldNameConverter.convertFieldName2ColumnName(field.getName());
 
             if (type == String.class && field.isAnnotationPresent(TransField.class)) {
 
@@ -96,20 +103,20 @@ public class EHTranslationHelper {
         }
     }
 
-    private static <T extends EHBaseModel> IFieldNameConverter getFieldNameConverterByClass(Class<T> clazz) {
-        IFieldNameConverter fieldNameConverter;
-        if (clazz.isAnnotationPresent(FieldNameConversion.class)) {
-           if(EHFieldNameConversionType.SNAKE2CAMELCASE == clazz.getAnnotation(FieldNameConversion.class).value()){
-               fieldNameConverter = new Snake2CamelCaseFieldNameConverter();
-           }else{
-               //case: EHFieldNameConversionType.NONE == model.getClass().getAnnotation(FieldNameConversion.class).value()
-                fieldNameConverter = new NoFieldNameConverter();
-            }
-        }else{
-            fieldNameConverter = MybatisPlusConfig.getDefaultFieldNameConverter();
-        }
-        return fieldNameConverter;
-    }
+//    private static <T extends EHBaseModel> IFieldNameConverter getFieldNameConverterByClass(Class<T> clazz) {
+//        IFieldNameConverter fieldNameConverter;
+//        if (clazz.isAnnotationPresent(FieldNameConversion.class)) {
+//           if(EHFieldNameConversionType.CAMELCASE2UNDERSCORE == clazz.getAnnotation(FieldNameConversion.class).value()){
+//               fieldNameConverter = new CamelCase2UnderScoreConverter();
+//           }else{
+//               //case: EHFieldNameConversionType.NONE == model.getClass().getAnnotation(FieldNameConversion.class).value()
+//                fieldNameConverter = new NoConverter();
+//            }
+//        }else{
+//            fieldNameConverter = MybatisPlusConfig.getDefaultFieldNameConverter();
+//        }
+//        return fieldNameConverter;
+//    }
 
     public static <T extends EHBaseModel> void saveTranslation(Collection<T> models) {
         models.forEach(model-> saveTranslation(model));
@@ -176,11 +183,21 @@ public class EHTranslationHelper {
 
         if(model!=null) {
 
-            IFieldNameConverter fieldNameConverter = getFieldNameConverterByClass(model.getClass());
+            //  IFieldNameConverter fieldNameConverter = getFieldNameConverterByClass(model.getClass());
 
             for (Field field : model.getClass().getDeclaredFields()) {
+
                 Class type = field.getType();
-                String columnName =fieldNameConverter.convertFieldName2ColumnName(field.getName());
+
+                TableField fieldAnnotation = field.getAnnotation(TableField.class);
+
+                String columnNameInAnnotation = fieldAnnotation != null ? fieldAnnotation.value() : null;
+
+                String columnName = StringUtils.isNotEmpty(columnNameInAnnotation) ? columnNameInAnnotation :
+                        MybatisPlusConfig.getDefaultFieldNameConverter().convertFieldName2ColumnName(field.getName());
+
+
+            //  String columnName =fieldNameConverter.convertFieldName2ColumnName(field.getName());
                 if (type == String.class && field.isAnnotationPresent(TransField.class)) {
 
                     EhTranslationService translationService = EHContextHelper.getBean(EhTranslationService.class);
