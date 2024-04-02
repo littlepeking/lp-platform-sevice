@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enhantec.wms.ui.common.mapper.CodeListMapper">
+
+    <resultMap id="BaseResultMap" type="com.enhantec.wms.ui.common.model.CodeListModel">
+            <id property="listName" column="LISTNAME" jdbcType="VARCHAR"/>
+            <result property="serialKey" column="SERIALKEY" jdbcType="INTEGER"/>
+            <result property="whseId" column="WHSEID" jdbcType="VARCHAR"/>
+            <result property="description" column="DESCRIPTION" jdbcType="VARCHAR"/>
+            <result property="sourceVersion" column="SOURCEVERSION" jdbcType="INTEGER"/>
+            <result property="editable" column="EDITABLE" jdbcType="VARCHAR"/>
+            <result property="subDetail" column="SUBDETAIL" jdbcType="VARCHAR"/>
+            <result property="parentList" column="PARENTLIST" jdbcType="VARCHAR"/>
+            <result property="parentCode" column="PARENTCODE" jdbcType="VARCHAR"/>
+            <result property="enterpriseCode" column="ENTERPRISECODE" jdbcType="VARCHAR"/>
+            <result property="usedExternallyIndicator" column="USEDEXTERNALLYINDICATOR" jdbcType="VARCHAR"/>
+            <result property="language" column="LANGUAGE" jdbcType="VARCHAR"/>
+            <result property="addDate" column="ADDDATE" jdbcType="TIMESTAMP"/>
+            <result property="addWho" column="ADDWHO" jdbcType="VARCHAR"/>
+            <result property="editDate" column="EDITDATE" jdbcType="TIMESTAMP"/>
+            <result property="editWho" column="EDITWHO" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        LISTNAME,SERIALKEY,WHSEID,
+        DESCRIPTION,SOURCEVERSION,EDITABLE,
+        SUBDETAIL,PARENTLIST,PARENTCODE,
+        ENTERPRISECODE,USEDEXTERNALLYINDICATOR,LANGUAGE,
+        ADDDATE,ADDWHO,EDITDATE,EDITWHO
+    </sql>
+</mapper>

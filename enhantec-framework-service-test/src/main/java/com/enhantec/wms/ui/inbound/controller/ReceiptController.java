@@ -55,7 +55,7 @@ public class ReceiptController {
 
         val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.NONE);
 
-        Page<Map<String, Object>> res = receiptService.getPageData(pageInfo, queryWrapper);
+        Page<Map<String, Object>> res = receiptService.queryPageData(pageInfo, queryWrapper);
 
         return res;
     }

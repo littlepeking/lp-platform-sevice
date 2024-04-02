@@ -25,7 +25,7 @@ class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesC
         // Customize the MybatisPlusProperties object
         // Modify the properties according to your requirements
         EHMybatisConfiguration configuration = ehMybatisConfiguration;
-        configuration.setObjectWrapperFactory(new EHMybatisPlusConfigurationPropCustomizer.MapWrapperFactory());
+        configuration.setObjectWrapperFactory(new EHMapWrapperFactory());
         configuration.setCallSettersOnNulls(true);
         properties.setConfiguration(configuration);
 
@@ -34,7 +34,7 @@ class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesC
 
 
 
-    static class MapWrapperFactory implements ObjectWrapperFactory {
+    static class EHMapWrapperFactory implements ObjectWrapperFactory {
         @Override
         public boolean hasWrapperFor(Object object) {
             return object != null && object instanceof Map;
@@ -42,12 +42,12 @@ class EHMybatisPlusConfigurationPropCustomizer implements MybatisPlusPropertiesC
 
         @Override
         public ObjectWrapper getWrapperFor(MetaObject metaObject, Object object) {
-            return new EHMybatisPlusConfigurationPropCustomizer.MyMapWrapper(metaObject, (Map) object);
+            return new EHMapWrapper(metaObject, (Map) object);
         }
     }
 
-    static class MyMapWrapper extends MapWrapper {
-        MyMapWrapper(MetaObject metaObject, Map<String, Object> map) {
+    static class EHMapWrapper extends MapWrapper {
+        EHMapWrapper(MetaObject metaObject, Map<String, Object> map) {
             super(metaObject, map);
         }
 

@@ -22,17 +22,13 @@ package com.enhantec.wms.ui.inbound.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.enhantec.framework.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.framework.common.utils.DSConstants;
-import com.enhantec.demo.ui.inbound.mapper.TestReceiptMapper;
-import com.enhantec.demo.ui.inbound.model.TestReceipt;
-import com.enhantec.demo.ui.inbound.service.TestReceiptService;
 import com.enhantec.wms.ui.inbound.mapper.ReceiptMapper;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 import com.enhantec.wms.ui.inbound.service.ReceiptService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,12 +38,12 @@ import java.util.Map;
 */
 @Service
 @DS(DSConstants.DS_DEFAULT)
-public class ReceiptServiceImpl extends ServiceImpl<ReceiptMapper, ReceiptModel>
+public class ReceiptServiceImpl extends EHBaseServiceImpl<ReceiptMapper, ReceiptModel>
     implements ReceiptService {
 
-    public Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw){
+    public Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper qw){
 
-        return getBaseMapper().selectMapsPageTr(page, qw,null);
+        return getBaseMapper().queryPageData(page, qw);
     }
 
 

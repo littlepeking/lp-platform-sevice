@@ -18,19 +18,23 @@
 package com.enhantec.wms.ui.inbound.model;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.enhantec.framework.common.model.EHWMSModel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- *
- * @TableName test_receipt
- */
+
 @TableName(value ="RECEIPT")
+@SuperBuilder(toBuilder = true)
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReceiptModel extends EHWMSModel implements Serializable {
 
 

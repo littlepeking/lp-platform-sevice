@@ -93,6 +93,7 @@ mybatis-plus:
   #  mapper-locations: classpath*:com/enhantec/**/mapper/xml/*Mapper.xml
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    map-underscore-to-camel-case: false
+    map-underscore-to-camel-case: true
+
     #Mybatis自动扫描到自定义的POJO，以用于MAPPER XML文件中的resultType
   type-aliases-package: com.enhantec.framework.security.common.model,com.enhantec.framework.scheduler.common.model,com.enhantec.wms.inbound.model

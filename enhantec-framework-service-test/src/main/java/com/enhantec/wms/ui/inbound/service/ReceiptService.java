@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.enhantec.demo.ui.inbound.model.TestReceipt;
+import com.enhantec.framework.common.service.EHBaseService;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.Map;
 * @description 针对表【test_receipt】的数据库操作Service
 * @createDate 2022-04-18 17:37:15
 */
-public interface ReceiptService extends IService<ReceiptModel> {
+public interface ReceiptService extends EHBaseService<ReceiptModel> {
 
-    Page<Map<String,Object>> getPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+    Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper qw);
 }

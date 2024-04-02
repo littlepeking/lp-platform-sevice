@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enhantec.wms.ui.common.mapper.CodeLookupMapper">
+
+    <resultMap id="BaseResultMap" type="com.enhantec.wms.ui.common.model.CodeLookupModel">
+            <id property="listName" column="LISTNAME" jdbcType="VARCHAR"/>
+            <id property="code" column="CODE" jdbcType="VARCHAR"/>
+            <result property="serialKey" column="SERIALKEY" jdbcType="INTEGER"/>
+            <result property="whseId" column="WHSEID" jdbcType="VARCHAR"/>
+            <result property="description" column="DESCRIPTION" jdbcType="VARCHAR"/>
+            <result property="shortValue" column="SHORT" jdbcType="VARCHAR"/>
+            <result property="longValue" column="LONG_VALUE" jdbcType="VARCHAR"/>
+            <result property="sourceVersion" column="SOURCEVERSION" jdbcType="INTEGER"/>
+            <result property="editable" column="EDITABLE" jdbcType="VARCHAR"/>
+            <result property="active" column="ACTIVE" jdbcType="VARCHAR"/>
+            <result property="sequence" column="SEQUENCE" jdbcType="INTEGER"/>
+            <result property="udf1" column="UDF1" jdbcType="VARCHAR"/>
+            <result property="udf2" column="UDF2" jdbcType="VARCHAR"/>
+            <result property="udf3" column="UDF3" jdbcType="VARCHAR"/>
+            <result property="udf4" column="UDF4" jdbcType="VARCHAR"/>
+            <result property="udf5" column="UDF5" jdbcType="VARCHAR"/>
+            <result property="addDate" column="ADDDATE" jdbcType="TIMESTAMP"/>
+            <result property="addWho" column="ADDWHO" jdbcType="VARCHAR"/>
+            <result property="editDate" column="EDITDATE" jdbcType="TIMESTAMP"/>
+            <result property="editWho" column="EDITWHO" jdbcType="VARCHAR"/>
+            <result property="notes" column="NOTES" jdbcType="VARCHAR"/>
+            <result property="woFlag" column="WOFLAG" jdbcType="INTEGER"/>
+            <result property="extUdfStr1" column="EXT_UDF_STR1" jdbcType="VARCHAR"/>
+            <result property="extUdfStr2" column="EXT_UDF_STR2" jdbcType="VARCHAR"/>
+            <result property="extUdfStr3" column="EXT_UDF_STR3" jdbcType="VARCHAR"/>
+            <result property="extUdfStr4" column="EXT_UDF_STR4" jdbcType="VARCHAR"/>
+            <result property="extUdfStr5" column="EXT_UDF_STR5" jdbcType="VARCHAR"/>
+            <result property="extUdfStr6" column="EXT_UDF_STR6" jdbcType="VARCHAR"/>
+            <result property="extUdfStr7" column="EXT_UDF_STR7" jdbcType="VARCHAR"/>
+            <result property="extUdfStr8" column="EXT_UDF_STR8" jdbcType="VARCHAR"/>
+            <result property="extUdfStr9" column="EXT_UDF_STR9" jdbcType="VARCHAR"/>
+            <result property="extUdfStr10" column="EXT_UDF_STR10" jdbcType="VARCHAR"/>
+            <result property="extUdfStr11" column="EXT_UDF_STR11" jdbcType="VARCHAR"/>
+            <result property="extUdfStr12" column="EXT_UDF_STR12" jdbcType="VARCHAR"/>
+            <result property="extUdfStr13" column="EXT_UDF_STR13" jdbcType="VARCHAR"/>
+            <result property="extUdfStr14" column="EXT_UDF_STR14" jdbcType="VARCHAR"/>
+            <result property="extUdfStr15" column="EXT_UDF_STR15" jdbcType="VARCHAR"/>
+            <result property="extUdfDate1" column="EXT_UDF_DATE1" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate2" column="EXT_UDF_DATE2" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate3" column="EXT_UDF_DATE3" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate4" column="EXT_UDF_DATE4" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate5" column="EXT_UDF_DATE5" jdbcType="TIMESTAMP"/>
+            <result property="extUdfFloat1" column="EXT_UDF_FLOAT1" jdbcType="FLOAT"/>
+            <result property="extUdfFloat2" column="EXT_UDF_FLOAT2" jdbcType="FLOAT"/>
+            <result property="extUdfFloat3" column="EXT_UDF_FLOAT3" jdbcType="FLOAT"/>
+            <result property="extUdfFloat4" column="EXT_UDF_FLOAT4" jdbcType="FLOAT"/>
+            <result property="extUdfFloat5" column="EXT_UDF_FLOAT5" jdbcType="FLOAT"/>
+            <result property="extUdfLkup1" column="EXT_UDF_LKUP1" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup2" column="EXT_UDF_LKUP2" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup3" column="EXT_UDF_LKUP3" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup4" column="EXT_UDF_LKUP4" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup5" column="EXT_UDF_LKUP5" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup6" column="EXT_UDF_LKUP6" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup7" column="EXT_UDF_LKUP7" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup8" column="EXT_UDF_LKUP8" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup9" column="EXT_UDF_LKUP9" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup10" column="EXT_UDF_LKUP10" jdbcType="VARCHAR"/>
+            <result property="udf6" column="UDF6" jdbcType="VARCHAR"/>
+            <result property="udf7" column="UDF7" jdbcType="VARCHAR"/>
+            <result property="udf8" column="UDF8" jdbcType="VARCHAR"/>
+            <result property="udf9" column="UDF9" jdbcType="VARCHAR"/>
+            <result property="udf10" column="UDF10" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        LISTNAME,CODE,SERIALKEY,
+        WHSEID,DESCRIPTION,SHORT,
+        LONG_VALUE,SOURCEVERSION,EDITABLE,
+        ACTIVE,SEQUENCE,UDF1,
+        UDF2,UDF3,UDF4,
+        UDF5,ADDDATE,ADDWHO,
+        EDITDATE,EDITWHO,NOTES,
+        WOFLAG,EXT_UDF_STR1,EXT_UDF_STR2,
+        EXT_UDF_STR3,EXT_UDF_STR4,EXT_UDF_STR5,
+        EXT_UDF_STR6,EXT_UDF_STR7,EXT_UDF_STR8,
+        EXT_UDF_STR9,EXT_UDF_STR10,EXT_UDF_STR11,
+        EXT_UDF_STR12,EXT_UDF_STR13,EXT_UDF_STR14,
+        EXT_UDF_STR15,EXT_UDF_DATE1,EXT_UDF_DATE2,
+        EXT_UDF_DATE3,EXT_UDF_DATE4,EXT_UDF_DATE5,
+        EXT_UDF_FLOAT1,EXT_UDF_FLOAT2,EXT_UDF_FLOAT3,
+        EXT_UDF_FLOAT4,EXT_UDF_FLOAT5,EXT_UDF_LKUP1,
+        EXT_UDF_LKUP2,EXT_UDF_LKUP3,EXT_UDF_LKUP4,
+        EXT_UDF_LKUP5,EXT_UDF_LKUP6,EXT_UDF_LKUP7,
+        EXT_UDF_LKUP8,EXT_UDF_LKUP9,EXT_UDF_LKUP10,
+        UDF6,UDF7,UDF8,
+        UDF9,UDF10
+    </sql>
+</mapper>
