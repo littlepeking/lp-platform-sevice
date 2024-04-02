@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.enhantec.framework.common.model.EHWMSModel;
+import com.enhantec.framework.config.annotations.TransField;
 import lombok.Data;
 
 /**
@@ -34,21 +35,15 @@ public class CodeLookupModel extends EHWMSModel implements Serializable {
     @TableField(value = "WHSEID")
     private String whseId;
 
-    /**
-     * 
-     */
+    @TransField
     @TableField(value = "DESCRIPTION")
     private String description;
 
-    /**
-     * 
-     */
+    @TransField
     @TableField(value = "SHORT")
     private String shortValue;
 
-    /**
-     * 
-     */
+    @TransField
     @TableField(value = "LONG_VALUE")
     private String longValue;
 

@@ -19,7 +19,7 @@
         from eh_role_permission rp
         JOIN eh_role r
         ON rp.role_id = r.id
-        AND r.org_id = ${orgId}
+        AND r.org_id = #{orgId}
     </select>
     <select id="findByPermIdAndOrgId" resultType="com.enhantec.framework.security.common.model.EHRolePermission">
         select
@@ -27,8 +27,8 @@
         from eh_role_permission rp
         JOIN eh_role r
         ON rp.role_id = r.id
-        AND r.org_id = ${orgId}
-        AND rp.permission_id = ${permId}
+        AND r.org_id = #{orgId}
+        AND rp.permission_id = #{permId}
     </select>
 
 </mapper>

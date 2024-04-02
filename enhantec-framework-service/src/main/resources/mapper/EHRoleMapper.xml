@@ -28,12 +28,12 @@
         ON tr_org.table_name = 'eh_organization'
         AND tr_org.column_name = 'name'
         AND tr_org.trans_id = org.id
-        AND tr_org.language_code = '${languageCode}'
+        AND tr_org.language_code = #{languageCode}
         LEFT JOIN eh_translation tr_role
         ON tr_role.table_name = 'eh_role'
         AND tr_role.column_name = 'display_name'
         AND tr_role.trans_id = r.id
-        AND tr_role.language_code = '${languageCode}'
+        AND tr_role.language_code = #{languageCode}
         ${ew.customSqlSegment}
     </select>
 
@@ -48,12 +48,12 @@
                   ON tr_org.table_name = 'eh_organization'
                       AND tr_org.column_name = 'name'
                       AND tr_org.trans_id = org.id
-                      AND tr_org.language_code = '${languageCode}'
+                      AND tr_org.language_code = #{languageCode}
         LEFT JOIN eh_translation tr_role
                   ON tr_role.table_name = 'eh_role'
                       AND tr_role.column_name = 'display_name'
                       AND tr_role.trans_id = r.id
-                      AND tr_role.language_code = '${languageCode}'
+                      AND tr_role.language_code = #{languageCode}
         ${ew.customSqlSegment}
 <!--        <if test="ew.customSqlSegment != null and ew.customSqlSegment.indexOf('ORDER BY') == -1">-->
 <!--        ORDER BY r.id desc-->

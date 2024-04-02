@@ -1,7 +1,10 @@
 package com.enhantec.wms.ui.common.mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.enhantec.framework.common.mapper.EHBaseMapper;
 import com.enhantec.wms.ui.common.model.CodeLookupModel;
+
+import java.util.*;
 
 /**
 * @author johnw
@@ -10,6 +13,10 @@ import com.enhantec.wms.ui.common.model.CodeLookupModel;
 * @Entity com.enhantec.wms.ui.common.CodeLkup
 */
 public interface CodeLookupMapper extends EHBaseMapper<CodeLookupModel> {
+
+
+    List<Map<String,String>> findActiveCodeByListName(@Param("listName") String listName);
+
 
 }
 

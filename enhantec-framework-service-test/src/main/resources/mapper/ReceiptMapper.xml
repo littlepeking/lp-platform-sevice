@@ -28,7 +28,7 @@
     <sql id="Base_Column_List">
         serialKey,whseId, storerKey, receiptKey, poKey, receiptDate, externReceiptKey,
         externReceiptKey2, status, susr1, susr2, susr3, susr4, susr5, type,
-        notes, closeDate, isConfirmed, isConfirmedUser, isConfirmedUser2
+        notes, closedDate, isConfirmed, isConfirmedUser, isConfirmedUser2
     </sql>
 
 
@@ -36,7 +36,7 @@
     <select id="queryPageData" resultType="java.util.Map">
         select
             serialKey,whseId, storerKey, receiptKey, poKey, receiptDate, externReceiptKey,
-            externalReceiptKey2, type, notes, closedDate, isConfirmed, isConfirmedUser, isConfirmedUser2,
+            externalReceiptKey2, type, status, notes, closedDate, isConfirmed, isConfirmedUser, isConfirmedUser2,
             addWho, addDate, editWho, editDate
         from RECEIPT
         ${ew.customSqlSegment}

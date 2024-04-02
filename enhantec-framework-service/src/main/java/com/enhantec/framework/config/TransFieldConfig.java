@@ -19,15 +19,17 @@
 
 package com.enhantec.framework.config;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class TransFieldConfig {
 
     private String transIdFieldName;//翻译所依据的 ID - TransId 在目标对象存储的Field
-    private String transTextFieldName;//被翻译后的值写入目标对象的Field(一般存入原待翻译的列名)
+    private String transTextFieldName;//找到翻译值后写入目标对象的FieldName(待翻译的属性字段名)
     private String transTableName;//在翻译表中需要检索的表名
     private String transColumnName;//在翻译表中需要检索的列名
 
