@@ -16,7 +16,6 @@
  *******************************************************************************/
 package com.enhantec.wms.backend.core.inbound;
 
-import com.enhantec.wms.backend.core.outbound.OutboundOperations;
 import com.enhantec.wms.backend.core.WMSServiceNames;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;

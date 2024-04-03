@@ -45,30 +45,32 @@ public class SingleLotLpnPickService extends WMSBaseService {
      */
     public void execute(ServiceDataHolder serviceDataHolder){
 
-        String fromId = serviceDataHolder.getInputDataAsMap().getString("fromId");
+       // String fromId = serviceDataHolder.getInputDataAsMap().getString("fromId");
         //toId为空：当为整容器移动时代表目标容器仍为原容器，当对容器中的部分数量做移动时提示错误，子容器直接传入toId，这里为核心逻，不做LPN生成。
+
+        String pickDetailKey = serviceDataHolder.getInputDataAsMap().getString("pickDetailKey");//拣货明细号
+
         String toId = serviceDataHolder.getInputDataAsMap().getString("toId");
         String toLoc = serviceDataHolder.getInputDataAsMap().getString("toLoc");
         BigDecimal uomQtyToBePicked = serviceDataHolder.getInputDataAsMap().getDecimalValue("uomQtyToBePicked");
         String uom = serviceDataHolder.getInputDataAsMap().getString("uom");
 
-        String pickDetailKey = serviceDataHolder.getInputDataAsMap().getString("pickDetailKey");//是否为拣货操作
         boolean allowOverPick = serviceDataHolder.getInputDataAsMap().getBoolean("allowOverPick");//是否允许超拣
         boolean allowShortPick = serviceDataHolder.getInputDataAsMap().getBoolean("allowShortPick");//是否允许短拣
-        boolean reduceOpenQtyAfterShortPick = serviceDataHolder.getInputDataAsMap().getBoolean("reduceOpenQtyAfterShortPick");//是否允许短拣
+        boolean reduceOpenQtyAfterShortPick = serviceDataHolder.getInputDataAsMap().getBoolean("reduceOpenQtyAfterShortPick");//短拣后是否自动减少需求量
 
 
-        if(UtilHelper.isEmpty(fromId)) throw new FulfillLogicException("待拣货的容器号不能为空");
+        //if(UtilHelper.isEmpty(fromId)) throw new FulfillLogicException("待拣货的容器号不能为空");
 
-        Map<String,String> fromIdHashMap = LotxLocxId.findWithoutCheckIDNotes(fromId,true);
+        //Map<String,String> fromIdHashMap = LotxLocxId.findWithoutCheckIDNotes(fromId,true);
 
-        String sku = fromIdHashMap.get("SKU");
-        BigDecimal qtyInFromId = new BigDecimal(fromIdHashMap.get("QTY"));
-        BigDecimal qtyAvailableInFromId = new BigDecimal(fromIdHashMap.get("AVAILABLEQTY"));
-        BigDecimal qtyAllocatedInFromId = new BigDecimal(fromIdHashMap.get("QTYALLOCATED"));
-        BigDecimal qtyPickedInFromId = new BigDecimal(fromIdHashMap.get("QTYPICKED"));
-        String fromLoc = fromIdHashMap.get("LOC");
-        String lot = fromIdHashMap.get("LOT");
+//        String sku = fromIdHashMap.get("SKU");
+//        BigDecimal qtyInFromId = new BigDecimal(fromIdHashMap.get("QTY"));
+//        BigDecimal qtyAvailableInFromId = new BigDecimal(fromIdHashMap.get("AVAILABLEQTY"));
+//        BigDecimal qtyAllocatedInFromId = new BigDecimal(fromIdHashMap.get("QTYALLOCATED"));
+//        BigDecimal qtyPickedInFromId = new BigDecimal(fromIdHashMap.get("QTYPICKED"));
+//        String fromLoc = fromIdHashMap.get("LOC");
+//        String lot = fromIdHashMap.get("LOT");
 
 
         Map<String, String> pickDetailHashMap = PickDetail.findByPickDetailKey(pickDetailKey,true);
@@ -80,8 +82,8 @@ public class SingleLotLpnPickService extends WMSBaseService {
 
 
         //暂不支持扫描容器直接换托盘功能
-        if(!pickDetailHashMap.get("ID").equals(fromId)) throw new EHApplicationException("暂不支持扫描容器直接换托盘功能");
-        if(!pickDetailHashMap.get("LOC").equals(fromLoc)) throw new EHApplicationException("扫描的库位和拣货明细中提供的不一致");
+        //if(!pickDetailHashMap.get("ID").equals(fromId)) throw new EHApplicationException("暂不支持扫描容器直接换托盘功能");
+        //if(!pickDetailHashMap.get("LOC").equals(fromLoc)) throw new EHApplicationException("扫描的库位和拣货明细中提供的不一致");
 
         ////////////////////////////////////////////////////////////////////////////////////////////
         //TODO 如FROMID和拣货明细不一致则直接换托盘拣货
