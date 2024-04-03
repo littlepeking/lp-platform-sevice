@@ -18,6 +18,6 @@ import java.util.Map;
 @DS(DSConstants.DS_DEFAULT)
 public interface CodeLkupService extends EHBaseService<CodeLookupModel> {
 
-    List<Map<String,String>> findActiveCodeByListName(@Param("listName") String listName);
+    List<Map<String,Object>> findActiveCodeByListName(@Param("listName") String listName);
 
 }

@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
+import com.enhantec.framework.common.utils.EHTranslationHelper;
 import com.enhantec.framework.config.TransFieldConfig;
 import com.enhantec.framework.config.annotations.TransField;
 import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
@@ -46,44 +47,45 @@ public class CodeLookupController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/findActiveCodeByListName/{listName}")
-    public List<CodeLookupModel> findActiveCodeByListName(@PathVariable String listName){
+    public List<Map<String,Object>> findActiveCodeByListName(@PathVariable String listName){
      //   return codeLkupService.findActiveCodeByListName(listName);
 
-        List<CodeLookupModel> res = codeLkupService.list(Wrappers.lambdaQuery(CodeLookupModel.class)
-                .select(
-                        CodeLookupModel::getSerialKey,
-                        CodeLookupModel::getCode,
-                        CodeLookupModel::getDescription,
-                        CodeLookupModel::getLongValue,
-                        CodeLookupModel::getShortValue)
-                        .eq(CodeLookupModel::getListName, listName)
-                        .eq(CodeLookupModel::getActive,1)
-                //,
-//                new ArrayList<>(){{
-//                    add(new  TransFieldConfig(
-//                            "serialKey",
-//                            "description",
-//                            "CODELKUP",
-//                            "DESCRIPTION")
-//                    );
-//                    add(new  TransFieldConfig(
-//                            "serialKey",
-//                            "longValue",
-//                            "CODELKUP",
-//                            "LONG_VALUE")
-//                    );
-//                    add(new  TransFieldConfig(
-//                            "serialKey",
-//                            "shortValue",
-//                            "CODELKUP",
-//                            "SHORT")
-//                    );
-//                }
+//        List<CodeLookupModel> res = codeLkupService.list(Wrappers.lambdaQuery(CodeLookupModel.class)
+//                .select(
+//                        CodeLookupModel::getSerialKey,
+//                        CodeLookupModel::getCode,
+//                        CodeLookupModel::getDescription,
+//                        CodeLookupModel::getLongValue,
+//                        CodeLookupModel::getShortValue)
+//                        .eq(CodeLookupModel::getListName, listName)
+//                        .eq(CodeLookupModel::getActive,1)
 
-        //}
+        List<Map<String,Object>> list = codeLkupService.findActiveCodeByListName(listName);
+
+        return EHTranslationHelper.translate(list,
+                new ArrayList<>(){{
+                    add(new  TransFieldConfig(
+                            "serialKey",
+                            "description",
+                            "CODELKUP",
+                            "DESCRIPTION")
+                    );
+                    add(new  TransFieldConfig(
+                            "serialKey",
+                            "longValue",
+                            "CODELKUP",
+                            "LONG_VALUE")
+                    );
+                    add(new  TransFieldConfig(
+                            "serialKey",
+                            "shortValue",
+                            "CODELKUP",
+                            "SHORT")
+                    );
+                }
+
+            }
         );
-
-        return res;
 
     }
 

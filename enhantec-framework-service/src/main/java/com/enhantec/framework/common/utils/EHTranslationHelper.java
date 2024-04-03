@@ -228,7 +228,7 @@ public class EHTranslationHelper {
 
     }
 
-    public static <T extends EHBaseModel> List<Map<String, Object>> translate(List<Map<String, Object>> dataList, List<TransFieldConfig> transFieldConfigList) {
+    public static List<Map<String, Object>> translate(List<Map<String, Object>> dataList, List<TransFieldConfig> transFieldConfigList) {
 
         if(transFieldConfigList!=null && transFieldConfigList.size()>0) {
 

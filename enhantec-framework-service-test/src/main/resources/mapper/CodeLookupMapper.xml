@@ -92,13 +92,13 @@
         UDF6,UDF7,UDF8,
         UDF9,UDF10
     </sql>
-    <select id="findActiveCodeByListName" resultMap="BaseResultMap">
+    <select id="findActiveCodeByListName" resultType="java.util.Map">
         select
-            SERIALKEY, CODE,DESCRIPTION,SHORT, LONG_VALUE
+            serialKey, code,description,short as shortValue, LONG_VALUE as longValue
         from CODELKUP
         WHERE
             ACTIVE = 1
-            LISTNAME = #{listName,jdbcType=VARCHAR}
+        AND LISTNAME = #{listName,jdbcType=VARCHAR}
     </select>
 
 </mapper>

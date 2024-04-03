@@ -19,7 +19,7 @@ import java.util.Map;
 public class CodeLkupServiceImpl extends EHBaseServiceImpl<CodeLookupMapper, CodeLookupModel>
     implements CodeLkupService{
 
-    public List<Map<String,String>> findActiveCodeByListName(@Param("listName") String listName){
+    public List<Map<String,Object>> findActiveCodeByListName(@Param("listName") String listName){
         return getBaseMapper().findActiveCodeByListName(listName);
     }
 

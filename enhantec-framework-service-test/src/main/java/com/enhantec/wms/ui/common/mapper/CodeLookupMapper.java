@@ -15,7 +15,7 @@ import java.util.*;
 public interface CodeLookupMapper extends EHBaseMapper<CodeLookupModel> {
 
 
-    List<Map<String,String>> findActiveCodeByListName(@Param("listName") String listName);
+    List<Map<String,Object>> findActiveCodeByListName(@Param("listName") String listName);
 
 
 }
