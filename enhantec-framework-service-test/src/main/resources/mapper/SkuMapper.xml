@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enhantec.wms.ui.common.mapper.SkuMapper">
+
+    <resultMap id="BaseResultMap" type="com.enhantec.wms.ui.common.model.SkuModel">
+            <id property="sku" column="SKU" jdbcType="VARCHAR"/>
+            <id property="storerkey" column="STORERKEY" jdbcType="VARCHAR"/>
+            <result property="serialkey" column="SERIALKEY" jdbcType="INTEGER"/>
+            <result property="whseid" column="WHSEID" jdbcType="VARCHAR"/>
+            <result property="sourceversion" column="SOURCEVERSION" jdbcType="VARCHAR"/>
+            <result property="hazmatcodeskey" column="HAZMATCODESKEY" jdbcType="VARCHAR"/>
+            <result property="itemreference" column="ITEMREFERENCE" jdbcType="VARCHAR"/>
+            <result property="serialnumberstart" column="SERIALNUMBERSTART" jdbcType="DECIMAL"/>
+            <result property="serialnumberend" column="SERIALNUMBEREND" jdbcType="DECIMAL"/>
+            <result property="serialnumbernext" column="SERIALNUMBERNEXT" jdbcType="DECIMAL"/>
+            <result property="descr" column="DESCR" jdbcType="VARCHAR"/>
+            <result property="susr1" column="SUSR1" jdbcType="VARCHAR"/>
+            <result property="susr2" column="SUSR2" jdbcType="VARCHAR"/>
+            <result property="susr3" column="SUSR3" jdbcType="VARCHAR"/>
+            <result property="susr4" column="SUSR4" jdbcType="VARCHAR"/>
+            <result property="susr5" column="SUSR5" jdbcType="VARCHAR"/>
+            <result property="manufacturersku" column="MANUFACTURERSKU" jdbcType="VARCHAR"/>
+            <result property="retailsku" column="RETAILSKU" jdbcType="VARCHAR"/>
+            <result property="altsku" column="ALTSKU" jdbcType="VARCHAR"/>
+            <result property="packkey" column="PACKKEY" jdbcType="VARCHAR"/>
+            <result property="stdgrosswgt" column="STDGROSSWGT" jdbcType="DECIMAL"/>
+            <result property="stdnetwgt" column="STDNETWGT" jdbcType="DECIMAL"/>
+            <result property="stdcube" column="STDCUBE" jdbcType="DECIMAL"/>
+            <result property="tare" column="TARE" jdbcType="DECIMAL"/>
+            <result property="class" column="CLASS" jdbcType="VARCHAR"/>
+            <result property="active" column="ACTIVE" jdbcType="VARCHAR"/>
+            <result property="skugroup" column="SKUGROUP" jdbcType="VARCHAR"/>
+            <result property="tariffkey" column="TARIFFKEY" jdbcType="VARCHAR"/>
+            <result property="busr1" column="BUSR1" jdbcType="VARCHAR"/>
+            <result property="busr2" column="BUSR2" jdbcType="VARCHAR"/>
+            <result property="busr3" column="BUSR3" jdbcType="VARCHAR"/>
+            <result property="busr4" column="BUSR4" jdbcType="VARCHAR"/>
+            <result property="busr5" column="BUSR5" jdbcType="VARCHAR"/>
+            <result property="lottable01label" column="LOTTABLE01LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable02label" column="LOTTABLE02LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable03label" column="LOTTABLE03LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable04label" column="LOTTABLE04LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable05label" column="LOTTABLE05LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable06label" column="LOTTABLE06LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable07label" column="LOTTABLE07LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable08label" column="LOTTABLE08LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable09label" column="LOTTABLE09LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable10label" column="LOTTABLE10LABEL" jdbcType="VARCHAR"/>
+            <result property="pickcode" column="PICKCODE" jdbcType="VARCHAR"/>
+            <result property="strategykey" column="STRATEGYKEY" jdbcType="VARCHAR"/>
+            <result property="cartongroup" column="CARTONGROUP" jdbcType="VARCHAR"/>
+            <result property="putcode" column="PUTCODE" jdbcType="VARCHAR"/>
+            <result property="putawayloc" column="PUTAWAYLOC" jdbcType="VARCHAR"/>
+            <result property="putawayzone" column="PUTAWAYZONE" jdbcType="VARCHAR"/>
+            <result property="innerpack" column="INNERPACK" jdbcType="DECIMAL"/>
+            <result property="cube" column="CUBE" jdbcType="FLOAT"/>
+            <result property="grosswgt" column="GROSSWGT" jdbcType="FLOAT"/>
+            <result property="netwgt" column="NETWGT" jdbcType="FLOAT"/>
+            <result property="abc" column="ABC" jdbcType="VARCHAR"/>
+            <result property="cyclecountfrequency" column="CYCLECOUNTFREQUENCY" jdbcType="INTEGER"/>
+            <result property="lastcyclecount" column="LASTCYCLECOUNT" jdbcType="TIMESTAMP"/>
+            <result property="reorderpoint" column="REORDERPOINT" jdbcType="INTEGER"/>
+            <result property="reorderqty" column="REORDERQTY" jdbcType="DECIMAL"/>
+            <result property="stdordercost" column="STDORDERCOST" jdbcType="FLOAT"/>
+            <result property="carrycost" column="CARRYCOST" jdbcType="FLOAT"/>
+            <result property="price" column="PRICE" jdbcType="DECIMAL"/>
+            <result property="cost" column="COST" jdbcType="DECIMAL"/>
+            <result property="onreceiptcopypackkey" column="ONRECEIPTCOPYPACKKEY" jdbcType="VARCHAR"/>
+            <result property="receiptholdcode" column="RECEIPTHOLDCODE" jdbcType="VARCHAR"/>
+            <result property="receiptinspectionloc" column="RECEIPTINSPECTIONLOC" jdbcType="VARCHAR"/>
+            <result property="rotateby" column="ROTATEBY" jdbcType="VARCHAR"/>
+            <result property="datecodedays" column="DATECODEDAYS" jdbcType="INTEGER"/>
+            <result property="defaultrotation" column="DEFAULTROTATION" jdbcType="VARCHAR"/>
+            <result property="shippablecontainer" column="SHIPPABLECONTAINER" jdbcType="VARCHAR"/>
+            <result property="ioflag" column="IOFLAG" jdbcType="VARCHAR"/>
+            <result property="tareweight" column="TAREWEIGHT" jdbcType="DECIMAL"/>
+            <result property="lotxiddetailotherlabel1" column="LOTXIDDETAILOTHERLABEL1" jdbcType="VARCHAR"/>
+            <result property="lotxiddetailotherlabel2" column="LOTXIDDETAILOTHERLABEL2" jdbcType="VARCHAR"/>
+            <result property="lotxiddetailotherlabel3" column="LOTXIDDETAILOTHERLABEL3" jdbcType="VARCHAR"/>
+            <result property="avgcaseweight" column="AVGCASEWEIGHT" jdbcType="DECIMAL"/>
+            <result property="tolerancepct" column="TOLERANCEPCT" jdbcType="DECIMAL"/>
+            <result property="shelflifeindicator" column="SHELFLIFEINDICATOR" jdbcType="VARCHAR"/>
+            <result property="shelflife" column="SHELFLIFE" jdbcType="INTEGER"/>
+            <result property="transportationmode" column="TRANSPORTATIONMODE" jdbcType="VARCHAR"/>
+            <result property="skugroup2" column="SKUGROUP2" jdbcType="VARCHAR"/>
+            <result property="susr6" column="SUSR6" jdbcType="VARCHAR"/>
+            <result property="susr7" column="SUSR7" jdbcType="VARCHAR"/>
+            <result property="susr8" column="SUSR8" jdbcType="VARCHAR"/>
+            <result property="susr9" column="SUSR9" jdbcType="VARCHAR"/>
+            <result property="susr10" column="SUSR10" jdbcType="VARCHAR"/>
+            <result property="busr6" column="BUSR6" jdbcType="VARCHAR"/>
+            <result property="busr7" column="BUSR7" jdbcType="VARCHAR"/>
+            <result property="busr8" column="BUSR8" jdbcType="VARCHAR"/>
+            <result property="busr9" column="BUSR9" jdbcType="VARCHAR"/>
+            <result property="busr10" column="BUSR10" jdbcType="VARCHAR"/>
+            <result property="minimumshelflifeonrfpicking" column="MINIMUMSHELFLIFEONRFPICKING" jdbcType="DECIMAL"/>
+            <result property="freightclass" column="FREIGHTCLASS" jdbcType="VARCHAR"/>
+            <result property="icwflag" column="ICWFLAG" jdbcType="VARCHAR"/>
+            <result property="icwby" column="ICWBY" jdbcType="VARCHAR"/>
+            <result property="ideweight" column="IDEWEIGHT" jdbcType="VARCHAR"/>
+            <result property="icdflag" column="ICDFLAG" jdbcType="VARCHAR"/>
+            <result property="icdlabel1" column="ICDLABEL1" jdbcType="VARCHAR"/>
+            <result property="icdlabel2" column="ICDLABEL2" jdbcType="VARCHAR"/>
+            <result property="icdlabel3" column="ICDLABEL3" jdbcType="VARCHAR"/>
+            <result property="ocwflag" column="OCWFLAG" jdbcType="VARCHAR"/>
+            <result property="ocwby" column="OCWBY" jdbcType="VARCHAR"/>
+            <result property="odeweight" column="ODEWEIGHT" jdbcType="VARCHAR"/>
+            <result property="oacoverride" column="OACOVERRIDE" jdbcType="VARCHAR"/>
+            <result property="ocdflag" column="OCDFLAG" jdbcType="VARCHAR"/>
+            <result property="ocdlabel1" column="OCDLABEL1" jdbcType="VARCHAR"/>
+            <result property="ocdlabel2" column="OCDLABEL2" jdbcType="VARCHAR"/>
+            <result property="ocdlabel3" column="OCDLABEL3" jdbcType="VARCHAR"/>
+            <result property="otareweight" column="OTAREWEIGHT" jdbcType="DECIMAL"/>
+            <result property="oavgcaseweight" column="OAVGCASEWEIGHT" jdbcType="DECIMAL"/>
+            <result property="otolerancepct" column="OTOLERANCEPCT" jdbcType="DECIMAL"/>
+            <result property="rfdefaultpack" column="RFDEFAULTPACK" jdbcType="VARCHAR"/>
+            <result property="rfdefaultuom" column="RFDEFAULTUOM" jdbcType="VARCHAR"/>
+            <result property="shelflifecodetype" column="SHELFLIFECODETYPE" jdbcType="VARCHAR"/>
+            <result property="shelflifeonreceiving" column="SHELFLIFEONRECEIVING" jdbcType="INTEGER"/>
+            <result property="lottablevalidationkey" column="LOTTABLEVALIDATIONKEY" jdbcType="VARCHAR"/>
+            <result property="allowconsolidation" column="ALLOWCONSOLIDATION" jdbcType="VARCHAR"/>
+            <result property="minimumwaveqty" column="MINIMUMWAVEQTY" jdbcType="DECIMAL"/>
+            <result property="bulkcartongroup" column="BULKCARTONGROUP" jdbcType="VARCHAR"/>
+            <result property="pickuom" column="PICKUOM" jdbcType="VARCHAR"/>
+            <result property="eachkey" column="EACHKEY" jdbcType="VARCHAR"/>
+            <result property="casekey" column="CASEKEY" jdbcType="VARCHAR"/>
+            <result property="type" column="TYPE" jdbcType="VARCHAR"/>
+            <result property="effecstartdate" column="EFFECSTARTDATE" jdbcType="TIMESTAMP"/>
+            <result property="effecenddate" column="EFFECENDDATE" jdbcType="TIMESTAMP"/>
+            <result property="conveyable" column="CONVEYABLE" jdbcType="VARCHAR"/>
+            <result property="flowthruitem" column="FLOWTHRUITEM" jdbcType="VARCHAR"/>
+            <result property="notes1" column="NOTES1" jdbcType="VARCHAR"/>
+            <result property="notes2" column="NOTES2" jdbcType="VARCHAR"/>
+            <result property="vertStorage" column="VERT_STORAGE" jdbcType="VARCHAR"/>
+            <result property="cwflag" column="CWFLAG" jdbcType="VARCHAR"/>
+            <result property="verifylot04lot05" column="VERIFYLOT04LOT05" jdbcType="VARCHAR"/>
+            <result property="putawaystrategykey" column="PUTAWAYSTRATEGYKEY" jdbcType="VARCHAR"/>
+            <result property="returnsloc" column="RETURNSLOC" jdbcType="VARCHAR"/>
+            <result property="qcloc" column="QCLOC" jdbcType="VARCHAR"/>
+            <result property="receiptvalidationtemplate" column="RECEIPTVALIDATIONTEMPLATE" jdbcType="VARCHAR"/>
+            <result property="skutype" column="SKUTYPE" jdbcType="VARCHAR"/>
+            <result property="stacklimit" column="StackLimit" jdbcType="INTEGER"/>
+            <result property="maxpalletsperzone" column="MaxPalletsPerZone" jdbcType="INTEGER"/>
+            <result property="ccdiscrepancyrule" column="CCDISCREPANCYRULE" jdbcType="VARCHAR"/>
+            <result property="manualsetuprequired" column="MANUALSETUPREQUIRED" jdbcType="VARCHAR"/>
+            <result property="qclocout" column="QCLOCOUT" jdbcType="VARCHAR"/>
+            <result property="ocdcatchwhen" column="OCDCATCHWHEN" jdbcType="VARCHAR"/>
+            <result property="ocdcatchqty1" column="OCDCATCHQTY1" jdbcType="VARCHAR"/>
+            <result property="ocdcatchqty2" column="OCDCATCHQTY2" jdbcType="VARCHAR"/>
+            <result property="ocdcatchqty3" column="OCDCATCHQTY3" jdbcType="VARCHAR"/>
+            <result property="hasimage" column="HASIMAGE" jdbcType="VARCHAR"/>
+            <result property="guid" column="GUID" jdbcType="VARCHAR"/>
+            <result property="nonstockedindicator" column="NONSTOCKEDINDICATOR" jdbcType="VARCHAR"/>
+            <result property="lottable11label" column="LOTTABLE11LABEL" jdbcType="VARCHAR"/>
+            <result property="lottable12label" column="LOTTABLE12LABEL" jdbcType="VARCHAR"/>
+            <result property="toexpiredays" column="TOEXPIREDAYS" jdbcType="INTEGER"/>
+            <result property="todeliverbydays" column="TODELIVERBYDAYS" jdbcType="INTEGER"/>
+            <result property="tobestbydays" column="TOBESTBYDAYS" jdbcType="INTEGER"/>
+            <result property="snumPosition" column="SNUM_POSITION" jdbcType="INTEGER"/>
+            <result property="snumLength" column="SNUM_LENGTH" jdbcType="INTEGER"/>
+            <result property="snumDelimiter" column="SNUM_DELIMITER" jdbcType="VARCHAR"/>
+            <result property="snumDelimCount" column="SNUM_DELIM_COUNT" jdbcType="INTEGER"/>
+            <result property="snumQuantity" column="SNUM_QUANTITY" jdbcType="INTEGER"/>
+            <result property="snumIncrPos" column="SNUM_INCR_POS" jdbcType="INTEGER"/>
+            <result property="snumIncrLength" column="SNUM_INCR_LENGTH" jdbcType="INTEGER"/>
+            <result property="snumEndtoend" column="SNUM_ENDTOEND" jdbcType="INTEGER"/>
+            <result property="snumMask" column="SNUM_MASK" jdbcType="VARCHAR"/>
+            <result property="icdlabel4" column="ICDLABEL4" jdbcType="VARCHAR"/>
+            <result property="icdlabel5" column="ICDLABEL5" jdbcType="VARCHAR"/>
+            <result property="ocdlabel4" column="OCDLABEL4" jdbcType="VARCHAR"/>
+            <result property="ocdlabel5" column="OCDLABEL5" jdbcType="VARCHAR"/>
+            <result property="icd1unique" column="ICD1UNIQUE" jdbcType="VARCHAR"/>
+            <result property="ocd1unique" column="OCD1UNIQUE" jdbcType="VARCHAR"/>
+            <result property="snumlongDelimiter" column="SNUMLONG_DELIMITER" jdbcType="VARCHAR"/>
+            <result property="snumlongFixed" column="SNUMLONG_FIXED" jdbcType="INTEGER"/>
+            <result property="snumAutoincrement" column="SNUM_AUTOINCREMENT" jdbcType="INTEGER"/>
+            <result property="accountingentity" column="ACCOUNTINGENTITY" jdbcType="VARCHAR"/>
+            <result property="voicegroupingid" column="VOICEGROUPINGID" jdbcType="VARCHAR"/>
+            <result property="countsequence" column="COUNTSEQUENCE" jdbcType="INTEGER"/>
+            <result property="dapicksort" column="DAPICKSORT" jdbcType="VARCHAR"/>
+            <result property="rplnsort" column="RPLNSORT" jdbcType="VARCHAR"/>
+            <result property="catchgrosswgt" column="CATCHGROSSWGT" jdbcType="INTEGER"/>
+            <result property="catchnetwgt" column="CATCHNETWGT" jdbcType="INTEGER"/>
+            <result property="catchtarewgt" column="CATCHTAREWGT" jdbcType="INTEGER"/>
+            <result property="tarewgt1" column="TAREWGT1" jdbcType="FLOAT"/>
+            <result property="stdnetwgt1" column="STDNETWGT1" jdbcType="FLOAT"/>
+            <result property="stdgrosswgt1" column="STDGROSSWGT1" jdbcType="FLOAT"/>
+            <result property="stduom" column="STDUOM" jdbcType="VARCHAR"/>
+            <result property="zerodefaultwgtforpick" column="ZERODEFAULTWGTFORPICK" jdbcType="INTEGER"/>
+            <result property="fillqtyuom" column="FILLQTYUOM" jdbcType="VARCHAR"/>
+            <result property="cartonizeft" column="CARTONIZEFT" jdbcType="VARCHAR"/>
+            <result property="recurcode" column="RECURCODE" jdbcType="VARCHAR"/>
+            <result property="wgtuom" column="WGTUOM" jdbcType="VARCHAR"/>
+            <result property="dimenuom" column="DIMENUOM" jdbcType="VARCHAR"/>
+            <result property="cubeuom" column="CUBEUOM" jdbcType="VARCHAR"/>
+            <result property="storagetype" column="STORAGETYPE" jdbcType="VARCHAR"/>
+            <result property="nmfcclass" column="NMFCCLASS" jdbcType="VARCHAR"/>
+            <result property="mateabilitycode" column="MATEABILITYCODE" jdbcType="VARCHAR"/>
+            <result property="lotholdcode" column="LOTHOLDCODE" jdbcType="VARCHAR"/>
+            <result property="autoreleaselotby" column="AUTORELEASELOTBY" jdbcType="VARCHAR"/>
+            <result property="hourstoholdlot" column="HOURSTOHOLDLOT" jdbcType="DECIMAL"/>
+            <result property="autoreleaselpnby" column="AUTORELEASELPNBY" jdbcType="VARCHAR"/>
+            <result property="hourstoholdlpn" column="HOURSTOHOLDLPN" jdbcType="DECIMAL"/>
+            <result property="amstrategykey" column="AMSTRATEGYKEY" jdbcType="VARCHAR"/>
+            <result property="tempforasn" column="TEMPFORASN" jdbcType="VARCHAR"/>
+            <result property="ibsumcwflg" column="IBSUMCWFLG" jdbcType="VARCHAR"/>
+            <result property="obsumcwflg" column="OBSUMCWFLG" jdbcType="VARCHAR"/>
+            <result property="showrfcwontrans" column="SHOWRFCWONTRANS" jdbcType="VARCHAR"/>
+            <result property="putawayclass" column="PUTAWAYCLASS" jdbcType="VARCHAR"/>
+            <result property="groupfteach" column="GROUPFTEACH" jdbcType="VARCHAR"/>
+            <result property="transportationservice" column="TRANSPORTATIONSERVICE" jdbcType="VARCHAR"/>
+            <result property="skufacilitygroup" column="SKUFACILITYGROUP" jdbcType="VARCHAR"/>
+            <result property="lotctrlatpack" column="LOTCTRLATPACK" jdbcType="VARCHAR"/>
+            <result property="lastccreleasedate" column="LASTCCRELEASEDATE" jdbcType="TIMESTAMP"/>
+            <result property="defaultequipmentattribute" column="DEFAULTEQUIPMENTATTRIBUTE" jdbcType="VARCHAR"/>
+            <result property="defaultequipmenttype" column="DEFAULTEQUIPMENTTYPE" jdbcType="VARCHAR"/>
+            <result property="defaultequipmentlength" column="DEFAULTEQUIPMENTLENGTH" jdbcType="VARCHAR"/>
+            <result property="barcodeconfigkey" column="BARCODECONFIGKEY" jdbcType="VARCHAR"/>
+            <result property="autoassignconsloc" column="AUTOASSIGNCONSLOC" jdbcType="VARCHAR"/>
+            <result property="conspicklocmin" column="CONSPICKLOCMIN" jdbcType="DECIMAL"/>
+            <result property="conspicklocmax" column="CONSPICKLOCMAX" jdbcType="DECIMAL"/>
+            <result property="conspickminmaxuom" column="CONSPICKMINMAXUOM" jdbcType="VARCHAR"/>
+            <result property="conspickreplenuom" column="CONSPICKREPLENUOM" jdbcType="VARCHAR"/>
+            <result property="roundbackflushqty" column="ROUNDBACKFLUSHQTY" jdbcType="VARCHAR"/>
+            <result property="itemcharacteristic1" column="ITEMCHARACTERISTIC1" jdbcType="VARCHAR"/>
+            <result property="itemcharacteristic2" column="ITEMCHARACTERISTIC2" jdbcType="VARCHAR"/>
+            <result property="commodityclass" column="COMMODITYCLASS" jdbcType="VARCHAR"/>
+            <result property="stockcategory" column="STOCKCATEGORY" jdbcType="VARCHAR"/>
+            <result property="countryoforigin" column="COUNTRYOFORIGIN" jdbcType="VARCHAR"/>
+            <result property="collection" column="COLLECTION" jdbcType="VARCHAR"/>
+            <result property="theme" column="THEME" jdbcType="VARCHAR"/>
+            <result property="season" column="SEASON" jdbcType="VARCHAR"/>
+            <result property="style" column="STYLE" jdbcType="VARCHAR"/>
+            <result property="color" column="COLOR" jdbcType="VARCHAR"/>
+            <result property="skusize" column="SKUSIZE" jdbcType="VARCHAR"/>
+            <result property="campaignstart" column="CAMPAIGNSTART" jdbcType="VARCHAR"/>
+            <result property="campaignend" column="CAMPAIGNEND" jdbcType="VARCHAR"/>
+            <result property="allowmultilotlpn" column="ALLOWMULTILOTLPN" jdbcType="VARCHAR"/>
+            <result property="receiptunitlabelname" column="RECEIPTUNITLABELNAME" jdbcType="VARCHAR"/>
+            <result property="receiptunitlabeluom" column="RECEIPTUNITLABELUOM" jdbcType="VARCHAR"/>
+            <result property="qcfirstcompl" column="QCFIRSTCOMPL" jdbcType="VARCHAR"/>
+            <result property="newallocationstrategy" column="NEWALLOCATIONSTRATEGY" jdbcType="VARCHAR"/>
+            <result property="slotgroup" column="SLOTGROUP" jdbcType="VARCHAR"/>
+            <result property="pickcontplacement" column="PICKCONTPLACEMENT" jdbcType="VARCHAR"/>
+            <result property="forceuomreplenqty" column="FORCEUOMREPLENQTY" jdbcType="VARCHAR"/>
+            <result property="datacapturestrategykey" column="DATACAPTURESTRATEGYKEY" jdbcType="VARCHAR"/>
+            <result property="serialparcingstrategykey" column="SERIALPARCINGSTRATEGYKEY" jdbcType="VARCHAR"/>
+            <result property="icwvalidationuomlevel" column="ICWVALIDATIONUOMLEVEL" jdbcType="VARCHAR"/>
+            <result property="ocwvalidationuomlevel" column="OCWVALIDATIONUOMLEVEL" jdbcType="VARCHAR"/>
+            <result property="icwavggrossweight" column="ICWAVGGROSSWEIGHT" jdbcType="DECIMAL"/>
+            <result property="icwavgnetweight" column="ICWAVGNETWEIGHT" jdbcType="DECIMAL"/>
+            <result property="icwavgtareweight" column="ICWAVGTAREWEIGHT" jdbcType="DECIMAL"/>
+            <result property="icwtolerancepct" column="ICWTOLERANCEPCT" jdbcType="DECIMAL"/>
+            <result property="ocwavggrossweight" column="OCWAVGGROSSWEIGHT" jdbcType="DECIMAL"/>
+            <result property="ocwavgnetweight" column="OCWAVGNETWEIGHT" jdbcType="DECIMAL"/>
+            <result property="ocwavgtareweight" column="OCWAVGTAREWEIGHT" jdbcType="DECIMAL"/>
+            <result property="ocwtolerancepct" column="OCWTOLERANCEPCT" jdbcType="DECIMAL"/>
+            <result property="stdweightuomlevel" column="STDWEIGHTUOMLEVEL" jdbcType="VARCHAR"/>
+            <result property="stdgrossweight" column="STDGROSSWEIGHT" jdbcType="DECIMAL"/>
+            <result property="stdnetweight" column="STDNETWEIGHT" jdbcType="DECIMAL"/>
+            <result property="stdtareweight" column="STDTAREWEIGHT" jdbcType="DECIMAL"/>
+            <result property="replenstratkey" column="REPLENSTRATKEY" jdbcType="VARCHAR"/>
+            <result property="speedgroupstratkey" column="SPEEDGROUPSTRATKEY" jdbcType="VARCHAR"/>
+            <result property="outlotvalidationkey" column="OUTLOTVALIDATIONKEY" jdbcType="VARCHAR"/>
+            <result property="department" column="DEPARTMENT" jdbcType="VARCHAR"/>
+            <result property="adddate" column="ADDDATE" jdbcType="TIMESTAMP"/>
+            <result property="addwho" column="ADDWHO" jdbcType="VARCHAR"/>
+            <result property="editdate" column="EDITDATE" jdbcType="TIMESTAMP"/>
+            <result property="editwho" column="EDITWHO" jdbcType="VARCHAR"/>
+            <result property="extUdfStr1" column="EXT_UDF_STR1" jdbcType="VARCHAR"/>
+            <result property="extUdfStr2" column="EXT_UDF_STR2" jdbcType="VARCHAR"/>
+            <result property="extUdfStr3" column="EXT_UDF_STR3" jdbcType="VARCHAR"/>
+            <result property="extUdfStr4" column="EXT_UDF_STR4" jdbcType="VARCHAR"/>
+            <result property="extUdfStr5" column="EXT_UDF_STR5" jdbcType="VARCHAR"/>
+            <result property="extUdfStr6" column="EXT_UDF_STR6" jdbcType="VARCHAR"/>
+            <result property="extUdfStr7" column="EXT_UDF_STR7" jdbcType="VARCHAR"/>
+            <result property="extUdfStr8" column="EXT_UDF_STR8" jdbcType="VARCHAR"/>
+            <result property="extUdfStr9" column="EXT_UDF_STR9" jdbcType="VARCHAR"/>
+            <result property="extUdfStr10" column="EXT_UDF_STR10" jdbcType="VARCHAR"/>
+            <result property="extUdfStr11" column="EXT_UDF_STR11" jdbcType="VARCHAR"/>
+            <result property="extUdfStr12" column="EXT_UDF_STR12" jdbcType="VARCHAR"/>
+            <result property="extUdfStr13" column="EXT_UDF_STR13" jdbcType="VARCHAR"/>
+            <result property="extUdfStr14" column="EXT_UDF_STR14" jdbcType="VARCHAR"/>
+            <result property="extUdfStr15" column="EXT_UDF_STR15" jdbcType="VARCHAR"/>
+            <result property="extUdfStr16" column="EXT_UDF_STR16" jdbcType="VARCHAR"/>
+            <result property="extUdfStr17" column="EXT_UDF_STR17" jdbcType="VARCHAR"/>
+            <result property="extUdfStr18" column="EXT_UDF_STR18" jdbcType="VARCHAR"/>
+            <result property="extUdfStr19" column="EXT_UDF_STR19" jdbcType="VARCHAR"/>
+            <result property="extUdfStr20" column="EXT_UDF_STR20" jdbcType="VARCHAR"/>
+            <result property="extUdfStr21" column="EXT_UDF_STR21" jdbcType="VARCHAR"/>
+            <result property="extUdfStr22" column="EXT_UDF_STR22" jdbcType="VARCHAR"/>
+            <result property="extUdfStr23" column="EXT_UDF_STR23" jdbcType="VARCHAR"/>
+            <result property="extUdfStr24" column="EXT_UDF_STR24" jdbcType="VARCHAR"/>
+            <result property="extUdfStr25" column="EXT_UDF_STR25" jdbcType="VARCHAR"/>
+            <result property="extUdfStr26" column="EXT_UDF_STR26" jdbcType="VARCHAR"/>
+            <result property="extUdfStr27" column="EXT_UDF_STR27" jdbcType="VARCHAR"/>
+            <result property="extUdfStr28" column="EXT_UDF_STR28" jdbcType="VARCHAR"/>
+            <result property="extUdfStr29" column="EXT_UDF_STR29" jdbcType="VARCHAR"/>
+            <result property="extUdfStr30" column="EXT_UDF_STR30" jdbcType="VARCHAR"/>
+            <result property="extUdfDate1" column="EXT_UDF_DATE1" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate2" column="EXT_UDF_DATE2" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate3" column="EXT_UDF_DATE3" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate4" column="EXT_UDF_DATE4" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate5" column="EXT_UDF_DATE5" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate6" column="EXT_UDF_DATE6" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate7" column="EXT_UDF_DATE7" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate8" column="EXT_UDF_DATE8" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate9" column="EXT_UDF_DATE9" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate10" column="EXT_UDF_DATE10" jdbcType="TIMESTAMP"/>
+            <result property="extUdfFloat1" column="EXT_UDF_FLOAT1" jdbcType="FLOAT"/>
+            <result property="extUdfFloat2" column="EXT_UDF_FLOAT2" jdbcType="FLOAT"/>
+            <result property="extUdfFloat3" column="EXT_UDF_FLOAT3" jdbcType="FLOAT"/>
+            <result property="extUdfFloat4" column="EXT_UDF_FLOAT4" jdbcType="FLOAT"/>
+            <result property="extUdfFloat5" column="EXT_UDF_FLOAT5" jdbcType="FLOAT"/>
+            <result property="extUdfFloat6" column="EXT_UDF_FLOAT6" jdbcType="FLOAT"/>
+            <result property="extUdfFloat7" column="EXT_UDF_FLOAT7" jdbcType="FLOAT"/>
+            <result property="extUdfFloat8" column="EXT_UDF_FLOAT8" jdbcType="FLOAT"/>
+            <result property="extUdfFloat9" column="EXT_UDF_FLOAT9" jdbcType="FLOAT"/>
+            <result property="extUdfFloat10" column="EXT_UDF_FLOAT10" jdbcType="FLOAT"/>
+            <result property="extUdfLkup1" column="EXT_UDF_LKUP1" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup2" column="EXT_UDF_LKUP2" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup3" column="EXT_UDF_LKUP3" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup4" column="EXT_UDF_LKUP4" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup5" column="EXT_UDF_LKUP5" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup6" column="EXT_UDF_LKUP6" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup7" column="EXT_UDF_LKUP7" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup8" column="EXT_UDF_LKUP8" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup9" column="EXT_UDF_LKUP9" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup10" column="EXT_UDF_LKUP10" jdbcType="VARCHAR"/>
+            <result property="isserialcontrol" column="ISSERIALCONTROL" jdbcType="VARCHAR"/>
+            <result property="busr11" column="BUSR11" jdbcType="VARCHAR"/>
+            <result property="busr12" column="BUSR12" jdbcType="VARCHAR"/>
+            <result property="busr13" column="BUSR13" jdbcType="VARCHAR"/>
+            <result property="enablebarcode" column="ENABLEBARCODE" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        SKU,STORERKEY,SERIALKEY,
+        WHSEID,SOURCEVERSION,HAZMATCODESKEY,
+        ITEMREFERENCE,SERIALNUMBERSTART,SERIALNUMBEREND,
+        SERIALNUMBERNEXT,DESCR,SUSR1,
+        SUSR2,SUSR3,SUSR4,
+        SUSR5,MANUFACTURERSKU,RETAILSKU,
+        ALTSKU,PACKKEY,STDGROSSWGT,
+        STDNETWGT,STDCUBE,TARE,
+        CLASS,ACTIVE,SKUGROUP,
+        TARIFFKEY,BUSR1,BUSR2,
+        BUSR3,BUSR4,BUSR5,
+        LOTTABLE01LABEL,LOTTABLE02LABEL,LOTTABLE03LABEL,
+        LOTTABLE04LABEL,LOTTABLE05LABEL,LOTTABLE06LABEL,
+        LOTTABLE07LABEL,LOTTABLE08LABEL,LOTTABLE09LABEL,
+        LOTTABLE10LABEL,PICKCODE,STRATEGYKEY,
+        CARTONGROUP,PUTCODE,PUTAWAYLOC,
+        PUTAWAYZONE,INNERPACK,CUBE,
+        GROSSWGT,NETWGT,ABC,
+        CYCLECOUNTFREQUENCY,LASTCYCLECOUNT,REORDERPOINT,
+        REORDERQTY,STDORDERCOST,CARRYCOST,
+        PRICE,COST,ONRECEIPTCOPYPACKKEY,
+        RECEIPTHOLDCODE,RECEIPTINSPECTIONLOC,ROTATEBY,
+        DATECODEDAYS,DEFAULTROTATION,SHIPPABLECONTAINER,
+        IOFLAG,TAREWEIGHT,LOTXIDDETAILOTHERLABEL1,
+        LOTXIDDETAILOTHERLABEL2,LOTXIDDETAILOTHERLABEL3,AVGCASEWEIGHT,
+        TOLERANCEPCT,SHELFLIFEINDICATOR,SHELFLIFE,
+        TRANSPORTATIONMODE,SKUGROUP2,SUSR6,
+        SUSR7,SUSR8,SUSR9,
+        SUSR10,BUSR6,BUSR7,
+        BUSR8,BUSR9,BUSR10,
+        MINIMUMSHELFLIFEONRFPICKING,FREIGHTCLASS,ICWFLAG,
+        ICWBY,IDEWEIGHT,ICDFLAG,
+        ICDLABEL1,ICDLABEL2,ICDLABEL3,
+        OCWFLAG,OCWBY,ODEWEIGHT,
+        OACOVERRIDE,OCDFLAG,OCDLABEL1,
+        OCDLABEL2,OCDLABEL3,OTAREWEIGHT,
+        OAVGCASEWEIGHT,OTOLERANCEPCT,RFDEFAULTPACK,
+        RFDEFAULTUOM,SHELFLIFECODETYPE,SHELFLIFEONRECEIVING,
+        LOTTABLEVALIDATIONKEY,ALLOWCONSOLIDATION,MINIMUMWAVEQTY,
+        BULKCARTONGROUP,PICKUOM,EACHKEY,
+        CASEKEY,TYPE,EFFECSTARTDATE,
+        EFFECENDDATE,CONVEYABLE,FLOWTHRUITEM,
+        NOTES1,NOTES2,VERT_STORAGE,
+        CWFLAG,VERIFYLOT04LOT05,PUTAWAYSTRATEGYKEY,
+        RETURNSLOC,QCLOC,RECEIPTVALIDATIONTEMPLATE,
+        SKUTYPE,StackLimit,MaxPalletsPerZone,
+        CCDISCREPANCYRULE,MANUALSETUPREQUIRED,QCLOCOUT,
+        OCDCATCHWHEN,OCDCATCHQTY1,OCDCATCHQTY2,
+        OCDCATCHQTY3,HASIMAGE,GUID,
+        NONSTOCKEDINDICATOR,LOTTABLE11LABEL,LOTTABLE12LABEL,
+        TOEXPIREDAYS,TODELIVERBYDAYS,TOBESTBYDAYS,
+        SNUM_POSITION,SNUM_LENGTH,SNUM_DELIMITER,
+        SNUM_DELIM_COUNT,SNUM_QUANTITY,SNUM_INCR_POS,
+        SNUM_INCR_LENGTH,SNUM_ENDTOEND,SNUM_MASK,
+        ICDLABEL4,ICDLABEL5,OCDLABEL4,
+        OCDLABEL5,ICD1UNIQUE,OCD1UNIQUE,
+        SNUMLONG_DELIMITER,SNUMLONG_FIXED,SNUM_AUTOINCREMENT,
+        ACCOUNTINGENTITY,VOICEGROUPINGID,COUNTSEQUENCE,
+        DAPICKSORT,RPLNSORT,CATCHGROSSWGT,
+        CATCHNETWGT,CATCHTAREWGT,TAREWGT1,
+        STDNETWGT1,STDGROSSWGT1,STDUOM,
+        ZERODEFAULTWGTFORPICK,FILLQTYUOM,CARTONIZEFT,
+        RECURCODE,WGTUOM,DIMENUOM,
+        CUBEUOM,STORAGETYPE,NMFCCLASS,
+        MATEABILITYCODE,LOTHOLDCODE,AUTORELEASELOTBY,
+        HOURSTOHOLDLOT,AUTORELEASELPNBY,HOURSTOHOLDLPN,
+        AMSTRATEGYKEY,TEMPFORASN,IBSUMCWFLG,
+        OBSUMCWFLG,SHOWRFCWONTRANS,PUTAWAYCLASS,
+        GROUPFTEACH,TRANSPORTATIONSERVICE,SKUFACILITYGROUP,
+        LOTCTRLATPACK,LASTCCRELEASEDATE,DEFAULTEQUIPMENTATTRIBUTE,
+        DEFAULTEQUIPMENTTYPE,DEFAULTEQUIPMENTLENGTH,BARCODECONFIGKEY,
+        AUTOASSIGNCONSLOC,CONSPICKLOCMIN,CONSPICKLOCMAX,
+        CONSPICKMINMAXUOM,CONSPICKREPLENUOM,ROUNDBACKFLUSHQTY,
+        ITEMCHARACTERISTIC1,ITEMCHARACTERISTIC2,COMMODITYCLASS,
+        STOCKCATEGORY,COUNTRYOFORIGIN,COLLECTION,
+        THEME,SEASON,STYLE,
+        COLOR,SKUSIZE,CAMPAIGNSTART,
+        CAMPAIGNEND,ALLOWMULTILOTLPN,RECEIPTUNITLABELNAME,
+        RECEIPTUNITLABELUOM,QCFIRSTCOMPL,NEWALLOCATIONSTRATEGY,
+        SLOTGROUP,PICKCONTPLACEMENT,FORCEUOMREPLENQTY,
+        DATACAPTURESTRATEGYKEY,SERIALPARCINGSTRATEGYKEY,ICWVALIDATIONUOMLEVEL,
+        OCWVALIDATIONUOMLEVEL,ICWAVGGROSSWEIGHT,ICWAVGNETWEIGHT,
+        ICWAVGTAREWEIGHT,ICWTOLERANCEPCT,OCWAVGGROSSWEIGHT,
+        OCWAVGNETWEIGHT,OCWAVGTAREWEIGHT,OCWTOLERANCEPCT,
+        STDWEIGHTUOMLEVEL,STDGROSSWEIGHT,STDNETWEIGHT,
+        STDTAREWEIGHT,REPLENSTRATKEY,SPEEDGROUPSTRATKEY,
+        OUTLOTVALIDATIONKEY,DEPARTMENT,ADDDATE,
+        ADDWHO,EDITDATE,EDITWHO,
+        EXT_UDF_STR1,EXT_UDF_STR2,EXT_UDF_STR3,
+        EXT_UDF_STR4,EXT_UDF_STR5,EXT_UDF_STR6,
+        EXT_UDF_STR7,EXT_UDF_STR8,EXT_UDF_STR9,
+        EXT_UDF_STR10,EXT_UDF_STR11,EXT_UDF_STR12,
+        EXT_UDF_STR13,EXT_UDF_STR14,EXT_UDF_STR15,
+        EXT_UDF_STR16,EXT_UDF_STR17,EXT_UDF_STR18,
+        EXT_UDF_STR19,EXT_UDF_STR20,EXT_UDF_STR21,
+        EXT_UDF_STR22,EXT_UDF_STR23,EXT_UDF_STR24,
+        EXT_UDF_STR25,EXT_UDF_STR26,EXT_UDF_STR27,
+        EXT_UDF_STR28,EXT_UDF_STR29,EXT_UDF_STR30,
+        EXT_UDF_DATE1,EXT_UDF_DATE2,EXT_UDF_DATE3,
+        EXT_UDF_DATE4,EXT_UDF_DATE5,EXT_UDF_DATE6,
+        EXT_UDF_DATE7,EXT_UDF_DATE8,EXT_UDF_DATE9,
+        EXT_UDF_DATE10,EXT_UDF_FLOAT1,EXT_UDF_FLOAT2,
+        EXT_UDF_FLOAT3,EXT_UDF_FLOAT4,EXT_UDF_FLOAT5,
+        EXT_UDF_FLOAT6,EXT_UDF_FLOAT7,EXT_UDF_FLOAT8,
+        EXT_UDF_FLOAT9,EXT_UDF_FLOAT10,EXT_UDF_LKUP1,
+        EXT_UDF_LKUP2,EXT_UDF_LKUP3,EXT_UDF_LKUP4,
+        EXT_UDF_LKUP5,EXT_UDF_LKUP6,EXT_UDF_LKUP7,
+        EXT_UDF_LKUP8,EXT_UDF_LKUP9,EXT_UDF_LKUP10,
+        ISSERIALCONTROL,BUSR11,BUSR12,
+        BUSR13,ENABLEBARCODE
+    </sql>
+</mapper>

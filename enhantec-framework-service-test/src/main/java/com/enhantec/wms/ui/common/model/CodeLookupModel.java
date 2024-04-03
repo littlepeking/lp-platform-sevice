@@ -1,23 +1,22 @@
 package com.enhantec.wms.ui.common.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import com.enhantec.framework.common.model.EHWMSModel;
 import com.enhantec.framework.config.annotations.TransField;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-/**
- * 
- * @TableName CODELKUP
- */
 @TableName(value ="CODELKUP")
+@SuperBuilder(toBuilder = true)
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CodeLookupModel extends EHWMSModel implements Serializable {
 
     @TableField(value = "LISTNAME")
