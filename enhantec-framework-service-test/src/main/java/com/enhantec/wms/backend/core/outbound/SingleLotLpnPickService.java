@@ -20,19 +20,17 @@ package com.enhantec.wms.backend.core.outbound;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
 import com.enhantec.wms.backend.common.outbound.PickDetail;
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
-import com.enhantec.wms.backend.utils.common.FulfillLogicException;
-import com.enhantec.wms.backend.utils.common.UtilHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service(WMSServiceNames.OUTBOUND_SINGLE_LOT_ID_PICK)
+@Service(WMSCoreServiceNames.OUTBOUND_SINGLE_LOT_ID_PICK)
 @AllArgsConstructor
 public class SingleLotLpnPickService extends WMSBaseService {
 

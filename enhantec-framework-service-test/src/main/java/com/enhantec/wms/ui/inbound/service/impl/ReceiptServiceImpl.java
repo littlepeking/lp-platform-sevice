@@ -32,6 +32,8 @@ import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 import com.enhantec.wms.ui.inbound.service.ReceiptService;
 import lombok.val;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -40,6 +42,8 @@ import java.util.Map;
 * @description 针对表【test_receipt】的数据库操作Service实现
 * @createDate 2022-04-18 17:37:15
 */
+
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @Service
 @DS(DSConstants.DS_DEFAULT)
 public class ReceiptServiceImpl extends EHBaseServiceImpl<ReceiptMapper, ReceiptModel>

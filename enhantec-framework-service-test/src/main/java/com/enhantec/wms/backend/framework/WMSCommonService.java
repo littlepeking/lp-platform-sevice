@@ -31,6 +31,8 @@ public class WMSCommonService {
 
         public ServiceDataMap execute(String serviceName, ServiceDataHolder serviceDataHolder){
 
+            //TODO: service permission control by user / role.
+
             WMSBaseService service = EHContextHelper.getBean(serviceName, WMSBaseService.class);
 
             service.execute(serviceDataHolder);

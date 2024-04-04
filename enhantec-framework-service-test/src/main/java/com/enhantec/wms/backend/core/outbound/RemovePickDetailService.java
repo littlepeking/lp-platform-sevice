@@ -18,7 +18,7 @@
 package com.enhantec.wms.backend.core.outbound;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
@@ -26,7 +26,7 @@ import com.enhantec.wms.backend.utils.common.UtilHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service(WMSServiceNames.OUTBOUND_REMOVE_SINGLE_LOT_ID_PD)
+@Service(WMSCoreServiceNames.OUTBOUND_REMOVE_SINGLE_LOT_ID_PD)
 @AllArgsConstructor
 public class RemovePickDetailService extends WMSBaseService {
 

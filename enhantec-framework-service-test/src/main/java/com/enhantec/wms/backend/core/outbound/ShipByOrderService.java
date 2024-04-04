@@ -17,13 +17,13 @@
 
 package com.enhantec.wms.backend.core.outbound;
 
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service(WMSServiceNames.OUTBOUND_SHIP_BY_ORDER)
+@Service(WMSCoreServiceNames.OUTBOUND_SHIP_BY_ORDER)
 @AllArgsConstructor
 public class ShipByOrderService extends WMSBaseService {
 

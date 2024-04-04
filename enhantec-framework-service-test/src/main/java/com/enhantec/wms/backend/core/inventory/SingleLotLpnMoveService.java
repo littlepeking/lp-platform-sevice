@@ -22,7 +22,7 @@ import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHDateTimeHelper;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service(WMSServiceNames.INV_SINGLE_LOT_ID_MOVE)
+@Service(WMSCoreServiceNames.INV_SINGLE_LOT_ID_MOVE)
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @AllArgsConstructor
 public class SingleLotLpnMoveService extends WMSBaseService {

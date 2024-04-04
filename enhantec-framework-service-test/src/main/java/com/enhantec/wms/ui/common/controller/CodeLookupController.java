@@ -17,7 +17,7 @@
 
 
 
-package com.enhantec.wms.ui.inbound.controller;
+package com.enhantec.wms.ui.common.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -38,8 +38,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.enhantec.wms.Constants.WMS_UI_SERVICE;
+
 @RestController
-@RequestMapping("/api/wms/common/code-lookup")
+@RequestMapping(WMS_UI_SERVICE+"/common/code-lookup")
 @RequiredArgsConstructor
 public class CodeLookupController {
 

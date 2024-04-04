@@ -17,7 +17,7 @@
 
 package com.enhantec.wms.backend.core.inventory;
 
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 
-@Service(WMSServiceNames.INV_INTERNAL_TRANSFER)
+@Service(WMSCoreServiceNames.INV_INTERNAL_TRANSFER)
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @AllArgsConstructor
 public class InternalTransferService extends WMSBaseService {

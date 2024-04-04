@@ -18,7 +18,7 @@
 package com.enhantec.wms.backend.core.inventory;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.utils.common.*;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service(WMSServiceNames.INV_HOLD)
+@Service(WMSCoreServiceNames.INV_HOLD)
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @AllArgsConstructor
 public class InventoryHoldService extends WMSBaseService {

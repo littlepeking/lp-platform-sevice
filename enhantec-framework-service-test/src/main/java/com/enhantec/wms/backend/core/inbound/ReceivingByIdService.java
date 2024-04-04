@@ -16,7 +16,7 @@
  *******************************************************************************/
 package com.enhantec.wms.backend.core.inbound;
 
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.WMSBaseService;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
-@Service(WMSServiceNames.INBOUND_RECEIVING_BY_ID)
+@Service(WMSCoreServiceNames.INBOUND_RECEIVING_BY_ID)
 @Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @AllArgsConstructor
 public class ReceivingByIdService extends WMSBaseService{

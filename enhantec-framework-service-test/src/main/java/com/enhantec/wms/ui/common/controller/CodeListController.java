@@ -17,58 +17,27 @@
 
 
 
-package com.enhantec.wms.ui.inbound.controller;
+package com.enhantec.wms.ui.common.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
 import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
-import com.enhantec.wms.ui.inbound.model.ReceiptModel;
-import com.enhantec.wms.ui.inbound.service.ReceiptDetailService;
-import com.enhantec.wms.ui.inbound.service.ReceiptService;
+import com.enhantec.wms.ui.common.service.CodeLkupService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.enhantec.wms.Constants.WMS_UI_SERVICE;
 
 @RestController
-@RequestMapping(WMS_UI_SERVICE+"/inbound/receipt")
+@RequestMapping(WMS_UI_SERVICE+"/common/code-list")
 @RequiredArgsConstructor
-public class ReceiptController {
-
-    private final ReceiptService receiptService;
-
-
-    private final ReceiptDetailService receiptDetailService;
-
-
-    @GetMapping("/findById/{id}")
-    public ReceiptModel findById(@PathVariable String id){
-        return receiptService.getById(id);
-
-    }
-
-    @PreAuthorize("hasAnyAuthority('WM_ASN')")
-    @PostMapping("/queryReceiptByPage")
-    public Page<Map<String, Object>> queryReceiptByPage(@RequestBody PageParams pageParams) {
-
-        return receiptService.queryPageData(pageParams,EHFieldNameConversionType.NONE);
-
-    }
-
-
-    @PreAuthorize("hasAnyAuthority('WM_ASN')")
-    @PostMapping("/queryReceiptDetailByPage")
-    public Page<Map<String, Object>> queryReceiptDetailByPage(@RequestBody PageParams pageParams) {
-
-        return receiptDetailService.queryPageData(pageParams,EHFieldNameConversionType.NONE);
-
-    }
-
+public class CodeListController {
 
 
 }

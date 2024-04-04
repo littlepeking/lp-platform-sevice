@@ -19,7 +19,7 @@ package com.enhantec.wms.backend.core.outbound;
 
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.wms.backend.common.inventory.LotxLocxId;
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 import com.enhantec.wms.backend.framework.ServiceDataHolder;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.framework.WMSBaseService;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service(WMSServiceNames.OUTBOUND_ADD_SINGLE_LOT_ID_PD)
+@Service(WMSCoreServiceNames.OUTBOUND_ADD_SINGLE_LOT_ID_PD)
 @AllArgsConstructor
 public class AddPickDetailService extends WMSBaseService {
 

@@ -9,6 +9,8 @@ import com.enhantec.wms.ui.common.service.CodeListService;
 import com.enhantec.wms.ui.common.mapper.CodeListMapper;
 import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -17,6 +19,8 @@ import java.util.Map;
 * @description 针对表【CODELIST】的数据库操作Service实现
 * @createDate 2024-04-01 23:19:17
 */
+
+@Transactional(rollbackFor = Exception.class,propagation = Propagation.REQUIRED)
 @Service
 public class CodeListServiceImpl extends EHBaseServiceImpl<CodeListMapper, CodeListModel>
     implements CodeListService{

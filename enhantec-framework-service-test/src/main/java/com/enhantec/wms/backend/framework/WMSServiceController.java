@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 
+import static com.enhantec.wms.Constants.WMS_APP_SERVICE;
+
 @RestController
-@RequestMapping("/api/wms-services")
+@RequestMapping(WMS_APP_SERVICE)
 @RequiredArgsConstructor
 public class WMSServiceController {
 

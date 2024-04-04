@@ -17,8 +17,8 @@
 
 package com.enhantec.wms.backend.core;
 
-public class WMSServiceNames {
-    public static final String CORE_PREFIX = "core-";
+public class WMSCoreServiceNames {
+    public static final String CORE_PREFIX = "service-core-";
 
     public static final String INBOUND_CLOSE_ASN = CORE_PREFIX + "inbound-closeASNService";
     public static final String INBOUND_RECEIVING_BY_ID = CORE_PREFIX + "inbound-receivingById";

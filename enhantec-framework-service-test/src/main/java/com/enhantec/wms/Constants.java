@@ -12,30 +12,16 @@
  *
  *             Author: John Wang
  *             Email: john.wang_ca@hotmail.com
- * 
+ *
  *******************************************************************************/
 
 
 
-package com.enhantec.wms.ui.inbound.controller;
+package com.enhantec.wms;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.enhantec.framework.common.model.PageParams;
-import com.enhantec.framework.common.utils.EHPaginationHelper;
-import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
-import com.enhantec.wms.ui.common.service.CodeLkupService;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+public class Constants {
 
-import java.util.List;
-import java.util.Map;
-
-@RestController
-@RequestMapping("/api/wms/common/code-list")
-@RequiredArgsConstructor
-public class CodeListController {
-
+  public static final String WMS_UI_SERVICE ="/api/wms/ui";
+  public static final String WMS_APP_SERVICE ="/api/wms/app";
 
 }

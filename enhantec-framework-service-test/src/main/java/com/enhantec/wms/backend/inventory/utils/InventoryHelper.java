@@ -9,7 +9,7 @@ import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.wms.backend.framework.ServiceDataMap;
 import com.enhantec.wms.backend.utils.common.*;
 import com.enhantec.wms.backend.utils.print.Labels;
-import com.enhantec.wms.backend.core.WMSServiceNames;
+import com.enhantec.wms.backend.core.WMSCoreServiceNames;
 
 import java.math.BigDecimal;
 
@@ -121,7 +121,7 @@ public class InventoryHelper {
 
         ServiceDataMap moveDO = buildParams( fromIdHashMap.get("STORERKEY"), fromId, toId,  toLoc, deltaNetWgt);
 
-        ServiceHelper.executeService(WMSServiceNames.INV_SINGLE_LOT_ID_MOVE,new ServiceDataHolder(moveDO));
+        ServiceHelper.executeService(WMSCoreServiceNames.INV_SINGLE_LOT_ID_MOVE,new ServiceDataHolder(moveDO));
 
         if (!toId.equalsIgnoreCase(fromId)){//拆分SN时 不一致
             ChangeOpenSnMarksHelper.changeOpenSnMarksBYLpn(fromIdHashMap.get("SKU"),toId,fromId);

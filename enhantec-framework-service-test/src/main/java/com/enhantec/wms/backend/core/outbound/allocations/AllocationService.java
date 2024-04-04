@@ -25,7 +25,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
-import static com.enhantec.wms.backend.core.WMSServiceNames.OUTBOUND_ALLOCATE_ORDER;
+import static com.enhantec.wms.backend.core.WMSCoreServiceNames.OUTBOUND_ALLOCATE_ORDER;
 
 
 @Service(OUTBOUND_ALLOCATE_ORDER)
