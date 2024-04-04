@@ -20,19 +20,25 @@
 package com.enhantec.framework.common.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.enhantec.framework.common.mapper.EHBaseMapper;
 import com.enhantec.framework.common.model.EHBaseModel;
+import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.service.EHBaseService;
+import com.enhantec.framework.common.utils.EHPaginationHelper;
 import com.enhantec.framework.common.utils.EHTranslationHelper;
 import com.enhantec.framework.config.TransFieldConfig;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
+import lombok.val;
 import org.apache.ibatis.binding.MapperMethod;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -207,5 +213,29 @@ public class EHBaseServiceImpl<M extends EHBaseMapper<T>, T extends EHBaseModel>
 
         });
     }
+
+    public Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper qw){
+
+        return getBaseMapper().queryPageData(page, qw);
+
+    }
+
+    public Page<Map<String,Object>> queryPageData(PageParams pageParams){
+
+        return this.queryPageData(pageParams,null);
+
+    }
+
+    public Page<Map<String,Object>> queryPageData(PageParams pageParams, EHFieldNameConversionType fieldNameConversionType){
+
+        Page pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
+
+        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams,fieldNameConversionType);
+
+        return getBaseMapper().queryPageData(pageInfo, queryWrapper);
+    }
+
+
+
 
 }

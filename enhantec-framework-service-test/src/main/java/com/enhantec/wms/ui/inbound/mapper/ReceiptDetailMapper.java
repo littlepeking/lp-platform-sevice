@@ -1,8 +1,13 @@
 package com.enhantec.wms.ui.inbound.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.mapper.EHBaseMapper;
 import com.enhantec.wms.ui.inbound.model.ReceiptDetailModel;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.MapKey;
+
+import java.util.Map;
 
 /**
 * @author johnw
@@ -11,6 +16,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.enhantec.wms.ui.inbound.ReceiptDetailModel
 */
 public interface ReceiptDetailMapper extends EHBaseMapper<ReceiptDetailModel> {
+
+    Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper ew);
 
 }
 

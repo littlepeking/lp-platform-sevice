@@ -89,15 +89,5 @@ public class CodeLookupController {
 
     }
 
-//    @PreAuthorize("isAuthenticated()")
-//    @PostMapping("/queryByPage")
-//    public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
-//
-//        Page pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
-//
-//        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.NONE);
-//
-//    }
-
 
 }

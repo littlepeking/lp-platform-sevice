@@ -44,9 +44,6 @@ import java.util.Map;
 @Repository
 public interface ReceiptMapper extends EHBaseMapper<ReceiptModel> {
 
-    @MapKey("id")
-    Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper ew);
-
 }
 
 

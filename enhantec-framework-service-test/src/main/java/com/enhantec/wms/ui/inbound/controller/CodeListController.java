@@ -37,19 +37,5 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CodeListController {
 
-//    @PreAuthorize("isAuthenticated()")
-//    @PostMapping("/queryByPage")
-//    public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
-//
-//        Page pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
-//
-//        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.NONE);
-//
-//        Page<Map<String, Object>> res = receiptService.queryPageData(pageInfo, queryWrapper);
-//
-//        return res;
-//    }
-//
-
 
 }

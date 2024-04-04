@@ -23,7 +23,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.enhantec.demo.ui.inbound.model.TestReceipt;
+import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.service.EHBaseService;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 
 import java.util.List;
@@ -37,4 +39,8 @@ import java.util.Map;
 public interface ReceiptService extends EHBaseService<ReceiptModel> {
 
     Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+
+    Page<Map<String,Object>> queryPageData(PageParams pageParams, EHFieldNameConversionType fieldNameConversionType);
+
+    Page<Map<String,Object>> queryPageData(PageParams pageParams);
 }

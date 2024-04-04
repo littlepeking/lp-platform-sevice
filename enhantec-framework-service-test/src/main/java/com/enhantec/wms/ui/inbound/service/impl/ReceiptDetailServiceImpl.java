@@ -1,10 +1,13 @@
 package com.enhantec.wms.ui.inbound.service.impl;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.enhantec.framework.common.service.impl.EHBaseServiceImpl;
+import com.enhantec.framework.common.utils.DSConstants;
 import com.enhantec.wms.ui.inbound.model.ReceiptDetailModel;
 import com.enhantec.wms.ui.inbound.service.ReceiptDetailService;
 import com.enhantec.wms.ui.inbound.mapper.ReceiptDetailMapper;
 import org.springframework.stereotype.Service;
+
 
 /**
 * @author johnw
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2024-04-03 09:59:07
 */
 @Service
+@DS(DSConstants.DS_DEFAULT)
 public class ReceiptDetailServiceImpl extends EHBaseServiceImpl<ReceiptDetailMapper, ReceiptDetailModel>
     implements ReceiptDetailService {
 

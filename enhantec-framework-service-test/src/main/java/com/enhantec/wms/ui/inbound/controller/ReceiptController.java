@@ -24,6 +24,7 @@ import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
 import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
+import com.enhantec.wms.ui.inbound.service.ReceiptDetailService;
 import com.enhantec.wms.ui.inbound.service.ReceiptService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -40,6 +41,9 @@ public class ReceiptController {
     private final ReceiptService receiptService;
 
 
+    private final ReceiptDetailService receiptDetailService;
+
+
     @GetMapping("/findById/{id}")
     public ReceiptModel findById(@PathVariable String id){
         return receiptService.getById(id);
@@ -47,16 +51,20 @@ public class ReceiptController {
     }
 
     @PreAuthorize("hasAnyAuthority('WM_ASN')")
-    @PostMapping("/queryByPage")
-    public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
+    @PostMapping("/queryReceiptByPage")
+    public Page<Map<String, Object>> queryReceiptByPage(@RequestBody PageParams pageParams) {
 
-        Page pageInfo = EHPaginationHelper.buildPageInfo(pageParams);
+        return receiptService.queryPageData(pageParams,EHFieldNameConversionType.NONE);
 
-        val queryWrapper = EHPaginationHelper.buildQueryWrapperByPageParams(pageParams, EHFieldNameConversionType.NONE);
+    }
 
-        Page<Map<String, Object>> res = receiptService.queryPageData(pageInfo, queryWrapper);
 
-        return res;
+    @PreAuthorize("hasAnyAuthority('WM_ASN')")
+    @PostMapping("/queryReceiptDetailByPage")
+    public Page<Map<String, Object>> queryReceiptDetailByPage(@RequestBody PageParams pageParams) {
+
+        return receiptDetailService.queryPageData(pageParams,EHFieldNameConversionType.NONE);
+
     }
 
 

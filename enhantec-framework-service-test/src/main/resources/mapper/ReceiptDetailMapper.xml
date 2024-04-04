@@ -300,4 +300,14 @@
         PRODLOTEXPECTED,LASTSHIPPEDLOC,ELOTTABLE21,
         LASTID
     </sql>
+
+    <select id="queryPageData" resultType="java.util.Map">
+        select
+            serialKey,whseId, storerKey, receiptKey, poKey, receiptDate, externReceiptKey,
+            externalReceiptKey2, type, status, notes, closedDate, isConfirmed, isConfirmedUser, isConfirmedUser2,
+            addWho, addDate, editWho, editDate
+        from RECEIPT
+                 ${ew.customSqlSegment}
+    </select>
+
 </mapper>

@@ -20,16 +20,20 @@
 package com.enhantec.framework.common.service;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.toolkit.SqlHelper;
 import com.enhantec.framework.common.exception.EHApplicationException;
 import com.enhantec.framework.common.mapper.EHBaseMapper;
 import com.enhantec.framework.common.model.EHBaseModel;
+import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.config.TransFieldConfig;
+import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -239,5 +243,12 @@ public interface EHBaseService<T extends EHBaseModel> extends IService<T> {
     }
 
     T saveOrUpdateRetE(T model);
+
+
+    Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+
+    Page<Map<String, Object>> queryPageData(PageParams pageParams);
+
+    Page<Map<String, Object>> queryPageData(PageParams pageParams, EHFieldNameConversionType fieldNameConversionType);
 
 }
