@@ -13,26 +13,18 @@ import java.time.LocalDateTime;
 
 @TableName(value ="RECEIPTDETAIL")
 @Data
-
 public class ReceiptDetailModel extends EHWMSModel implements Serializable {
     /**
      * 
      */
-    @TableId(value = "RECEIPTKEY")
+    @TableField(value = "RECEIPTKEY")
     private String receiptKey;
 
     /**
      * 
      */
-    @TableId(value = "RECEIPTLINENUMBER")
+    @TableField(value = "RECEIPTLINENUMBER")
     private String receiptLineNumber;
-
-    /**
-     * 
-     */
-    @TableField(value = "SERIALKEY")
-    private Integer serialKey;
-
     /**
      * 
      */

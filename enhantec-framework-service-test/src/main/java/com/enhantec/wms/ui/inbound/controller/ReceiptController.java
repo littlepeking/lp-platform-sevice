@@ -46,8 +46,7 @@ public class ReceiptController {
 
     }
 
-    @PreAuthorize("permitAll()")
-    //@PreAuthorize("hasAnyAuthority('SCHEDULER_JOB_DEFINITION')")
+    @PreAuthorize("hasAnyAuthority('WM_ASN')")
     @PostMapping("/queryByPage")
     public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
 

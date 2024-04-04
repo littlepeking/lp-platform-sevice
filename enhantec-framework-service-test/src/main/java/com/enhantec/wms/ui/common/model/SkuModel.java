@@ -273,11 +273,11 @@ public class SkuModel extends EHWMSModel implements Serializable {
 
 
     @TableField(value = "LOTTABLE11LABEL")
-    private String lottable11label;
+    private String lottable11Label;
 
 
     @TableField(value = "LOTTABLE12LABEL")
-    private String lottable12label;
+    private String lottable12Label;
 
 
     @TableField(value = "SUSR1")
