@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.enhantec.wms.ui.common.mapper.StorerMapper">
+
+    <resultMap id="BaseResultMap" type="com.enhantec.wms.ui.common.model.StorerModel">
+            <id property="serialKey" column="SERIALKEY" jdbcType="INTEGER"/>
+            <result property="storerKey" column="STORERKEY" jdbcType="VARCHAR"/>
+            <result property="type" column="TYPE" jdbcType="VARCHAR"/>
+            <result property="whseId" column="WHSEID" jdbcType="VARCHAR"/>
+            <result property="company" column="COMPANY" jdbcType="VARCHAR"/>
+            <result property="address1" column="ADDRESS1" jdbcType="VARCHAR"/>
+            <result property="address2" column="ADDRESS2" jdbcType="VARCHAR"/>
+            <result property="address3" column="ADDRESS3" jdbcType="VARCHAR"/>
+            <result property="address4" column="ADDRESS4" jdbcType="VARCHAR"/>
+            <result property="city" column="CITY" jdbcType="VARCHAR"/>
+            <result property="state" column="STATE" jdbcType="VARCHAR"/>
+            <result property="zip" column="ZIP" jdbcType="VARCHAR"/>
+            <result property="country" column="COUNTRY" jdbcType="VARCHAR"/>
+            <result property="isoCntryCode" column="ISOCNTRYCODE" jdbcType="VARCHAR"/>
+            <result property="contact1" column="CONTACT1" jdbcType="VARCHAR"/>
+            <result property="contact2" column="CONTACT2" jdbcType="VARCHAR"/>
+            <result property="phone1" column="PHONE1" jdbcType="VARCHAR"/>
+            <result property="phone2" column="PHONE2" jdbcType="VARCHAR"/>
+            <result property="fax1" column="FAX1" jdbcType="VARCHAR"/>
+            <result property="fax2" column="FAX2" jdbcType="VARCHAR"/>
+            <result property="email1" column="EMAIL1" jdbcType="VARCHAR"/>
+            <result property="email2" column="EMAIL2" jdbcType="VARCHAR"/>
+            <result property="bContact1" column="B_CONTACT1" jdbcType="VARCHAR"/>
+            <result property="bContact2" column="B_CONTACT2" jdbcType="VARCHAR"/>
+            <result property="bCompany" column="B_COMPANY" jdbcType="VARCHAR"/>
+            <result property="bAddress1" column="B_ADDRESS1" jdbcType="VARCHAR"/>
+            <result property="bAddress2" column="B_ADDRESS2" jdbcType="VARCHAR"/>
+            <result property="bAddress3" column="B_ADDRESS3" jdbcType="VARCHAR"/>
+            <result property="bAddress4" column="B_ADDRESS4" jdbcType="VARCHAR"/>
+            <result property="bCity" column="B_CITY" jdbcType="VARCHAR"/>
+            <result property="bState" column="B_STATE" jdbcType="VARCHAR"/>
+            <result property="bZip" column="B_ZIP" jdbcType="VARCHAR"/>
+            <result property="bCountry" column="B_COUNTRY" jdbcType="VARCHAR"/>
+            <result property="bIsoCntryCode" column="B_ISOCNTRYCODE" jdbcType="VARCHAR"/>
+            <result property="bPhone1" column="B_PHONE1" jdbcType="VARCHAR"/>
+            <result property="bPhone2" column="B_PHONE2" jdbcType="VARCHAR"/>
+            <result property="bFax1" column="B_FAX1" jdbcType="VARCHAR"/>
+            <result property="bFax2" column="B_FAX2" jdbcType="VARCHAR"/>
+            <result property="bEmail1" column="B_EMAIL1" jdbcType="VARCHAR"/>
+            <result property="bEmail2" column="B_EMAIL2" jdbcType="VARCHAR"/>
+            <result property="cartonGroup" column="CARTONGROUP" jdbcType="VARCHAR"/>
+            <result property="status" column="STATUS" jdbcType="VARCHAR"/>
+            <result property="activeDate" column="ACTIVEDATE" jdbcType="TIMESTAMP"/>
+            <result property="inactiveDate" column="INACTIVEDATE" jdbcType="TIMESTAMP"/>
+            <result property="defaultStrategy" column="DEFAULTSTRATEGY" jdbcType="VARCHAR"/>
+            <result property="defaultSkuRotation" column="DEFAULTSKUROTATION" jdbcType="VARCHAR"/>
+            <result property="defaultRotation" column="DEFAULTROTATION" jdbcType="VARCHAR"/>
+            <result property="title1" column="TITLE1" jdbcType="VARCHAR"/>
+            <result property="title2" column="TITLE2" jdbcType="VARCHAR"/>
+            <result property="description" column="DESCRIPTION" jdbcType="VARCHAR"/>
+            <result property="susr1" column="SUSR1" jdbcType="VARCHAR"/>
+            <result property="susr2" column="SUSR2" jdbcType="VARCHAR"/>
+            <result property="susr3" column="SUSR3" jdbcType="VARCHAR"/>
+            <result property="susr4" column="SUSR4" jdbcType="VARCHAR"/>
+            <result property="susr5" column="SUSR5" jdbcType="VARCHAR"/>
+            <result property="susr6" column="SUSR6" jdbcType="VARCHAR"/>
+
+            <result property="notes1" column="NOTES1" jdbcType="VARCHAR"/>
+            <result property="notes2" column="NOTES2" jdbcType="VARCHAR"/>
+            <result property="enableOppXDock" column="ENABLEOPPXDOCK" jdbcType="VARCHAR"/>
+            <result property="receiptValidationTemplate" column="RECEIPTVALIDATIONTEMPLATE" jdbcType="VARCHAR"/>
+            <result property="defaultPutawayStrategy" column="DEFAULTPUTAWAYSTRATEGY" jdbcType="VARCHAR"/>
+
+            <result property="defaultReturnsLoc" column="DEFAULTRETURNSLOC" jdbcType="VARCHAR"/>
+            <result property="defaultQcLoc" column="DEFAULTQCLOC" jdbcType="VARCHAR"/>
+
+            <result property="skuSetupRequired" column="SKUSETUPREQUIRED" jdbcType="VARCHAR"/>
+
+            <result property="address5" column="ADDRESS5" jdbcType="VARCHAR"/>
+            <result property="address6" column="ADDRESS6" jdbcType="VARCHAR"/>
+
+            <result property="locale" column="LOCALE" jdbcType="VARCHAR"/>
+
+            <result property="externStorerKey" column="EXTERNSTORERKEY" jdbcType="VARCHAR"/>
+            <result property="defaultNewAllocationStrategy" column="DEFAULTNEWALLOCATIONSTRATEGY" jdbcType="VARCHAR"/>
+
+            <result property="addDate" column="ADDDATE" jdbcType="TIMESTAMP"/>
+            <result property="addWho" column="ADDWHO" jdbcType="VARCHAR"/>
+            <result property="editDate" column="EDITDATE" jdbcType="TIMESTAMP"/>
+            <result property="editWho" column="EDITWHO" jdbcType="VARCHAR"/>
+            <result property="defaultLottableValidationKey" column="DEFAULTLOTTABLEVALIDATIONKEY" jdbcType="VARCHAR"/>
+
+            <result property="extUdfStr1" column="EXT_UDF_STR1" jdbcType="VARCHAR"/>
+            <result property="extUdfStr2" column="EXT_UDF_STR2" jdbcType="VARCHAR"/>
+            <result property="extUdfStr3" column="EXT_UDF_STR3" jdbcType="VARCHAR"/>
+            <result property="extUdfStr4" column="EXT_UDF_STR4" jdbcType="VARCHAR"/>
+            <result property="extUdfStr5" column="EXT_UDF_STR5" jdbcType="VARCHAR"/>
+            <result property="extUdfStr6" column="EXT_UDF_STR6" jdbcType="VARCHAR"/>
+            <result property="extUdfStr7" column="EXT_UDF_STR7" jdbcType="VARCHAR"/>
+            <result property="extUdfStr8" column="EXT_UDF_STR8" jdbcType="VARCHAR"/>
+            <result property="extUdfStr9" column="EXT_UDF_STR9" jdbcType="VARCHAR"/>
+            <result property="extUdfStr10" column="EXT_UDF_STR10" jdbcType="VARCHAR"/>
+            <result property="extUdfStr11" column="EXT_UDF_STR11" jdbcType="VARCHAR"/>
+            <result property="extUdfStr12" column="EXT_UDF_STR12" jdbcType="VARCHAR"/>
+            <result property="extUdfStr13" column="EXT_UDF_STR13" jdbcType="VARCHAR"/>
+            <result property="extUdfStr14" column="EXT_UDF_STR14" jdbcType="VARCHAR"/>
+            <result property="extUdfStr15" column="EXT_UDF_STR15" jdbcType="VARCHAR"/>
+            <result property="extUdfStr16" column="EXT_UDF_STR16" jdbcType="VARCHAR"/>
+            <result property="extUdfStr17" column="EXT_UDF_STR17" jdbcType="VARCHAR"/>
+            <result property="extUdfStr18" column="EXT_UDF_STR18" jdbcType="VARCHAR"/>
+            <result property="extUdfStr19" column="EXT_UDF_STR19" jdbcType="VARCHAR"/>
+            <result property="extUdfStr20" column="EXT_UDF_STR20" jdbcType="VARCHAR"/>
+            <result property="extUdfStr21" column="EXT_UDF_STR21" jdbcType="VARCHAR"/>
+            <result property="extUdfStr22" column="EXT_UDF_STR22" jdbcType="VARCHAR"/>
+            <result property="extUdfStr23" column="EXT_UDF_STR23" jdbcType="VARCHAR"/>
+            <result property="extUdfStr24" column="EXT_UDF_STR24" jdbcType="VARCHAR"/>
+            <result property="extUdfStr25" column="EXT_UDF_STR25" jdbcType="VARCHAR"/>
+            <result property="extUdfStr26" column="EXT_UDF_STR26" jdbcType="VARCHAR"/>
+            <result property="extUdfStr27" column="EXT_UDF_STR27" jdbcType="VARCHAR"/>
+            <result property="extUdfStr28" column="EXT_UDF_STR28" jdbcType="VARCHAR"/>
+            <result property="extUdfStr29" column="EXT_UDF_STR29" jdbcType="VARCHAR"/>
+            <result property="extUdfStr30" column="EXT_UDF_STR30" jdbcType="VARCHAR"/>
+            <result property="extUdfStr31" column="EXT_UDF_STR31" jdbcType="VARCHAR"/>
+            <result property="extUdfStr32" column="EXT_UDF_STR32" jdbcType="VARCHAR"/>
+            <result property="extUdfStr33" column="EXT_UDF_STR33" jdbcType="VARCHAR"/>
+            <result property="extUdfStr34" column="EXT_UDF_STR34" jdbcType="VARCHAR"/>
+            <result property="extUdfDate1" column="EXT_UDF_DATE1" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate2" column="EXT_UDF_DATE2" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate3" column="EXT_UDF_DATE3" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate4" column="EXT_UDF_DATE4" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate5" column="EXT_UDF_DATE5" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate6" column="EXT_UDF_DATE6" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate7" column="EXT_UDF_DATE7" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate8" column="EXT_UDF_DATE8" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate9" column="EXT_UDF_DATE9" jdbcType="TIMESTAMP"/>
+            <result property="extUdfDate10" column="EXT_UDF_DATE10" jdbcType="TIMESTAMP"/>
+            <result property="extUdfFloat1" column="EXT_UDF_FLOAT1" jdbcType="FLOAT"/>
+            <result property="extUdfFloat2" column="EXT_UDF_FLOAT2" jdbcType="FLOAT"/>
+            <result property="extUdfFloat3" column="EXT_UDF_FLOAT3" jdbcType="FLOAT"/>
+            <result property="extUdfFloat4" column="EXT_UDF_FLOAT4" jdbcType="FLOAT"/>
+            <result property="extUdfFloat5" column="EXT_UDF_FLOAT5" jdbcType="FLOAT"/>
+            <result property="extUdfFloat6" column="EXT_UDF_FLOAT6" jdbcType="FLOAT"/>
+            <result property="extUdfFloat7" column="EXT_UDF_FLOAT7" jdbcType="FLOAT"/>
+            <result property="extUdfFloat8" column="EXT_UDF_FLOAT8" jdbcType="FLOAT"/>
+            <result property="extUdfFloat9" column="EXT_UDF_FLOAT9" jdbcType="FLOAT"/>
+            <result property="extUdfFloat10" column="EXT_UDF_FLOAT10" jdbcType="FLOAT"/>
+            <result property="extUdfLkup1" column="EXT_UDF_LKUP1" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup2" column="EXT_UDF_LKUP2" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup3" column="EXT_UDF_LKUP3" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup4" column="EXT_UDF_LKUP4" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup5" column="EXT_UDF_LKUP5" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup6" column="EXT_UDF_LKUP6" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup7" column="EXT_UDF_LKUP7" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup8" column="EXT_UDF_LKUP8" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup9" column="EXT_UDF_LKUP9" jdbcType="VARCHAR"/>
+            <result property="extUdfLkup10" column="EXT_UDF_LKUP10" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        STORERKEY,TYPE,SERIALKEY,
+        WHSEID,SOURCEVERSION,COMPANY,
+        VAT,ADDRESS1,ADDRESS2,
+        ADDRESS3,ADDRESS4,CITY,
+        STATE,ZIP,COUNTRY,
+        ISOCNTRYCODE,CONTACT1,CONTACT2,
+        PHONE1,PHONE2,FAX1,
+        FAX2,EMAIL1,EMAIL2,
+        B_CONTACT1,B_CONTACT2,B_COMPANY,
+        B_ADDRESS1,B_ADDRESS2,B_ADDRESS3,
+        B_ADDRESS4,B_CITY,B_STATE,
+        B_ZIP,B_COUNTRY,B_ISOCNTRYCODE,
+        B_PHONE1,B_PHONE2,B_FAX1,
+        B_FAX2,B_EMAIL1,B_EMAIL2,
+        CREDITLIMIT,CARTONGROUP,PICKCODE,
+        CREATEPATASKONRFRECEIPT,CALCULATEPUTAWAYLOCATION,STATUS,
+        DEFAULTSTRATEGY,DEFAULTSKUROTATION,DEFAULTROTATION,
+        SCAC_CODE,TITLE1,TITLE2,
+        DESCRIPTION,SUSR1,SUSR2,
+        SUSR3,SUSR4,SUSR5,
+        SUSR6,MULTIZONEPLPA,CWOFLAG,
+        ROLLRECEIPT,NOTES1,NOTES2,
+        APPORTIONRULE,ENABLEOPPXDOCK,ALLOWOVERSHIPMENT,
+        MAXIMUMORDERS,MINIMUMPERCENT,ORDERDATESTARTDAYS,
+        ORDERDATEENDDAYS,ORDERTYPERESTRICT01,ORDERTYPERESTRICT02,
+        ORDERTYPERESTRICT03,ORDERTYPERESTRICT04,ORDERTYPERESTRICT05,
+        ORDERTYPERESTRICT06,OPPORDERSTRATEGYKEY,RECEIPTVALIDATIONTEMPLATE,
+        ALLOWAUTOCLOSEFORPO,ALLOWAUTOCLOSEFORASN,ALLOWAUTOCLOSEFORPS,
+        ALLOWSYSTEMGENERATEDLPN,ALLOWDUPLICATELICENSEPLATES,ALLOWCOMMINGLEDLPN,
+        LPNBARCODESYMBOLOGY,LPNBARCODEFORMAT,ALLOWSINGLESCANRECEIVING,
+        LPNLENGTH,APPLICATIONID,SSCC1STDIGIT,
+        UCCVENDORNUMBER,CASELABELTYPE,AUTOPRINTLABELLPN,
+        AUTOPRINTLABELPUTAWAY,LPNSTARTNUMBER,NEXTLPNNUMBER,
+        LPNROLLBACKNUMBER,BARCODECONFIGKEY,DEFAULTPUTAWAYSTRATEGY,
+        AUTOCLOSEASN,AUTOCLOSEPO,TRACKINVENTORYBY,
+        DUPCASEID,DEFAULTRETURNSLOC,DEFAULTQCLOC,
+        PISKUXLOC,CCSKUXLOC,CCDISCREPANCYRULE,
+        CCADJBYRF,ORDERBREAKDEFAULT,SKUSETUPREQUIRED,
+        DEFAULTQCLOCOUT,ENABLEPACKINGDEFAULT,DEFAULTPACKINGLOCATION,
+        GENERATEPACKLIST,PACKINGVALIDATIONTEMPLATE,INSPECTATPACK,
+        ADDRESSOVERWRITEINDICATOR,ACCOUNTINGENTITY,CREATEOPPXDTASKS,
+        ISSUEOPPXDTASKS,OPPXDPICKFROM,OBXDSTAGE,
+        KSHIP_CARRIER,SPSUOMWEIGHT,SPSUOMDIMENSION,
+        DEFDAPICKSORT,DEFRPLNSORT,REQREASONSHORTSHIP,
+        EXPLODELPNLENGTH,EXPLODELPNROLLBACKNUMBER,EXPLODELPNSTARTNUMBER,
+        EXPLODENEXTLPNNUMBER,OWNERPREFIX,CONTAINEREXCHANGEFLAG,
+        CARTONIZEFTDFLT,DEFFTLABELPRINT,DEFFTTASKCONTROL,
+        MEASURECODE,WGTUOM,DIMENUOM,
+        CUBEUOM,CURRCODE,TAXGROUP,
+        DEFCORPCODE,SURCHGBASETEMP,AMBTEMPERATURE,
+        INVOICETERMS,ARCORP,ARDEPT,
+        ARACCT,INVOICELEVEL,NONNEGLEVEL,
+        TAXID,DUNSID,RECURCODE,
+        QFSURCHARGE,BFSURCHARGE,TAXEXEMPT,
+        TAXEXEMPTCODE,TIMEZONE,PLANDAYS,
+        ARCHIVEPLANNINGDAYS,ARCHIVEREPORTINGDATA,PLANENABLED,
+        DEFAULTHOURLYRATE,DISTCALCMETHOD,MAXCORNERANGLE,
+        SAVESTANDARDSAUDIT,ADDRESS5,ADDRESS6,
+        PARENT,SPSACCOUNTNUM,SPSCOSTCENTER,
+        SPSRETURNLABEL,AMSTRATEGYKEY,TEMPFORASN,
+        MIXEDLPNPUTSTRATEGY,GROUPFTEACHDFLT,ALLOCATEFTONCLOSE,
+        SPS_SCAC,SPSAPISTRATEGYKEY,PRINTPACKLIST,
+        PRINTPACKTEMPLATE,PRINTCONTENTSREPORT,PKTRACKINGID,
+        AUTOPRINTADDRESSLABEL,AUTOPRINTORDERLABELS,LOCALE,
+        PAYROLLPERIOD,INITIALPAYROLLPERIODENDDATE,PAYROLLEXTRACTFOLDER,
+        INCREMENTALEXTRACT,DAYBOUNDARYMINUTES,AUTOMATICFIRSTACTIVITY,
+        VENDORCOMPLYSTRATEGYKEY,BACKORDER,BOTYPE,
+        DEFAULTTRANSPORTATIONSERVICE,DEFAULTEQUIPMENTATTRIBUTE,DEFAULTEQUIPMENTTYPE,
+        DEFAULTEQUIPMENTLENGTH,MIXPALLETPUTAWAYMETHOD,DFLTEQUIPMENTFORASSGN,
+        DFLTEQUIPMENTFORPALLET,RFAUTOFILLRCVLPN,INBOUNDLPNLENGTH,
+        INBOUNDLPNPREFIX,RFRCVAUTOPRINTLPN,RECEIPTUNITLABELNAME,
+        RECEIPTUNITLABELUOM,LASTSHIPPEDLOTCTRL,ALLOCATIONLOTLIMIT,
+        OUTLABELSREQUIREDTOSHIP,OUTLABELSREQUIREDTOBOL,OUTBOUNDLABELSLEVEL,
+        OUTBOUNDLABELSCOUNTLEVEL,STANDARDOUTBOUNDLABELPREFIX,USEPARTNERLPNCONTROL,
+        EXTERNSTORERKEY,DEFAULTNEWALLOCATIONSTRATEGY,MINSHELFLIFEOVERRIDEPCT,
+        AUTOFINALIZEPRODORDER,CREATEMOVESFROMPROD,PRODCOUNTLOC,
+        SHIPTOGROUP,PACKINGTOIDPREFIX,PACKINGTOIDLENGTH,
+        QUARANTINEINDICATOR,CDOFLAG,ADDDATE,
+        ADDWHO,EDITDATE,EDITWHO,
+        DEFAULTLOTTABLEVALIDATIONKEY,DFLTUSERAINBOW,RECPUT,
+        PROMPTRECFORPUT,PUTSEQ,AUTOPRINTLABELIFORDERISPACKED,
+        DEFAULTOUTLOTVALIDATIONKEY,LOADTOIDLENGTH,LOADTOIDFORMAT,
+        LOADTOIDPREFIX,LOADFROMIDPREFIXES,CARRIERLOADCOMMINGLEGROUP,
+        EXT_UDF_STR1,EXT_UDF_STR2,EXT_UDF_STR3,
+        EXT_UDF_STR4,EXT_UDF_STR5,EXT_UDF_STR6,
+        EXT_UDF_STR7,EXT_UDF_STR8,EXT_UDF_STR9,
+        EXT_UDF_STR10,EXT_UDF_STR11,EXT_UDF_STR12,
+        EXT_UDF_STR13,EXT_UDF_STR14,EXT_UDF_STR15,
+        EXT_UDF_STR16,EXT_UDF_STR17,EXT_UDF_STR18,
+        EXT_UDF_STR19,EXT_UDF_STR20,EXT_UDF_STR21,
+        EXT_UDF_STR22,EXT_UDF_STR23,EXT_UDF_STR24,
+        EXT_UDF_STR25,EXT_UDF_STR26,EXT_UDF_STR27,
+        EXT_UDF_STR28,EXT_UDF_STR29,EXT_UDF_STR30,
+        EXT_UDF_STR31,EXT_UDF_STR32,EXT_UDF_STR33,
+        EXT_UDF_STR34,EXT_UDF_DATE1,EXT_UDF_DATE2,
+        EXT_UDF_DATE3,EXT_UDF_DATE4,EXT_UDF_DATE5,
+        EXT_UDF_DATE6,EXT_UDF_DATE7,EXT_UDF_DATE8,
+        EXT_UDF_DATE9,EXT_UDF_DATE10,EXT_UDF_FLOAT1,
+        EXT_UDF_FLOAT2,EXT_UDF_FLOAT3,EXT_UDF_FLOAT4,
+        EXT_UDF_FLOAT5,EXT_UDF_FLOAT6,EXT_UDF_FLOAT7,
+        EXT_UDF_FLOAT8,EXT_UDF_FLOAT9,EXT_UDF_FLOAT10,
+        EXT_UDF_LKUP1,EXT_UDF_LKUP2,EXT_UDF_LKUP3,
+        EXT_UDF_LKUP4,EXT_UDF_LKUP5,EXT_UDF_LKUP6,
+        EXT_UDF_LKUP7,EXT_UDF_LKUP8,EXT_UDF_LKUP9,
+        EXT_UDF_LKUP10,ACTIVEDATE,INACTIVEDATE
+    </sql>
+
+    <select id="queryPageData" resultType="java.util.Map">
+        select * from
+            (select
+             serialKey, storerKey,description,company,address1,address2,address3,address4
+            from STORER where type = 1) StorerAlias
+        ${ew.customSqlSegment}
+    </select>
+</mapper>
