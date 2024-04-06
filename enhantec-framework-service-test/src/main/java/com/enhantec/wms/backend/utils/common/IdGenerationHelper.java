@@ -257,7 +257,7 @@ public class IdGenerationHelper {
         return getNCounter("System",KeyName,Count,FirstValue);
     }
 
-    public static int getNCounter(String UserID,String KeyName,int Count,int FirstValue)
+    public static int getNCounter(String userId,String KeyName,int Count,int FirstValue)
     {
 
             int result=0;
@@ -270,7 +270,7 @@ public class IdGenerationHelper {
             {
                 result=(int) seqHashMap.get("KEYCOUNT")+1;
                 DBHelper.executeUpdate("update ncounter set KeyCount=KeyCount+"+Integer.toString(Count)
-                        +",EditWHo=?,EditDate=? where KeyName=?", new Object[]{UserID.toUpperCase()
+                        +",EditWHo=?,EditDate=? where KeyName=?", new Object[]{userId.toUpperCase()
                         , UtilHelper.getCurrentSqlDate11(), KeyName.toUpperCase()});
             }
             else
@@ -278,7 +278,7 @@ public class IdGenerationHelper {
                 if (FirstValue<=0) ExceptionHelper.throwRfFulfillLogicException("ncounter("+KeyName+") load error");
                 result=FirstValue;
                 DBHelper.executeUpdate("insert into ncounter(KeyName,KeyCount,AddWHo,EditWHo) "
-                        +" values('"+KeyName.toUpperCase()+"',"+Integer.toString(Count+FirstValue-1)+",'"+UserID+"','"+UserID+"')", new Object[]{});
+                        +" values('"+KeyName.toUpperCase()+"',"+Integer.toString(Count+FirstValue-1)+",'"+userId+"','"+userId+"')", new Object[]{});
             }
             return result;
 

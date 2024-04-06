@@ -21,14 +21,13 @@ package com.enhantec.wms.ui.inbound.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
-import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
-import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
+import com.enhantec.wms.ui.inbound.model.ReceiptDetailModel;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
+import com.enhantec.wms.ui.inbound.service.ReceiptDetailService;
 import com.enhantec.wms.ui.inbound.service.ReceiptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -36,33 +35,29 @@ import java.util.Map;
 import static com.enhantec.wms.Constants.WMS_UI_SERVICE;
 
 @RestController
-@RequestMapping(WMS_UI_SERVICE+"/inbound/receipt")
+@RequestMapping(WMS_UI_SERVICE+"/inbound/receiptDetail")
 @RequiredArgsConstructor
-public class ReceiptController {
+public class ReceiptDetailController {
 
-    private final ReceiptService receiptService;
+
+    private final ReceiptDetailService receiptDetailService;
 
 
     @GetMapping("/findById/{id}")
-    public ReceiptModel findById(@PathVariable String id){
-        return receiptService.getById(id);
+    public ReceiptDetailModel findById(@PathVariable String id){
+        return receiptDetailService.getById(id);
 
     }
+
 
     @PreAuthorize("hasAnyAuthority('WM_ASN')")
     @PostMapping("/queryByPage")
     public Page<Map<String, Object>> queryByPage(@RequestBody PageParams pageParams) {
 
-        return receiptService.queryPageData(pageParams,EHFieldNameConversionType.NONE);
+        return receiptDetailService.queryPageData(pageParams,EHFieldNameConversionType.NONE);
 
     }
 
-    @PreAuthorize("hasAnyAuthority('WM_ASN')")
-    @PostMapping("/createOrUpdate")
-    public ReceiptModel createOrUpdate(@RequestBody ReceiptModel receiptModel){
 
-        return receiptService.saveOrUpdateRetE(receiptModel);
-
-    }
 
 }

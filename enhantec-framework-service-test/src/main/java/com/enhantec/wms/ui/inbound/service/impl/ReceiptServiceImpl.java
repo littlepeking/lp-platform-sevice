@@ -25,8 +25,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.common.service.impl.EHBaseServiceImpl;
 import com.enhantec.framework.common.utils.DSConstants;
+import com.enhantec.framework.common.utils.EHContextHelper;
 import com.enhantec.framework.common.utils.EHPaginationHelper;
 import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
+import com.enhantec.wms.backend.utils.common.IdGenerationHelper;
 import com.enhantec.wms.ui.inbound.mapper.ReceiptMapper;
 import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 import com.enhantec.wms.ui.inbound.service.ReceiptService;
@@ -34,6 +36,7 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
 
@@ -48,6 +51,20 @@ import java.util.Map;
 @DS(DSConstants.DS_DEFAULT)
 public class ReceiptServiceImpl extends EHBaseServiceImpl<ReceiptMapper, ReceiptModel>
     implements ReceiptService {
+
+
+  public ReceiptModel saveOrUpdateRetE(ReceiptModel receiptModel){
+
+      if (!StringUtils.hasLength(receiptModel.getId())) {
+          receiptModel.setReceiptKey(IdGenerationHelper.getNCounterStrWithLength("RECEIPTKEY",10));
+          receiptModel.setWhseId(EHContextHelper.getCurrentOrgId());//因为whseId没有实际用途，这里为了兼容infor wms使用，这里仅使用orgId代替
+      }
+
+      return  super.saveOrUpdateRetE(receiptModel);
+
+
+  }
+
 
 }
 

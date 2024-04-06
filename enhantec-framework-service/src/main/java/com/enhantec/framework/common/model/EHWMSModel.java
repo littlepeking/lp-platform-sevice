@@ -20,6 +20,7 @@
 package com.enhantec.framework.common.model;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class EHWMSModel extends EHBaseModel{
 
-    @TableId("serialKey")
+    @TableId(value = "serialKey",type = IdType.AUTO)
     String serialKey;
 
     public String getId(){

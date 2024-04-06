@@ -9,15 +9,11 @@
         <id property="receiptLineNumber" column="RECEIPTLINENUMBER" jdbcType="VARCHAR"/>
         <result property="serialKey" column="SERIALKEY" jdbcType="INTEGER"/>
         <result property="whseId" column="WHSEID" jdbcType="VARCHAR"/>
-        <result property="subLineNumber" column="SUBLINENUMBER" jdbcType="VARCHAR"/>
         <result property="externReceiptKey" column="EXTERNRECEIPTKEY" jdbcType="VARCHAR"/>
         <result property="externLineNo" column="EXTERNLINENO" jdbcType="VARCHAR"/>
         <result property="storerKey" column="STORERKEY" jdbcType="VARCHAR"/>
         <result property="poKey" column="POKEY" jdbcType="VARCHAR"/>
-        <result property="tariffKey" column="TARIFFKEY" jdbcType="VARCHAR"/>
         <result property="sku" column="SKU" jdbcType="VARCHAR"/>
-        <result property="altSku" column="ALTSKU" jdbcType="VARCHAR"/>
-        <result property="id" column="ID" jdbcType="VARCHAR"/>
         <result property="status" column="STATUS" jdbcType="VARCHAR"/>
         <result property="dateReceived" column="DATERECEIVED" jdbcType="TIMESTAMP"/>
         <result property="qtyExpected" column="QTYEXPECTED" jdbcType="DECIMAL"/>
@@ -25,10 +21,7 @@
         <result property="qtyReceived" column="QTYRECEIVED" jdbcType="DECIMAL"/>
         <result property="uom" column="UOM" jdbcType="VARCHAR"/>
         <result property="packKey" column="PACKKEY" jdbcType="VARCHAR"/>
-        <result property="vesselKey" column="VESSELKEY" jdbcType="VARCHAR"/>
-        <result property="voyageKey" column="VOYAGEKEY" jdbcType="VARCHAR"/>
         <result property="xdockKey" column="XDOCKKEY" jdbcType="VARCHAR"/>
-        <result property="containerKey" column="CONTAINERKEY" jdbcType="VARCHAR"/>
         <result property="toLoc" column="TOLOC" jdbcType="VARCHAR"/>
         <result property="toLot" column="TOLOT" jdbcType="VARCHAR"/>
         <result property="toId" column="TOID" jdbcType="VARCHAR"/>
@@ -43,18 +36,8 @@
         <result property="lottable08" column="LOTTABLE08" jdbcType="VARCHAR"/>
         <result property="lottable09" column="LOTTABLE09" jdbcType="VARCHAR"/>
         <result property="lottable10" column="LOTTABLE10" jdbcType="VARCHAR"/>
-        <result property="caseCnt" column="CASECNT" jdbcType="DECIMAL"/>
-        <result property="innerPack" column="INNERPACK" jdbcType="DECIMAL"/>
-        <result property="pallet" column="PALLET" jdbcType="DECIMAL"/>
-        <result property="cube" column="CUBE" jdbcType="FLOAT"/>
         <result property="grossWgt" column="GROSSWGT" jdbcType="DECIMAL"/>
         <result property="netWgt" column="NETWGT" jdbcType="DECIMAL"/>
-        <result property="otherUnit1" column="OTHERUNIT1" jdbcType="FLOAT"/>
-        <result property="otherUnit2" column="OTHERUNIT2" jdbcType="FLOAT"/>
-        <result property="unitPrice" column="UNITPRICE" jdbcType="FLOAT"/>
-        <result property="extendedPrice" column="EXTENDEDPRICE" jdbcType="FLOAT"/>
-        <result property="effectiveDate" column="EFFECTIVEDATE" jdbcType="TIMESTAMP"/>
-        <result property="forteFlag" column="FORTE_FLAG" jdbcType="VARCHAR"/>
         <result property="susr1" column="SUSR1" jdbcType="VARCHAR"/>
         <result property="susr2" column="SUSR2" jdbcType="VARCHAR"/>
         <result property="susr3" column="SUSR3" jdbcType="VARCHAR"/>
@@ -62,77 +45,21 @@
         <result property="susr5" column="SUSR5" jdbcType="VARCHAR"/>
         <result property="notes" column="NOTES" jdbcType="VARCHAR"/>
         <result property="reasonCode" column="REASONCODE" jdbcType="VARCHAR"/>
-        <result property="palletId" column="PALLETID" jdbcType="VARCHAR"/>
         <result property="qtyRejected" column="QTYREJECTED" jdbcType="DECIMAL"/>
         <result property="type" column="TYPE" jdbcType="VARCHAR"/>
-        <result property="returnType" column="RETURNTYPE" jdbcType="VARCHAR"/>
-        <result property="returnReason" column="RETURNREASON" jdbcType="VARCHAR"/>
-        <result property="dispositionType" column="DISPOSITIONTYPE" jdbcType="VARCHAR"/>
-        <result property="dispositionCode" column="DISPOSITIONCODE" jdbcType="VARCHAR"/>
-        <result property="returnCondition" column="RETURNCONDITION" jdbcType="VARCHAR"/>
         <result property="qcRequired" column="QCREQUIRED" jdbcType="VARCHAR"/>
         <result property="qcQtyInspected" column="QCQTYINSPECTED" jdbcType="DECIMAL"/>
         <result property="qcQtyRejected" column="QCQTYREJECTED" jdbcType="DECIMAL"/>
         <result property="qcRejReason" column="QCREJREASON" jdbcType="VARCHAR"/>
         <result property="qcStatus" column="QCSTATUS" jdbcType="VARCHAR"/>
         <result property="qcUser" column="QCUSER" jdbcType="VARCHAR"/>
-        <result property="qcAutoAdjust" column="QCAUTOADJUST" jdbcType="VARCHAR"/>
         <result property="externalLot" column="EXTERNALLOT" jdbcType="VARCHAR"/>
-        <result property="rma" column="RMA" jdbcType="VARCHAR"/>
-        <result property="packingSlipQty" column="PACKINGSLIPQTY" jdbcType="DECIMAL"/>
-        <result property="ipsKey" column="IPSKey" jdbcType="VARCHAR"/>
-        <result property="supplierName" column="SupplierName" jdbcType="VARCHAR"/>
-        <result property="supplierKey" column="SupplierKey" jdbcType="VARCHAR"/>
-        <result property="matchLottable" column="MatchLottable" jdbcType="VARCHAR"/>
-        <result property="receiptDetailId" column="RECEIPTDETAILID" jdbcType="VARCHAR"/>
         <result property="poLineNumber" column="POLINENUMBER" jdbcType="VARCHAR"/>
         <result property="lottable11" column="LOTTABLE11" jdbcType="TIMESTAMP"/>
         <result property="lottable12" column="LOTTABLE12" jdbcType="TIMESTAMP"/>
-        <result property="sourceLocation" column="SOURCELOCATION" jdbcType="VARCHAR"/>
-        <result property="sourceVersion" column="SOURCEVERSION" jdbcType="VARCHAR"/>
-        <result property="referenceType" column="REFERENCETYPE" jdbcType="VARCHAR"/>
-        <result property="referenceDocument" column="REFERENCEDOCUMENT" jdbcType="VARCHAR"/>
-        <result property="referenceLocation" column="REFERENCELOCATION" jdbcType="VARCHAR"/>
-        <result property="referenceVersion" column="REFERENCEVERSION" jdbcType="VARCHAR"/>
-        <result property="referenceLine" column="REFERENCELINE" jdbcType="VARCHAR"/>
-        <result property="cubicMeter" column="CUBICMETER" jdbcType="DECIMAL"/>
-        <result property="hundredWeight" column="HUNDREDWEIGHT" jdbcType="DECIMAL"/>
         <result property="tareWgt" column="TAREWGT" jdbcType="DECIMAL"/>
-        <result property="referenceAccountingEntity" column="ReferenceAccountingEntity" jdbcType="VARCHAR"/>
-        <result property="referenceScheduleLine" column="ReferenceScheduleLine" jdbcType="VARCHAR"/>
-        <result property="requisitionDocument" column="REQUISITIONDOCUMENT" jdbcType="VARCHAR"/>
-        <result property="requisitionAccountingEntity" column="REQUISITIONACCOUNTINGENTITY" jdbcType="VARCHAR"/>
-        <result property="requisitionLocation" column="REQUISITIONLOCATION" jdbcType="VARCHAR"/>
-        <result property="requisitionVersion" column="REQUISITIONVERSION" jdbcType="VARCHAR"/>
-        <result property="requisitionLine" column="REQUISITIONLINE" jdbcType="VARCHAR"/>
-        <result property="requisitionScheduleLine" column="REQUISITIONSCHEDULELINE" jdbcType="VARCHAR"/>
-        <result property="purchaseOrderDocument" column="PURCHASEORDERDOCUMENT" jdbcType="VARCHAR"/>
-        <result property="purchaseOrderAccountingEntity" column="PURCHASEORDERACCOUNTINGENTITY" jdbcType="VARCHAR"/>
-        <result property="purchaseOrderLocation" column="PURCHASEORDERLOCATION" jdbcType="VARCHAR"/>
-        <result property="purchaseOrderVersion" column="PURCHASEORDERVERSION" jdbcType="VARCHAR"/>
-        <result property="purchaseOrderLine" column="PURCHASEORDERLINE" jdbcType="VARCHAR"/>
-        <result property="purchaseOrderScheduleLine" column="PURCHASEORDERSCHEDULELINE" jdbcType="VARCHAR"/>
-        <result property="salesOrderDocument" column="SALESORDERDOCUMENT" jdbcType="VARCHAR"/>
-        <result property="salesOrderAccountingEntity" column="SALESORDERACCOUNTINGENTITY" jdbcType="VARCHAR"/>
-        <result property="salesOrderLocation" column="SALESORDERLOCATION" jdbcType="VARCHAR"/>
-        <result property="salesOrderVersion" column="SALESORDERVERSION" jdbcType="VARCHAR"/>
-        <result property="salesOrderLine" column="SALESORDERLINE" jdbcType="VARCHAR"/>
-        <result property="salesOrderScheduleLine" column="SALESORDERSCHEDULELINE" jdbcType="VARCHAR"/>
-        <result property="productionOrderDocument" column="PRODUCTIONORDERDOCUMENT" jdbcType="VARCHAR"/>
-        <result property="productionOrderAccEntity" column="PRODUCTIONORDERACCENTITY" jdbcType="VARCHAR"/>
-        <result property="productionOrderLocation" column="PRODUCTIONORDERLOCATION" jdbcType="VARCHAR"/>
-        <result property="productionOrderVersion" column="PRODUCTIONORDERVERSION" jdbcType="VARCHAR"/>
-        <result property="productionOrderLine" column="PRODUCTIONORDERLINE" jdbcType="VARCHAR"/>
-        <result property="productionOrderScheduleLine" column="PRODUCTIONORDERSCHEDULELINE" jdbcType="VARCHAR"/>
         <result property="temperature" column="TEMPERATURE" jdbcType="DECIMAL"/>
         <result property="originalLineNumber" column="ORIGINALLINENUMBER" jdbcType="VARCHAR"/>
-        <result property="disposition" column="DISPOSITION" jdbcType="VARCHAR"/>
-        <result property="qcSampledType" column="QCSAMPLEDTYPE" jdbcType="VARCHAR"/>
-        <result property="qtyToInspect" column="QTYTOINSPECT" jdbcType="DECIMAL"/>
-        <result property="checkForBackflushing" column="CHECKFORBACKFLUSHING" jdbcType="VARCHAR"/>
-        <result property="quarantineLPN" column="QUARANTINELPN" jdbcType="VARCHAR"/>
-        <result property="hostProcessRequired" column="HOSTPROCESSREQUIRED" jdbcType="VARCHAR"/>
-        <result property="allowReopen" column="ALLOWREOPEN" jdbcType="VARCHAR"/>
         <result property="addDate" column="ADDDATE" jdbcType="TIMESTAMP"/>
         <result property="addWho" column="ADDWHO" jdbcType="VARCHAR"/>
         <result property="editDate" column="EDITDATE" jdbcType="TIMESTAMP"/>
@@ -216,97 +143,42 @@
         <result property="elottable19" column="ELOTTABLE19" jdbcType="VARCHAR"/>
         <result property="elottable20" column="ELOTTABLE20" jdbcType="VARCHAR"/>
         <result property="elottable21" column="ELOTTABLE21" jdbcType="VARCHAR"/>
-        <result property="parentId" column="PARENTID" jdbcType="VARCHAR"/>
-        <result property="serialNumber" column="SERIALNUMBER" jdbcType="VARCHAR"/>
         <result property="memo" column="MEMO" jdbcType="VARCHAR"/>
-        <result property="prodLotExpected" column="PRODLOTEXPECTED" jdbcType="VARCHAR"/>
-        <result property="lastShippedLoc" column="LASTSHIPPEDLOC" jdbcType="VARCHAR"/>
-        <result property="lastId" column="LASTID" jdbcType="VARCHAR"/>
 
     </resultMap>
 
     <sql id="Base_Column_List">
-        RECEIPTKEY,RECEIPTLINENUMBER,SERIALKEY,
-        WHSEID,SUBLINENUMBER,EXTERNRECEIPTKEY,
-        EXTERNLINENO,STORERKEY,POKEY,
-        TARIFFKEY,SKU,ALTSKU,
-        ID,STATUS,DATERECEIVED,
-        QTYEXPECTED,QTYADJUSTED,QTYRECEIVED,
-        UOM,PACKKEY,VESSELKEY,
-        VOYAGEKEY,XDOCKKEY,CONTAINERKEY,
-        TOLOC,TOLOT,TOID,
-        CONDITIONCODE,LOTTABLE01,LOTTABLE02,
-        LOTTABLE03,LOTTABLE04,LOTTABLE05,
-        LOTTABLE06,LOTTABLE07,LOTTABLE08,
-        LOTTABLE09,LOTTABLE10,CASECNT,
-        INNERPACK,PALLET,CUBE,
-        GROSSWGT,NETWGT,OTHERUNIT1,
-        OTHERUNIT2,UNITPRICE,EXTENDEDPRICE,
-        EFFECTIVEDATE,FORTE_FLAG,SUSR1,
-        SUSR2,SUSR3,SUSR4,
-        SUSR5,NOTES,REASONCODE,
-        PALLETID,QTYREJECTED,TYPE,
-        RETURNTYPE,RETURNREASON,DISPOSITIONTYPE,
-        DISPOSITIONCODE,RETURNCONDITION,QCREQUIRED,
-        QCQTYINSPECTED,QCQTYREJECTED,QCREJREASON,
-        QCSTATUS,QCUSER,QCAUTOADJUST,
-        EXTERNALLOT,RMA,PACKINGSLIPQTY,
-        IPSKey,SupplierName,SupplierKey,
-        MatchLottable,RECEIPTDETAILID,POLINENUMBER,
-        LOTTABLE11,LOTTABLE12,SOURCELOCATION,
-        SOURCEVERSION,REFERENCETYPE,REFERENCEDOCUMENT,
-        REFERENCELOCATION,REFERENCEVERSION,REFERENCELINE,
-        CUBICMETER,HUNDREDWEIGHT,TAREWGT,
-        ReferenceAccountingEntity,ReferenceScheduleLine,REQUISITIONDOCUMENT,
-        REQUISITIONACCOUNTINGENTITY,REQUISITIONLOCATION,REQUISITIONVERSION,
-        REQUISITIONLINE,REQUISITIONSCHEDULELINE,PURCHASEORDERDOCUMENT,
-        PURCHASEORDERACCOUNTINGENTITY,PURCHASEORDERLOCATION,PURCHASEORDERVERSION,
-        PURCHASEORDERLINE,PURCHASEORDERSCHEDULELINE,SALESORDERDOCUMENT,
-        SALESORDERACCOUNTINGENTITY,SALESORDERLOCATION,SALESORDERVERSION,
-        SALESORDERLINE,SALESORDERSCHEDULELINE,PRODUCTIONORDERDOCUMENT,
-        PRODUCTIONORDERACCENTITY,PRODUCTIONORDERLOCATION,PRODUCTIONORDERVERSION,
-        PRODUCTIONORDERLINE,PRODUCTIONORDERSCHEDULELINE,TEMPERATURE,
-        ORIGINALLINENUMBER,DISPOSITION,QCSAMPLEDTYPE,
-        QTYTOINSPECT,CHECKFORBACKFLUSHING,QUARANTINELPN,
-        HOSTPROCESSREQUIRED,ALLOWREOPEN,ADDDATE,
-        ADDWHO,EDITDATE,EDITWHO,
-        EXT_UDF_STR1,EXT_UDF_STR2,EXT_UDF_STR3,
-        EXT_UDF_STR4,EXT_UDF_STR5,EXT_UDF_STR6,
-        EXT_UDF_STR7,EXT_UDF_STR8,EXT_UDF_STR9,
-        EXT_UDF_STR10,EXT_UDF_STR11,EXT_UDF_STR12,
-        EXT_UDF_STR13,EXT_UDF_STR14,EXT_UDF_STR15,
-        EXT_UDF_DATE1,EXT_UDF_DATE2,EXT_UDF_DATE3,
-        EXT_UDF_DATE4,EXT_UDF_DATE5,EXT_UDF_FLOAT1,
-        EXT_UDF_FLOAT2,EXT_UDF_FLOAT3,EXT_UDF_FLOAT4,
-        EXT_UDF_FLOAT5,EXT_UDF_LKUP1,EXT_UDF_LKUP2,
-        EXT_UDF_LKUP3,EXT_UDF_LKUP4,EXT_UDF_LKUP5,
-        EXT_UDF_LKUP6,EXT_UDF_LKUP7,EXT_UDF_LKUP8,
-        EXT_UDF_LKUP9,EXT_UDF_LKUP10,SUSR6,
-        SUSR7,SUSR8,SUSR9,
-        SUSR10,SUSR11,SUSR12,
-        SUSR13,SUSR14,SUSR15,
-        SUSR16,SUSR17,SUSR18,
-        SUSR19,SUSR20,GROSSWGTRECEIVED,
-        TAREWGTRECEIVED,BARRELNUMBER,GROSSWGTEXPECTED,
-        TAREWGTEXPECTED,TOTALBARRELNUMBER,REGROSSWGT,
-        ELOTTABLE01,ELOTTABLE02,ELOTTABLE03,
-        ELOTTABLE04,ELOTTABLE05,ELOTTABLE06,
-        ELOTTABLE07,ELOTTABLE08,ELOTTABLE09,
-        ELOTTABLE10,EEXTERNALLOT,ELOTTABLE11,
-        ELOTTABLE12,ELOTTABLE13,ELOTTABLE14,
-        ELOTTABLE15,ELOTTABLE16,ELOTTABLE17,
-        ELOTTABLE18,ELOTTABLE19,ELOTTABLE20,
-        PARENTID,SERIALNUMBER,MEMO,
-        PRODLOTEXPECTED,LASTSHIPPEDLOC,ELOTTABLE21,
-        LASTID
+            receiptKey, receiptLineNumber, whseId, externReceiptKey, externLineNo, storerKey, sku, status,
+            dateReceived, qtyExpected, qtyAdjusted, qtyReceived, uom, packKey, xdockKey, toLoc, toLot, toId,
+            conditionCode, lottable01, lottable02, lottable03, lottable04, lottable05, lottable06, lottable07, lottable08, lottable09,
+            lottable10, lottable11, lottable12, notes, reasonCode,
+            qtyRejected, type, qcRequired, qcQtyInspected, qcQtyRejected, qcRejReason,
+            qcStatus, qcUser, externalLot, poKey, poLineNumber, temperature, originalLineNumber,
+            ext_Udf_Str1 as extUdfStr1, ext_Udf_Str2 as extUdfStr2, ext_Udf_Str3 as extUdfStr3,
+            ext_Udf_Str4 as extUdfStr4, ext_Udf_Str5 as extUdfStr5, ext_Udf_Str6 as extUdfStr6,
+            ext_Udf_Str7 as extUdfStr7, ext_Udf_Str8 as extUdfStr8, ext_Udf_Str9 as extUdfStr9,
+            ext_Udf_Str10 as extUdfStr10, ext_Udf_Str11 as extUdfStr11, ext_Udf_Str12 as extUdfStr12,
+            ext_Udf_Str13 as extUdfStr13, ext_Udf_Str14 as extUdfStr14, ext_Udf_Str15 as extUdfStr15,
+            ext_Udf_Date1 as extUdfDate1, ext_Udf_Date2 as extUdfDate2, ext_Udf_Date3 as extUdfDate3,
+            ext_Udf_Date4 as extUdfDate4, ext_Udf_Date5 as extUdfDate5, ext_Udf_Float1 as extUdfFloat1,
+            ext_Udf_Float2 as extUdfFloat2, ext_Udf_Float3 as extUdfFloat3, ext_Udf_Float4 as extUdfFloat4,
+            ext_Udf_Float5 as extUdfFloat5, ext_Udf_Lkup1 as extUdfLkup1, ext_Udf_Lkup2 as extUdfLkup2,
+            ext_Udf_Lkup3 as extUdfLkup3, ext_Udf_Lkup4 as extUdfLkup4, ext_Udf_Lkup5 as extUdfLkup5,
+            ext_Udf_Lkup6 as extUdfLkup6, ext_Udf_Lkup7 as extUdfLkup7, ext_Udf_Lkup8 as extUdfLkup8,
+            ext_Udf_Lkup9 as extUdfLkup9, ext_Udf_Lkup10 as extUdfLkup10,
+            susr1, susr2, susr3, susr4, susr5, susr6, susr7, susr8, susr9,
+            susr10, susr11, susr12, susr13, susr14, susr15, susr16, susr17, susr18, susr19, susr20,
+            grossWgtReceived, tareWgtReceived, barrelNumber, grossWgtExpected, tareWgtExpected, totalBarrelNumber,
+            regrossWgt, eExternalLot, elottable01, elottable02, elottable03, elottable04, elottable05, elottable06, elottable07,
+            elottable08, elottable09, elottable10, elottable11, elottable12, elottable13, elottable14, elottable15,
+            elottable16, elottable17, elottable18, elottable19, elottable20, elottable21, memo,
+            addDate,addWho,editDate,editWho
     </sql>
 
     <select id="queryPageData" resultType="java.util.Map">
         select
-            serialKey,whseId, storerKey, receiptKey, poKey, receiptDate, externReceiptKey,
-            externalReceiptKey2, type, status, notes, closedDate, isConfirmed, isConfirmedUser, isConfirmedUser2,
-            addWho, addDate, editWho, editDate
-        from RECEIPT
+            <include refid="Base_Column_List"></include>
+        from RECEIPTDETAIL
                  ${ew.customSqlSegment}
     </select>
 

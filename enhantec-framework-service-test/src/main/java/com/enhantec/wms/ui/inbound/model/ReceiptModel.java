@@ -89,10 +89,10 @@ public class ReceiptModel extends EHWMSModel implements Serializable {
     private String isConfirmed;
 
     @TableField(value = "isConfirmedUser")
-    private Boolean isConfirmedUser;
+    private String isConfirmedUser;
 
     @TableField(value = "isConfirmedUser2")
-    private Boolean isConfirmedUser2;
+    private String isConfirmedUser2;
 
 
     @TableField(exist = false)

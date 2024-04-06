@@ -38,9 +38,6 @@ import java.util.Map;
 */
 public interface ReceiptService extends EHBaseService<ReceiptModel> {
 
-    Page<Map<String,Object>> queryPageData(Page<Map<String,Object>> page, QueryWrapper qw);
+    ReceiptModel saveOrUpdateRetE(ReceiptModel receiptModel);
 
-    Page<Map<String,Object>> queryPageData(PageParams pageParams, EHFieldNameConversionType fieldNameConversionType);
-
-    Page<Map<String,Object>> queryPageData(PageParams pageParams);
 }

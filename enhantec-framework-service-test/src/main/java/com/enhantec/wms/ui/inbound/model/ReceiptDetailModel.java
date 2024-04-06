@@ -13,224 +13,118 @@ import java.time.LocalDateTime;
 @TableName(value ="RECEIPTDETAIL")
 @Data
 public class ReceiptDetailModel extends EHWMSModel implements Serializable {
-    /**
-     * 
-     */
+
     @TableField(value = "RECEIPTKEY")
     private String receiptKey;
 
-    /**
-     * 
-     */
+
     @TableField(value = "RECEIPTLINENUMBER")
     private String receiptLineNumber;
-    /**
-     * 
-     */
+
     @TableField(value = "WHSEID")
     private String whseId;
 
-    /**
-     * 
-     */
-    @TableField(value = "SUBLINENUMBER")
-    private String subLineNumber;
 
-    /**
-     * 
-     */
     @TableField(value = "EXTERNRECEIPTKEY")
     private String externReceiptKey;
 
-    /**
-     * 
-     */
+
     @TableField(value = "EXTERNLINENO")
     private String externLineNo;
 
-    /**
-     * 
-     */
+
     @TableField(value = "STORERKEY")
     private String storerKey;
 
-    /**
-     * 
-     */
-    @TableField(value = "POKEY")
-    private String poKey;
 
-    /**
-     * 
-     */
-    @TableField(value = "TARIFFKEY")
-    private String tariffKey;
-
-    /**
-     * 
-     */
     @TableField(value = "SKU")
     private String sku;
 
-    /**
-     * 
-     */
-    @TableField(value = "ALTSKU")
-    private String altSku;
 
-    /**
-     * 
-     */
-    @TableField(value = "ID")
-    private String id;
-
-    /**
-     * 
-     */
     @TableField(value = "STATUS")
     private String status;
 
-    /**
-     * 
-     */
+
     @TableField(value = "DATERECEIVED")
     private LocalDateTime dateReceived;
 
-    /**
-     * 
-     */
+
     @TableField(value = "QTYEXPECTED")
     private BigDecimal qtyExpected;
 
-    /**
-     * 
-     */
+
     @TableField(value = "QTYADJUSTED")
     private BigDecimal qtyAdjusted;
 
-    /**
-     * 
-     */
+
     @TableField(value = "QTYRECEIVED")
     private BigDecimal qtyReceived;
 
-    /**
-     * 
-     */
+
     @TableField(value = "UOM")
     private String uom;
 
-    /**
-     * 
-     */
+
     @TableField(value = "PACKKEY")
     private String packKey;
 
-    /**
-     * 
-     */
-    @TableField(value = "VESSELKEY")
-    private String vesselKey;
 
-    /**
-     * 
-     */
-    @TableField(value = "VOYAGEKEY")
-    private String voyageKey;
-
-    /**
-     * 
-     */
     @TableField(value = "XDOCKKEY")
     private String xdockKey;
 
-    /**
-     * 
-     */
-    @TableField(value = "CONTAINERKEY")
-    private String containerKey;
 
-    /**
-     * 
-     */
     @TableField(value = "TOLOC")
     private String toLoc;
 
-    /**
-     * 
-     */
+
     @TableField(value = "TOLOT")
     private String toLot;
 
-    /**
-     * 
-     */
+
     @TableField(value = "TOID")
     private String toId;
 
-    /**
-     * 
-     */
+
     @TableField(value = "CONDITIONCODE")
     private String conditionCode;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE01")
     private String lottable01;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE02")
     private String lottable02;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE03")
     private String lottable03;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE04")
     private LocalDateTime lottable04;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE05")
     private LocalDateTime lottable05;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE06")
     private String lottable06;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE07")
     private String lottable07;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE08")
     private String lottable08;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE09")
     private String lottable09;
 
-    /**
-     * 
-     */
+
     @TableField(value = "LOTTABLE10")
     private String lottable10;
 
@@ -242,151 +136,53 @@ public class ReceiptDetailModel extends EHWMSModel implements Serializable {
     @TableField(value = "LOTTABLE12")
     private LocalDateTime  lottable12;
 
-    /**
-     * 
-     */
-    @TableField(value = "CASECNT")
-    private BigDecimal caseCnt;
 
-    /**
-     * 
-     */
-    @TableField(value = "INNERPACK")
-    private BigDecimal innerPack;
-
-    /**
-     * 
-     */
-    @TableField(value = "PALLET")
-    private BigDecimal pallet;
-
-    /**
-     * 
-     */
-    @TableField(value = "CUBE")
-    private Double cube;
-
-    /**
-     * 
-     */
     @TableField(value = "GROSSWGT")
     private BigDecimal grossWgt;
 
-    /**
-     * 
-     */
+
     @TableField(value = "NETWGT")
     private BigDecimal netWgt;
 
-    /**
-     * 
-     */
-    @TableField(value = "OTHERUNIT1")
-    private Double otherUnit1;
 
-    /**
-     * 
-     */
-    @TableField(value = "OTHERUNIT2")
-    private Double otherUnit2;
+    @TableField(value = "TAREWGT")
+    private BigDecimal tareWgt;
 
-    /**
-     * 
-     */
-    @TableField(value = "UNITPRICE")
-    private Double unitPrice;
 
-    /**
-     * 
-     */
-    @TableField(value = "EXTENDEDPRICE")
-    private Double extendedPrice;
-
-    /**
-     * 
-     */
-    @TableField(value = "EFFECTIVEDATE")
-    private LocalDateTime effectiveDate;
-
-    /**
-     * 
-     */
-    @TableField(value = "FORTE_FLAG")
-    private String forteFlag;
-
-    /**
-     * 
-     */
     @TableField(value = "SUSR1")
     private String susr1;
 
-    /**
-     * 
-     */
+
     @TableField(value = "SUSR2")
     private String susr2;
 
-    /**
-     * 
-     */
+
     @TableField(value = "SUSR3")
     private String susr3;
 
-    /**
-     * 
-     */
+
     @TableField(value = "SUSR4")
     private String susr4;
 
-    /**
-     * 
-     */
+
     @TableField(value = "SUSR5")
     private String susr5;
 
-    /**
-     * 
-     */
+
     @TableField(value = "NOTES")
     private String notes;
 
-    /**
-     * 
-     */
+
     @TableField(value = "REASONCODE")
     private String reasonCode;
 
-    /**
-     * 
-     */
-    @TableField(value = "PALLETID")
-    private String palletId;
 
-    /**
-     * 
-     */
     @TableField(value = "QTYREJECTED")
     private BigDecimal qtyRejected;
 
-    /**
-     * 
-     */
+
     @TableField(value = "TYPE")
     private String type;
-    @TableField(value = "RETURNTYPE")
-    private String returnType;
-
-    @TableField(value = "RETURNREASON")
-    private String returnReason;
-
-    @TableField(value = "DISPOSITIONTYPE")
-    private String dispositionType;
-
-    @TableField(value = "DISPOSITIONCODE")
-    private String dispositionCode;
-
-    @TableField(value = "RETURNCONDITION")
-    private String returnCondition;
 
     @TableField(value = "QCREQUIRED")
     private String qcRequired;
@@ -406,143 +202,15 @@ public class ReceiptDetailModel extends EHWMSModel implements Serializable {
     @TableField(value = "QCUSER")
     private String qcUser;
 
-    @TableField(value = "QCAUTOADJUST")
-    private String qcAutoAdjust;
-
     @TableField(value = "EXTERNALLOT")
     private String externalLot;
 
-    @TableField(value = "RMA")
-    private String rma;
 
-    @TableField(value = "PACKINGSLIPQTY")
-    private BigDecimal packingSlipQty;
-
-    @TableField(value = "IPSKey")
-    private String ipsKey;
-
-    @TableField(value = "SupplierName")
-    private String supplierName;
-
-    @TableField(value = "SupplierKey")
-    private String supplierKey;
-
-    @TableField(value = "MatchLottable")
-    private String matchLottable;
-
-    @TableField(value = "RECEIPTDETAILID")
-    private String receiptDetailId;
+    @TableField(value = "POKEY")
+    private String poKey;
 
     @TableField(value = "POLINENUMBER")
     private String poLineNumber;
-
-    @TableField(value = "SOURCELOCATION")
-    private String sourceLocation;
-
-    @TableField(value = "SOURCEVERSION")
-    private String sourceVersion;
-
-    @TableField(value = "REFERENCETYPE")
-    private String referenceType;
-
-    @TableField(value = "REFERENCEDOCUMENT")
-    private String referenceDocument;
-
-    @TableField(value = "REFERENCELOCATION")
-    private String referenceLocation;
-
-    @TableField(value = "REFERENCEVERSION")
-    private String referenceVersion;
-
-    @TableField(value = "REFERENCELINE")
-    private String referenceLine;
-
-    @TableField(value = "CUBICMETER")
-    private BigDecimal cubicMeter;
-
-    @TableField(value = "HUNDREDWEIGHT")
-    private BigDecimal hundredWeight;
-
-    @TableField(value = "TAREWGT")
-    private BigDecimal tareWgt;
-
-    @TableField(value = "ReferenceAccountingEntity")
-    private String referenceAccountingEntity;
-
-    @TableField(value = "ReferenceScheduleLine")
-    private String referenceScheduleLine;
-
-    @TableField(value = "REQUISITIONDOCUMENT")
-    private String requisitionDocument;
-
-    @TableField(value = "REQUISITIONACCOUNTINGENTITY")
-    private String requisitionAccountingEntity;
-
-    @TableField(value = "REQUISITIONLOCATION")
-    private String requisitionLocation;
-
-    @TableField(value = "REQUISITIONVERSION")
-    private String requisitionVersion;
-
-    @TableField(value = "REQUISITIONLINE")
-    private String requisitionLine;
-
-    @TableField(value = "REQUISITIONSCHEDULELINE")
-    private String requisitionScheduleLine;
-
-    @TableField(value = "PURCHASEORDERDOCUMENT")
-    private String purchaseOrderDocument;
-
-    @TableField(value = "PURCHASEORDERACCOUNTINGENTITY")
-    private String purchaseOrderAccountingEntity;
-
-    @TableField(value = "PURCHASEORDERLOCATION")
-    private String purchaseOrderLocation;
-
-    @TableField(value = "PURCHASEORDERVERSION")
-    private String purchaseOrderVersion;
-
-    @TableField(value = "PURCHASEORDERLINE")
-    private String purchaseOrderLine;
-
-    @TableField(value = "PURCHASEORDERSCHEDULELINE")
-    private String purchaseOrderScheduleLine;
-
-    @TableField(value = "SALESORDERDOCUMENT")
-    private String salesOrderDocument;
-
-    @TableField(value = "SALESORDERACCOUNTINGENTITY")
-    private String salesOrderAccountingEntity;
-
-    @TableField(value = "SALESORDERLOCATION")
-    private String salesOrderLocation;
-
-    @TableField(value = "SALESORDERVERSION")
-    private String salesOrderVersion;
-
-    @TableField(value = "SALESORDERLINE")
-    private String salesOrderLine;
-
-    @TableField(value = "SALESORDERSCHEDULELINE")
-    private String salesOrderScheduleLine;
-
-    @TableField(value = "PRODUCTIONORDERDOCUMENT")
-    private String productionOrderDocument;
-
-    @TableField(value = "PRODUCTIONORDERACCENTITY")
-    private String productionOrderAccEntity;
-
-    @TableField(value = "PRODUCTIONORDERLOCATION")
-    private String productionOrderLocation;
-
-    @TableField(value = "PRODUCTIONORDERVERSION")
-    private String productionOrderVersion;
-
-    @TableField(value = "PRODUCTIONORDERLINE")
-    private String productionOrderLine;
-
-    @TableField(value = "PRODUCTIONORDERSCHEDULELINE")
-    private String productionOrderScheduleLine;
 
     @TableField(value = "TEMPERATURE")
     private BigDecimal temperature;
@@ -550,38 +218,6 @@ public class ReceiptDetailModel extends EHWMSModel implements Serializable {
     @TableField(value = "ORIGINALLINENUMBER")
     private String originalLineNumber;
 
-    @TableField(value = "DISPOSITION")
-    private String disposition;
-
-    @TableField(value = "QCSAMPLEDTYPE")
-    private String qcSampledType;
-
-    @TableField(value = "QTYTOINSPECT")
-    private BigDecimal qtyToInspect;
-
-    @TableField(value = "CHECKFORBACKFLUSHING")
-    private String checkForBackflushing;
-
-    @TableField(value = "QUARANTINELPN")
-    private String quarantineLPN;
-
-    @TableField(value = "HOSTPROCESSREQUIRED")
-    private String hostProcessRequired;
-
-    @TableField(value = "ALLOWREOPEN")
-    private String allowReopen;
-
-    @TableField(value = "ADDDATE")
-    private LocalDateTime addDate;
-
-    @TableField(value = "ADDWHO")
-    private String addWho;
-
-    @TableField(value = "EDITDATE")
-    private LocalDateTime editDate;
-
-    @TableField(value = "EDITWHO")
-    private String editWho;
 
     @TableField(value = "EXT_UDF_STR1")
     private String extUdfStr1;
@@ -788,7 +424,6 @@ public class ReceiptDetailModel extends EHWMSModel implements Serializable {
     @TableField(value = "ELOTTABLE10")
     private String elottable10;
 
-
     @TableField(value = "ELOTTABLE11")
     private LocalDateTime elottable11;
 
@@ -819,26 +454,13 @@ public class ReceiptDetailModel extends EHWMSModel implements Serializable {
     @TableField(value = "ELOTTABLE20")
     private String elottable20;
 
-    @TableField(value = "PARENTID")
-    private String parentId;
-
-    @TableField(value = "SERIALNUMBER")
-    private String serialNumber;
-
-    @TableField(value = "MEMO")
-    private String memo;
-
-    @TableField(value = "PRODLOTEXPECTED")
-    private String prodLotExpected;
-
-    @TableField(value = "LASTSHIPPEDLOC")
-    private String lastShippedLoc;
 
     @TableField(value = "ELOTTABLE21")
     private String elottable21;
 
-    @TableField(value = "LASTID")
-    private String lastId;
+
+    @TableField(value = "MEMO")
+    private String memo;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

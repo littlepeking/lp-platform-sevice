@@ -28,7 +28,8 @@
     <sql id="Base_Column_List">
         serialKey,whseId, storerKey, receiptKey, poKey, receiptDate, externReceiptKey,
         externReceiptKey2, status, susr1, susr2, susr3, susr4, susr5, type,
-        notes, closedDate, isConfirmed, isConfirmedUser, isConfirmedUser2
+        notes, closedDate, isConfirmed, isConfirmedUser, isConfirmedUser2,
+        addDate,addWho,editDate,editWho
     </sql>
 
 
