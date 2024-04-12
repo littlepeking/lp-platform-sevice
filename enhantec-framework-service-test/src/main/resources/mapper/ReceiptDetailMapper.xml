@@ -148,7 +148,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-            receiptKey, receiptLineNumber, whseId, externReceiptKey, externLineNo, storerKey, sku, status,
+            serialKey, receiptKey, receiptLineNumber, whseId, externReceiptKey, externLineNo, storerKey, sku, status,
             dateReceived, qtyExpected, qtyAdjusted, qtyReceived, uom, packKey, xdockKey, toLoc, toLot, toId,
             conditionCode, lottable01, lottable02, lottable03, lottable04, lottable05, lottable06, lottable07, lottable08, lottable09,
             lottable10, lottable11, lottable12, notes, reasonCode,

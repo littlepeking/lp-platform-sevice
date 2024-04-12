@@ -23,14 +23,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.enhantec.framework.common.model.PageParams;
 import com.enhantec.framework.config.annotations.converter.EHFieldNameConversionType;
 import com.enhantec.wms.ui.inbound.model.ReceiptDetailModel;
-import com.enhantec.wms.ui.inbound.model.ReceiptModel;
 import com.enhantec.wms.ui.inbound.service.ReceiptDetailService;
-import com.enhantec.wms.ui.inbound.service.ReceiptService;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
 
 import static com.enhantec.wms.Constants.WMS_UI_SERVICE;
 
@@ -48,6 +48,13 @@ public class ReceiptDetailController {
         return receiptDetailService.getById(id);
 
     }
+
+    @DeleteMapping("/deleteByIds")
+    public boolean deleteByIds(@RequestBody List<String> ids){
+        return receiptDetailService.deleteByIds(ids);
+    }
+
+
 
 
     @PreAuthorize("hasAnyAuthority('WM_ASN')")
